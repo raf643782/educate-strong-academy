@@ -1,0 +1,357 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  LEARNER
+  ASSESSOR
+  ADMIN
+}
+
+enum Pathway {
+  COACHING
+  REFEREEING
+  STRONGKIDZ
+}
+
+enum LessonType {
+  TEXT
+  VIDEO
+  RESOURCE
+  CASE_STUDY
+  PRACTICAL_TASK
+}
+
+enum AssessmentType {
+  KNOWLEDGE_EXAM
+  WRITTEN_SCENARIO
+  PROGRAMMING_ASSIGNMENT
+  PRACTICAL_OBSERVATION
+  JUDGING_SCENARIO
+  SESSION_PLAN
+}
+
+enum SubmissionStatus {
+  PENDING
+  IN_REVIEW
+  PASSED
+  FAILED
+  REFERRED
+}
+
+enum CPDActivity {
+  FORMAL_LEARNING
+  COACHING_EVENT
+  COMPETITION
+  OFFICIATING
+  KNOWLEDGE_CONTRIBUTION
+  MENTORING
+  PEER_LEARNING
+}
+
+enum CPDStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ContentType {
+  LESSON
+  MODULE
+  COURSE
+  CERTIFICATION
+  KB_ARTICLE
+  EXERCISE
+  EVENT
+  EXTERNAL_URL
+}
+
+enum AccessLevel {
+  FREE
+  ENROLLED
+  CERTIFIED
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  ELITE
+}
+
+model User {
+  id                  String    @id @default(uuid())
+  email               String    @unique
+  password            String
+  firstName           String
+  lastName            String
+  role                Role      @default(LEARNER)
+  avatarUrl           String?
+  bio                 String?
+  location            String?
+  externalUserId      String?
+  sourcePlatform      String?
+  integrationProvider String?
+  apiToken            String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  enrolments            Enrolment[]
+  lessonProgress        LessonProgress[]
+  assessmentSubmissions AssessmentSubmission[]
+  certificates          Certificate[]
+  cpdLogs               CPDLog[]
+  integrationLogs       IntegrationLog[]
+}
+
+model Course {
+  id            String    @id @default(uuid())
+  title         String
+  slug          String    @unique
+  description   String
+  summary       String?
+  pathway       Pathway
+  level         Int       @default(1)
+  imageUrl      String?
+  durationHours Float?
+  prerequisites String?
+  isPublished   Boolean   @default(false)
+  sortOrder     Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  modules      Module[]
+  enrolments   Enrolment[]
+  certificates Certificate[]
+  assessments  Assessment[]
+}
+
+model Module {
+  id          String   @id @default(uuid())
+  courseId    String
+  title       String
+  description String?
+  sortOrder   Int      @default(0)
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons Lesson[]
+}
+
+model Lesson {
+  id              String     @id @default(uuid())
+  moduleId        String
+  title           String
+  content         String?
+  type            LessonType @default(TEXT)
+  videoUrl        String?
+  resourceUrl     String?
+  durationMinutes Int?
+  sortOrder       Int        @default(0)
+  isPublished     Boolean    @default(false)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  module          Module               @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  progress        LessonProgress[]
+  recommendations RecommendationPrompt[]
+}
+
+model LessonProgress {
+  id          String    @id @default(uuid())
+  userId      String
+  lessonId    String
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+  startedAt   DateTime  @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+}
+
+model Enrolment {
+  id          String    @id @default(uuid())
+  userId      String
+  courseId    String
+  enrolledAt  DateTime  @default(now())
+  completedAt DateTime?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+}
+
+model Assessment {
+  id          String         @id @default(uuid())
+  courseId    String?
+  title       String
+  description String?
+  type        AssessmentType
+  passMark    Int            @default(75)
+  maxAttempts Int            @default(3)
+  isActive    Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+
+  course      Course?               @relation(fields: [courseId], references: [id])
+  submissions AssessmentSubmission[]
+}
+
+model AssessmentSubmission {
+  id           String           @id @default(uuid())
+  assessmentId String
+  userId       String
+  content      String?
+  fileUrl      String?
+  status       SubmissionStatus @default(PENDING)
+  score        Int?
+  feedback     String?
+  submittedAt  DateTime         @default(now())
+  gradedAt     DateTime?
+  gradedById   String?
+
+  assessment Assessment @relation(fields: [assessmentId], references: [id])
+  user       User       @relation(fields: [userId], references: [id])
+}
+
+model Certificate {
+  id              String    @id @default(uuid())
+  userId          String
+  courseId        String
+  certificateCode String    @unique
+  issuedAt        DateTime  @default(now())
+  expiresAt       DateTime?
+  webhookStatus   String?
+
+  user   User   @relation(fields: [userId], references: [id])
+  course Course @relation(fields: [courseId], references: [id])
+}
+
+model CPDLog {
+  id           String      @id @default(uuid())
+  userId       String
+  activityType CPDActivity
+  description  String
+  hoursEarned  Float
+  evidenceUrl  String?
+  status       CPDStatus   @default(PENDING)
+  loggedAt     DateTime    @default(now())
+  approvedAt   DateTime?
+  approvedById String?
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model KnowledgeArticle {
+  id             String      @id @default(uuid())
+  title          String
+  slug           String      @unique
+  category       String
+  subcategory    String?
+  summary        String?
+  content        String?
+  authorName     String?
+  lastReviewedAt DateTime?
+  isPublished    Boolean     @default(false)
+  accessLevel    AccessLevel @default(FREE)
+  imageUrl       String?
+  readMinutes    Int?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+}
+
+model Exercise {
+  id               String     @id @default(uuid())
+  name             String
+  slug             String     @unique
+  category         String
+  difficulty       Difficulty @default(INTERMEDIATE)
+  description      String?
+  techniqueNotes   String?
+  coachingCues     String?
+  commonMistakes   String?
+  progressions     String?
+  regressions      String?
+  programmingNotes String?
+  videoUrl         String?
+  equipmentNeeded  String?
+  musclesWorked    String?
+  safetyNotes      String?
+  isCompetitionEvent Boolean  @default(false)
+  isPublished      Boolean    @default(false)
+  isLaunchPriority Boolean    @default(false)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+}
+
+model Event {
+  id               String   @id @default(uuid())
+  name             String
+  slug             String   @unique
+  category         String
+  description      String?
+  technicalNotes   String?
+  coachingNotes    String?
+  judgingCriteria  String?
+  programmingNotes String?
+  commonErrors     String?
+  videoUrl         String?
+  isPublished      Boolean  @default(false)
+  isLaunchPriority Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model ContentRelationship {
+  id               String      @id @default(uuid())
+  sourceType       ContentType
+  sourceId         String
+  targetType       ContentType
+  targetId         String
+  relationshipType String
+  displayLabel     String?
+  priority         Int         @default(3)
+  isActive         Boolean     @default(true)
+  createdAt        DateTime    @default(now())
+
+  @@index([sourceType, sourceId])
+  @@index([targetType, targetId])
+}
+
+model RecommendationPrompt {
+  id             String      @id @default(uuid())
+  lessonId       String?
+  triggerContext String?
+  promptLabel    String
+  targetType     ContentType
+  targetId       String?
+  targetUrl      String?
+  ctaText        String
+  position       String      @default("end_of_lesson")
+  isActive       Boolean     @default(true)
+  createdAt      DateTime    @default(now())
+
+  lesson Lesson? @relation(fields: [lessonId], references: [id])
+}
+
+model IntegrationLog {
+  id             String    @id @default(uuid())
+  userId         String
+  eventType      String
+  targetPlatform String
+  payload        Json
+  status         String    @default("pending")
+  sentAt         DateTime?
+  createdAt      DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}

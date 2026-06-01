@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: educate-strong-api
+    runtime: node
+    region: frankfurt
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: educate-strong-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        value: https://educate-strong.vercel.app
+
+databases:
+  - name: educate-strong-db
+    plan: free
+    region: frankfurt
