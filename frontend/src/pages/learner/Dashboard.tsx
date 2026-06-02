@@ -41,6 +41,14 @@ const QUICK_LINKS = [
   { to: '/cpd', label: 'CPD Log', icon: '📊', desc: 'Track your professional development' },
 ];
 
+// Be Strong card is kept separate so it has its own green treatment
+const BE_STRONG_HIGHLIGHT = {
+  to: '/be-strong',
+  label: 'Be Strong',
+  desc: 'Nutrition education for Strongman coaches and athletes',
+  categories: ['Nutrition Basics', 'Competition Nutrition', 'Recovery', 'Making Weight', 'Hydration', 'Supplements'],
+};
+
 export default function Dashboard() {
   const { user } = useAuth();
   const [enrolments, setEnrolments] = useState<EnrolmentWithProgress[]>([]);
@@ -198,6 +206,29 @@ export default function Dashboard() {
                     </Link>
                   ))}
                 </div>
+              </section>
+
+              {/* Be Strong card */}
+              <section>
+                <Link
+                  to={BE_STRONG_HIGHLIGHT.to}
+                  className="block bg-green-900 rounded-xl p-5 hover:bg-green-800 transition-colors"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xl">💚</span>
+                    <h3 className="text-base font-bold text-white">Be Strong</h3>
+                    <span className="ml-auto text-green-300 text-xs font-medium">Nutrition</span>
+                  </div>
+                  <p className="text-green-200 text-xs leading-relaxed mb-3">{BE_STRONG_HIGHLIGHT.desc}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {BE_STRONG_HIGHLIGHT.categories.slice(0, 4).map(c => (
+                      <span key={c} className="text-xs bg-green-800/60 border border-green-700/40 text-green-200 px-2 py-0.5 rounded-full">
+                        {c}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="text-green-400 text-xs font-medium mt-3">Explore Be Strong →</p>
+                </Link>
               </section>
 
               {/* CPD Snapshot */}

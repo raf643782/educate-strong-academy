@@ -14,6 +14,7 @@ import assessorRouter from './routes/assessor';
 import adminRouter from './routes/admin';
 import certificatesRouter from './routes/certificates';
 import cpdRouter from './routes/cpd';
+import bestrongRouter from './routes/bestrong';
 
 dotenv.config();
 
@@ -55,6 +56,7 @@ app.use('/api/assessor', assessorRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/certificates', certificatesRouter);
 app.use('/api/cpd', cpdRouter);
+app.use('/api/be-strong', bestrongRouter);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', service: 'Educate.Strong API', timestamp: new Date().toISOString() });

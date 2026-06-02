@@ -1,4 +1,4 @@
-import { PrismaClient, Pathway, LessonType, ContentType, Difficulty } from '@prisma/client';
+import { PrismaClient, Pathway, LessonType, ContentType, Difficulty, BeStrongCategory } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -644,6 +644,327 @@ async function main() {
     await prisma.recommendationPrompt.create({ data: rec });
   }
   console.log('Recommendation prompts seeded.');
+
+  // ── Be Strong Articles ─────────────────────────────────────────────────────
+  const SCOPE_NOTE = 'This article provides general nutritional information for educational purposes. It does not constitute personalised dietary advice. Coaches should refer athletes to a registered dietitian or registered nutritionist for individualised nutrition support.';
+
+  const beStrongArticles = [
+    // BASICS
+    {
+      title: 'Energy Balance for Strongman Athletes',
+      slug: 'energy-balance-strongman',
+      category: BeStrongCategory.BASICS,
+      summary: 'Why calories matter for strength sport, and how chronic underfuelling sabotages training and recovery.',
+      content: 'Strongman athletes have some of the highest energy demands of any strength sport. This article covers the fundamentals of energy balance — what it means, why it matters, and how coaches can identify signs of energy deficiency in their athletes without crossing into nutrition prescription.\n\nKey points:\n• Total energy expenditure in Strongman is significantly higher than general population estimates\n• Chronic energy deficiency impairs recovery, reduces training quality, and increases injury risk\n• Signs a coach might observe: persistent fatigue, stalled progress, irritability, frequent illness\n• The coach\'s role: identify and refer — not prescribe',
+      authorName: 'Be Strong Editorial Team',
+      reviewerName: 'Victoria Wilson',
+      reviewerQualification: 'Strength and Conditioning Coach',
+      lastReviewedAt: new Date('2026-01-01'),
+      scopeOfPracticeNote: SCOPE_NOTE,
+      accessLevel: 'FREE' as const,
+      isPublished: true,
+      isFeatured: true,
+      readMinutes: 8,
+      sortOrder: 1,
+    },
+    {
+      title: 'Protein for Strength Athletes: What Coaches Need to Know',
+      slug: 'protein-strength-athletes-coaches',
+      category: BeStrongCategory.BASICS,
+      summary: 'The role of protein in muscle protein synthesis, general intake guidance, and timing basics.',
+      content: 'Protein is the most discussed macronutrient in strength sport. This article covers what coaches need to understand — at a level that supports athlete conversations without crossing into individualised dietary prescription.\n\nKey points:\n• Muscle protein synthesis requires adequate protein distributed across the day\n• General ranges for strength athletes: 1.6–2.2g per kg bodyweight (current consensus)\n• Timing: protein around training is beneficial but total daily intake matters most\n• Food sources vs supplements: both can contribute; whole food sources first\n• Coaches should refer to a registered dietitian for individualised protein targets',
+      authorName: 'Be Strong Editorial Team',
+      reviewerName: 'Victoria Wilson',
+      reviewerQualification: 'Strength and Conditioning Coach',
+      lastReviewedAt: new Date('2026-01-01'),
+      scopeOfPracticeNote: SCOPE_NOTE,
+      accessLevel: 'FREE' as const,
+      isPublished: true,
+      isFeatured: true,
+      readMinutes: 10,
+      sortOrder: 2,
+    },
+    {
+      title: 'Carbohydrates and Strongman Performance',
+      slug: 'carbohydrates-strongman-performance',
+      category: BeStrongCategory.BASICS,
+      summary: 'Why carbohydrates are essential for high-intensity strength events, and how to discuss them with athletes.',
+      content: 'Despite misconceptions in some strength communities, carbohydrates are a critical fuel source for Strongman events. This article covers the basics coaches need to support athlete education.\n\nKey points:\n• High-intensity events like atlas stones, log press, and truck pulls are fuelled primarily by glycolytic (carbohydrate-dependent) pathways\n• Carbohydrate availability affects training quality, recovery between sessions, and competition performance\n• Low-carbohydrate approaches may be appropriate for some athletes in some contexts — but coaches should not make individualised recommendations\n• Practical signpost: if an athlete is consistently fatigued in later events during training, carbohydrate availability is one factor worth exploring with a nutrition professional',
+      authorName: 'Be Strong Editorial Team',
+      reviewerName: 'Victoria Wilson',
+      reviewerQualification: 'Strength and Conditioning Coach',
+      lastReviewedAt: new Date('2026-01-01'),
+      scopeOfPracticeNote: SCOPE_NOTE,
+      accessLevel: 'FREE' as const,
+      isPublished: true,
+      isFeatured: false,
+      readMinutes: 9,
+      sortOrder: 3,
+    },
+    // COMPETITION
+    {
+      title: 'Competition Day Nutrition: A Practical Guide',
+      slug: 'competition-day-nutrition-guide',
+      category: BeStrongCategory.COMPETITION,
+      summary: 'What to eat before, between, and after events on competition day — practical guidance coaches can share.',
+      content: 'Competition day nutrition is one of the highest-impact areas where coaches can support athlete performance. This guide covers practical strategies within coach scope of practice.\n\nPre-competition (2–4 hours before):\n• A carbohydrate-rich meal with moderate protein and low fat/fibre reduces GI discomfort risk\n• Examples: pasta, rice, oats with protein source — well-practiced in training, not tried for the first time on competition day\n\nBetween events (30–90 minute windows):\n• Small carbohydrate-rich snacks: banana, rice cakes, sports drinks if tolerated\n• Hydration: sip consistently rather than drinking large volumes\n• Avoid high fat, high fibre, or novel foods\n\nPost-competition:\n• Protein + carbohydrate meal within 2 hours\n• Prioritise rehydration\n\nCoach role: remind athletes of their own pre-agreed competition day plan; do not create one for them without nutrition professional input.',
+      authorName: 'Be Strong Editorial Team',
+      reviewerName: 'Victoria Wilson',
+      reviewerQualification: 'Strength and Conditioning Coach',
+      lastReviewedAt: new Date('2026-01-01'),
+      scopeOfPracticeNote: SCOPE_NOTE,
+      accessLevel: 'FREE' as const,
+      isPublished: true,
+      isFeatured: true,
+      readMinutes: 12,
+      sortOrder: 1,
+    },
+    {
+      title: 'Managing Long Competition Days',
+      slug: 'managing-long-competition-days',
+      category: BeStrongCategory.COMPETITION,
+      summary: 'Strategies for maintaining energy and focus across a full day of Strongman competition.',
+      content: 'A Strongman competition can span 6–10 hours with multiple events. Maintaining fuelling and hydration across this window is a skill in itself.\n\nKey principles:\n• Start the day well-fuelled — do not arrive in a fasted state\n• Treat between-event windows as refuelling opportunities\n• Mental fatigue as the day progresses is partly nutritional — carbohydrate availability affects cognitive function\n• Heat: outdoor competitions dramatically increase fluid and electrolyte needs\n\nCoaching considerations:\n• Help athletes develop and practice their competition day nutrition routine in training\n• Remind athletes of their plan; do not override it under competition pressure\n• Know the signs of energy depletion vs normal competition fatigue',
+      authorName: 'Be Strong Editorial Team',
+      reviewerName: 'Victoria Wilson',
+      reviewerQualification: 'Strength and Conditioning Coach',
+      lastReviewedAt: new Date('2026-01-01'),
+      scopeOfPracticeNote: SCOPE_NOTE,
+      accessLevel: 'ENROLLED' as const,
+      isPublished: true,
+      isFeatured: false,
+      readMinutes: 10,
+      sortOrder: 2,
+    },
+    // RECOVERY
+    {
+      title: 'Post-Training Nutrition for Strongman Recovery',
+      slug: 'post-training-nutrition-strongman',
+      category: BeStrongCategory.RECOVERY,
+      summary: 'The nutritional strategies that support recovery, adaptation, and readiness for the next session.',
+      content: 'Recovery nutrition is one of the most actionable areas where general guidance can make a meaningful difference. This article covers the principles coaches can share with athletes.\n\nThe recovery window:\n• There is no magic 30-minute window — but consuming protein and carbohydrate within 1–2 hours of training is a practical target\n• Protein triggers muscle protein synthesis; carbohydrate restores glycogen and supports hormonal environment for recovery\n\nPractical guidance:\n• A mixed meal with protein and carbohydrate within 2 hours of training is sufficient for most athletes\n• Athletes who train multiple times per day may benefit from faster post-session refuelling\n• Sleep is the most important recovery period — nutrition quality in the hours before sleep matters\n\nScope note: coaches can discuss general recovery nutrition principles; they should not prescribe specific quantities without nutrition professional involvement.',
+      authorName: 'Be Strong Editorial Team',
+      reviewerName: 'Victoria Wilson',
+      reviewerQualification: 'Strength and Conditioning Coach',
+      lastReviewedAt: new Date('2026-01-01'),
+      scopeOfPracticeNote: SCOPE_NOTE,
+      accessLevel: 'FREE' as const,
+      isPublished: true,
+      isFeatured: true,
+      readMinutes: 9,
+      sortOrder: 1,
+    },
+    // MAKING WEIGHT
+    {
+      title: 'Weight Categories in Strongman: A Coach\'s Awareness Guide',
+      slug: 'weight-categories-coaches-awareness',
+      category: BeStrongCategory.MAKING_WEIGHT,
+      summary: 'What coaches need to know about weight classes, the risks of extreme weight cutting, and when to refer.',
+      content: 'Weight categories exist across most Strongman federations. Coaches need to understand this landscape — and its risks — without crossing into nutrition prescription.\n\nWhat coaches should know:\n• Weight classes vary by federation — verify current class structures with the relevant governing body\n• "Making weight" practices range from benign (dietary adjustment weeks before) to dangerous (dehydration and extreme restriction close to weigh-in)\n• Extreme weight cutting carries serious health risks and impairs competition performance\n\nRed flags a coach should recognise:\n• Athlete discussing dehydration protocols (water cutting)\n• Dramatic calorie restriction in the week before competition\n• Signs of disordered eating: excessive preoccupation with food, distorted body image, secretive eating patterns\n\nCoach role:\n• Encourage athletes to compete in their natural weight class where possible\n• Do not endorse or assist with extreme weight cutting\n• Refer athletes to a sports dietitian for any weight management plan\n• If concerned about eating behaviours, refer to appropriate support services',
+      authorName: 'Be Strong Editorial Team',
+      reviewerName: 'Victoria Wilson',
+      reviewerQualification: 'Strength and Conditioning Coach',
+      lastReviewedAt: new Date('2026-01-01'),
+      scopeOfPracticeNote: SCOPE_NOTE,
+      accessLevel: 'FREE' as const,
+      isPublished: true,
+      isFeatured: true,
+      readMinutes: 11,
+      sortOrder: 1,
+    },
+    // HYDRATION
+    {
+      title: 'Hydration for Strongman Training and Competition',
+      slug: 'hydration-strongman-training-competition',
+      category: BeStrongCategory.HYDRATION,
+      summary: 'Daily hydration principles, competition-day fluid management, and recognising dehydration.',
+      content: 'Hydration is one of the most underestimated performance factors in Strongman. This article covers the basics coaches can discuss with athletes.\n\nGeneral principles:\n• Even mild dehydration (1–2% body mass) can impair strength output and cognitive function\n• Urine colour is a simple monitoring tool: pale yellow is the target; dark amber indicates dehydration\n• Thirst is a lagging indicator — encourage athletes to drink consistently through the day, not just when thirsty\n\nTraining sessions:\n• Drink before, during, and after training\n• For sessions over 90 minutes, electrolyte intake becomes relevant — particularly sodium\n\nCompetition days:\n• Arrive well-hydrated\n• Sip consistently between events — do not consume large volumes rapidly\n• Outdoor competitions in warm weather: increase fluid intake and monitor for heat illness signs\n\nHeat illness recognition (for coaches):\n• Heavy sweating, pale/clammy skin: heat exhaustion — rest, shade, cool fluids\n• Hot/dry skin, confusion, no sweating: heat stroke — emergency services required immediately',
+      authorName: 'Be Strong Editorial Team',
+      reviewerName: 'Victoria Wilson',
+      reviewerQualification: 'Strength and Conditioning Coach',
+      lastReviewedAt: new Date('2026-01-01'),
+      scopeOfPracticeNote: SCOPE_NOTE,
+      accessLevel: 'FREE' as const,
+      isPublished: true,
+      isFeatured: true,
+      readMinutes: 10,
+      sortOrder: 1,
+    },
+    // SUPPLEMENTS
+    {
+      title: 'Supplements for Strongman: Evidence and Scope of Practice',
+      slug: 'supplements-strongman-evidence-scope',
+      category: BeStrongCategory.SUPPLEMENTS,
+      summary: 'A review of commonly discussed supplements in Strongman — what the evidence says, and what coaches should and should not advise.',
+      content: 'Supplement use is widespread in Strongman. Coaches will regularly be asked about supplements. This article provides the awareness needed to respond professionally.\n\nIMPORTANT: Coaches are not qualified to recommend specific supplement protocols. The information below is for educational awareness only.\n\nSupplements with reasonable evidence for strength/power sport:\n• Creatine monohydrate: well-researched, generally regarded as safe, may improve high-intensity performance\n• Caffeine: well-evidenced for performance, timing and dose matter, individual tolerance varies\n• Beta-alanine: some evidence for buffering fatigue in high-rep efforts, causes harmless tingling in many users\n\nSupplements requiring caution:\n• Pre-workout blends: ingredient lists are often unclear; contamination risk varies by manufacturer\n• Protein powders: quality varies; batch-tested products reduce contamination risk for tested athletes\n• Any supplement making dramatic performance claims\n\nCoach responsibilities:\n• Do not recommend specific supplements or doses\n• Direct athletes who compete in tested federations to Informed Sport or Informed Choice for batch-tested products\n• Refer all supplement decisions to a qualified sports dietitian',
+      authorName: 'Be Strong Editorial Team',
+      reviewerName: 'Victoria Wilson',
+      reviewerQualification: 'Strength and Conditioning Coach',
+      lastReviewedAt: new Date('2026-01-01'),
+      scopeOfPracticeNote: SCOPE_NOTE,
+      accessLevel: 'FREE' as const,
+      isPublished: true,
+      isFeatured: true,
+      readMinutes: 13,
+      sortOrder: 1,
+    },
+    // COACHES GUIDE
+    {
+      title: 'How to Have Nutrition Conversations with Athletes',
+      slug: 'nutrition-conversations-with-athletes',
+      category: BeStrongCategory.COACHES_GUIDE,
+      summary: 'A practical guide for coaches on discussing nutrition effectively without crossing professional boundaries.',
+      content: 'Nutrition conversations happen in every coaching relationship. Handled well, they support athlete development. Handled poorly, they create liability and can cause harm. This guide helps coaches navigate them professionally.\n\nWhat coaches CAN do:\n• Share general evidence-based information (energy balance, protein importance, hydration, competition day fuelling)\n• Signpost athletes to qualified nutrition professionals\n• Notice and respond to red flags (extreme restriction, disordered eating behaviours, dangerous weight cutting)\n• Refer athletes to registered dietitians or registered nutritionists for personalised advice\n• Discuss Be Strong resources as educational starting points\n\nWhat coaches should NOT do:\n• Prescribe calorie targets, macronutrient splits, or specific meal plans\n• Recommend supplement doses\n• Provide medical nutrition therapy (managing eating disorders, medical conditions)\n• Provide weight loss or weight gain prescriptions\n\nPhrasing that stays in scope:\n• "There\'s a great resource on competition nutrition in Be Strong — I\'d recommend having a look."\n• "It might be worth speaking to a sports dietitian about your nutrition leading into this competition."\n• "I\'ve noticed you\'ve mentioned skipping meals a lot — how are you feeling in training?"\n\nPhrasing that crosses the line:\n• "You should eat X calories a day."\n• "Take this supplement — it\'ll help your performance."\n• "You need to cut 3kg before weigh-in — here\'s how."',
+      authorName: 'Be Strong Editorial Team',
+      reviewerName: 'Victoria Wilson',
+      reviewerQualification: 'Strength and Conditioning Coach',
+      lastReviewedAt: new Date('2026-01-01'),
+      scopeOfPracticeNote: null,
+      accessLevel: 'FREE' as const,
+      isPublished: true,
+      isFeatured: true,
+      readMinutes: 12,
+      sortOrder: 1,
+    },
+    // YOUTH
+    {
+      title: 'Nutrition for Young Strongman Athletes',
+      slug: 'nutrition-young-strongman-athletes',
+      category: BeStrongCategory.YOUTH_NUTRITION,
+      summary: 'Age-appropriate nutritional guidance for StrongKidz coaches supporting young participants.',
+      content: 'Young athletes have different nutritional needs from adults. StrongKidz coaches should be aware of these differences — and the particularly important scope-of-practice boundaries that apply when working with children.\n\nKey differences in youth nutrition:\n• Children and adolescents in growth phases have elevated protein and energy needs relative to body mass\n• Growth spurts increase overall nutritional requirements\n• Restrictive diets during development can impair growth and long-term health\n• Young athletes are particularly vulnerable to the consequences of energy deficiency\n\nFor StrongKidz coaches:\n• Never comment on a child\'s weight or body composition\n• Do not discuss specific foods, diets, or eating patterns with children\n• If you observe signs of inadequate nutrition (excessive fatigue, fainting, declining performance), raise this with the parent or guardian — not directly with the child\n• Parents and guardians are the appropriate referral point; signpost them to their GP or a paediatric dietitian if concerned\n\nPositive messaging:\n• "Strong athletes eat well to train well."\n• "Fuel your training — your body needs food to do what you\'re asking it to do."\n• Normalise eating — avoid any language that stigmatises food choices',
+      authorName: 'Be Strong Editorial Team',
+      reviewerName: 'Victoria Wilson',
+      reviewerQualification: 'Strength and Conditioning Coach',
+      lastReviewedAt: new Date('2026-01-01'),
+      scopeOfPracticeNote: SCOPE_NOTE,
+      accessLevel: 'FREE' as const,
+      isPublished: true,
+      isFeatured: false,
+      readMinutes: 10,
+      sortOrder: 1,
+    },
+  ];
+
+  for (const article of beStrongArticles) {
+    await prisma.beStrongArticle.upsert({
+      where: { slug: article.slug },
+      update: {},
+      create: article,
+    });
+  }
+  console.log(`Be Strong articles seeded: ${beStrongArticles.length}`);
+
+  // ── Be Strong Downloads ────────────────────────────────────────────────────
+  const beStrongDownloads = [
+    {
+      title: 'Competition Day Nutrition Planner',
+      slug: 'competition-day-nutrition-planner',
+      description: 'A one-page planning template for athletes to map their competition day nutrition across morning, between events, and post-competition.',
+      category: BeStrongCategory.DOWNLOADS,
+      fileType: 'PDF',
+      accessLevel: 'ENROLLED' as const,
+      isPublished: true,
+      sortOrder: 1,
+    },
+    {
+      title: 'Hydration Monitoring Log',
+      slug: 'hydration-monitoring-log',
+      description: 'A simple daily hydration tracking sheet — urine colour guide included.',
+      category: BeStrongCategory.DOWNLOADS,
+      fileType: 'PDF',
+      accessLevel: 'FREE' as const,
+      isPublished: true,
+      sortOrder: 2,
+    },
+    {
+      title: 'Athlete Nutrition Conversation Guide for Coaches',
+      slug: 'athlete-nutrition-conversation-guide',
+      description: 'A reference card with in-scope and out-of-scope nutrition conversation examples for coaches.',
+      category: BeStrongCategory.DOWNLOADS,
+      fileType: 'PDF',
+      accessLevel: 'FREE' as const,
+      isPublished: true,
+      sortOrder: 3,
+    },
+    {
+      title: 'Supplement Checklist — Tested Athletes',
+      slug: 'supplement-checklist-tested-athletes',
+      description: 'A reference guide for coaches supporting athletes in tested federations, including batch-testing resource links.',
+      category: BeStrongCategory.SUPPLEMENTS,
+      fileType: 'PDF',
+      accessLevel: 'FREE' as const,
+      isPublished: true,
+      sortOrder: 1,
+    },
+    {
+      title: 'Recovery Week Nutrition Template',
+      slug: 'recovery-week-nutrition-template',
+      description: 'A simple weekly nutrition planning framework for deload weeks and post-competition recovery periods.',
+      category: BeStrongCategory.RECOVERY,
+      fileType: 'PDF',
+      accessLevel: 'ENROLLED' as const,
+      isPublished: true,
+      sortOrder: 1,
+    },
+  ];
+
+  for (const download of beStrongDownloads) {
+    await prisma.beStrongDownload.upsert({
+      where: { slug: download.slug },
+      update: {},
+      create: download,
+    });
+  }
+  console.log(`Be Strong downloads seeded: ${beStrongDownloads.length}`);
+
+  // ── Be Strong recommendation prompts linked to course lessons ─────────────
+  // Find the Level 1 nutrition module lesson and Level 2 nutrition module
+  const l1NutritionLesson = await prisma.lesson.findFirst({
+    where: { module: { title: { contains: 'Programming' } } },
+  });
+  const l2NutritionLesson = await prisma.lesson.findFirst({
+    where: { module: { title: { contains: 'Nutrition' } } },
+  });
+
+  const bsNutritionArticle = await prisma.beStrongArticle.findUnique({
+    where: { slug: 'competition-day-nutrition-guide' },
+  });
+  const bsBasicsArticle = await prisma.beStrongArticle.findUnique({
+    where: { slug: 'energy-balance-strongman' },
+  });
+
+  const beStrongPrompts = [
+    // L1 — subtle prompt on any lesson that might mention nutrition
+    ...(l1NutritionLesson && bsBasicsArticle ? [{
+      lessonId: l1NutritionLesson.id,
+      triggerContext: 'nutrition mention in programming lesson',
+      promptLabel: 'Want to learn more?',
+      ctaText: 'Explore Be Strong — Nutrition Basics',
+      targetType: ContentType.BE_STRONG_ARTICLE,
+      targetId: bsBasicsArticle.id,
+      targetUrl: '/be-strong/articles/energy-balance-strongman',
+      position: 'end_of_lesson',
+      isActive: true,
+    }] : []),
+    // L2 — deeper nutrition prompt
+    ...(l2NutritionLesson && bsNutritionArticle ? [{
+      lessonId: l2NutritionLesson.id,
+      triggerContext: 'nutrition fundamentals module',
+      promptLabel: 'Go deeper on this topic',
+      ctaText: 'Explore Be Strong — Competition Nutrition',
+      targetType: ContentType.BE_STRONG_ARTICLE,
+      targetId: bsNutritionArticle.id,
+      targetUrl: '/be-strong/articles/competition-day-nutrition-guide',
+      position: 'end_of_lesson',
+      isActive: true,
+    }] : []),
+  ];
+
+  for (const prompt of beStrongPrompts) {
+    await prisma.recommendationPrompt.create({ data: prompt });
+  }
+  console.log(`Be Strong recommendation prompts seeded: ${beStrongPrompts.length}`);
 
   console.log('\nSeed complete!');
   console.log('Admin login: admin@educate-strong.com / AdminPass123!');

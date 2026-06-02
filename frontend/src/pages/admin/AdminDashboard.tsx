@@ -13,6 +13,7 @@ interface Stats {
 
 const QUICK_LINKS = [
   { label: 'Manage Courses', href: '/admin/courses', icon: '📚', desc: 'View, edit, and publish courses' },
+  { label: 'Be Strong Content', href: '/admin/be-strong', icon: '💚', desc: 'Manage nutrition articles and downloads', green: true },
   { label: 'Knowledge Hub', href: '/knowledge', icon: '📖', desc: 'Browse the knowledge library' },
   { label: 'Exercise Library', href: '/exercises', icon: '🏋️', desc: 'View exercise reference library' },
   { label: 'Event Library', href: '/events', icon: '🏆', desc: 'View competition event library' },
@@ -81,7 +82,11 @@ export default function AdminDashboard() {
                 <Link
                   key={link.href}
                   to={link.href}
-                  className="bg-white rounded-xl border border-gray-200 hover:border-amber-300 hover:shadow-sm transition-all p-5 flex items-start gap-4"
+                  className={`rounded-xl border hover:shadow-sm transition-all p-5 flex items-start gap-4 ${
+                    (link as any).green
+                      ? 'bg-green-50 border-green-200 hover:border-green-400'
+                      : 'bg-white border-gray-200 hover:border-amber-300'
+                  }`}
                 >
                   <span className="text-2xl">{link.icon}</span>
                   <div>

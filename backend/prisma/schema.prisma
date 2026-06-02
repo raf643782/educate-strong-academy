@@ -68,7 +68,21 @@ enum ContentType {
   KB_ARTICLE
   EXERCISE
   EVENT
+  BE_STRONG_ARTICLE
+  BE_STRONG_HUB
   EXTERNAL_URL
+}
+
+enum BeStrongCategory {
+  BASICS
+  COMPETITION
+  RECOVERY
+  MAKING_WEIGHT
+  HYDRATION
+  SUPPLEMENTS
+  COACHES_GUIDE
+  YOUTH_NUTRITION
+  DOWNLOADS
 }
 
 enum AccessLevel {
@@ -354,4 +368,54 @@ model IntegrationLog {
   createdAt      DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id])
+}
+
+// ─── Be Strong Nutrition Section ──────────────────────────────────────────────
+
+model BeStrongArticle {
+  id                    String           @id @default(uuid())
+  title                 String
+  slug                  String           @unique
+  category              BeStrongCategory
+  subcategory           String?
+  summary               String?
+  content               String?
+  // Authorship — nutrition content must be attributed to a qualified reviewer
+  authorName            String?
+  reviewerName          String?
+  reviewerQualification String?          // e.g. "Registered Dietitian", "SENr Practitioner"
+  lastReviewedAt        DateTime?
+  // Scope of practice disclaimer shown at article top
+  scopeOfPracticeNote   String?
+  // Access control
+  accessLevel           AccessLevel      @default(FREE)
+  isPremium             Boolean          @default(false)  // reserved for future paid tier
+  isPublished           Boolean          @default(false)
+  isFeatured            Boolean          @default(false)
+  readMinutes           Int?
+  imageUrl              String?
+  tags                  String?          // comma-separated
+  // Related content (stored as JSON arrays of IDs)
+  relatedArticleSlugs   String?
+  relatedCourseSlugs    String?
+  sortOrder             Int              @default(0)
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+}
+
+model BeStrongDownload {
+  id           String           @id @default(uuid())
+  title        String
+  slug         String           @unique
+  description  String?
+  category     BeStrongCategory
+  fileType     String           @default("PDF")  // PDF, Excel, Word
+  fileUrl      String?
+  thumbnailUrl String?
+  accessLevel  AccessLevel      @default(ENROLLED)
+  isPublished  Boolean          @default(false)
+  downloadCount Int             @default(0)
+  sortOrder    Int              @default(0)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
 }
