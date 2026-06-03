@@ -2,117 +2,94 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
-import Badge, { pathwayVariant, levelVariant } from '../../components/ui/Badge';
 import api from '../../lib/api';
 
 interface Course {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  summary?: string;
-  pathway: string;
-  level: number;
-  durationHours?: number;
+  id: string; title: string; slug: string;
+  description: string; summary?: string;
+  pathway: string; level: number; durationHours?: number;
+  _count?: { modules: number; enrolments: number };
 }
 
-type Filter = 'ALL' | 'COACHING' | 'REFEREEING' | 'STRONGKIDZ';
-
-const pathwayLabel = (p: string) =>
-  p === 'COACHING' ? 'Coaching' : p === 'REFEREEING' ? 'Refereeing' : 'StrongKidz';
+const PATHWAY_META: Record<string, { label: string; badge: string }> = {
+  COACHING:   { label: 'Coaching',   badge: 'badge-accent' },
+  REFEREEING: { label: 'Refereeing', badge: 'badge-grey' },
+  STRONGKIDZ: { label: 'StrongKidz', badge: 'badge-amber' },
+};
+const FILTERS = ['All', 'Coaching', 'Refereeing', 'StrongKidz'];
 
 export default function CourseCatalogue() {
   const [courses, setCourses] = useState<Course[]>([]);
-  const [filter, setFilter] = useState<Filter>('ALL');
+  const [filter, setFilter] = useState('All');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/courses')
-      .then(res => setCourses(res.data))
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    api.get('/courses').then(r => setCourses(r.data)).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
-  const filtered = filter === 'ALL' ? courses : courses.filter(c => c.pathway === filter);
-
-  const tabs: { label: string; value: Filter }[] = [
-    { label: 'All Courses', value: 'ALL' },
-    { label: 'Coaching', value: 'COACHING' },
-    { label: 'Refereeing', value: 'REFEREEING' },
-    { label: 'StrongKidz', value: 'STRONGKIDZ' },
-  ];
+  const filtered = filter === 'All'
+    ? courses
+    : courses.filter(c => PATHWAY_META[c.pathway]?.label === filter);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
       <Navbar />
-
-      <div className="bg-gray-900 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold mb-3">Course Catalogue</h1>
-          <p className="text-gray-400 text-lg">Professional Strongman qualifications for coaches, referees, and youth leaders.</p>
+      <section className="pt-navbar" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C' }}>
+        <div className="es-container py-16">
+          <p className="es-label mb-3">Academy</p>
+          <h1 className="text-4xl font-black text-white mb-3" style={{ letterSpacing: '-0.04em' }}>All Courses</h1>
+          <p className="text-es-muted max-w-xl">Accredited qualifications across coaching, refereeing, and youth development.</p>
         </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1">
-        {/* Filter tabs */}
-        <div className="flex gap-1 bg-gray-100 p-1 rounded-lg w-fit mb-10">
-          {tabs.map(tab => (
-            <button
-              key={tab.value}
-              onClick={() => setFilter(tab.value)}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                filter === tab.value
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+      </section>
+      <div style={{ background: '#111111', borderBottom: '1px solid #2C2C2C' }}>
+        <div className="es-container py-4 flex flex-wrap gap-2">
+          {FILTERS.map(f => (
+            <button key={f} onClick={() => setFilter(f)}
+              className={`px-4 py-2 rounded text-sm font-semibold transition-all ${
+                filter === f ? 'bg-es-accent text-white' : 'text-es-muted hover:text-white border border-es-grey-dark hover:border-es-accent'
               }`}
-            >
-              {tab.label}
-            </button>
+            >{f}</button>
           ))}
         </div>
-
-        {loading ? (
-          <div className="text-center py-20 text-gray-400">Loading courses...</div>
-        ) : filtered.length === 0 ? (
-          <div className="text-center py-20 text-gray-400">No courses found.</div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map(course => (
-              <div key={course.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-all group">
-                <div className="h-44 bg-gradient-to-br from-gray-900 via-gray-800 to-amber-900 flex items-end p-5">
-                  <div className="flex gap-2 flex-wrap">
-                    <Badge variant={pathwayVariant(course.pathway)}>{pathwayLabel(course.pathway)}</Badge>
-                    <Badge variant={levelVariant(course.level)}>Level {course.level}</Badge>
-                  </div>
-                </div>
-                <div className="p-6">
-                  <h2 className="font-bold text-gray-900 text-lg leading-snug mb-2 group-hover:text-amber-700 transition-colors">
-                    {course.title}
-                  </h2>
-                  <p className="text-gray-500 text-sm leading-relaxed mb-5 line-clamp-3">
-                    {course.summary || course.description}
-                  </p>
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <div className="flex items-center gap-1 text-gray-400 text-xs">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      {course.durationHours}h
-                    </div>
-                    <Link
-                      to={`/courses/${course.slug}`}
-                      className="bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
-                    >
-                      View Course
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
-
+      <div className="es-section flex-1">
+        <div className="es-container">
+          {loading ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {[1,2,3].map(i => <div key={i} className="es-card h-64 animate-pulse" />)}
+            </div>
+          ) : filtered.length === 0 ? (
+            <p className="text-center text-es-muted py-20">No courses found.</p>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {filtered.map(course => {
+                const meta = PATHWAY_META[course.pathway] || { label: course.pathway, badge: 'badge-grey' };
+                return (
+                  <div key={course.id} className="es-card-hover flex flex-col overflow-hidden">
+                    <div className={`h-1 ${meta.label === 'Coaching' ? 'bg-es-accent' : meta.label === 'StrongKidz' ? 'bg-es-amber' : 'bg-es-grey'}`} />
+                    <div className="p-6 flex flex-col flex-1">
+                      <div className="flex gap-2 mb-4">
+                        <span className={meta.badge}>{meta.label}</span>
+                        <span className="badge-grey">Level {course.level}</span>
+                      </div>
+                      <h3 className="font-bold text-white text-base mb-2 leading-snug flex-1">{course.title}</h3>
+                      <p className="text-es-muted text-sm leading-relaxed mb-5">
+                        {(course.summary || course.description).slice(0, 110)}...
+                      </p>
+                      {course.durationHours && (
+                        <p className="text-xs text-es-subtle mb-4">{course.durationHours}h content</p>
+                      )}
+                      <Link to={`/courses/${course.slug}`} className="btn-secondary text-sm text-center">
+                        View Course
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
       <Footer />
     </div>
   );

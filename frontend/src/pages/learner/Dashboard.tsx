@@ -2,156 +2,97 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
-import Card from '../../components/ui/Card';
-import ProgressBar from '../../components/ui/ProgressBar';
-import Badge from '../../components/ui/Badge';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../lib/api';
 
-interface EnrolmentWithProgress {
-  id: string;
-  enrolledAt: string;
-  completedAt: string | null;
-  course: {
-    id: string;
-    title: string;
-    slug: string;
-    pathway: string;
-    level: number;
-    durationHours?: number;
-    modules: { lessons: { id: string }[] }[];
-  };
-  progress: {
-    total: number;
-    completed: number;
-    percent: number;
-  };
+interface Enrolment {
+  id: string; enrolledAt: string; completedAt: string | null;
+  course: { id: string; title: string; slug: string; pathway: string; level: number; durationHours?: number; modules: { lessons: { id: string }[] }[] };
+  progress: { total: number; completed: number; percent: number };
 }
 
-const pathwayVariant = (p: string) =>
-  p === 'COACHING' ? 'coaching' : p === 'REFEREEING' ? 'refereeing' : ('strongkidz' as any);
-
-const pathwayLabel = (p: string) =>
-  p === 'COACHING' ? 'Coaching' : p === 'REFEREEING' ? 'Refereeing' : 'StrongKidz';
-
-const QUICK_LINKS = [
-  { to: '/knowledge', label: 'Knowledge Hub', desc: 'Articles and coaching resources' },
-  { to: '/exercises', label: 'Exercise Library', desc: 'Technique guides and cues' },
-  { to: '/events', label: 'Event Library', desc: 'Competition event reference' },
-  { to: '/cpd', label: 'CPD Log', desc: 'Track your professional development' },
-];
-
-// EatStrong card — kept visually separate with green identity, no emojis
-const EATSTRONG_HIGHLIGHT = {
-  to: '/eatstrong',
-  label: 'EatStrong',
-  desc: 'Dedicated nutrition education for Strongman coaches and athletes.',
-  categories: ['Nutrition Basics', 'Competition Nutrition', 'Recovery', 'Making Weight', 'Hydration', 'Supplements'],
+const pathwayColour: Record<string, string> = {
+  COACHING: '#A41C64', REFEREEING: '#3C3C3C', STRONGKIDZ: '#E19A47',
 };
+const pathwayLabel: Record<string, string> = {
+  COACHING: 'Coaching', REFEREEING: 'Refereeing', STRONGKIDZ: 'StrongKidz',
+};
+
+const QUICK = [
+  { to: '/knowledge', label: 'Knowledge Hub', desc: 'Articles and references' },
+  { to: '/exercises', label: 'Exercise Library', desc: 'Technique and cues' },
+  { to: '/events', label: 'Event Library', desc: 'Competition events' },
+  { to: '/cpd', label: 'CPD Log', desc: 'Track professional development' },
+];
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const [enrolments, setEnrolments] = useState<EnrolmentWithProgress[]>([]);
+  const [enrolments, setEnrolments] = useState<Enrolment[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/courses/my')
-      .then(res => setEnrolments(res.data))
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    api.get('/courses/my').then(r => setEnrolments(r.data)).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
-  // Get the first uncompleted lesson for a course
-  const getContinueUrl = (enrolment: EnrolmentWithProgress) => {
-    const firstLesson = enrolment.course.modules[0]?.lessons[0];
-    if (!firstLesson) return `/courses/${enrolment.course.slug}`;
-    return `/learn/${enrolment.course.slug}/lessons/${firstLesson.id}`;
+  const continueUrl = (e: Enrolment) => {
+    const id = e.course.modules[0]?.lessons[0]?.id;
+    return id ? `/learn/${e.course.slug}/lessons/${id}` : `/courses/${e.course.slug}`;
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
       <Navbar />
-
-      <div className="flex-1">
-        {/* Header */}
-        <div className="bg-white border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <h1 className="text-3xl font-bold text-gray-900">
-              Welcome back, {user?.firstName}
-            </h1>
-            <p className="text-gray-500 mt-1">Continue your professional development journey.</p>
-          </div>
+      {/* Header */}
+      <div className="pt-navbar" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C' }}>
+        <div className="es-container py-8">
+          <p className="es-label mb-1">Dashboard</p>
+          <h1 className="text-2xl font-black text-white">Welcome back, {user?.firstName}</h1>
+          <p className="text-es-muted text-sm mt-1">Continue your professional development.</p>
         </div>
+      </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="es-section flex-1">
+        <div className="es-container">
+          <div className="grid lg:grid-cols-3 gap-8">
 
-            {/* Main content */}
+            {/* Main */}
             <div className="lg:col-span-2 space-y-8">
-
-              {/* My Courses */}
               <section>
                 <div className="flex items-center justify-between mb-5">
-                  <h2 className="text-xl font-bold text-gray-900">My Courses</h2>
-                  <Link to="/courses" className="text-amber-600 hover:text-amber-700 text-sm font-medium">
-                    Browse catalogue →
-                  </Link>
+                  <h2 className="text-lg font-bold text-white">My Courses</h2>
+                  <Link to="/courses" className="text-sm text-es-accent hover:text-es-accent-mid">Browse catalogue →</Link>
                 </div>
-
                 {loading ? (
                   <div className="space-y-3">
-                    {[1, 2].map(i => (
-                      <div key={i} className="bg-white rounded-xl border border-gray-200 p-5 animate-pulse">
-                        <div className="h-4 w-48 bg-gray-100 rounded mb-3" />
-                        <div className="h-2.5 bg-gray-100 rounded-full" />
-                      </div>
-                    ))}
+                    {[1,2].map(i => <div key={i} className="es-card h-20 animate-pulse" />)}
                   </div>
                 ) : enrolments.length === 0 ? (
-                  <Card>
-                    <div className="p-8 text-center">
-                      <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg className="w-8 h-8 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                        </svg>
-                      </div>
-                      <h3 className="font-semibold text-gray-900 mb-2">Start your learning journey</h3>
-                      <p className="text-gray-500 text-sm mb-5 max-w-sm mx-auto">
-                        Enrol in a course to begin. Your progress will appear here.
-                      </p>
-                      <Link
-                        to="/courses"
-                        className="bg-amber-600 hover:bg-amber-500 text-white font-semibold px-5 py-2.5 rounded-lg transition-colors text-sm inline-block"
-                      >
-                        Explore Courses
-                      </Link>
-                    </div>
-                  </Card>
+                  <div className="es-card p-8 text-center">
+                    <p className="text-es-muted mb-4">You are not enrolled in any courses yet.</p>
+                    <Link to="/courses" className="btn-primary text-sm">Explore Courses</Link>
+                  </div>
                 ) : (
                   <div className="space-y-4">
-                    {enrolments.map(enrolment => (
-                      <div key={enrolment.id} className="bg-white rounded-xl border border-gray-200 hover:border-amber-200 hover:shadow-sm transition-all p-5">
+                    {enrolments.map(e => (
+                      <div key={e.id} className="es-card-hover p-5">
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Badge variant={pathwayVariant(enrolment.course.pathway)}>
-                                {pathwayLabel(enrolment.course.pathway)}
-                              </Badge>
-                              <span className="text-xs text-gray-400">Level {enrolment.course.level}</span>
+                            <div className="flex gap-2 mb-2">
+                              <span className="badge-accent">{pathwayLabel[e.course.pathway] || e.course.pathway}</span>
+                              <span className="badge-grey">Level {e.course.level}</span>
                             </div>
-                            <h3 className="font-semibold text-gray-900 mb-3 leading-snug">
-                              {enrolment.course.title}
-                            </h3>
-                            <ProgressBar value={enrolment.progress.percent} />
-                            <p className="text-xs text-gray-500 mt-1.5">
-                              {enrolment.progress.completed} of {enrolment.progress.total} lessons complete
-                            </p>
+                            <h3 className="font-bold text-white text-sm leading-snug mb-2">{e.course.title}</h3>
+                            {/* Progress bar */}
+                            <div className="h-1.5 bg-es-grey rounded-full overflow-hidden mb-1">
+                              <div
+                                className="h-full rounded-full transition-all"
+                                style={{ width: `${e.progress.percent}%`, background: pathwayColour[e.course.pathway] || '#A41C64' }}
+                              />
+                            </div>
+                            <p className="text-xs text-es-subtle">{e.progress.completed}/{e.progress.total} lessons</p>
                           </div>
-                          <Link
-                            to={getContinueUrl(enrolment)}
-                            className="flex-shrink-0 bg-gray-900 hover:bg-gray-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
-                          >
-                            {enrolment.progress.percent > 0 ? 'Continue' : 'Start'}
+                          <Link to={continueUrl(e)} className="btn-primary text-xs py-2 px-4 flex-shrink-0">
+                            {e.progress.percent > 0 ? 'Continue' : 'Start'}
                           </Link>
                         </div>
                       </div>
@@ -163,115 +104,74 @@ export default function Dashboard() {
               {/* Recommended */}
               {enrolments.length === 0 && (
                 <section>
-                  <h2 className="text-xl font-bold text-gray-900 mb-5">Recommended Start</h2>
-                  <Card>
+                  <h2 className="text-lg font-bold text-white mb-4">Recommended Start</h2>
+                  <div className="es-card p-6">
                     <div className="flex items-start gap-5">
-                      <div className="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <svg className="w-6 h-6 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <div className="w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(164,28,100,0.15)', border: '1px solid rgba(164,28,100,0.3)' }}>
+                        <svg className="w-6 h-6 text-es-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                         </svg>
                       </div>
                       <div className="flex-1">
-                        <Badge variant="coaching" className="mb-2">Coaching</Badge>
-                        <h3 className="font-bold text-gray-900 mb-1">Level 1 Fundamentals of Coaching Strongman</h3>
-                        <p className="text-gray-500 text-sm mb-4">The recommended starting point for all new coaches. 15 hours across 7 modules.</p>
-                        <Link
-                          to="/courses/level-1-coaching-strongman"
-                          className="bg-amber-600 hover:bg-amber-500 text-white font-semibold px-4 py-2 rounded-lg transition-colors text-sm inline-block"
-                        >
-                          View Course
-                        </Link>
+                        <span className="badge-accent mb-2 inline-block">Coaching</span>
+                        <h3 className="font-bold text-white mb-1">Level 1 Fundamentals of Coaching Strongman</h3>
+                        <p className="text-es-muted text-sm mb-4">The recommended starting point. Active IQ accredited. Practical, hands-on, 15 hours.</p>
+                        <Link to="/courses/level-1-coaching-strongman" className="btn-primary text-sm">View Course</Link>
                       </div>
                     </div>
-                  </Card>
+                  </div>
                 </section>
               )}
             </div>
 
             {/* Sidebar */}
-            <div className="space-y-6">
+            <div className="space-y-5">
+              {/* EatStrong */}
+              <Link to="/eatstrong" className="block es-card p-5 hover:border-green-700 transition-colors" style={{ borderTop: '2px solid #166534' }}>
+                <p className="text-xs font-bold uppercase tracking-widest text-green-500 mb-1">EatStrong</p>
+                <p className="font-bold text-white text-sm mb-1">Nutrition Education</p>
+                <p className="text-xs text-es-muted">Performance nutrition for Strongman coaches and athletes.</p>
+              </Link>
+
               {/* Quick links */}
-              <section>
-                <h2 className="text-lg font-bold text-gray-900 mb-4">Quick Links</h2>
+              <div>
+                <p className="es-label mb-3">Quick Links</p>
                 <div className="space-y-2">
-                  {QUICK_LINKS.map(link => (
-                    <Link
-                      key={link.to}
-                      to={link.to}
-                      className="flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-4 py-3.5 hover:shadow-sm hover:border-amber-200 transition-all"
-                    >
+                  {QUICK.map(l => (
+                    <Link key={l.to} to={l.to} className="flex items-center justify-between es-card p-3.5 hover:border-es-accent transition-colors group">
                       <div>
-                        <p className="text-sm font-semibold text-gray-900">{link.label}</p>
-                        <p className="text-xs text-gray-500">{link.desc}</p>
+                        <p className="text-sm font-semibold text-white">{l.label}</p>
+                        <p className="text-xs text-es-subtle">{l.desc}</p>
                       </div>
+                      <svg className="w-4 h-4 text-es-subtle group-hover:text-es-accent transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
                     </Link>
                   ))}
                 </div>
-              </section>
+              </div>
 
-              {/* EatStrong card — green identity, no emojis */}
-              <section>
-                <Link
-                  to={EATSTRONG_HIGHLIGHT.to}
-                  className="block bg-green-900 rounded-xl p-5 hover:bg-green-800 transition-colors"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-base font-bold text-white">{EATSTRONG_HIGHLIGHT.label}</h3>
-                    <span className="text-green-300 text-xs font-medium border border-green-700 rounded px-2 py-0.5">
-                      Nutrition
-                    </span>
-                  </div>
-                  <p className="text-green-200 text-xs leading-relaxed mb-3">
-                    {EATSTRONG_HIGHLIGHT.desc}
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {EATSTRONG_HIGHLIGHT.categories.slice(0, 4).map(c => (
-                      <span
-                        key={c}
-                        className="text-xs border border-green-700/60 text-green-300 px-2 py-0.5 rounded"
-                      >
-                        {c}
-                      </span>
-                    ))}
-                  </div>
-                  <p className="text-green-400 text-xs font-medium mt-3">Explore EatStrong</p>
-                </Link>
-              </section>
-
-              {/* CPD Snapshot */}
-              <section>
-                <h2 className="text-lg font-bold text-gray-900 mb-4">CPD Overview</h2>
-                <Card>
-                  <div className="text-center py-2">
-                    <p className="text-4xl font-bold text-gray-900 mb-1">0</p>
-                    <p className="text-sm text-gray-500 mb-4">CPD hours logged</p>
-                    <ProgressBar value={0} showPercent={false} />
-                    <p className="text-xs text-gray-400 mt-2">Complete a certification to start logging CPD</p>
-                    <Link to="/cpd" className="text-amber-600 hover:text-amber-700 text-sm font-medium mt-3 inline-block">
-                      View CPD log →
-                    </Link>
-                  </div>
-                </Card>
-              </section>
+              {/* CPD */}
+              <div className="es-card p-5">
+                <p className="es-label mb-3">CPD Overview</p>
+                <p className="text-3xl font-black text-white mb-1">0</p>
+                <p className="text-xs text-es-muted mb-3">CPD hours logged</p>
+                <div className="h-1.5 bg-es-grey rounded-full mb-2" />
+                <p className="text-xs text-es-subtle mb-3">Complete a certification to start logging CPD</p>
+                <Link to="/cpd" className="text-xs text-es-accent hover:text-es-accent-mid font-semibold">View CPD log →</Link>
+              </div>
 
               {/* Certificates */}
-              <section>
-                <h2 className="text-lg font-bold text-gray-900 mb-4">Certificates</h2>
-                <Card>
-                  <div className="text-center py-2">
-                    <p className="text-4xl font-bold text-gray-900 mb-1">0</p>
-                    <p className="text-sm text-gray-500 mb-3">certificates earned</p>
-                    <Link to="/certificates" className="text-amber-600 hover:text-amber-700 text-sm font-medium">
-                      View certificates →
-                    </Link>
-                  </div>
-                </Card>
-              </section>
+              <div className="es-card p-5">
+                <p className="es-label mb-3">Certificates</p>
+                <p className="text-3xl font-black text-white mb-1">0</p>
+                <p className="text-xs text-es-muted mb-3">certificates earned</p>
+                <Link to="/certificates" className="text-xs text-es-accent hover:text-es-accent-mid font-semibold">View certificates →</Link>
+              </div>
             </div>
           </div>
         </div>
       </div>
-
       <Footer />
     </div>
   );

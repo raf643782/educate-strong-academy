@@ -2,70 +2,94 @@ import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
+const LIBRARY_LINKS = [
+  { to: '/knowledge', label: 'Knowledge Hub', desc: 'Articles & coaching guides' },
+  { to: '/exercises', label: 'Exercise Library', desc: 'Technique & coaching cues' },
+  { to: '/events', label: 'Event Library', desc: 'Competition events' },
+];
+
 export default function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [learnOpen, setLearnOpen] = useState(false);
+  const [libOpen, setLibOpen] = useState(false);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-    setMenuOpen(false);
-  };
-
-  const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-    `text-sm font-medium transition-colors ${
-      isActive ? 'text-amber-400' : 'text-gray-300 hover:text-white'
-    }`;
+  const close = () => setMenuOpen(false);
 
   return (
-    <nav className="bg-gray-900 border-b border-gray-800 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav
+      style={{ background: 'rgba(13,13,13,0.95)', backdropFilter: 'blur(12px)' }}
+      className="fixed top-0 left-0 right-0 z-50 border-b border-es-grey-dark"
+    >
+      <div className="es-container">
         <div className="flex items-center justify-between h-16">
 
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-1 flex-shrink-0">
-            <span className="text-white font-bold text-lg tracking-tight">
-              Educate<span className="text-amber-500">.</span>Strong
-            </span>
+          <Link to="/" className="flex-shrink-0">
+            <img src="/assets/es-logo.png" alt="Educate.Strong" className="h-8 w-auto" />
           </Link>
 
-          {/* Desktop nav */}
-          <div className="hidden lg:flex items-center gap-7">
-            <NavLink to="/courses" className={navLinkClass}>Courses</NavLink>
-            <NavLink to="/about" className={navLinkClass}>About</NavLink>
-            <NavLink to="/strongkidz" className={navLinkClass}>StrongKidz</NavLink>
+          {/* Desktop links */}
+          <div className="hidden lg:flex items-center gap-1">
+            {[
+              { to: '/courses', label: 'Courses' },
+              { to: '/about',   label: 'About' },
+              { to: '/strongkidz', label: 'StrongKidz' },
+            ].map(l => (
+              <NavLink
+                key={l.to}
+                to={l.to}
+                className={({ isActive }) =>
+                  `px-4 py-2 rounded text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'text-white'
+                      : 'text-es-muted hover:text-white'
+                  }`
+                }
+              >
+                {l.label}
+              </NavLink>
+            ))}
 
             {/* Library dropdown */}
             <div
               className="relative"
-              onMouseEnter={() => setLearnOpen(true)}
-              onMouseLeave={() => setLearnOpen(false)}
+              onMouseEnter={() => setLibOpen(true)}
+              onMouseLeave={() => setLibOpen(false)}
             >
-              <button className="text-sm font-medium text-gray-300 hover:text-white transition-colors flex items-center gap-1">
+              <button className="px-4 py-2 rounded text-sm font-medium text-es-muted hover:text-white transition-colors flex items-center gap-1">
                 Library
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-              {learnOpen && (
-                <div className="absolute top-full left-0 mt-1 w-52 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
-                  <DropLink to="/knowledge" label="Knowledge Hub" desc="Articles and references" />
-                  <DropLink to="/exercises" label="Exercise Library" desc="Technique and coaching cues" />
-                  <DropLink to="/events" label="Event Library" desc="Competition events" />
+              {libOpen && (
+                <div
+                  className="absolute top-full left-0 mt-px w-52 rounded-lg border border-es-grey-dark z-50 overflow-hidden"
+                  style={{ background: '#1C1C1C' }}
+                >
+                  {LIBRARY_LINKS.map(link => (
+                    <Link
+                      key={link.to}
+                      to={link.to}
+                      className="flex flex-col px-4 py-3 hover:bg-es-grey-dark transition-colors"
+                    >
+                      <span className="text-sm font-semibold text-white">{link.label}</span>
+                      <span className="text-xs text-es-muted">{link.desc}</span>
+                    </Link>
+                  ))}
                 </div>
               )}
             </div>
 
-            {/* EatStrong — visually distinct green link, no emoji */}
+            {/* EatStrong */}
             <NavLink
               to="/eatstrong"
               className={({ isActive }) =>
-                `text-sm font-medium transition-colors px-3 py-1 rounded border ${
+                `px-3 py-1.5 rounded text-sm font-semibold transition-colors border ${
                   isActive
-                    ? 'text-green-300 border-green-700 bg-green-900/40'
-                    : 'text-green-400 border-green-800/60 hover:text-green-300 hover:border-green-700 hover:bg-green-900/30'
+                    ? 'border-green-600 text-green-400 bg-green-950'
+                    : 'border-green-900 text-green-500 hover:border-green-700 hover:text-green-400'
                 }`
               }
             >
@@ -73,43 +97,30 @@ export default function Navbar() {
             </NavLink>
           </div>
 
-          {/* Desktop auth */}
+          {/* Auth */}
           <div className="hidden lg:flex items-center gap-3">
             {isAuthenticated ? (
               <>
-                <Link to="/dashboard" className="text-sm text-gray-300 hover:text-white transition-colors">
+                <Link to="/dashboard" className="text-sm text-es-muted hover:text-white transition-colors">
                   Dashboard
                 </Link>
                 {user?.role === 'ADMIN' && (
-                  <Link to="/admin" className="text-sm text-gray-300 hover:text-white transition-colors">
-                    Admin
-                  </Link>
+                  <Link to="/admin" className="text-sm text-es-muted hover:text-white transition-colors">Admin</Link>
                 )}
-                {(user?.role === 'ASSESSOR' || user?.role === 'ADMIN') && (
-                  <Link to="/assessor" className="text-sm text-gray-300 hover:text-white transition-colors">
-                    Assessor
-                  </Link>
-                )}
-                <button
-                  onClick={handleLogout}
-                  className="text-sm font-medium bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
-                >
-                  Sign out
+                <button onClick={() => { logout(); navigate('/'); }} className="btn-secondary py-2 px-4 text-xs">
+                  Sign Out
                 </button>
-                <div className="w-8 h-8 rounded-full bg-amber-600 flex items-center justify-center text-white text-sm font-semibold">
+                <div className="w-8 h-8 rounded-full bg-es-accent flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                   {user?.firstName?.[0]}{user?.lastName?.[0]}
                 </div>
               </>
             ) : (
               <>
-                <Link to="/login" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
-                  Sign in
+                <Link to="/login" className="text-sm text-es-muted hover:text-white transition-colors">
+                  Sign In
                 </Link>
-                <Link
-                  to="/register"
-                  className="text-sm font-medium bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-lg transition-colors"
-                >
-                  Get started
+                <Link to="/courses" className="btn-primary py-2.5 px-5 text-xs">
+                  Get Started
                 </Link>
               </>
             )}
@@ -117,86 +128,59 @@ export default function Navbar() {
 
           {/* Mobile hamburger */}
           <button
-            className="lg:hidden text-gray-300 hover:text-white p-2"
+            className="lg:hidden p-2 text-es-muted hover:text-white transition-colors"
             onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Toggle menu"
+            aria-label="Menu"
           >
-            {menuOpen ? (
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            ) : (
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            )}
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              {menuOpen
+                ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />}
+            </svg>
           </button>
         </div>
       </div>
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="lg:hidden border-t border-gray-800 bg-gray-900 px-4 py-5 space-y-1">
-          <MobileLink to="/courses" onClick={() => setMenuOpen(false)}>Courses</MobileLink>
-          <MobileLink to="/about" onClick={() => setMenuOpen(false)}>About</MobileLink>
-          <MobileLink to="/strongkidz" onClick={() => setMenuOpen(false)}>StrongKidz</MobileLink>
-          <MobileLink to="/knowledge" onClick={() => setMenuOpen(false)}>Knowledge Hub</MobileLink>
-          <MobileLink to="/exercises" onClick={() => setMenuOpen(false)}>Exercise Library</MobileLink>
-          <MobileLink to="/events" onClick={() => setMenuOpen(false)}>Event Library</MobileLink>
-          {/* EatStrong — distinct styling, no emoji */}
-          <Link
-            to="/eatstrong"
-            onClick={() => setMenuOpen(false)}
-            className="block text-sm font-medium text-green-400 border border-green-800/60 rounded-lg px-3 py-2.5 hover:bg-green-900/30 transition-colors"
-          >
-            EatStrong — Nutrition
-          </Link>
-          <div className="border-t border-gray-800 pt-4 mt-3 space-y-1">
-            {isAuthenticated ? (
-              <>
-                <MobileLink to="/dashboard" onClick={() => setMenuOpen(false)}>Dashboard</MobileLink>
-                {user?.role === 'ADMIN' && (
-                  <MobileLink to="/admin" onClick={() => setMenuOpen(false)}>Admin</MobileLink>
-                )}
-                <button
-                  onClick={handleLogout}
-                  className="block w-full text-left text-sm text-red-400 hover:text-red-300 px-3 py-2.5 rounded-lg hover:bg-gray-800 transition-colors"
-                >
-                  Sign out
-                </button>
-              </>
-            ) : (
-              <>
-                <MobileLink to="/login" onClick={() => setMenuOpen(false)}>Sign in</MobileLink>
-                <MobileLink to="/register" onClick={() => setMenuOpen(false)}>Get started</MobileLink>
-              </>
-            )}
+        <div className="lg:hidden border-t border-es-grey-dark" style={{ background: '#141414' }}>
+          <div className="es-container py-4 space-y-1">
+            {[
+              { to: '/courses', l: 'Courses' },
+              { to: '/about', l: 'About' },
+              { to: '/strongkidz', l: 'StrongKidz' },
+              { to: '/knowledge', l: 'Knowledge Hub' },
+              { to: '/exercises', l: 'Exercise Library' },
+              { to: '/events', l: 'Event Library' },
+            ].map(item => (
+              <Link
+                key={item.to}
+                to={item.to}
+                onClick={close}
+                className="block px-3 py-2.5 rounded text-sm font-medium text-es-muted hover:text-white hover:bg-es-card transition-colors"
+              >
+                {item.l}
+              </Link>
+            ))}
+            <Link to="/eatstrong" onClick={close} className="block px-3 py-2.5 rounded text-sm font-medium text-green-400">
+              EatStrong
+            </Link>
+            <div className="border-t border-es-grey-dark pt-3 mt-3 space-y-2">
+              {isAuthenticated ? (
+                <>
+                  <Link to="/dashboard" onClick={close} className="block px-3 py-2 text-sm text-es-muted hover:text-white rounded transition-colors">Dashboard</Link>
+                  <button onClick={() => { logout(); navigate('/'); close(); }} className="block w-full text-left px-3 py-2 text-sm text-red-400 rounded transition-colors">Sign Out</button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" onClick={close} className="block px-3 py-2 text-sm text-es-muted hover:text-white rounded transition-colors">Sign In</Link>
+                  <Link to="/courses" onClick={close} className="block btn-primary text-center text-sm mt-2">Get Started</Link>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
     </nav>
-  );
-}
-
-// ── Sub-components ────────────────────────────────────────────────────────────
-
-function DropLink({ to, label, desc }: { to: string; label: string; desc: string }) {
-  return (
-    <Link to={to} className="flex flex-col px-4 py-2.5 hover:bg-gray-50 transition-colors">
-      <span className="text-sm font-semibold text-gray-900">{label}</span>
-      <span className="text-xs text-gray-400">{desc}</span>
-    </Link>
-  );
-}
-
-function MobileLink({ to, onClick, children }: { to: string; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <Link
-      to={to}
-      onClick={onClick}
-      className="block text-sm font-medium text-gray-300 hover:text-white px-3 py-2.5 rounded-lg hover:bg-gray-800 transition-colors"
-    >
-      {children}
-    </Link>
   );
 }

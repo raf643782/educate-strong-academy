@@ -1,470 +1,646 @@
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
-import ImagePlaceholder from '../../components/media/ImagePlaceholder';
-import VideoTestimonialCard from '../../components/testimonials/VideoTestimonialCard';
-import TestimonialGrid from '../../components/testimonials/TestimonialGrid';
-import TutorCard from '../../components/tutors/TutorCard';
-import PathwayVisualiser from '../../components/pathway/PathwayVisualiser';
-import CommunitySection from '../../components/community/CommunitySection';
-import { TUTORS } from '../../data/tutorsData';
-import { getHomepageTestimonials, getFeaturedVideoTestimonial } from '../../data/testimonialsData';
-import { PATHWAYS } from '../../data/pathwayData';
-import api from '../../lib/api';
 
-interface CourseAPI {
-  id: string;
-  title: string;
-  slug: string;
-  pathway: string;
-  level: number;
-  durationHours?: number;
-  summary?: string;
+/* ── Shared section heading ───────────────────────────────────────── */
+function SectionHeader({
+  label,
+  heading,
+  sub,
+  center = false,
+}: {
+  label?: string;
+  heading: string;
+  sub?: string;
+  center?: boolean;
+}) {
+  return (
+    <div className={`mb-10 md:mb-14 ${center ? 'text-center' : ''}`}>
+      {label && <p className="es-label mb-3">{label}</p>}
+      <h2 className="text-3xl md:text-4xl font-black text-white leading-tight mb-4" style={{ letterSpacing: '-0.03em' }}>
+        {heading}
+      </h2>
+      {sub && <p className="text-es-muted text-base md:text-lg leading-relaxed max-w-2xl" style={center ? { margin: '0 auto' } : {}}>
+        {sub}
+      </p>}
+    </div>
+  );
 }
 
-const coachingPathway = PATHWAYS.find(p => p.id === 'coaching')!;
-const writtenTestimonials = getHomepageTestimonials();
-const featuredVideo = getFeaturedVideoTestimonial();
+/* ── Arrow icon ───────────────────────────────────────────────────── */
+const Arrow = () => (
+  <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+  </svg>
+);
 
-const ACCREDITATION_ITEMS = [
-  { label: 'Active IQ Accredited', note: 'Ofqual-regulated qualification' },
-  { label: 'Endorsed by WHEA.GB', note: 'Level 1 Refereeing' },
-  { label: 'Armed Forces Strongman', note: 'Endorsed partner' },
-  { label: 'Mind Body Connect', note: 'Charity No. 1173834' },
-];
-
-const PATHWAY_CARDS = [
-  {
-    marker: 'C',
-    title: 'Coaching Pathway',
-    label: 'COACHING',
-    levels: 'Levels 1, 2 & 3',
-    badge: 'Active IQ Accredited',
-    desc: 'From beginner coaching fundamentals to high-performance athlete management. Build the knowledge — and the credential — to coach Strongman properly.',
-    link: '/courses/level-1-coaching-strongman',
-    cta: 'View Level 1 Coaching',
-  },
-  {
-    marker: 'R',
-    title: 'Refereeing Pathway',
-    label: 'REFEREEING',
-    levels: 'Level 1',
-    badge: 'WHEA.GB Endorsed',
-    desc: 'The first formal Strongman refereeing certification in the UK. Endorsed by WHEA.GB and Armed Forces Strongman.',
-    link: '/courses/level-1-strongman-refereeing',
-    cta: 'View Refereeing Course',
-  },
-  {
-    marker: 'SK',
-    title: 'StrongKidz',
-    label: 'STRONGKIDZ',
-    levels: 'Youth Programme',
-    badge: 'Safeguarding Trained',
-    desc: 'A weekly youth strength programme developing physical confidence, resilience, and functional movement in children — and coach education for those who deliver it.',
-    link: '/strongkidz',
-    cta: 'Learn About StrongKidz',
-  },
-];
-
-export default function Home() {
-  const [featuredCourse, setFeaturedCourse] = useState<CourseAPI | null>(null);
-
-  useEffect(() => {
-    api.get('/courses/level-1-coaching-strongman').then(res => setFeaturedCourse(res.data)).catch(() => {});
-  }, []);
-
+/* ── Pathway card ─────────────────────────────────────────────────── */
+function PathwayCard({
+  badge,
+  badgeType = 'accent',
+  title,
+  who,
+  outcomes,
+  to,
+  levels,
+  accent = false,
+}: {
+  badge: string;
+  badgeType?: 'accent' | 'amber' | 'grey';
+  title: string;
+  who: string;
+  outcomes: string[];
+  to: string;
+  levels?: string;
+  accent?: boolean;
+}) {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div
+      className="es-card-hover flex flex-col p-6 h-full"
+      style={{ borderTop: accent ? '2px solid #A41C64' : '2px solid #3C3C3C' }}
+    >
+      <div className="flex items-center justify-between mb-5">
+        <span className={`badge-${badgeType}`}>{badge}</span>
+        {levels && <span className="text-xs text-es-subtle">{levels}</span>}
+      </div>
+      <h3 className="text-xl font-bold text-white mb-2">{title}</h3>
+      <p className="text-es-muted text-sm mb-5 leading-relaxed flex-1">{who}</p>
+      <ul className="space-y-2 mb-6">
+        {outcomes.map(o => (
+          <li key={o} className="flex items-start gap-2 text-sm text-es-muted">
+            <span className="text-es-accent mt-0.5 flex-shrink-0">—</span>
+            {o}
+          </li>
+        ))}
+      </ul>
+      <Link to={to} className="btn-secondary text-sm flex items-center justify-between group">
+        Explore Pathway
+        <Arrow />
+      </Link>
+    </div>
+  );
+}
+
+/* ── Course card ──────────────────────────────────────────────────── */
+function CourseCard({
+  title,
+  type,
+  level,
+  description,
+  benefits,
+  coverImg,
+  to,
+  highlight = false,
+}: {
+  title: string;
+  type: string;
+  level: string;
+  description: string;
+  benefits: string[];
+  coverImg?: string;
+  to: string;
+  highlight?: boolean;
+}) {
+  return (
+    <div className="es-card-hover flex flex-col overflow-hidden">
+      {/* Cover */}
+      <div className="relative h-52 bg-es-grey flex items-center justify-center overflow-hidden">
+        {coverImg ? (
+          <img src={coverImg} alt={title} className="w-full h-full object-cover" />
+        ) : (
+          <div className="flex flex-col items-center gap-2 text-es-subtle">
+            <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+            <span className="text-xs">Course Cover</span>
+          </div>
+        )}
+        {highlight && (
+          <div className="absolute top-3 right-3">
+            <span className="badge-accent">Active IQ</span>
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="p-6 flex flex-col flex-1">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="badge-grey">{type}</span>
+          <span className="badge-grey">{level}</span>
+        </div>
+        <h3 className="text-lg font-bold text-white mb-2 leading-snug">{title}</h3>
+        <p className="text-es-muted text-sm leading-relaxed mb-5 flex-1">{description}</p>
+        <ul className="space-y-1.5 mb-6">
+          {benefits.map(b => (
+            <li key={b} className="flex items-center gap-2 text-xs text-es-muted">
+              <span className="w-1 h-1 rounded-full bg-es-amber flex-shrink-0" />
+              {b}
+            </li>
+          ))}
+        </ul>
+        <Link to={to} className="btn-primary text-sm text-center">
+          View Course
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+/* ── Progression step ─────────────────────────────────────────────── */
+function ProgressionStep({
+  num,
+  title,
+  desc,
+  active,
+}: {
+  num: string;
+  title: string;
+  desc: string;
+  active?: boolean;
+}) {
+  return (
+    <div className={`flex gap-5 p-5 rounded-lg border transition-all ${
+      active
+        ? 'border-es-accent bg-es-accent/5'
+        : 'border-es-grey-dark bg-es-card'
+    }`}>
+      <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-black ${
+        active ? 'bg-es-accent text-white' : 'bg-es-grey text-es-muted'
+      }`}>
+        {num}
+      </div>
+      <div>
+        <p className={`font-bold text-sm mb-1 ${active ? 'text-white' : 'text-es-muted'}`}>{title}</p>
+        <p className="text-xs text-es-subtle leading-relaxed">{desc}</p>
+      </div>
+    </div>
+  );
+}
+
+/* ── Team card ────────────────────────────────────────────────────── */
+function TeamCard({
+  name,
+  title,
+  img,
+  initials,
+}: {
+  name: string;
+  title: string;
+  img?: string;
+  initials: string;
+}) {
+  return (
+    <div className="es-card flex flex-col items-center text-center p-6">
+      <div className="w-24 h-24 rounded-full overflow-hidden mb-4 bg-es-grey flex items-center justify-center flex-shrink-0">
+        {img ? (
+          <img src={img} alt={name} className="w-full h-full object-cover object-top" />
+        ) : (
+          <span className="text-2xl font-black text-es-subtle">{initials}</span>
+        )}
+      </div>
+      <p className="font-bold text-white text-sm">{name}</p>
+      <p className="text-xs text-es-accent mt-1">{title}</p>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/*  HOME                                                               */
+/* ═══════════════════════════════════════════════════════════════════ */
+export default function Home() {
+  return (
+    <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
       <Navbar />
 
-      {/* ── SECTION 1: HERO ──────────────────────────────────────────────── */}
-      <section className="relative bg-gray-900 text-white min-h-[88vh] flex items-center">
-        {/* Background image layer */}
-        <div className="absolute inset-0 overflow-hidden">
-          <ImagePlaceholder
-            label="Hero background — coaching session on gym floor — Educate.Strong to provide"
-            aspectRatio="16/9"
-            className="w-full h-full rounded-none opacity-30"
-          />
-          {/* Gradient overlay for readability */}
-          <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/80 to-gray-900/40" />
-        </div>
+      {/* ── HERO ─────────────────────────────────────────────────────── */}
+      <section
+        className="relative pt-navbar flex items-center min-h-screen overflow-hidden"
+        style={{
+          background: 'radial-gradient(ellipse 90% 60% at 50% -10%, rgba(164,28,100,0.28) 0%, transparent 65%), #0D0D0D',
+        }}
+      >
+        {/* Background grid lines */}
+        <div className="absolute inset-0 pointer-events-none" style={{
+          backgroundImage: 'linear-gradient(rgba(60,60,60,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(60,60,60,0.07) 1px, transparent 1px)',
+          backgroundSize: '60px 60px',
+        }} />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
-          <div className="max-w-3xl">
-            <p className="text-amber-400 text-xs font-semibold uppercase tracking-widest mb-5">
-              The UK's Original Strongman Coaching Qualification
-            </p>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight mb-6">
-              Become a Better Coach.{' '}
-              <span className="text-amber-400">Earn the Credentials</span>{' '}
-              to Prove It.
+        <div className="es-container relative z-10 py-24 md:py-32">
+          <div className="max-w-4xl">
+            {/* Label */}
+            <div className="flex items-center gap-3 mb-6">
+              <span className="es-label">The Academy</span>
+              <span className="h-px w-12 bg-es-accent opacity-60" />
+            </div>
+
+            {/* Headline */}
+            <h1
+              className="font-black text-white leading-none mb-6"
+              style={{ fontSize: 'clamp(2.6rem, 7vw, 5.5rem)', letterSpacing: '-0.04em' }}
+            >
+              Train Coaches.
+              <br />
+              <span style={{ color: '#A41C64' }}>Build Standards.</span>
+              <br />
+              Develop the Sport.
             </h1>
-            <p className="text-gray-300 text-lg md:text-xl leading-relaxed mb-8 max-w-2xl">
-              Educate.Strong delivers Active IQ accredited Strongman coaching qualifications,
-              refereeing certifications, and youth programme education — built by coaches who have
-              competed at the highest level of the sport.
+
+            {/* Sub */}
+            <p className="text-es-muted text-lg md:text-xl leading-relaxed mb-10 max-w-2xl">
+              Educate.Strong is the home of accredited Strongman coach education, refereeing
+              certification, youth strength development, and performance nutrition.
             </p>
-            {/* Key facts */}
-            <div className="flex flex-wrap gap-x-6 gap-y-2 mb-10">
-              {['Active IQ Accredited', 'Practical In-Person Delivery', 'Maximum 10 Participants per Course'].map(f => (
-                <div key={f} className="flex items-center gap-2 text-sm text-gray-400">
-                  <span className="w-1 h-1 bg-amber-500 rounded-full flex-shrink-0" />
-                  {f}
-                </div>
+
+            {/* Accreditation pills */}
+            <div className="flex flex-wrap gap-2 mb-10">
+              {['Active IQ Accredited', 'Endorsed by WHEA.GB', 'Armed Forces Strongman'].map(t => (
+                <span key={t} className="badge-grey text-xs">{t}</span>
               ))}
             </div>
+
             {/* CTAs */}
-            <div className="flex flex-wrap items-center gap-4">
-              <Link
-                to="/courses"
-                className="bg-amber-600 hover:bg-amber-500 text-white font-semibold px-8 py-4 rounded-lg transition-colors"
-              >
-                Explore Courses
+            <div className="flex flex-wrap gap-4">
+              <Link to="/courses" className="btn-primary text-sm">
+                Explore Pathways
               </Link>
-              <Link
-                to="/about"
-                className="border border-gray-600 hover:border-gray-400 text-gray-300 hover:text-white font-medium px-8 py-4 rounded-lg transition-colors"
+              <Link to="/courses" className="btn-secondary text-sm">
+                View Courses
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom fade */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
+          style={{ background: 'linear-gradient(transparent, #0D0D0D)' }} />
+      </section>
+
+      {/* ── TRUST BAR ─────────────────────────────────────────────────── */}
+      <section style={{ background: '#141414', borderTop: '1px solid #2C2C2C', borderBottom: '1px solid #2C2C2C' }}>
+        <div className="es-container py-6">
+          <div className="flex flex-wrap items-center justify-between gap-6">
+            <p className="text-xs text-es-subtle uppercase tracking-widest">Trusted by</p>
+            <div className="flex flex-wrap items-center gap-8">
+              {/* British Army logo */}
+              <div className="flex items-center gap-2.5">
+                <img src="/assets/british-army-logo.webp" alt="British Army" className="h-8 w-auto opacity-70" />
+                <span className="text-xs text-es-muted">Armed Forces Partner</span>
+              </div>
+              {/* Active IQ */}
+              <div className="flex items-center gap-2">
+                <span className="badge-accent">Active IQ</span>
+                <span className="text-xs text-es-muted">Accredited</span>
+              </div>
+              {/* WHEA.GB */}
+              <div>
+                <span className="text-xs text-es-muted">WHEA.GB Endorsed</span>
+              </div>
+              {/* Mind Body Connect */}
+              <div>
+                <span className="text-xs text-es-muted">Mind Body Connect — Charity No. 1173834</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FOUR PATHWAYS ─────────────────────────────────────────────── */}
+      <section className="es-section" style={{ background: '#0D0D0D' }}>
+        <div className="es-container">
+          <SectionHeader
+            label="The Academy"
+            heading="Four Pathways. One Purpose."
+            sub="Whether you coach, officiate, train young people, or support athletes through nutrition — Educate.Strong has a structured qualification pathway for you."
+          />
+          <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-5">
+            <PathwayCard
+              badge="Coaching"
+              badgeType="accent"
+              title="Coaching Pathway"
+              who="For personal trainers, gym owners, athletes moving into coaching, and strength coaches building Strongman-specific expertise."
+              outcomes={[
+                'Coach the six core Strongman events',
+                'Earn an Active IQ accredited qualification',
+                'Progress from Level 1 through to Level 3',
+              ]}
+              to="/courses/level-1-coaching-strongman"
+              levels="Level 1 → 2 → 3"
+              accent
+            />
+            <PathwayCard
+              badge="Refereeing"
+              title="Refereeing Pathway"
+              who="For competitors and coaches who want to contribute to the sport by officiating competitions to a consistent, credible standard."
+              outcomes={[
+                'WHEA.GB endorsed certification',
+                'Practical live drills on event rules',
+                'Join a network of certified officials',
+              ]}
+              to="/courses/level-1-strongman-refereeing"
+              levels="Level 1"
+            />
+            <PathwayCard
+              badge="StrongKidz"
+              badgeType="amber"
+              title="StrongKidz Pathway"
+              who="For coaches, PE teachers, and youth programme leaders who want to deliver safe, structured youth strength sessions."
+              outcomes={[
+                'Safeguarding-first certification',
+                'Age-appropriate movement frameworks',
+                'Session planning and parent communication',
+              ]}
+              to="/strongkidz"
+              levels="Coach Education"
+            />
+            <PathwayCard
+              badge="EatStrong"
+              badgeType="grey"
+              title="EatStrong Pathway"
+              who="For coaches who want to understand performance nutrition, support athlete fuelling decisions, and stay within scope of practice."
+              outcomes={[
+                'Strongman-specific nutrition education',
+                'Competition and recovery fuelling',
+                'Evidence-based, coach-appropriate depth',
+              ]}
+              to="/eatstrong"
+              levels="Coming Soon"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ── PROGRESSION ───────────────────────────────────────────────── */}
+      <section
+        className="es-section"
+        style={{ background: '#111111', borderTop: '1px solid #2C2C2C', borderBottom: '1px solid #2C2C2C' }}
+      >
+        <div className="es-container">
+          <div className="grid lg:grid-cols-2 gap-14 items-start">
+            <div>
+              <SectionHeader
+                label="Professional Pathway"
+                heading="A Complete Development Journey"
+                sub="You are not buying a single course. You are entering a structured, progression-based qualification system with industry recognition at every level."
+              />
+              <Link to="/courses" className="btn-primary text-sm">
+                View All Courses
+              </Link>
+            </div>
+            <div className="space-y-3">
+              {[
+                {
+                  num: '01',
+                  title: 'Level 1 — Fundamentals',
+                  desc: 'Foundation knowledge. The six core events. Coaching principles, safety, and beginner athlete management. Active IQ accredited.',
+                  active: true,
+                },
+                {
+                  num: '02',
+                  title: 'Level 2 — Applied Coaching',
+                  desc: 'Intermediate programming, periodisation, competition preparation, nutrition fundamentals, and advanced event coaching.',
+                },
+                {
+                  num: '03',
+                  title: 'Level 3 — Advanced Practice',
+                  desc: 'High-performance programming, sports science application, elite athlete management, and coaching systems.',
+                },
+                {
+                  num: 'CPD',
+                  title: 'Continuing Professional Development',
+                  desc: 'Renewal requirements, specialist modules, and ongoing professional recognition throughout your coaching career.',
+                },
+              ].map(s => (
+                <ProgressionStep key={s.num} num={s.num} title={s.title} desc={s.desc} active={s.active} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FEATURED COURSES ──────────────────────────────────────────── */}
+      <section className="es-section" style={{ background: '#0D0D0D' }}>
+        <div className="es-container">
+          <SectionHeader
+            label="Available Now"
+            heading="Featured Courses"
+            sub="The first courses of the Academy are live and accepting enrolments. More qualifications in development."
+          />
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl">
+            <CourseCard
+              title="Level 1 Fundamentals of Coaching Strongman"
+              type="In-Person"
+              level="Level 1"
+              description="The UK's original Strongman coaching course. Two days of hands-on practical coaching across the six core events. Active IQ accredited."
+              benefits={[
+                'Active IQ Level 1 Qualification',
+                'Six core events — technique and coaching',
+                'Maximum 10 participants per cohort',
+                'Delivery by Paul Smith and Dr Chris Fitzgerald',
+              ]}
+              coverImg="/assets/coaching-l1-cover.webp"
+              to="/courses/level-1-coaching-strongman"
+              highlight
+            />
+            <CourseCard
+              title="Level 1 Strongman Refereeing Certification"
+              type="In-Person"
+              level="Level 1"
+              description="The first formal Strongman refereeing certification in the UK. One practical day covering event rules, judging decisions, and live officiating drills."
+              benefits={[
+                'WHEA.GB and Armed Forces Strongman endorsed',
+                'Live practical drills and judging scenarios',
+                'Event rules across all major events',
+                'Ethos, responsibilities, and safe officiating',
+              ]}
+              coverImg="/assets/refereeing-l1-content.webp"
+              to="/courses/level-1-strongman-refereeing"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ── VIDEO SECTION ─────────────────────────────────────────────── */}
+      <section
+        className="es-section"
+        style={{ background: '#111111', borderTop: '1px solid #2C2C2C', borderBottom: '1px solid #2C2C2C' }}
+      >
+        <div className="es-container">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Video */}
+            <div className="rounded-lg overflow-hidden aspect-video es-card-grey">
+              <video
+                controls
+                preload="metadata"
+                className="w-full h-full object-cover"
+                poster="/assets/coaching-l1-cover.webp"
               >
-                Learn About Educate.Strong
+                <source src="/assets/coaching-l1-video.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+            {/* Copy */}
+            <div>
+              <p className="es-label mb-3">See It In Action</p>
+              <h2 className="text-3xl font-black text-white mb-4" style={{ letterSpacing: '-0.03em' }}>
+                What Level 1 Coaching Looks Like
+              </h2>
+              <p className="text-es-muted leading-relaxed mb-6">
+                Every cohort is capped at ten participants. Every event is coached on the gym floor.
+                No passive learning — two full days of practical coaching alongside Paul Smith and Dr Chris Fitzgerald.
+              </p>
+              <ul className="space-y-3 mb-8">
+                {[
+                  'Log Press, Axle Press, and Deadlift',
+                  "Farmer's Walk, Yoke, and Atlas Stones",
+                  'Athlete screening and safety protocols',
+                  'Beginner programming and session structure',
+                ].map(item => (
+                  <li key={item} className="flex items-center gap-3 text-sm text-es-muted">
+                    <span className="w-1.5 h-1.5 rounded-full bg-es-accent flex-shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <Link to="/courses/level-1-coaching-strongman" className="btn-primary text-sm">
+                View Level 1 Coaching
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── SECTION 2: TRUST BAR ─────────────────────────────────────────── */}
-      <section className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
-            {ACCREDITATION_ITEMS.map(item => (
-              <div key={item.label} className="flex items-center gap-2 text-sm">
-                <svg className="w-4 h-4 text-amber-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-                <span className="text-gray-900 font-medium">{item.label}</span>
-                <span className="text-gray-400 hidden sm:inline">— {item.note}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── SECTION 3: PATHWAY SELECTOR ──────────────────────────────────── */}
-      <section className="bg-gray-50 py-16 md:py-20 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-              Three Pathways. One Academy.
-            </h2>
-            <p className="text-gray-500 max-w-xl mx-auto">
-              Whatever your role in Strongman, Educate.Strong has a qualification pathway built for you.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-5">
-            {PATHWAY_CARDS.map(p => (
-              <div key={p.label} className="bg-white border border-gray-200 rounded-xl p-6 hover:border-amber-300 hover:shadow-sm transition-all flex flex-col">
-                <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-white text-xs font-bold">{p.marker}</span>
-                </div>
-                <div className="flex items-center gap-2 mb-2 flex-wrap">
-                  <span className="text-xs text-gray-500 font-medium">{p.levels}</span>
-                  <span className="text-xs border border-amber-300 text-amber-700 bg-amber-50 px-2 py-0.5 rounded font-medium">
-                    {p.badge}
-                  </span>
-                </div>
-                <h3 className="font-bold text-gray-900 text-lg mb-2">{p.title}</h3>
-                <p className="text-sm text-gray-600 leading-relaxed mb-5 flex-1">{p.desc}</p>
-                <Link
-                  to={p.link}
-                  className="text-sm text-amber-600 hover:text-amber-700 font-semibold flex items-center gap-1 mt-auto"
-                >
-                  {p.cta}
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── SECTION 4: TUTOR CREDIBILITY ─────────────────────────────────── */}
-      <section className="bg-gray-900 text-white py-16 md:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl md:text-3xl font-bold mb-2">Built by Coaches Who Have Done It</h2>
-            <p className="text-gray-400 max-w-xl mx-auto">
-              Educate.Strong's tutors bring decades of competition, coaching, and academic experience
-              to every qualification.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-8">
-            {TUTORS.map(tutor => (
-              <TutorCard key={tutor.id} tutor={tutor} variant="compact" />
-            ))}
-          </div>
-          <div className="text-center">
-            <Link to="/about" className="text-amber-400 hover:text-amber-300 text-sm font-medium">
-              Meet the full team →
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── SECTION 5: FEATURED COURSE ───────────────────────────────────── */}
-      <section className="bg-white py-16 md:py-20 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-10 items-center">
-            {/* Content */}
+      {/* ── STRONGKIDZ ────────────────────────────────────────────────── */}
+      <section className="es-section" style={{ background: '#0D0D0D' }}>
+        <div className="es-container">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <div className="flex items-center gap-2 mb-3 flex-wrap">
-                <span className="text-xs bg-amber-100 text-amber-700 border border-amber-200 px-2 py-0.5 rounded font-medium uppercase tracking-wide">
-                  Most popular
-                </span>
-                <span className="text-xs border border-gray-200 text-gray-500 px-2 py-0.5 rounded font-medium">
-                  Active IQ Accredited
-                </span>
-              </div>
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
-                Level 1 Fundamentals of Coaching Strongman
+              <p className="es-label mb-3">Youth Strength Programme</p>
+              <h2 className="text-3xl font-black text-white mb-4" style={{ letterSpacing: '-0.03em' }}>
+                StrongKidz
               </h2>
-              <p className="text-gray-600 leading-relaxed mb-5">
-                The UK's original Strongman coaching course. Two days. Six core events. Maximum ten
-                participants. Practical, hands-on coaching with Paul Smith and Dr Chris Fitzgerald.
+              <p className="text-es-muted leading-relaxed mb-4">
+                A weekly functional strength programme for children. Physical confidence, mental resilience,
+                and social development — built safely, with expert guidance.
               </p>
-              {/* Key facts */}
-              <div className="flex flex-wrap gap-2 mb-5">
-                {['Two-day course', 'Active IQ Level 1', 'From £500'].map(f => (
-                  <span key={f} className="text-xs border border-gray-200 text-gray-600 px-2.5 py-1 rounded">
-                    {f}
-                  </span>
-                ))}
-              </div>
-              {/* Events */}
-              <div className="flex flex-wrap gap-1.5 mb-6">
-                {['Log Press', 'Axle Press', 'Deadlift', "Farmer's Walk", 'Yoke', 'Atlas Stones'].map(e => (
-                  <span key={e} className="text-xs bg-gray-900 text-gray-200 px-2.5 py-1 rounded font-medium">
-                    {e}
-                  </span>
-                ))}
-              </div>
+              <p className="text-es-muted leading-relaxed mb-8">
+                Educate.Strong also provides a dedicated StrongKidz Coach Education certification for adults
+                who want to deliver the programme safely and professionally.
+              </p>
               <div className="flex flex-wrap gap-3">
-                <Link
-                  to="/courses/level-1-coaching-strongman"
-                  className="bg-amber-600 hover:bg-amber-500 text-white font-semibold px-6 py-3 rounded-lg transition-colors text-sm"
-                >
-                  View Course Details
+                <Link to="/strongkidz" className="btn-primary text-sm">Learn About StrongKidz</Link>
+                <Link to="/courses/strongkidz-coach-education" className="btn-secondary text-sm">
+                  Coach Certification
                 </Link>
-                <a
-                  href="mailto:educate.strongltd@gmail.com?subject=Register%20Interest%20—%20Level%201%20Coaching"
-                  className="border border-gray-300 text-gray-700 hover:border-gray-400 font-medium px-6 py-3 rounded-lg transition-colors text-sm"
-                >
-                  Register Interest
-                </a>
               </div>
             </div>
             {/* Image */}
-            <ImagePlaceholder
-              label="Level 1 Coaching — course photography — coaching session on gym floor — Educate.Strong to provide"
-              aspectRatio="4/3"
-              className="rounded-xl"
-            />
+            <div className="rounded-lg overflow-hidden h-80 lg:h-96">
+              <img
+                src="/assets/strongkidz.avif"
+                alt="StrongKidz programme"
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── SECTION 6: VIDEO TESTIMONIAL ─────────────────────────────────── */}
-      {featuredVideo && (
-        <section className="bg-gray-50 py-16 md:py-20 border-b border-gray-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <p className="text-xs text-gray-400 uppercase tracking-wide font-medium mb-6">What Coaches Say</p>
-            <VideoTestimonialCard testimonial={featuredVideo} layout="split" />
-            <div className="mt-6 text-center">
-              <Link to="/about" className="text-amber-600 hover:text-amber-700 text-sm font-medium">
-                Read more coach stories →
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── SECTION 7: WRITTEN TESTIMONIALS ─────────────────────────────── */}
-      {writtenTestimonials.length > 0 && (
-        <section className="bg-white py-16 md:py-20 border-b border-gray-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <TestimonialGrid
-              testimonials={writtenTestimonials}
-              columns={3}
-              heading="Coaches Who Have Made the Move"
-              subheading="From personal trainers and gym owners to armed forces coaches and competitive athletes."
-            />
-          </div>
-        </section>
-      )}
-
-      {/* ── SECTION 8: LEARNING PATHWAY VISUALISER ───────────────────────── */}
-      <section className="bg-gray-50 py-16 md:py-20 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-10">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-              A Complete Professional Pathway
+      {/* ── EATSTRONG ─────────────────────────────────────────────────── */}
+      <section
+        className="es-section"
+        style={{ background: '#0A0A0A', borderTop: '1px solid #2C2C2C' }}
+      >
+        <div className="es-container">
+          <div className="max-w-2xl">
+            <p className="text-xs font-bold uppercase tracking-widest text-green-500 mb-3">EatStrong</p>
+            <h2 className="text-3xl font-black text-white mb-4" style={{ letterSpacing: '-0.03em' }}>
+              Performance Nutrition for Strongman Coaches
             </h2>
-            <p className="text-gray-500 max-w-xl">
-              You are not buying a single course. You are entering a structured professional development
-              pathway with a recognised qualification at every level.
+            <p className="text-es-muted leading-relaxed mb-8 max-w-xl">
+              Evidence-based nutrition education built specifically for Strongman. Not generic
+              diet advice — practical, scope-of-practice coaching nutrition guidance for the demands of the sport.
             </p>
-          </div>
-          <PathwayVisualiser pathway={coachingPathway} compact />
-          <div className="mt-8 flex flex-wrap gap-4">
-            <Link
-              to="/courses"
-              className="bg-gray-900 hover:bg-gray-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors text-sm"
-            >
-              View All Courses
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── SECTION 9: ACCREDITATIONS ────────────────────────────────────── */}
-      <section className="bg-white py-14 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Professionally Accredited. Formally Endorsed.</h2>
-          <p className="text-gray-500 mb-8 max-w-2xl">Educate.Strong qualifications are backed by recognised awarding organisations and endorsed by Strongman governing bodies.</p>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {ACCREDITATION_ITEMS.map(item => (
-              <div key={item.label} className="border border-gray-200 rounded-xl p-4">
-                <div className="h-8 bg-gray-100 rounded mb-3 flex items-center px-2">
-                  <span className="text-xs text-gray-400">{item.label} — logo pending permission</span>
-                </div>
-                <p className="font-semibold text-gray-900 text-sm">{item.label}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{item.note}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── SECTION 10: STRONGKIDZ PREVIEW ──────────────────────────────── */}
-      <section className="bg-gray-900 text-white py-14 border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-10 items-center">
-            <div>
-              <p className="text-xs text-gray-400 uppercase tracking-wide font-medium mb-3">Youth Programme</p>
-              <h2 className="text-2xl md:text-3xl font-bold mb-4">Developing the Next Generation</h2>
-              <p className="text-gray-300 leading-relaxed mb-6">
-                StrongKidz is a weekly functional strength programme for children. Physical confidence,
-                mental resilience, social connection — developed safely, with expert coaching, from a
-                young age.
-              </p>
-              <div className="flex flex-wrap gap-2 mb-6">
-                {['Physical Development', 'Mental Resilience', 'Social Confidence'].map(t => (
-                  <span key={t} className="text-xs border border-gray-700 text-gray-300 px-3 py-1 rounded">
-                    {t}
-                  </span>
-                ))}
-              </div>
-              <div className="flex flex-wrap gap-3">
-                <Link to="/strongkidz" className="bg-white text-gray-900 font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-100 transition-colors text-sm">
-                  Learn About StrongKidz
-                </Link>
-                <Link to="/courses/strongkidz-coach-education" className="border border-gray-600 text-gray-300 hover:text-white font-medium px-5 py-2.5 rounded-lg transition-colors text-sm">
-                  Become a StrongKidz Coach
-                </Link>
-              </div>
-            </div>
-            <ImagePlaceholder
-              label="StrongKidz — environment or equipment photograph — no child faces until parental consent confirmed"
-              aspectRatio="4/3"
-              className="rounded-xl opacity-80"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* ── SECTION 11: EATSTRONG PREVIEW ────────────────────────────────── */}
-      <section className="bg-gray-50 py-12 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
-            <div>
-              <p className="text-xs text-green-700 font-semibold uppercase tracking-widest mb-1">EatStrong</p>
-              <h2 className="text-xl font-bold text-gray-900 mb-1">Nutrition Education Built for Strongman</h2>
-              <p className="text-gray-500 text-sm max-w-lg">
-                Evidence-based, scope-of-practice aware nutrition education for coaches and athletes.
-                Not generic nutrition advice repurposed for strength sport — built specifically for it.
-              </p>
-            </div>
-            <Link
-              to="/eatstrong"
-              className="flex-shrink-0 border border-green-700 text-green-700 hover:bg-green-50 font-semibold px-5 py-2.5 rounded-lg transition-colors text-sm"
-            >
+            <Link to="/eatstrong" className="btn-secondary text-sm border-green-800 text-green-400 hover:border-green-600">
               Explore EatStrong
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ── SECTION 12: KNOWLEDGE HUB PREVIEW ───────────────────────────── */}
-      <section className="bg-white py-14 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-end justify-between mb-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-1">The Knowledge Hub</h2>
-              <p className="text-gray-500 text-sm">Reference articles and coaching guides for Strongman coaches and athletes.</p>
-            </div>
-            <Link to="/knowledge" className="text-amber-600 hover:text-amber-700 text-sm font-medium hidden sm:block">
-              Browse all articles →
-            </Link>
+      {/* ── TEAM ──────────────────────────────────────────────────────── */}
+      <section
+        className="es-section"
+        style={{ background: '#111111', borderTop: '1px solid #2C2C2C', borderBottom: '1px solid #2C2C2C' }}
+      >
+        <div className="es-container">
+          <SectionHeader
+            label="The Team"
+            heading="Taught by People Who Have Done It"
+            sub="Every qualification is delivered by coaches and practitioners who have competed, coached, and achieved at the highest level of the sport."
+            center
+          />
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            <TeamCard
+              name="Paul Smith"
+              title="Lead Tutor"
+              img="/assets/paul-smith.avif"
+              initials="PS"
+            />
+            <TeamCard
+              name="Dr Chris Fitzgerald"
+              title="Tutor & Programme Lead"
+              initials="CF"
+            />
+            <TeamCard
+              name="Laura Hollywood"
+              title="StrongKidz Coach"
+              img="/assets/laura-hollywood.avif"
+              initials="LH"
+            />
+            <TeamCard
+              name="Victoria Wilson"
+              title="StrongKidz Coach"
+              img="/assets/victoria-wilson.avif"
+              initials="VW"
+            />
+            <TeamCard
+              name="Krish Herbert"
+              title="Director, Digital & Media"
+              img="/assets/krish-herbert.jpg"
+              initials="KH"
+            />
           </div>
-          {/* Article preview cards */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[
-              { cat: 'Event Technique', title: 'Atlas Stone Technique: What Coaches Need to Know', time: '8 min read' },
-              { cat: 'Safe Practice', title: 'Risk Assessment for Strongman Training Environments', time: '6 min read' },
-              { cat: 'Programming', title: "How to Build a Beginner's First 12 Weeks", time: '10 min read' },
-            ].map(a => (
-              <div key={a.title} className="border border-gray-200 rounded-xl p-5 hover:border-amber-300 hover:shadow-sm transition-all">
-                <p className="text-xs text-amber-600 font-medium mb-2">{a.cat}</p>
-                <h3 className="font-semibold text-gray-900 text-sm leading-snug mb-2">{a.title}</h3>
-                <p className="text-xs text-gray-400">{a.time} · Free</p>
-              </div>
-            ))}
-          </div>
-          <div className="mt-5 sm:hidden">
-            <Link to="/knowledge" className="text-amber-600 text-sm font-medium">Browse all articles →</Link>
+          <div className="text-center mt-8">
+            <Link to="/about" className="btn-secondary text-sm">Meet the Full Team</Link>
           </div>
         </div>
       </section>
 
-      {/* ── SECTION 13: COMMUNITY ────────────────────────────────────────── */}
-      <CommunitySection />
-
-      {/* ── FINAL CTA ────────────────────────────────────────────────────── */}
-      <section className="bg-gray-900 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-2xl">
-            <h2 className="text-2xl md:text-3xl font-bold mb-3">Ready to Start?</h2>
-            <p className="text-gray-400 mb-6">
-              New course dates are released throughout the year. Register your interest to be notified
-              when the next course is confirmed.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link
-                to="/courses"
-                className="bg-amber-600 hover:bg-amber-500 text-white font-semibold px-8 py-4 rounded-lg transition-colors"
-              >
-                Explore Courses
-              </Link>
-              <a
-                href="mailto:educate.strongltd@gmail.com?subject=Register%20Interest%20—%20Educate.Strong%20Academy"
-                className="border border-gray-600 hover:border-gray-400 text-gray-300 hover:text-white font-medium px-8 py-4 rounded-lg transition-colors"
-              >
-                Register Interest
-              </a>
-            </div>
+      {/* ── FINAL CTA ─────────────────────────────────────────────────── */}
+      <section
+        className="es-section"
+        style={{
+          background: 'radial-gradient(ellipse 70% 60% at 50% 50%, rgba(164,28,100,0.18) 0%, transparent 70%), #0D0D0D',
+        }}
+      >
+        <div className="es-container text-center max-w-2xl mx-auto">
+          <p className="es-label mb-4">Get Started</p>
+          <h2 className="text-4xl md:text-5xl font-black text-white mb-4" style={{ letterSpacing: '-0.04em' }}>
+            Ready to Take the Next Step?
+          </h2>
+          <p className="text-es-muted leading-relaxed mb-10">
+            Course dates are released throughout the year. Register your interest and be the first to know
+            when the next cohort is confirmed.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <Link to="/courses" className="btn-primary">Explore Courses</Link>
+            <a
+              href="mailto:educate.strongltd@gmail.com?subject=Register%20Interest"
+              className="btn-secondary"
+            >
+              Register Interest
+            </a>
           </div>
         </div>
       </section>

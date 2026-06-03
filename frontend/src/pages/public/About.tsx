@@ -1,191 +1,275 @@
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
-import TutorGrid from '../../components/tutors/TutorGrid';
-import VideoTestimonialCard from '../../components/testimonials/VideoTestimonialCard';
-import TestimonialGrid from '../../components/testimonials/TestimonialGrid';
-import ImagePlaceholder from '../../components/media/ImagePlaceholder';
-import { TUTORS } from '../../data/tutorsData';
-import { TESTIMONIALS } from '../../data/testimonialsData';
 
-const videoTestimonials = TESTIMONIALS.filter(t => t.isVideo);
-const allWritten = TESTIMONIALS.filter(t => !t.isVideo);
+const TEAM = [
+  {
+    id: 'paul',
+    name: 'Paul Smith',
+    role: 'Lead Tutor',
+    img: '/assets/paul-smith.avif',
+    credentials: [
+      '3× UK\'s Strongest Man',
+      'Junior UK and World Champion',
+      '4× England\'s Strongest Man',
+      'World\'s Strongest Man competitor',
+      'Coached multiple national and international champions',
+      'Co-founder, Mind Body Connect (Charity No. 1173834)',
+    ],
+    bio: 'Paul brings decades of elite competition and coaching experience to every qualification he delivers. His record speaks for itself — but what makes him exceptional as an educator is the ability to translate that experience into practical, teachable coaching frameworks.',
+  },
+  {
+    id: 'chris',
+    name: 'Dr Chris Fitzgerald',
+    role: 'Tutor & Programme Lead',
+    img: null,
+    credentials: [
+      'PhD in Health — published researcher',
+      'Natural World\'s Strongest Man athlete',
+      'Multiple national Strongman titles',
+      'Over a decade with Mind Body Connect charity',
+      'Extensive MOD coaching experience',
+      'Co-founder, Mind Body Connect (Charity No. 1173834)',
+    ],
+    bio: 'Chris brings the academic rigour that gives Educate.Strong qualifications their professional credibility. His research background and competition experience sit alongside each other — making every qualification evidence-based and practically grounded.',
+  },
+  {
+    id: 'laura',
+    name: 'Laura Hollywood',
+    role: 'StrongKidz Coach',
+    img: '/assets/laura-hollywood.avif',
+    credentials: [
+      "Britain's Strongest Woman u73",
+      "Europe's Strongest Woman u73",
+      'International Strongwoman podiums',
+      'StrongKidz co-founder',
+      'Youth strength development specialist',
+    ],
+    bio: 'Laura co-founded StrongKidz with a belief that building physical confidence in young people changes how they see themselves — in the gym and everywhere else. Her competition background and coaching approach make her one of the most compelling youth strength educators in the UK.',
+  },
+  {
+    id: 'victoria',
+    name: 'Victoria Wilson',
+    role: 'StrongKidz Coach',
+    img: '/assets/victoria-wilson.avif',
+    credentials: [
+      'Strength and Conditioning Coach',
+      'Youth development specialist',
+      'Powerlifting, weightlifting, and strongwoman competitor',
+      'Former Sheffield Steel Roller Derby captain',
+      'Sheffield Steel Juniors Strength Coach',
+    ],
+    bio: 'Victoria brings strength and conditioning expertise and extensive youth sport experience to every StrongKidz session. Her focus on technique, safety, and long-term development makes her an essential part of the programme.',
+  },
+  {
+    id: 'krish',
+    name: 'Krish Herbert',
+    role: 'Director, Digital & Media',
+    img: '/assets/krish-herbert.jpg',
+    credentials: [
+      'Digital strategy and media production',
+      'Education platform development',
+    ],
+    bio: 'Krish leads the digital presence and media strategy for Educate.Strong, ensuring the Academy platform serves coaches and athletes with a professional, modern experience.',
+  },
+];
 
 const ACCREDITATIONS = [
   {
     name: 'Active IQ',
-    description: 'Ofqual-regulated awarding organisation. The Level 1 Fundamentals of Coaching Strongman is a formally accredited qualification.',
-    note: 'Logo to be confirmed with Active IQ before display',
+    desc: 'Ofqual-regulated awarding organisation. The Level 1 Fundamentals of Coaching Strongman is a formally accredited qualification.',
   },
   {
     name: 'WHEA.GB',
-    description: 'The Level 1 Strongman Refereeing Certification is formally endorsed by WHEA.GB, one of the UK\'s leading Strongman governing bodies.',
-    note: 'Logo pending written permission from WHEA.GB',
+    desc: 'The Level 1 Strongman Refereeing Certification is formally endorsed by WHEA.GB.',
   },
   {
     name: 'Armed Forces Strongman',
-    description: 'Both coaching and refereeing courses are endorsed by Armed Forces Strongman, reflecting the organisation\'s close ties to the armed forces community.',
-    note: 'Logo pending written permission from Armed Forces Strongman',
+    desc: 'Both coaching and refereeing courses are endorsed by Armed Forces Strongman.',
   },
   {
     name: 'Mind Body Connect',
-    description: 'Educate.Strong\'s tutors are co-founders of Mind Body Connect (Charity No. 1173834), bringing community-driven values to every programme.',
-    note: 'Charity registration confirmed',
+    desc: 'Our tutors are co-founders of Mind Body Connect (Charity No. 1173834), bringing community-driven values to every programme.',
   },
 ];
 
 export default function About() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
       <Navbar />
 
       {/* Hero */}
-      <section className="bg-gray-900 text-white py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section
+        className="pt-navbar relative"
+        style={{
+          background: 'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(164,28,100,0.22) 0%, transparent 65%), #141414',
+        }}
+      >
+        <div className="es-container py-20 md:py-28">
           <div className="max-w-3xl">
-            <p className="text-amber-400 text-xs font-semibold uppercase tracking-widest mb-4">
-              About Educate.Strong
-            </p>
-            <h1 className="text-4xl md:text-5xl font-bold leading-tight tracking-tight mb-5">
-              Developing the Sport. Developing the Coaches.
+            <p className="es-label mb-4">About Educate.Strong</p>
+            <h1 className="text-4xl md:text-5xl font-black text-white mb-5" style={{ letterSpacing: '-0.04em' }}>
+              Developing the Sport.<br />Developing the Coaches.
             </h1>
-            <p className="text-gray-300 text-lg leading-relaxed max-w-2xl">
+            <p className="text-es-muted text-lg leading-relaxed">
               Educate.Strong exists to provide a legitimate, accredited route for Strongman coaching
-              education — and a space for children to develop functional strength, confidence, and
-              resilience. Built by coaches who have competed and coached at the highest level of the sport.
+              education — and a space for children to develop functional strength, confidence, and resilience.
+              Built by coaches who have competed and coached at the highest level of the sport.
             </p>
           </div>
         </div>
       </section>
 
       {/* Mission */}
-      <section className="bg-white border-b border-gray-100 py-14 md:py-18">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <section className="es-section" style={{ background: '#0D0D0D' }}>
+        <div className="es-container">
+          <div className="grid lg:grid-cols-2 gap-12 items-start">
             <div>
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-5">
-                Why Educate.Strong Exists
+              <p className="es-label mb-3">Why We Exist</p>
+              <h2 className="text-3xl font-black text-white mb-5" style={{ letterSpacing: '-0.03em' }}>
+                The Standard Strongman Deserves
               </h2>
-              <div className="space-y-4 text-gray-700 leading-relaxed">
+              <div className="space-y-4 text-es-muted leading-relaxed">
                 <p>
-                  Strongman is one of the most technically complex strength sports — and one of the
-                  least served by formal coach education. Until Educate.Strong, there was no structured,
-                  accredited pathway for coaches who wanted to teach it properly.
+                  Strongman is one of the most technically complex strength sports in existence — and one of
+                  the most underserved by formal coach education. Until Educate.Strong, there was no structured,
+                  accredited pathway for coaches who wanted to do it properly.
                 </p>
                 <p>
                   The Academy was built to change that. To give Strongman coaches the credentials their
-                  knowledge deserves. To give athletes the guarantee that their coach has been assessed,
-                  not just self-declared. To give the sport the professional infrastructure it needs to
-                  keep growing.
+                  knowledge deserves. To give athletes the guarantee that their coach has been trained and
+                  assessed, not just self-declared.
                 </p>
-                <div className="bg-gray-50 border border-dashed border-gray-200 rounded-xl p-5 mt-4">
-                  <p className="text-xs text-gray-400 uppercase tracking-wide font-medium mb-1">Placeholder — mission statement</p>
-                  <p className="text-sm text-gray-400 italic">
-                    This section will contain a more personal mission statement from Educate.Strong.
-                    To be provided by Paul Smith and Dr Chris Fitzgerald in their own words.
-                  </p>
-                </div>
+                <p>
+                  To give the sport the professional infrastructure it needs to keep growing.
+                </p>
               </div>
             </div>
-            <ImagePlaceholder
-              label="Team photograph — Educate.Strong full team — high value asset, Educate.Strong to provide"
-              aspectRatio="4/3"
-              className="rounded-xl"
-            />
+            <div className="space-y-3">
+              {[
+                { label: 'The Mission', text: 'Develop the sport of Strongman by providing a legitimate and accredited route for coaching education and a space for children to develop functional strength.' },
+                { label: 'The Standard', text: 'Active IQ accreditation. WHEA.GB endorsement. Armed Forces Strongman recognition. Every qualification carries real institutional weight.' },
+                { label: 'The Community', text: 'Through Mind Body Connect and partnerships with the MOD and armed forces community, Educate.Strong delivers education where it matters most.' },
+              ].map(item => (
+                <div key={item.label} className="es-card p-5">
+                  <p className="es-label mb-2">{item.label}</p>
+                  <p className="text-sm text-es-muted leading-relaxed">{item.text}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Tutor profiles */}
-      <section className="bg-gray-50 border-b border-gray-100 py-14">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-10">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Meet the Team</h2>
-            <p className="text-gray-600 max-w-2xl">
-              Every Educate.Strong qualification is delivered by coaches who have trained, competed,
-              and coached at the highest level of the sport.
+      {/* Team */}
+      <section
+        className="es-section"
+        style={{ background: '#111111', borderTop: '1px solid #2C2C2C', borderBottom: '1px solid #2C2C2C' }}
+      >
+        <div className="es-container">
+          <div className="mb-12">
+            <p className="es-label mb-3">The Team</p>
+            <h2 className="text-3xl font-black text-white mb-4" style={{ letterSpacing: '-0.03em' }}>
+              Coaches Who Have Done It
+            </h2>
+            <p className="text-es-muted max-w-2xl">
+              Every qualification is delivered by practitioners who have trained, competed, and coached
+              at the highest level of the sport.
             </p>
           </div>
-          <TutorGrid tutors={TUTORS} variant="full" />
-        </div>
-      </section>
 
-      {/* Accreditations */}
-      <section className="bg-white border-b border-gray-100 py-14">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-            Accreditations and Endorsements
-          </h2>
-          <p className="text-gray-600 mb-8 max-w-2xl">
-            Educate.Strong qualifications are backed by recognised awarding organisations and endorsed
-            by Strongman governing bodies.
-          </p>
-          <div className="grid sm:grid-cols-2 gap-5">
-            {ACCREDITATIONS.map(item => (
-              <div key={item.name} className="border border-gray-200 rounded-xl p-6">
-                {/* Logo placeholder */}
-                <div className="bg-gray-100 rounded-lg h-10 flex items-center px-3 mb-4">
-                  <span className="text-xs text-gray-400 font-medium">
-                    {item.name} — {item.note}
-                  </span>
+          <div className="space-y-0 divide-y divide-es-grey-dark">
+            {TEAM.map(member => (
+              <div key={member.id} className="grid md:grid-cols-3 gap-8 py-10">
+                {/* Photo */}
+                <div className="md:col-span-1">
+                  <div className="rounded-lg overflow-hidden aspect-[3/4] max-w-xs es-photo-placeholder"
+                    style={{ background: '#3C3C3C' }}>
+                    {member.img ? (
+                      <img
+                        src={member.img}
+                        alt={member.name}
+                        className="w-full h-full object-cover object-top"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <span className="text-4xl font-black text-es-subtle">
+                          {member.name.split(' ').map(n => n[0]).join('')}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <h3 className="font-bold text-gray-900 mb-2">{item.name}</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">{item.description}</p>
+
+                {/* Content */}
+                <div className="md:col-span-2">
+                  <h3 className="text-2xl font-black text-white mb-1">{member.name}</h3>
+                  <p className="text-es-accent font-semibold text-sm mb-5">{member.role}</p>
+
+                  <ul className="space-y-1.5 mb-5">
+                    {member.credentials.map(c => (
+                      <li key={c} className="flex items-start gap-2.5 text-sm text-es-muted">
+                        <svg className="w-4 h-4 text-es-accent mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        {c}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="es-card-grey p-4">
+                    <p className="text-sm text-es-muted leading-relaxed italic">{member.bio}</p>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Video testimonials archive */}
-      {videoTestimonials.length > 0 && (
-        <section className="bg-gray-50 border-b border-gray-100 py-14">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8">
-              What Coaches Say — Video Testimonials
+      {/* Accreditations */}
+      <section className="es-section" style={{ background: '#0D0D0D' }}>
+        <div className="es-container">
+          <div className="mb-10">
+            <p className="es-label mb-3">Recognition</p>
+            <h2 className="text-3xl font-black text-white" style={{ letterSpacing: '-0.03em' }}>
+              Formally Accredited. Properly Endorsed.
             </h2>
-            <div className="space-y-10">
-              {videoTestimonials.map(t => (
-                <VideoTestimonialCard key={t.id} testimonial={t} layout="split" />
-              ))}
-            </div>
           </div>
-        </section>
-      )}
-
-      {/* Written testimonials archive */}
-      <section className="bg-white border-b border-gray-100 py-14">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <TestimonialGrid
-            testimonials={allWritten}
-            columns={3}
-            heading="Testimonials"
-            subheading="From coaches, referees, and parents who have experienced Educate.Strong programmes."
-          />
+          <div className="grid sm:grid-cols-2 gap-4">
+            {ACCREDITATIONS.map(item => (
+              <div key={item.name} className="es-card p-6">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="badge-accent">{item.name}</span>
+                </div>
+                <p className="text-sm text-es-muted leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+          {/* British Army logo */}
+          <div className="mt-8 flex items-center gap-4">
+            <img src="/assets/british-army-logo.webp" alt="British Army" className="h-10 w-auto opacity-60" />
+            <p className="text-sm text-es-subtle">Armed Forces Strongman partner — educational support for serving and veteran personnel.</p>
+          </div>
         </div>
       </section>
 
       {/* Final CTA */}
-      <section className="bg-gray-900 text-white py-14">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section
+        className="es-section"
+        style={{ background: '#111111', borderTop: '1px solid #2C2C2C' }}
+      >
+        <div className="es-container">
           <div className="max-w-2xl">
-            <h2 className="text-2xl font-bold mb-3">Ready to Start?</h2>
-            <p className="text-gray-400 mb-6">
+            <h2 className="text-3xl font-black text-white mb-4" style={{ letterSpacing: '-0.03em' }}>
+              Ready to Start?
+            </h2>
+            <p className="text-es-muted mb-8">
               Explore the coaching qualifications, refereeing certification, or StrongKidz coach education.
             </p>
             <div className="flex flex-wrap gap-4">
-              <Link
-                to="/courses"
-                className="bg-amber-600 hover:bg-amber-500 text-white font-semibold px-7 py-3.5 rounded-lg transition-colors text-sm"
-              >
-                Explore Courses
-              </Link>
-              <a
-                href="mailto:educate.strongltd@gmail.com"
-                className="border border-gray-600 hover:border-gray-400 text-gray-300 hover:text-white font-medium px-7 py-3.5 rounded-lg transition-colors text-sm"
-              >
-                Contact Educate.Strong
-              </a>
+              <Link to="/courses" className="btn-primary">Explore Courses</Link>
+              <a href="mailto:educate.strongltd@gmail.com" className="btn-secondary">Contact Us</a>
             </div>
           </div>
         </div>
