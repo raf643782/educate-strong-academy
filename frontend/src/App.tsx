@@ -6,6 +6,8 @@ import ProtectedRoute from './components/layout/ProtectedRoute';
 import Home from './pages/public/Home';
 import CourseCatalogue from './pages/public/CourseCatalogue';
 import CourseDetail from './pages/public/CourseDetail';
+import About from './pages/public/About';
+import StrongKidz from './pages/public/StrongKidz';
 
 // Auth pages
 import Login from './pages/auth/Login';
@@ -50,6 +52,8 @@ export default function App() {
           <Route path="/register" element={<Register />} />
 
           {/* Library */}
+          <Route path="/about" element={<About />} />
+          <Route path="/strongkidz" element={<StrongKidz />} />
           <Route path="/knowledge" element={<KnowledgeHub />} />
           <Route path="/exercises" element={<ExerciseLibrary />} />
           <Route path="/events" element={<EventLibrary />} />

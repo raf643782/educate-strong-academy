@@ -34,6 +34,8 @@ export default function Navbar() {
           {/* Desktop nav */}
           <div className="hidden lg:flex items-center gap-7">
             <NavLink to="/courses" className={navLinkClass}>Courses</NavLink>
+            <NavLink to="/about" className={navLinkClass}>About</NavLink>
+            <NavLink to="/strongkidz" className={navLinkClass}>StrongKidz</NavLink>
 
             {/* Library dropdown */}
             <div
@@ -136,6 +138,8 @@ export default function Navbar() {
       {menuOpen && (
         <div className="lg:hidden border-t border-gray-800 bg-gray-900 px-4 py-5 space-y-1">
           <MobileLink to="/courses" onClick={() => setMenuOpen(false)}>Courses</MobileLink>
+          <MobileLink to="/about" onClick={() => setMenuOpen(false)}>About</MobileLink>
+          <MobileLink to="/strongkidz" onClick={() => setMenuOpen(false)}>StrongKidz</MobileLink>
           <MobileLink to="/knowledge" onClick={() => setMenuOpen(false)}>Knowledge Hub</MobileLink>
           <MobileLink to="/exercises" onClick={() => setMenuOpen(false)}>Exercise Library</MobileLink>
           <MobileLink to="/events" onClick={() => setMenuOpen(false)}>Event Library</MobileLink>
