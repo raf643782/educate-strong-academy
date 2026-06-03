@@ -35,7 +35,7 @@ export default function Navbar() {
           <div className="hidden lg:flex items-center gap-7">
             <NavLink to="/courses" className={navLinkClass}>Courses</NavLink>
 
-            {/* Learn dropdown */}
+            {/* Library dropdown */}
             <div
               className="relative"
               onMouseEnter={() => setLearnOpen(true)}
@@ -48,25 +48,26 @@ export default function Navbar() {
                 </svg>
               </button>
               {learnOpen && (
-                <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
-                  <DropLink to="/knowledge" icon="📚" label="Knowledge Hub" desc="Articles and references" />
-                  <DropLink to="/exercises" icon="💪" label="Exercise Library" desc="Technique and cues" />
-                  <DropLink to="/events" icon="🏆" label="Event Library" desc="Competition events" />
+                <div className="absolute top-full left-0 mt-1 w-52 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                  <DropLink to="/knowledge" label="Knowledge Hub" desc="Articles and references" />
+                  <DropLink to="/exercises" label="Exercise Library" desc="Technique and coaching cues" />
+                  <DropLink to="/events" label="Event Library" desc="Competition events" />
                 </div>
               )}
             </div>
 
-            {/* Be Strong — distinct green link */}
+            {/* EatStrong — visually distinct green link, no emoji */}
             <NavLink
-              to="/be-strong"
+              to="/eatstrong"
               className={({ isActive }) =>
-                `text-sm font-medium transition-colors flex items-center gap-1.5 ${
-                  isActive ? 'text-green-400' : 'text-gray-300 hover:text-green-400'
+                `text-sm font-medium transition-colors px-3 py-1 rounded border ${
+                  isActive
+                    ? 'text-green-300 border-green-700 bg-green-900/40'
+                    : 'text-green-400 border-green-800/60 hover:text-green-300 hover:border-green-700 hover:bg-green-900/30'
                 }`
               }
             >
-              <span className="text-base leading-none">💚</span>
-              <span>Be Strong</span>
+              EatStrong
             </NavLink>
           </div>
 
@@ -78,10 +79,14 @@ export default function Navbar() {
                   Dashboard
                 </Link>
                 {user?.role === 'ADMIN' && (
-                  <Link to="/admin" className="text-sm text-gray-300 hover:text-white transition-colors">Admin</Link>
+                  <Link to="/admin" className="text-sm text-gray-300 hover:text-white transition-colors">
+                    Admin
+                  </Link>
                 )}
                 {(user?.role === 'ASSESSOR' || user?.role === 'ADMIN') && (
-                  <Link to="/assessor" className="text-sm text-gray-300 hover:text-white transition-colors">Assessor</Link>
+                  <Link to="/assessor" className="text-sm text-gray-300 hover:text-white transition-colors">
+                    Assessor
+                  </Link>
                 )}
                 <button
                   onClick={handleLogout}
@@ -98,7 +103,10 @@ export default function Navbar() {
                 <Link to="/login" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
                   Sign in
                 </Link>
-                <Link to="/register" className="text-sm font-medium bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-lg transition-colors">
+                <Link
+                  to="/register"
+                  className="text-sm font-medium bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-lg transition-colors"
+                >
                   Get started
                 </Link>
               </>
@@ -131,17 +139,14 @@ export default function Navbar() {
           <MobileLink to="/knowledge" onClick={() => setMenuOpen(false)}>Knowledge Hub</MobileLink>
           <MobileLink to="/exercises" onClick={() => setMenuOpen(false)}>Exercise Library</MobileLink>
           <MobileLink to="/events" onClick={() => setMenuOpen(false)}>Event Library</MobileLink>
-
-          {/* Be Strong highlighted entry */}
+          {/* EatStrong — distinct styling, no emoji */}
           <Link
-            to="/be-strong"
+            to="/eatstrong"
             onClick={() => setMenuOpen(false)}
-            className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-green-900/40 border border-green-800/40 text-green-300 hover:text-green-200 text-sm font-medium transition-colors"
+            className="block text-sm font-medium text-green-400 border border-green-800/60 rounded-lg px-3 py-2.5 hover:bg-green-900/30 transition-colors"
           >
-            <span>💚</span>
-            <span>Be Strong — Nutrition</span>
+            EatStrong — Nutrition
           </Link>
-
           <div className="border-t border-gray-800 pt-4 mt-3 space-y-1">
             {isAuthenticated ? (
               <>
@@ -151,7 +156,7 @@ export default function Navbar() {
                 )}
                 <button
                   onClick={handleLogout}
-                  className="block w-full text-left text-sm text-red-400 hover:text-red-300 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+                  className="block w-full text-left text-sm text-red-400 hover:text-red-300 px-3 py-2.5 rounded-lg hover:bg-gray-800 transition-colors"
                 >
                   Sign out
                 </button>
@@ -159,7 +164,7 @@ export default function Navbar() {
             ) : (
               <>
                 <MobileLink to="/login" onClick={() => setMenuOpen(false)}>Sign in</MobileLink>
-                <MobileLink to="/register" onClick={() => setMenuOpen(false)}>Get started →</MobileLink>
+                <MobileLink to="/register" onClick={() => setMenuOpen(false)}>Get started</MobileLink>
               </>
             )}
           </div>
@@ -171,14 +176,11 @@ export default function Navbar() {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function DropLink({ to, icon, label, desc }: { to: string; icon: string; label: string; desc: string }) {
+function DropLink({ to, label, desc }: { to: string; label: string; desc: string }) {
   return (
-    <Link to={to} className="flex items-start gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors">
-      <span className="text-lg mt-0.5 leading-none">{icon}</span>
-      <div>
-        <p className="text-sm font-semibold text-gray-900">{label}</p>
-        <p className="text-xs text-gray-400">{desc}</p>
-      </div>
+    <Link to={to} className="flex flex-col px-4 py-2.5 hover:bg-gray-50 transition-colors">
+      <span className="text-sm font-semibold text-gray-900">{label}</span>
+      <span className="text-xs text-gray-400">{desc}</span>
     </Link>
   );
 }

@@ -12,13 +12,13 @@ interface Stats {
 }
 
 const QUICK_LINKS = [
-  { label: 'Manage Courses', href: '/admin/courses', icon: '📚', desc: 'View, edit, and publish courses' },
-  { label: 'Be Strong Content', href: '/admin/be-strong', icon: '💚', desc: 'Manage nutrition articles and downloads', green: true },
-  { label: 'Knowledge Hub', href: '/knowledge', icon: '📖', desc: 'Browse the knowledge library' },
-  { label: 'Exercise Library', href: '/exercises', icon: '🏋️', desc: 'View exercise reference library' },
-  { label: 'Event Library', href: '/events', icon: '🏆', desc: 'View competition event library' },
-  { label: 'Assessor Portal', href: '/assessor', icon: '✅', desc: 'Review learner submissions' },
-  { label: 'Course Catalogue', href: '/courses', icon: '🎓', desc: 'View the public course catalogue' },
+  { label: 'Manage Courses', href: '/admin/courses', desc: 'View, edit, and publish courses' },
+  { label: 'EatStrong Content', href: '/admin/eatstrong', desc: 'Manage nutrition articles and downloads', green: true },
+  { label: 'Knowledge Hub', href: '/knowledge', desc: 'Browse the knowledge library' },
+  { label: 'Exercise Library', href: '/exercises', desc: 'View exercise reference library' },
+  { label: 'Event Library', href: '/events', desc: 'View competition event library' },
+  { label: 'Assessor Portal', href: '/assessor', desc: 'Review learner submissions' },
+  { label: 'Course Catalogue', href: '/courses', desc: 'View the public course catalogue' },
 ];
 
 export default function AdminDashboard() {
@@ -88,9 +88,10 @@ export default function AdminDashboard() {
                       : 'bg-white border-gray-200 hover:border-amber-300'
                   }`}
                 >
-                  <span className="text-2xl">{link.icon}</span>
                   <div>
-                    <p className="font-semibold text-gray-900 mb-0.5">{link.label}</p>
+                    <p className={`font-semibold mb-0.5 ${(link as any).green ? 'text-green-800' : 'text-gray-900'}`}>
+                      {link.label}
+                    </p>
                     <p className="text-sm text-gray-500">{link.desc}</p>
                   </div>
                 </Link>

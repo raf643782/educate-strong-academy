@@ -76,7 +76,7 @@ export default function Home() {
                 title: 'Coaching Pathway',
                 label: 'COACHING',
                 levels: 'Levels 1, 2 & 3',
-                icon: '🏋️',
+                marker: 'C',
                 desc: 'From beginner coaching fundamentals through to high-performance athlete management. Build the knowledge to coach at every level of the sport.',
                 link: '/courses',
               },
@@ -84,7 +84,7 @@ export default function Home() {
                 title: 'Refereeing Pathway',
                 label: 'REFEREEING',
                 levels: 'Level 1',
-                icon: '📋',
+                marker: 'R',
                 desc: 'Learn to officiate Strongman competitions consistently and fairly. Covers event rules, judging decisions, competition operations, and safety.',
                 link: '/courses',
               },
@@ -92,13 +92,15 @@ export default function Home() {
                 title: 'StrongKidz Pathway',
                 label: 'STRONGKIDZ',
                 levels: 'Level 1',
-                icon: '⭐',
+                marker: 'SK',
                 desc: 'Professional education for coaches delivering youth Strongman sessions. Covers safeguarding, youth development, and age-appropriate programming.',
                 link: '/courses',
               },
             ].map(p => (
               <div key={p.title} className="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow group">
-                <div className="text-4xl mb-4">{p.icon}</div>
+                <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center text-white text-xs font-bold mb-4">
+                  {p.marker}
+                </div>
                 <Badge variant={pathwayVariant(p.label)} className="mb-4">{pathwayLabel(p.label)}</Badge>
                 <h3 className="text-xl font-bold text-gray-900 mb-1 mt-3">{p.title}</h3>
                 <p className="text-sm text-gray-500 mb-3">{p.levels}</p>

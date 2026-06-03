@@ -103,18 +103,18 @@ export default function BeStrongManager() {
           <div className="flex items-center justify-between mb-8">
             <div>
               <p className="text-green-600 text-sm font-medium uppercase tracking-wide mb-1">
-                <Link to="/admin" className="hover:text-green-700">Admin</Link> › Be Strong
+                <Link to="/admin" className="hover:text-green-700">Admin</Link> › EatStrong
               </p>
               <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-                <span className="text-2xl">💚</span> Be Strong Content Manager
+                EatStrong Content Manager
               </h1>
               <p className="text-gray-500 mt-1">Manage nutrition articles, downloads, and featured content.</p>
             </div>
             <Link
-              to="/be-strong"
+              to="/eatstrong"
               className="text-sm text-green-600 hover:text-green-700 font-medium border border-green-200 rounded-lg px-4 py-2 hover:bg-green-50 transition-colors"
             >
-              View Be Strong →
+              View EatStrong →
             </Link>
           </div>
 
@@ -203,7 +203,7 @@ export default function BeStrongManager() {
                               className={`text-lg transition-opacity ${updating === article.id ? 'opacity-50' : ''}`}
                               title={article.isFeatured ? 'Remove from featured' : 'Add to featured'}
                             >
-                              {article.isFeatured ? '⭐' : '☆'}
+                              {article.isFeatured ? 'Yes' : 'No'}
                             </button>
                           </td>
                           <td className="px-4 py-4 text-center">
@@ -221,7 +221,7 @@ export default function BeStrongManager() {
                           </td>
                           <td className="px-6 py-4 text-right">
                             <Link
-                              to={`/be-strong/articles/${article.slug}`}
+                              to={`/eatstrong/articles/${article.slug}`}
                               className="text-xs text-green-600 hover:text-green-700 font-medium"
                             >
                               View
@@ -232,7 +232,7 @@ export default function BeStrongManager() {
                     </tbody>
                   </table>
                   {articles.length === 0 && (
-                    <div className="p-12 text-center text-gray-400 text-sm">No articles found. Run the database seed to populate Be Strong content.</div>
+                    <div className="p-12 text-center text-gray-400 text-sm">No articles found. Run the database seed to populate EatStrong content.</div>
                   )}
                 </div>
               )}

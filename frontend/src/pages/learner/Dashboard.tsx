@@ -35,17 +35,17 @@ const pathwayLabel = (p: string) =>
   p === 'COACHING' ? 'Coaching' : p === 'REFEREEING' ? 'Refereeing' : 'StrongKidz';
 
 const QUICK_LINKS = [
-  { to: '/knowledge', label: 'Knowledge Hub', icon: '📚', desc: 'Articles and coaching resources' },
-  { to: '/exercises', label: 'Exercise Library', icon: '💪', desc: 'Technique guides and cues' },
-  { to: '/events', label: 'Event Library', icon: '🏆', desc: 'Competition event reference' },
-  { to: '/cpd', label: 'CPD Log', icon: '📊', desc: 'Track your professional development' },
+  { to: '/knowledge', label: 'Knowledge Hub', desc: 'Articles and coaching resources' },
+  { to: '/exercises', label: 'Exercise Library', desc: 'Technique guides and cues' },
+  { to: '/events', label: 'Event Library', desc: 'Competition event reference' },
+  { to: '/cpd', label: 'CPD Log', desc: 'Track your professional development' },
 ];
 
-// Be Strong card is kept separate so it has its own green treatment
-const BE_STRONG_HIGHLIGHT = {
-  to: '/be-strong',
-  label: 'Be Strong',
-  desc: 'Nutrition education for Strongman coaches and athletes',
+// EatStrong card — kept visually separate with green identity, no emojis
+const EATSTRONG_HIGHLIGHT = {
+  to: '/eatstrong',
+  label: 'EatStrong',
+  desc: 'Dedicated nutrition education for Strongman coaches and athletes.',
   categories: ['Nutrition Basics', 'Competition Nutrition', 'Recovery', 'Making Weight', 'Hydration', 'Supplements'],
 };
 
@@ -166,8 +166,10 @@ export default function Dashboard() {
                   <h2 className="text-xl font-bold text-gray-900 mb-5">Recommended Start</h2>
                   <Card>
                     <div className="flex items-start gap-5">
-                      <div className="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl">
-                        🏋️
+                      <div className="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <svg className="w-6 h-6 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
                       </div>
                       <div className="flex-1">
                         <Badge variant="coaching" className="mb-2">Coaching</Badge>
@@ -198,7 +200,6 @@ export default function Dashboard() {
                       to={link.to}
                       className="flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-4 py-3.5 hover:shadow-sm hover:border-amber-200 transition-all"
                     >
-                      <span className="text-xl">{link.icon}</span>
                       <div>
                         <p className="text-sm font-semibold text-gray-900">{link.label}</p>
                         <p className="text-xs text-gray-500">{link.desc}</p>
@@ -208,26 +209,32 @@ export default function Dashboard() {
                 </div>
               </section>
 
-              {/* Be Strong card */}
+              {/* EatStrong card — green identity, no emojis */}
               <section>
                 <Link
-                  to={BE_STRONG_HIGHLIGHT.to}
+                  to={EATSTRONG_HIGHLIGHT.to}
                   className="block bg-green-900 rounded-xl p-5 hover:bg-green-800 transition-colors"
                 >
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xl">💚</span>
-                    <h3 className="text-base font-bold text-white">Be Strong</h3>
-                    <span className="ml-auto text-green-300 text-xs font-medium">Nutrition</span>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-base font-bold text-white">{EATSTRONG_HIGHLIGHT.label}</h3>
+                    <span className="text-green-300 text-xs font-medium border border-green-700 rounded px-2 py-0.5">
+                      Nutrition
+                    </span>
                   </div>
-                  <p className="text-green-200 text-xs leading-relaxed mb-3">{BE_STRONG_HIGHLIGHT.desc}</p>
+                  <p className="text-green-200 text-xs leading-relaxed mb-3">
+                    {EATSTRONG_HIGHLIGHT.desc}
+                  </p>
                   <div className="flex flex-wrap gap-1.5">
-                    {BE_STRONG_HIGHLIGHT.categories.slice(0, 4).map(c => (
-                      <span key={c} className="text-xs bg-green-800/60 border border-green-700/40 text-green-200 px-2 py-0.5 rounded-full">
+                    {EATSTRONG_HIGHLIGHT.categories.slice(0, 4).map(c => (
+                      <span
+                        key={c}
+                        className="text-xs border border-green-700/60 text-green-300 px-2 py-0.5 rounded"
+                      >
                         {c}
                       </span>
                     ))}
                   </div>
-                  <p className="text-green-400 text-xs font-medium mt-3">Explore Be Strong →</p>
+                  <p className="text-green-400 text-xs font-medium mt-3">Explore EatStrong</p>
                 </Link>
               </section>
 

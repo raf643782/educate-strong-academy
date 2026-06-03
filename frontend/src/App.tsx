@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 
@@ -22,7 +22,9 @@ import KnowledgeHub from './pages/knowledge/KnowledgeHub';
 import ExerciseLibrary from './pages/exercises/ExerciseLibrary';
 import EventLibrary from './pages/events/EventLibrary';
 
-// Be Strong — Nutrition section (all public)
+// EatStrong — Nutrition section (all public)
+// Internal file names remain "BeStrong" to avoid a database migration.
+// User-facing routes and labels use "EatStrong".
 import BeStrongHub from './pages/bestrong/BeStrongHub';
 import BeStrongCategory from './pages/bestrong/BeStrongCategory';
 import BeStrongArticlePage from './pages/bestrong/BeStrongArticlePage';
@@ -47,15 +49,20 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* Library — all publicly browsable */}
+          {/* Library */}
           <Route path="/knowledge" element={<KnowledgeHub />} />
           <Route path="/exercises" element={<ExerciseLibrary />} />
           <Route path="/events" element={<EventLibrary />} />
 
-          {/* ── Be Strong — Nutrition section ──────────────────────────── */}
-          <Route path="/be-strong" element={<BeStrongHub />} />
-          <Route path="/be-strong/category/:categorySlug" element={<BeStrongCategory />} />
-          <Route path="/be-strong/articles/:slug" element={<BeStrongArticlePage />} />
+          {/* ── EatStrong — canonical routes ───────────────────────────── */}
+          <Route path="/eatstrong" element={<BeStrongHub />} />
+          <Route path="/eatstrong/category/:categorySlug" element={<BeStrongCategory />} />
+          <Route path="/eatstrong/articles/:slug" element={<BeStrongArticlePage />} />
+
+          {/* ── /be-strong redirects — keep old links working ──────────── */}
+          <Route path="/be-strong" element={<Navigate to="/eatstrong" replace />} />
+          <Route path="/be-strong/category/:categorySlug" element={<RedirectCategory />} />
+          <Route path="/be-strong/articles/:slug" element={<RedirectArticle />} />
 
           {/* ── Protected learner ───────────────────────────────────────── */}
           <Route path="/dashboard" element={
@@ -82,10 +89,25 @@ export default function App() {
             <ProtectedRoute roles={['ADMIN']}><CourseManager /></ProtectedRoute>
           } />
           <Route path="/admin/be-strong" element={
+            <Navigate to="/admin/eatstrong" replace />
+          } />
+          <Route path="/admin/eatstrong" element={
             <ProtectedRoute roles={['ADMIN']}><BeStrongManager /></ProtectedRoute>
           } />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
   );
+}
+
+// ── Redirect helpers for legacy /be-strong/* routes ──────────────────────────
+
+function RedirectCategory() {
+  const { categorySlug } = useParams<{ categorySlug: string }>();
+  return <Navigate to={`/eatstrong/category/${categorySlug}`} replace />;
+}
+
+function RedirectArticle() {
+  const { slug } = useParams<{ slug: string }>();
+  return <Navigate to={`/eatstrong/articles/${slug}`} replace />;
 }
