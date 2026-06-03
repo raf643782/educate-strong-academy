@@ -176,4 +176,73 @@
   /* Hide scrollbar */
   .hide-scrollbar::-webkit-scrollbar { display: none; }
   .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* ── Grit texture ──────────────────────────────────────────────────── */
+  /* Subtle noise texture overlay for dark sections */
+  .es-grit {
+    position: relative;
+  }
+  .es-grit::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    z-index: 1;
+    opacity: 0.6;
+  }
+  .es-grit > * { position: relative; z-index: 2; }
+
+  /* Chalk dust overlay (lighter, used on hero sections) */
+  .es-chalk::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse 60% 40% at 80% 20%, rgba(164,28,100,0.06) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 30% at 20% 80%, rgba(225,154,71,0.04) 0%, transparent 60%);
+    z-index: 1;
+  }
+  .es-chalk > * { position: relative; z-index: 2; }
+
+  /* Scratch line accent — used as section separators */
+  .es-scratch {
+    height: 1px;
+    background: linear-gradient(to right, transparent 0%, rgba(164,28,100,0.4) 20%, rgba(164,28,100,0.6) 50%, rgba(164,28,100,0.4) 80%, transparent 100%);
+  }
+
+  /* Deep section — darker background for alternating sections */
+  .es-section-deep {
+    background: #0A0A0A;
+  }
+
+  /* Section alt */
+  .es-section-alt {
+    background: #111111;
+  }
+
+  /* Orange accent dot / arrow */
+  .es-arrow::after {
+    content: '→';
+    color: #E19A47;
+    margin-left: 8px;
+    font-weight: 700;
+  }
+
+  /* Level badge */
+  .badge-level {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #ffffff;
+    background: linear-gradient(135deg, #A41C64, #7A1349);
+    border: 1px solid rgba(164,28,100,0.4);
+  }
 }

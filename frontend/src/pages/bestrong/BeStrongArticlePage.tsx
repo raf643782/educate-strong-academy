@@ -66,9 +66,9 @@ export default function EatStrongArticlePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
         <Navbar />
-        <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">
+        <div className="flex-1 flex items-center justify-center text-es-muted text-sm">
           Loading article...
         </div>
       </div>
@@ -77,12 +77,12 @@ export default function EatStrongArticlePage() {
 
   if (notFound || !article) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Article not found</h2>
-            <Link to="/eatstrong" className="text-green-700 hover:text-green-800 text-sm font-medium">
+            <h2 className="text-2xl font-black text-white mb-2">Article not found</h2>
+            <Link to="/eatstrong" className="text-sm font-medium" style={{ color: '#A41C64' }}>
               Back to EatStrong
             </Link>
           </div>
@@ -95,44 +95,43 @@ export default function EatStrongArticlePage() {
   const categoryLabel = CATEGORY_LABELS[article.category] || article.category;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
       <Navbar />
 
-      <main className="flex-1 bg-white">
+      <main className="flex-1">
         {/* Article header */}
-        <div className="bg-green-900 text-white py-10">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="pt-navbar" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C' }}>
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
             {/* Breadcrumb */}
-            <nav className="flex items-center gap-2 text-green-300 text-xs mb-5">
-              <Link to="/eatstrong" className="hover:text-white transition-colors">EatStrong</Link>
-              <span>/</span>
+            <nav className="flex items-center gap-2 text-xs mb-5" style={{ color: '#A41C64' }}>
+              <Link to="/eatstrong" className="hover:text-white transition-colors" style={{ color: '#A41C64' }}>EatStrong</Link>
+              <span className="text-es-subtle">/</span>
               <Link
                 to={`/eatstrong/category/${categorySlug}`}
                 className="hover:text-white transition-colors"
+                style={{ color: '#A41C64' }}
               >
                 {categoryLabel}
               </Link>
             </nav>
 
             <div className="mb-3">
-              <span className="text-xs border border-green-700 text-green-300 px-2.5 py-1 rounded font-medium">
-                {categoryLabel}
-              </span>
+              <span className="badge-grey">{categoryLabel}</span>
             </div>
 
-            <h1 className="text-3xl md:text-4xl font-bold leading-tight mb-4 tracking-tight">
+            <h1 className="text-3xl md:text-4xl font-black text-white leading-tight mb-4" style={{ letterSpacing: '-0.03em' }}>
               {article.title}
             </h1>
             {article.summary && (
-              <p className="text-green-100 text-lg leading-relaxed max-w-2xl">{article.summary}</p>
+              <p className="text-es-muted text-lg leading-relaxed max-w-2xl">{article.summary}</p>
             )}
 
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-5 text-sm text-green-300">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-5 text-sm text-es-subtle">
               {article.readMinutes && <span>{article.readMinutes} min read</span>}
               {article.reviewerName && (
                 <span>
                   Reviewed by{' '}
-                  <strong className="text-green-200 font-semibold">{article.reviewerName}</strong>
+                  <strong className="text-es-muted font-semibold">{article.reviewerName}</strong>
                   {article.reviewerQualification && ` · ${article.reviewerQualification}`}
                 </span>
               )}
@@ -151,9 +150,9 @@ export default function EatStrongArticlePage() {
 
         {/* Scope of practice note */}
         {article.scopeOfPracticeNote && (
-          <div className="bg-green-50 border-b border-green-200">
+          <div style={{ background: 'rgba(225,154,71,0.06)', borderBottom: '1px solid rgba(225,154,71,0.2)' }}>
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-              <p className="text-xs text-green-700 leading-relaxed">{article.scopeOfPracticeNote}</p>
+              <p className="text-xs leading-relaxed" style={{ color: '#E19A47', opacity: 0.85 }}>{article.scopeOfPracticeNote}</p>
             </div>
           </div>
         )}
@@ -167,8 +166,8 @@ export default function EatStrongArticlePage() {
                 if (para.startsWith('•')) {
                   return (
                     <div key={i} className="flex items-start gap-2 my-1.5 ml-4">
-                      <span className="text-green-600 mt-1 text-xs flex-shrink-0">—</span>
-                      <span className="text-gray-700 leading-relaxed text-base">
+                      <span className="mt-1 text-xs flex-shrink-0" style={{ color: '#A41C64' }}>—</span>
+                      <span className="text-es-muted leading-relaxed text-base">
                         {para.slice(1).trim()}
                       </span>
                     </div>
@@ -176,19 +175,19 @@ export default function EatStrongArticlePage() {
                 }
                 if (para.endsWith(':') && para.length < 80 && !para.startsWith(' ')) {
                   return (
-                    <h3 key={i} className="text-base font-bold text-gray-900 mt-8 mb-3">
+                    <h3 key={i} className="text-base font-black text-white mt-8 mb-3">
                       {para}
                     </h3>
                   );
                 }
                 return (
-                  <p key={i} className="text-gray-700 leading-relaxed my-3 text-base">
+                  <p key={i} className="text-es-muted leading-relaxed my-3 text-base">
                     {para}
                   </p>
                 );
               })
             ) : (
-              <p className="text-gray-400 italic text-sm">Content coming soon.</p>
+              <p className="text-es-subtle italic text-sm">Content coming soon.</p>
             )}
           </div>
 
@@ -196,48 +195,43 @@ export default function EatStrongArticlePage() {
           {article.tags && (
             <div className="mt-10 flex flex-wrap gap-2">
               {article.tags.split(',').map(tag => (
-                <span
-                  key={tag}
-                  className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded"
-                >
-                  {tag.trim()}
-                </span>
+                <span key={tag} className="badge-grey">{tag.trim()}</span>
               ))}
             </div>
           )}
 
           {/* Related content */}
-          <div className="mt-12 pt-8 border-t border-gray-200">
-            <h3 className="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wide">
+          <div className="mt-12 pt-8" style={{ borderTop: '1px solid #2C2C2C' }}>
+            <h3 className="font-bold text-es-muted mb-4 text-sm uppercase tracking-wide">
               Related resources
             </h3>
             <div className="grid sm:grid-cols-2 gap-3">
               <Link
                 to={`/eatstrong/category/${categorySlug}`}
-                className="flex items-center gap-3 border border-green-200 rounded-lg p-4 hover:bg-green-50 transition-colors"
+                className="flex items-center gap-3 es-card p-4 hover:border-es-accent transition-colors"
               >
-                <div className="w-8 h-8 bg-green-100 rounded flex items-center justify-center flex-shrink-0">
-                  <svg className="w-4 h-4 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="w-8 h-8 rounded flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(164,28,100,0.1)', border: '1px solid rgba(164,28,100,0.2)' }}>
+                  <svg className="w-4 h-4" style={{ color: '#A41C64' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 mb-0.5">More in</p>
-                  <p className="text-sm font-semibold text-green-800">{categoryLabel}</p>
+                  <p className="text-xs text-es-subtle mb-0.5">More in</p>
+                  <p className="text-sm font-semibold text-white">{categoryLabel}</p>
                 </div>
               </Link>
               <Link
                 to="/courses"
-                className="flex items-center gap-3 border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-3 es-card p-4 hover:border-es-accent transition-colors"
               >
-                <div className="w-8 h-8 bg-amber-100 rounded flex items-center justify-center flex-shrink-0">
-                  <svg className="w-4 h-4 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="w-8 h-8 rounded flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(225,154,71,0.1)', border: '1px solid rgba(225,154,71,0.2)' }}>
+                  <svg className="w-4 h-4 text-es-amber" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 mb-0.5">Continue your development</p>
-                  <p className="text-sm font-semibold text-gray-900">Coaching Qualifications</p>
+                  <p className="text-xs text-es-subtle mb-0.5">Continue your development</p>
+                  <p className="text-sm font-semibold text-white">Coaching Qualifications</p>
                 </div>
               </Link>
             </div>
@@ -247,15 +241,16 @@ export default function EatStrongArticlePage() {
           <div className="mt-10 flex items-center gap-4 text-sm">
             <Link
               to={`/eatstrong/category/${categorySlug}`}
-              className="text-green-700 hover:text-green-800 font-medium flex items-center gap-1"
+              className="font-medium flex items-center gap-1"
+              style={{ color: '#A41C64' }}
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
               {categoryLabel}
             </Link>
-            <span className="text-gray-300">·</span>
-            <Link to="/eatstrong" className="text-gray-500 hover:text-gray-700">
+            <span className="text-es-subtle">·</span>
+            <Link to="/eatstrong" className="text-es-subtle hover:text-es-muted">
               EatStrong hub
             </Link>
           </div>

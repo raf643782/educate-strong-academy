@@ -215,9 +215,10 @@ export default function Home() {
 
       {/* ── HERO ─────────────────────────────────────────────────────── */}
       <section
-        className="relative pt-navbar flex items-center min-h-screen overflow-hidden"
+        className="relative es-chalk pt-navbar flex items-center min-h-screen overflow-hidden"
         style={{
           background: 'radial-gradient(ellipse 90% 60% at 50% -10%, rgba(164,28,100,0.28) 0%, transparent 65%), #0D0D0D',
+          position: 'relative',
         }}
       >
         {/* Background grid lines */}
@@ -370,50 +371,103 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── PROGRESSION ───────────────────────────────────────────────── */}
-      <section
-        className="es-section"
-        style={{ background: '#111111', borderTop: '1px solid #2C2C2C', borderBottom: '1px solid #2C2C2C' }}
-      >
+      {/* ── PROGRESSION PATHWAY ─────────────────────────────────────── */}
+      <section className="es-section es-grit" style={{ background: '#111111', borderTop: '1px solid #2C2C2C', borderBottom: '1px solid #2C2C2C', position: 'relative' }}>
         <div className="es-container">
-          <div className="grid lg:grid-cols-2 gap-14 items-start">
-            <div>
-              <SectionHeader
-                label="Professional Pathway"
-                heading="A Complete Development Journey"
-                sub="You are not buying a single course. You are entering a structured, progression-based qualification system with industry recognition at every level."
-              />
-              <Link to="/courses" className="btn-primary text-sm">
-                View All Courses
-              </Link>
-            </div>
-            <div className="space-y-3">
+          <div className="text-center mb-12">
+            <p className="es-label mb-3">Professional Pathway</p>
+            <h2 className="text-3xl md:text-4xl font-black text-white mb-4" style={{ letterSpacing: '-0.03em' }}>
+              Every Level Unlocks More
+            </h2>
+            <p className="text-es-muted max-w-2xl mx-auto">
+              A structured qualification pathway built on practical delivery, coaching standards,
+              and real-world Strongman experience. Progress at your pace.
+            </p>
+          </div>
+
+          <div className="relative">
+            {/* Connection line — desktop only */}
+            <div className="hidden lg:block absolute top-10 left-0 right-0 h-px" style={{ background: 'linear-gradient(to right, transparent, #A41C64, #E19A47, #A41C64, transparent)', top: '40px', zIndex: 0 }} />
+
+            <div className="grid lg:grid-cols-4 gap-5 relative z-10">
               {[
                 {
                   num: '01',
-                  title: 'Level 1 — Fundamentals',
-                  desc: 'Foundation knowledge. The six core events. Coaching principles, safety, and beginner athlete management. Active IQ accredited.',
-                  active: true,
+                  level: 'Level 1',
+                  title: 'Foundation',
+                  colour: '#A41C64',
+                  unlocks: 'Safe, confident delivery of the six core Strongman events with beginner and intermediate athletes.',
+                  outcomes: ['Active IQ accredited qualification', 'Six core event coaching', 'Athlete screening & safety', 'Beginner session structure'],
+                  status: 'available',
                 },
                 {
                   num: '02',
-                  title: 'Level 2 — Applied Coaching',
-                  desc: 'Intermediate programming, periodisation, competition preparation, nutrition fundamentals, and advanced event coaching.',
+                  level: 'Level 2',
+                  title: 'Applied Practice',
+                  colour: '#C0246E',
+                  unlocks: 'Intermediate programming, competition preparation, nutrition basics, and deeper athlete support.',
+                  outcomes: ['Periodisation and programming', 'Competition preparation', 'Advanced event coaching', 'Performance monitoring'],
+                  status: 'coming',
                 },
                 {
                   num: '03',
-                  title: 'Level 3 — Advanced Practice',
-                  desc: 'High-performance programming, sports science application, elite athlete management, and coaching systems.',
+                  level: 'Level 3',
+                  title: 'Advanced Leadership',
+                  colour: '#E19A47',
+                  unlocks: 'High-performance athlete development, coaching systems, and potential course delivery representation.',
+                  outcomes: ['Elite athlete management', 'High-performance programming', 'Coaching system design', 'Academy representation'],
+                  status: 'coming',
                 },
                 {
                   num: 'CPD',
-                  title: 'Continuing Professional Development',
-                  desc: 'Renewal requirements, specialist modules, and ongoing professional recognition throughout your coaching career.',
+                  level: 'Ongoing',
+                  title: 'Professional Development',
+                  colour: '#3C3C3C',
+                  unlocks: 'Renewal modules, specialist topics, and continuing recognition throughout your coaching career.',
+                  outcomes: ['Qualification renewal', 'Specialist modules', 'Industry recognition', 'Career progression'],
+                  status: 'future',
                 },
-              ].map(s => (
-                <ProgressionStep key={s.num} num={s.num} title={s.title} desc={s.desc} active={s.active} />
+              ].map((step) => (
+                <div
+                  key={step.num}
+                  className="rounded-lg p-5 flex flex-col"
+                  style={{
+                    background: '#1A1A1A',
+                    border: `1px solid ${step.status === 'available' ? step.colour : '#2C2C2C'}`,
+                    borderTop: `3px solid ${step.colour}`,
+                    opacity: step.status === 'future' ? 0.6 : 1,
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-black flex-shrink-0"
+                      style={{ background: step.status === 'available' ? step.colour : '#2C2C2C' }}>
+                      {step.num}
+                    </div>
+                    {step.status !== 'available' && (
+                      <span className="badge-grey text-xs">{step.status === 'coming' ? 'Coming Soon' : 'Future'}</span>
+                    )}
+                    {step.status === 'available' && (
+                      <span className="badge-accent text-xs">Available</span>
+                    )}
+                  </div>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: step.colour }}>{step.level}</p>
+                  <h3 className="font-black text-white text-lg mb-3">{step.title}</h3>
+                  <p className="text-sm text-es-muted leading-relaxed mb-4 flex-1">{step.unlocks}</p>
+                  <ul className="space-y-1.5">
+                    {step.outcomes.map(o => (
+                      <li key={o} className="flex items-start gap-2 text-xs text-es-subtle">
+                        <span className="w-1 h-1 rounded-full flex-shrink-0 mt-1.5" style={{ background: step.colour }} />
+                        {o}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ))}
             </div>
+          </div>
+
+          <div className="text-center mt-10">
+            <Link to="/courses" className="btn-primary text-sm">Start at Level 1</Link>
           </div>
         </div>
       </section>
@@ -460,51 +514,58 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── VIDEO SECTION ─────────────────────────────────────────────── */}
-      <section
-        className="es-section"
-        style={{ background: '#111111', borderTop: '1px solid #2C2C2C', borderBottom: '1px solid #2C2C2C' }}
-      >
+      {/* ── VIDEO SECTION — vertical phone frame ────────────────────── */}
+      <section className="es-section es-grit" style={{ background: '#0A0A0A', borderTop: '1px solid #2C2C2C', borderBottom: '1px solid #2C2C2C', position: 'relative' }}>
         <div className="es-container">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Video */}
-            <div className="rounded-lg overflow-hidden aspect-video es-card-grey">
-              <video
-                controls
-                preload="metadata"
-                className="w-full h-full object-cover"
-                poster="/assets/coaching-l1-cover.webp"
-              >
-                <source src="/assets/coaching-l1-video.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-            </div>
-            {/* Copy */}
-            <div>
+            {/* Copy side */}
+            <div className="order-2 lg:order-1">
               <p className="es-label mb-3">See It In Action</p>
               <h2 className="text-3xl font-black text-white mb-4" style={{ letterSpacing: '-0.03em' }}>
                 What Level 1 Coaching Looks Like
               </h2>
               <p className="text-es-muted leading-relaxed mb-6">
                 Every cohort is capped at ten participants. Every event is coached on the gym floor.
-                No passive learning — two full days of practical coaching alongside Paul Smith and Dr Chris Fitzgerald.
+                Two full days of practical coaching alongside Paul Smith and Dr Chris Fitzgerald.
               </p>
               <ul className="space-y-3 mb-8">
-                {[
-                  'Log Press, Axle Press, and Deadlift',
-                  "Farmer's Walk, Yoke, and Atlas Stones",
-                  'Athlete screening and safety protocols',
-                  'Beginner programming and session structure',
-                ].map(item => (
+                {["Log Press, Axle Press & Deadlift", "Farmer's Walk, Yoke & Atlas Stones", "Athlete screening & safety protocols", "Beginner programming & session structure"].map(item => (
                   <li key={item} className="flex items-center gap-3 text-sm text-es-muted">
-                    <span className="w-1.5 h-1.5 rounded-full bg-es-accent flex-shrink-0" />
+                    <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: '#A41C64' }} />
                     {item}
                   </li>
                 ))}
               </ul>
-              <Link to="/courses/level-1-coaching-strongman" className="btn-primary text-sm">
-                View Level 1 Coaching
-              </Link>
+              <Link to="/courses/level-1-coaching-strongman" className="btn-primary text-sm">View Level 1 Coaching</Link>
+            </div>
+
+            {/* Vertical phone-style video frame */}
+            <div className="order-1 lg:order-2 flex justify-center">
+              <div className="relative" style={{ maxWidth: '280px', width: '100%' }}>
+                {/* Phone frame decoration */}
+                <div className="rounded-3xl overflow-hidden" style={{
+                  background: '#1A1A1A',
+                  border: '3px solid #3C3C3C',
+                  boxShadow: '0 0 60px rgba(164,28,100,0.2), 0 20px 80px rgba(0,0,0,0.8)',
+                  aspectRatio: '9/16',
+                }}>
+                  <video
+                    controls
+                    preload="metadata"
+                    playsInline
+                    className="w-full h-full object-contain"
+                    style={{ background: '#000' }}
+                    poster="/assets/coaching-l1-cover.webp"
+                  >
+                    <source src="/assets/coaching-l1-video.mp4" type="video/mp4" />
+                  </video>
+                </div>
+                {/* Decorative glow behind phone */}
+                <div className="absolute inset-0 -z-10 blur-3xl rounded-full" style={{
+                  background: 'radial-gradient(ellipse at center, rgba(164,28,100,0.25) 0%, transparent 70%)',
+                  transform: 'scale(1.3)',
+                }} />
+              </div>
             </div>
           </div>
         </div>
@@ -553,7 +614,7 @@ export default function Home() {
       >
         <div className="es-container">
           <div className="max-w-2xl">
-            <p className="text-xs font-bold uppercase tracking-widest text-green-500 mb-3">EatStrong</p>
+            <p className="es-label mb-3">EatStrong</p>
             <h2 className="text-3xl font-black text-white mb-4" style={{ letterSpacing: '-0.03em' }}>
               Performance Nutrition for Strongman Coaches
             </h2>
@@ -561,7 +622,7 @@ export default function Home() {
               Evidence-based nutrition education built specifically for Strongman. Not generic
               diet advice — practical, scope-of-practice coaching nutrition guidance for the demands of the sport.
             </p>
-            <Link to="/eatstrong" className="btn-secondary text-sm border-green-800 text-green-400 hover:border-green-600">
+            <Link to="/eatstrong" className="btn-secondary text-sm">
               Explore EatStrong
             </Link>
           </div>
@@ -590,6 +651,7 @@ export default function Home() {
             <TeamCard
               name="Dr Chris Fitzgerald"
               title="Tutor & Programme Lead"
+              img="/assets/chris-fitzgerald.avif"
               initials="CF"
             />
             <TeamCard
@@ -605,7 +667,7 @@ export default function Home() {
               initials="VW"
             />
             <TeamCard
-              name="Krish Herbert"
+              name="Kris Herbert"
               title="Director, Digital & Media"
               img="/assets/krish-herbert.jpg"
               initials="KH"

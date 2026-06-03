@@ -22,7 +22,7 @@ const TEAM = [
     id: 'chris',
     name: 'Dr Chris Fitzgerald',
     role: 'Tutor & Programme Lead',
-    img: null,
+    img: '/assets/chris-fitzgerald.avif',
     credentials: [
       'PhD in Health — published researcher',
       'Natural World\'s Strongest Man athlete',
@@ -63,14 +63,17 @@ const TEAM = [
   },
   {
     id: 'krish',
-    name: 'Krish Herbert',
+    name: 'Kris Herbert',
     role: 'Director, Digital & Media',
     img: '/assets/krish-herbert.jpg',
     credentials: [
+      'Natural World\'s Strongest Man 2024 — Under 90 kg — Bronze',
+      'UK & Ireland\'s Strongest Man 2024 — Under 90 kg — Silver (UKNS)',
+      'Wales Strongest Man 2024 — Under 90 kg — Gold (UKNS)',
       'Digital strategy and media production',
       'Education platform development',
     ],
-    bio: 'Krish leads the digital presence and media strategy for Educate.Strong, ensuring the Academy platform serves coaches and athletes with a professional, modern experience.',
+    bio: 'Kris leads the digital presence and media strategy for Educate.Strong, ensuring the Academy platform serves coaches and athletes with a professional, modern experience.',
   },
 ];
 

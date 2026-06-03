@@ -37,13 +37,14 @@ export default function CPD() {
   const percentToTarget = summary ? Math.min(100, Math.round((summary.approvedHours / annualTarget) * 100)) : 0;
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
       <Navbar />
 
-      <div className="bg-white border-b border-gray-200">
+      <div className="pt-navbar" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <h1 className="text-3xl font-bold text-gray-900">CPD Log</h1>
-          <p className="text-gray-500 mt-1">Track and manage your Continuing Professional Development.</p>
+          <p className="es-label mb-2">Learner Area</p>
+          <h1 className="text-3xl font-black text-white">CPD Log</h1>
+          <p className="text-es-muted mt-1">Track and manage your Continuing Professional Development.</p>
         </div>
       </div>
 
@@ -51,86 +52,86 @@ export default function CPD() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             {/* What is CPD */}
-            <Card>
-              <h2 className="text-lg font-bold text-gray-900 mb-3">What is CPD?</h2>
-              <p className="text-gray-600 text-sm leading-relaxed mb-3">
+            <div className="es-card p-6">
+              <h2 className="text-lg font-black text-white mb-3">What is CPD?</h2>
+              <p className="text-es-muted text-sm leading-relaxed mb-3">
                 Continuing Professional Development (CPD) ensures qualified coaches maintain and develop their knowledge and skills throughout their career. Accredited Educate.Strong coaches are expected to log CPD activity each year to maintain their qualification status.
               </p>
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <p className="text-amber-800 text-sm">
+              <div className="rounded-lg p-4" style={{ background: 'rgba(225,154,71,0.08)', border: '1px solid rgba(225,154,71,0.2)' }}>
+                <p className="text-sm" style={{ color: '#E19A47' }}>
                   <strong>CPD logging will be available once you complete your first certification.</strong> Complete Level 1 to access the full CPD tracking system.
                 </p>
               </div>
-            </Card>
+            </div>
 
             {/* CPD activity types */}
-            <Card>
-              <h2 className="text-lg font-bold text-gray-900 mb-4">CPD Activity Types</h2>
+            <div className="es-card p-6">
+              <h2 className="text-lg font-black text-white mb-4">CPD Activity Types</h2>
               <div className="space-y-3">
                 {Object.entries(activityLabels).map(([key, label]) => (
-                  <div key={key} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-                    <span className="text-sm text-gray-700">{label}</span>
-                    <span className="text-xs bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded-full font-medium">
+                  <div key={key} className="flex items-center justify-between py-2" style={{ borderBottom: '1px solid #2C2C2C' }}>
+                    <span className="text-sm text-es-muted">{label}</span>
+                    <span className="badge-grey text-xs">
                       {summary?.byActivity[key] ? `${summary.byActivity[key]}h logged` : '0h'}
                     </span>
                   </div>
                 ))}
               </div>
-            </Card>
+            </div>
           </div>
 
           {/* Sidebar stats */}
           <div className="space-y-5">
-            <Card>
-              <h3 className="font-bold text-gray-900 mb-4">Annual Progress</h3>
+            <div className="es-card p-6">
+              <h3 className="font-black text-white mb-4">Annual Progress</h3>
               {loading ? (
-                <p className="text-gray-400 text-sm">Loading...</p>
+                <p className="text-es-subtle text-sm">Loading...</p>
               ) : (
                 <>
                   <div className="relative w-24 h-24 mx-auto mb-4">
                     <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 36 36">
                       <path
                         d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none" stroke="#E5E7EB" strokeWidth="3"
+                        fill="none" stroke="#2C2C2C" strokeWidth="3"
                       />
                       <path
                         d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none" stroke="#D97706" strokeWidth="3"
+                        fill="none" stroke="#E19A47" strokeWidth="3"
                         strokeDasharray={`${percentToTarget}, 100`}
                       />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-lg font-bold text-gray-900">{percentToTarget}%</span>
+                      <span className="text-lg font-black text-white">{percentToTarget}%</span>
                     </div>
                   </div>
-                  <p className="text-center text-sm text-gray-600">
+                  <p className="text-center text-sm text-es-muted">
                     {summary?.approvedHours || 0} / {annualTarget} hours
                   </p>
-                  <p className="text-center text-xs text-gray-400 mt-1">Annual CPD target</p>
+                  <p className="text-center text-xs text-es-subtle mt-1">Annual CPD target</p>
                 </>
               )}
-            </Card>
+            </div>
 
-            <Card>
+            <div className="es-card p-6">
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Total logged</span>
-                  <span className="font-bold text-gray-900">{summary?.totalHours || 0}h</span>
+                  <span className="text-sm text-es-muted">Total logged</span>
+                  <span className="font-black text-white">{summary?.totalHours || 0}h</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Approved</span>
-                  <span className="font-bold text-green-600">{summary?.approvedHours || 0}h</span>
+                  <span className="text-sm text-es-muted">Approved</span>
+                  <span className="font-black" style={{ color: '#A41C64' }}>{summary?.approvedHours || 0}h</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Pending review</span>
-                  <span className="font-bold text-amber-600">{summary?.pendingCount || 0}</span>
+                  <span className="text-sm text-es-muted">Pending review</span>
+                  <span className="font-black text-es-amber">{summary?.pendingCount || 0}</span>
                 </div>
               </div>
-            </Card>
+            </div>
 
             <Link
               to="/courses"
-              className="block bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold px-4 py-3 rounded-lg transition-colors text-center"
+              className="block btn-primary text-sm text-center"
             >
               Complete a course to begin CPD
             </Link>

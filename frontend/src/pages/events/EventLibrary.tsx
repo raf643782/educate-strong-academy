@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import api from '../../lib/api';
@@ -17,13 +16,13 @@ interface Event {
 
 const CATEGORIES = ['All', 'Press Events', 'Deadlift Events', 'Carry Events', 'Loading Events', 'Pull Events', 'Hold Events'];
 
-const categoryColour: Record<string, string> = {
-  'Press Events': 'bg-blue-100 text-blue-700',
-  'Deadlift Events': 'bg-purple-100 text-purple-700',
-  'Carry Events': 'bg-green-100 text-green-700',
-  'Loading Events': 'bg-amber-100 text-amber-700',
-  'Pull Events': 'bg-orange-100 text-orange-700',
-  'Hold Events': 'bg-red-100 text-red-700',
+const CATEGORY_BADGE: Record<string, string> = {
+  'Press Events': 'badge-accent',
+  'Deadlift Events': 'badge-grey',
+  'Carry Events': 'badge-amber',
+  'Loading Events': 'badge-amber',
+  'Pull Events': 'badge-grey',
+  'Hold Events': 'badge-grey',
 };
 
 const CORE_SIX = ['Log Press', 'Axle Press', 'Deadlift', "Farmer's Walk", 'Yoke Walk', 'Atlas Stones'];
@@ -33,6 +32,7 @@ export default function EventLibrary() {
   const [filtered, setFiltered] = useState<Event[]>([]);
   const [category, setCategory] = useState('All');
   const [loading, setLoading] = useState(true);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   useEffect(() => {
     api.get('/events')
@@ -49,113 +49,189 @@ export default function EventLibrary() {
   const coreSix = events.filter(e => CORE_SIX.includes(e.name));
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
       <Navbar />
 
       {/* Header */}
-      <section className="bg-gray-900 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-amber-400 text-sm font-medium mb-3 uppercase tracking-wide">Competition Reference</p>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Event Library</h1>
-          <p className="text-gray-300 text-lg max-w-2xl">
+      <section className="pt-navbar es-grit" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C', position: 'relative' }}>
+        <div className="es-container py-16">
+          <p className="es-label mb-3">Competition Reference</p>
+          <h1 className="text-4xl md:text-5xl font-black text-white mb-4" style={{ letterSpacing: '-0.04em' }}>Event Library</h1>
+          <p className="text-es-muted text-lg max-w-2xl">
             Technical breakdowns, coaching notes, judging criteria, and programming guidance for every major Strongman competition event.
           </p>
         </div>
       </section>
 
-      <main className="flex-1 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      {/* Filters */}
+      <div style={{ background: '#111111', borderBottom: '1px solid #2C2C2C' }}>
+        <div className="es-container py-4 flex flex-wrap gap-2">
+          {CATEGORIES.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setCategory(cat)}
+              className={`px-4 py-2 rounded text-sm font-semibold transition-all ${category === cat ? 'text-white' : 'text-es-muted hover:text-white border border-es-grey-dark hover:border-es-accent'}`}
+              style={category === cat ? { background: '#A41C64', border: '1px solid rgba(164,28,100,0.6)' } : {}}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex-1">
+        <div className="es-container py-10">
 
           {/* Core Six featured */}
-          {coreSix.length > 0 && (
+          {coreSix.length > 0 && category === 'All' && (
             <div className="mb-12">
               <div className="flex items-center gap-3 mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">The Core Six Events</h2>
-                <span className="bg-amber-100 text-amber-700 text-xs font-semibold px-2.5 py-1 rounded-full">Taught in Level 1</span>
+                <h2 className="text-2xl font-black text-white">The Core Six Events</h2>
+                <span className="badge-amber">Taught in Level 1</span>
               </div>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {coreSix.map(event => (
-                  <div key={event.id} className="bg-white rounded-xl border-2 border-amber-200 hover:border-amber-400 hover:shadow-md transition-all p-6">
-                    <span className={`text-xs px-2 py-0.5 rounded font-medium mb-3 inline-block ${categoryColour[event.category] || 'bg-gray-100 text-gray-600'}`}>
+                  <div
+                    key={event.id}
+                    className="es-card-hover p-6"
+                    style={{ borderTop: '2px solid #E19A47' }}
+                  >
+                    <span className={`${CATEGORY_BADGE[event.category] || 'badge-grey'} mb-3 inline-block`}>
                       {event.category}
                     </span>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">{event.name}</h3>
+                    <h3 className="text-lg font-black text-white mb-2">{event.name}</h3>
                     {event.description && (
-                      <p className="text-sm text-gray-600 leading-relaxed line-clamp-3 mb-4">{event.description}</p>
+                      <p className="text-sm text-es-muted leading-relaxed line-clamp-3 mb-4">{event.description}</p>
                     )}
-                    <Link
-                      to={`/events/${event.slug}`}
-                      className="text-sm text-amber-600 hover:text-amber-700 font-semibold flex items-center gap-1"
+                    <button
+                      onClick={() => setSelectedEvent(event)}
+                      className="btn-amber text-xs py-2 px-4"
                     >
                       View Event
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </Link>
+                    </button>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* All events with filter */}
+          {/* All events */}
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">All Events</h2>
-
-            {/* Category filter */}
-            <div className="flex gap-2 flex-wrap mb-6">
-              {CATEGORIES.map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => setCategory(cat)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                    category === cat
-                      ? 'bg-gray-900 text-white'
-                      : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
+            {category !== 'All' && (
+              <h2 className="text-2xl font-black text-white mb-6">{category}</h2>
+            )}
+            {category === 'All' && (
+              <h2 className="text-2xl font-black text-white mb-6">All Events</h2>
+            )}
 
             {loading ? (
-              <div className="text-center py-16 text-gray-400">Loading events...</div>
+              <div className="text-center py-16 text-es-muted">Loading events...</div>
             ) : filtered.length === 0 ? (
-              <div className="text-center py-16 text-gray-500">No events found in this category.</div>
+              <div className="text-center py-16 text-es-muted">No events found in this category.</div>
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {filtered.map(event => (
-                  <div key={event.id} className="bg-white rounded-xl border border-gray-200 hover:border-amber-300 hover:shadow-md transition-all p-5">
-                    <span className={`text-xs px-2 py-0.5 rounded font-medium mb-3 inline-block ${categoryColour[event.category] || 'bg-gray-100 text-gray-600'}`}>
+                  <div key={event.id} className="es-card-hover flex flex-col p-5">
+                    <span className={`${CATEGORY_BADGE[event.category] || 'badge-grey'} mb-3 inline-block`}>
                       {event.category}
                     </span>
-                    <h3 className="font-bold text-gray-900 mb-2">{event.name}</h3>
+                    <h3 className="font-black text-white mb-2">{event.name}</h3>
                     {event.description && (
-                      <p className="text-sm text-gray-600 leading-relaxed line-clamp-2 mb-4">{event.description}</p>
+                      <p className="text-sm text-es-muted leading-relaxed line-clamp-2 mb-4 flex-1">{event.description}</p>
                     )}
-                    <Link
-                      to={`/events/${event.slug}`}
-                      className="text-sm text-amber-600 hover:text-amber-700 font-semibold flex items-center gap-1"
+                    <button
+                      onClick={() => setSelectedEvent(event)}
+                      className="btn-secondary text-xs py-2"
                     >
                       View Event
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </Link>
+                    </button>
                   </div>
                 ))}
               </div>
             )}
 
             {/* Phase 2 teaser */}
-            <div className="mt-10 bg-gray-100 border border-dashed border-gray-300 rounded-xl p-8 text-center">
-              <p className="text-gray-500 font-medium mb-1">More events coming soon</p>
-              <p className="text-gray-400 text-sm">Pull Events, Hold Events, Medleys, and Specialty Events will be added in Phase 2.</p>
+            <div className="mt-10 es-card text-center py-8 border-dashed">
+              <p className="text-es-muted font-medium mb-1">More events coming soon</p>
+              <p className="text-es-subtle text-sm">Pull Events, Hold Events, Medleys, and Specialty Events will be added in Phase 2.</p>
             </div>
           </div>
         </div>
-      </main>
+      </div>
+
+      {/* Event Detail Modal */}
+      {selectedEvent && (
+        <div
+          className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-16 overflow-y-auto"
+          style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}
+          onClick={(e) => { if (e.target === e.currentTarget) setSelectedEvent(null); }}
+        >
+          <div
+            className="w-full max-w-2xl rounded-lg overflow-hidden"
+            style={{ background: '#1A1A1A', border: '1px solid #3C3C3C', boxShadow: '0 20px 80px rgba(0,0,0,0.9)', marginBottom: '2rem' }}
+          >
+            {/* Modal header */}
+            <div className="flex items-start justify-between p-6" style={{ borderBottom: '1px solid #2C2C2C', background: 'linear-gradient(135deg, rgba(225,154,71,0.1), transparent)' }}>
+              <div>
+                <p className="es-label mb-1">{selectedEvent.category}</p>
+                <h2 className="text-2xl font-black text-white">{selectedEvent.name}</h2>
+                <div className="flex gap-2 mt-2">
+                  <span className={CATEGORY_BADGE[selectedEvent.category] || 'badge-grey'}>{selectedEvent.category}</span>
+                  {selectedEvent.isLaunchPriority && <span className="badge-amber">Core Six</span>}
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedEvent(null)}
+                className="p-2 rounded text-es-muted hover:text-white transition-colors flex-shrink-0"
+                style={{ background: '#2A2A2A' }}
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal body */}
+            <div className="p-6 space-y-6">
+              {selectedEvent.description && (
+                <div>
+                  <p className="es-label mb-2">Event Overview</p>
+                  <p className="text-es-muted text-sm leading-relaxed">{selectedEvent.description}</p>
+                </div>
+              )}
+
+              {selectedEvent.coachingNotes && (
+                <div>
+                  <p className="es-label mb-3">Coaching Notes</p>
+                  <div className="es-card-grey p-4 rounded-lg">
+                    <p className="text-sm text-es-muted leading-relaxed">{selectedEvent.coachingNotes}</p>
+                  </div>
+                </div>
+              )}
+
+              {selectedEvent.judgingCriteria && (
+                <div>
+                  <p className="es-label mb-3">Judging Criteria</p>
+                  <p className="text-sm text-es-muted leading-relaxed">{selectedEvent.judgingCriteria}</p>
+                </div>
+              )}
+
+              {!selectedEvent.description && !selectedEvent.coachingNotes && !selectedEvent.judgingCriteria && (
+                <div className="text-center py-8">
+                  <p className="text-es-muted text-sm">Full event details coming in Phase 2.</p>
+                  <p className="text-es-subtle text-xs mt-2">Coaching notes, judging criteria, and programming guidance will be added shortly.</p>
+                </div>
+              )}
+
+              <div className="pt-2" style={{ borderTop: '1px solid #2C2C2C' }}>
+                <p className="text-xs text-es-subtle italic">
+                  Event reference data is reviewed by the Educate.Strong coaching and refereeing team.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

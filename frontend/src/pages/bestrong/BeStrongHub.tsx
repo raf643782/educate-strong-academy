@@ -86,51 +86,44 @@ export default function EatStrongHub() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
       <Navbar />
 
       {/* Hero */}
-      <section className="bg-green-900 text-white py-16 md:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-green-400 text-xs font-semibold uppercase tracking-widest mb-4">
-            Educate.Strong
-          </p>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight tracking-tight">
+      <section className="es-grit" style={{ background: 'radial-gradient(ellipse 80% 50% at 50% -5%, rgba(164,28,100,0.2) 0%, transparent 65%), #141414', borderBottom: '1px solid #2C2C2C', position: 'relative', paddingTop: '64px', paddingBottom: '64px' }}>
+        <div className="es-container py-12 md:py-16">
+          <p className="es-label mb-4">Educate.Strong</p>
+          <h1 className="text-4xl md:text-5xl font-black text-white mb-4 leading-tight" style={{ letterSpacing: '-0.04em' }}>
             EatStrong
           </h1>
-          <p className="text-green-100 text-xl max-w-2xl leading-relaxed mb-8">
+          <p className="text-es-muted text-xl max-w-2xl leading-relaxed mb-8">
             Dedicated nutrition education for Strongman coaches and athletes.
             Evidence-based, practically focused, written with coach scope of
             practice at the centre.
           </p>
           <div className="flex flex-wrap gap-2 text-sm">
             {['Strongman Nutrition', 'Competition Fuelling', 'Recovery', 'Making Weight', 'Hydration', 'Supplements'].map(tag => (
-              <span
-                key={tag}
-                className="border border-green-700 rounded px-3 py-1 text-green-200 text-xs font-medium"
-              >
-                {tag}
-              </span>
+              <span key={tag} className="badge-grey text-xs">{tag}</span>
             ))}
           </div>
         </div>
       </section>
 
       {/* Scope disclaimer */}
-      <div className="bg-green-50 border-b border-green-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <p className="text-xs text-green-700 leading-relaxed">{SCOPE_DISCLAIMER}</p>
+      <div style={{ background: 'rgba(225,154,71,0.06)', borderBottom: '1px solid rgba(225,154,71,0.2)' }}>
+        <div className="es-container py-3">
+          <p className="text-xs leading-relaxed" style={{ color: '#E19A47', opacity: 0.85 }}>{SCOPE_DISCLAIMER}</p>
         </div>
       </div>
 
-      <main className="flex-1 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="flex-1" style={{ background: '#0D0D0D' }}>
+        <div className="es-container py-12">
 
           {/* Featured articles */}
           {featured.length > 0 && (
             <section className="mb-14">
-              <h2 className="text-2xl font-bold text-gray-900 mb-1">Start here</h2>
-              <p className="text-gray-500 text-sm mb-6">
+              <h2 className="text-2xl font-black text-white mb-1">Start here</h2>
+              <p className="text-es-muted text-sm mb-6">
                 The most useful resources for coaches and athletes.
               </p>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -138,27 +131,27 @@ export default function EatStrongHub() {
                   <Link
                     key={article.id}
                     to={`/eatstrong/articles/${article.slug}`}
-                    className="group bg-white rounded-lg border border-gray-200 hover:border-green-500 hover:shadow-sm transition-all p-5 flex flex-col"
+                    className="group es-card-hover p-5 flex flex-col"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <CategoryLabel category={article.category} />
                       {article.accessLevel === 'FREE' && (
-                        <span className="text-xs text-green-700 font-medium">Free</span>
+                        <span className="badge-grey text-xs">Free</span>
                       )}
                     </div>
-                    <h3 className="font-bold text-gray-900 group-hover:text-green-800 transition-colors leading-snug mb-2 flex-1 text-sm">
+                    <h3 className="font-bold text-white leading-snug mb-2 flex-1 text-sm">
                       {article.title}
                     </h3>
                     {article.summary && (
-                      <p className="text-xs text-gray-500 leading-relaxed line-clamp-2 mb-3">
+                      <p className="text-xs text-es-muted leading-relaxed line-clamp-2 mb-3">
                         {article.summary}
                       </p>
                     )}
-                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-100">
+                    <div className="flex items-center justify-between mt-auto pt-3" style={{ borderTop: '1px solid #2C2C2C' }}>
                       {article.readMinutes && (
-                        <span className="text-xs text-gray-400">{article.readMinutes} min read</span>
+                        <span className="text-xs text-es-subtle">{article.readMinutes} min read</span>
                       )}
-                      <span className="text-xs text-green-700 font-semibold ml-auto">
+                      <span className="text-xs font-semibold ml-auto" style={{ color: '#A41C64' }}>
                         Read article
                       </span>
                     </div>
@@ -170,8 +163,8 @@ export default function EatStrongHub() {
 
           {/* Category grid */}
           <section className="mb-14">
-            <h2 className="text-2xl font-bold text-gray-900 mb-1">Browse by topic</h2>
-            <p className="text-gray-500 text-sm mb-6">
+            <h2 className="text-2xl font-black text-white mb-1">Browse by topic</h2>
+            <p className="text-es-muted text-sm mb-6">
               All EatStrong content, organised by subject.
             </p>
 
@@ -180,28 +173,27 @@ export default function EatStrongHub() {
                 {[...Array(6)].map((_, i) => (
                   <div
                     key={i}
-                    className="bg-white rounded-lg border border-gray-200 p-5 animate-pulse h-28"
+                    className="es-card p-5 animate-pulse h-28"
                   />
                 ))}
               </div>
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {categories.map(cat => {
-                  const accent = CATEGORY_ACCENT[cat.colour] || 'border-l-gray-400';
-                  const textColour = CATEGORY_TEXT[cat.colour] || 'text-gray-700';
                   return (
                     <Link
                       key={cat.key}
                       to={`/eatstrong/category/${cat.key.toLowerCase()}`}
-                      className={`group bg-white rounded-lg border border-gray-200 border-l-4 ${accent} hover:shadow-sm transition-all p-5`}
+                      className="group es-card-hover p-5"
+                      style={{ borderLeft: '3px solid #A41C64' }}
                     >
-                      <h3 className={`font-bold text-sm ${textColour} mb-2 group-hover:underline`}>
+                      <h3 className="font-bold text-sm text-white mb-2 group-hover:text-es-accent transition-colors">
                         {cat.label}
                       </h3>
-                      <p className="text-xs text-gray-500 leading-relaxed line-clamp-2 mb-3">
+                      <p className="text-xs text-es-muted leading-relaxed line-clamp-2 mb-3">
                         {cat.description}
                       </p>
-                      <div className="flex items-center gap-3 text-xs text-gray-400">
+                      <div className="flex items-center gap-3 text-xs text-es-subtle">
                         {cat.articleCount > 0 && (
                           <span>{cat.articleCount} article{cat.articleCount !== 1 ? 's' : ''}</span>
                         )}
@@ -219,12 +211,12 @@ export default function EatStrongHub() {
 
           {/* Course connection */}
           <section>
-            <div className="bg-green-900 text-white rounded-xl p-8 flex flex-col md:flex-row items-start md:items-center gap-6">
+            <div className="rounded-xl p-8 flex flex-col md:flex-row items-start md:items-center gap-6" style={{ background: '#1A1A1A', border: '1px solid #2C2C2C', borderLeft: '3px solid #A41C64' }}>
               <div className="flex-1">
-                <h3 className="text-lg font-bold mb-2">
+                <h3 className="text-lg font-black text-white mb-2">
                   EatStrong connects to your coaching qualifications
                 </h3>
-                <p className="text-green-200 text-sm leading-relaxed">
+                <p className="text-es-muted text-sm leading-relaxed">
                   Nutrition content appears as contextual prompts throughout the
                   Level 1, Level 2, and Level 3 coaching courses — so the right
                   resource appears at the right moment during your learning.
@@ -232,7 +224,7 @@ export default function EatStrongHub() {
               </div>
               <Link
                 to="/courses"
-                className="flex-shrink-0 bg-white text-green-900 font-semibold px-6 py-2.5 rounded-lg hover:bg-green-50 transition-colors text-sm"
+                className="btn-primary flex-shrink-0 text-sm"
               >
                 Explore Coaching Courses
               </Link>
@@ -260,7 +252,7 @@ function CategoryLabel({ category }: { category: string }) {
     DOWNLOADS:       'Downloads',
   };
   return (
-    <span className="text-xs bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded font-medium">
+    <span className="badge-grey">
       {labels[category] || category}
     </span>
   );
