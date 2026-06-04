@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
+import AcademyInAction from '../../components/sections/AcademyInAction';
+import QualifiedReferees from '../../components/sections/QualifiedReferees';
+import PartnerLogosMarquee from '../../components/sections/PartnerLogosMarquee';
 
 /* ── Shared section heading ───────────────────────────────────────── */
 function SectionHeader({
@@ -292,34 +295,8 @@ export default function Home() {
           style={{ background: 'linear-gradient(transparent, #0D0D0D)' }} />
       </section>
 
-      {/* ── TRUST BAR ─────────────────────────────────────────────────── */}
-      <section style={{ background: '#141414', borderTop: '1px solid #2C2C2C', borderBottom: '1px solid #2C2C2C' }}>
-        <div className="es-container py-6">
-          <div className="flex flex-wrap items-center justify-between gap-6">
-            <p className="text-xs text-es-subtle uppercase tracking-widest">Trusted by</p>
-            <div className="flex flex-wrap items-center gap-8">
-              {/* British Army logo */}
-              <div className="flex items-center gap-2.5">
-                <img src="/assets/british-army-logo.webp" alt="British Army" className="h-8 w-auto opacity-70" />
-                <span className="text-xs text-es-muted">Armed Forces Partner</span>
-              </div>
-              {/* Active IQ */}
-              <div className="flex items-center gap-2">
-                <span className="badge-accent">Active IQ</span>
-                <span className="text-xs text-es-muted">Accredited</span>
-              </div>
-              {/* WHEA.GB */}
-              <div>
-                <span className="text-xs text-es-muted">WHEA.GB Endorsed</span>
-              </div>
-              {/* Mind Body Connect */}
-              <div>
-                <span className="text-xs text-es-muted">Mind Body Connect — Charity No. 1173834</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* ── TRUST LOGOS — animated marquee ───────────────────────────── */}
+      <PartnerLogosMarquee />
 
       {/* ── FOUR PATHWAYS ─────────────────────────────────────────────── */}
       <section className="es-section" style={{ background: '#0D0D0D' }}>
@@ -693,6 +670,12 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ── QUALIFIED REFEREES ───────────────────────────────────────── */}
+      <QualifiedReferees />
+
+      {/* ── ACADEMY IN ACTION (Instagram) ────────────────────────────── */}
+      <AcademyInAction />
 
       {/* ── FINAL CTA ─────────────────────────────────────────────────── */}
       <section

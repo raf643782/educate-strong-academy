@@ -267,4 +267,89 @@
     background: linear-gradient(135deg, #A41C64, #7A1349);
     border: 1px solid rgba(164,28,100,0.4);
   }
+
+  /* ── Animations ─────────────────────────────────────────────────────── */
+
+  /* Fade up on scroll — applied with animation-delay via inline style */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-up {
+    animation: fadeInUp 0.6s ease forwards;
+    opacity: 0;
+  }
+  .animate-fade-up-delay-1 { animation-delay: 0.1s; }
+  .animate-fade-up-delay-2 { animation-delay: 0.2s; }
+  .animate-fade-up-delay-3 { animation-delay: 0.3s; }
+  .animate-fade-up-delay-4 { animation-delay: 0.4s; }
+
+  /* Gentle horizontal drift — for trust logo strip */
+  @keyframes logoDrift {
+    0%   { transform: translateX(0); }
+    50%  { transform: translateX(-8px); }
+    100% { transform: translateX(0); }
+  }
+  .animate-logo-drift {
+    animation: logoDrift 6s ease-in-out infinite;
+  }
+  .animate-logo-drift-2 { animation-delay: 1s; }
+  .animate-logo-drift-3 { animation-delay: 2s; }
+  .animate-logo-drift-4 { animation-delay: 3s; }
+
+  /* Pulse glow — accent elements */
+  @keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 20px rgba(164,28,100,0.2); }
+    50%       { box-shadow: 0 0 40px rgba(164,28,100,0.4); }
+  }
+  .animate-pulse-glow {
+    animation: pulseGlow 4s ease-in-out infinite;
+  }
+
+  /* Chalk burst — appears and fades */
+  @keyframes chalkBurst {
+    0%   { opacity: 0; transform: scale(0.8); }
+    30%  { opacity: 0.15; transform: scale(1.1); }
+    100% { opacity: 0; transform: scale(1.4); }
+  }
+  .chalk-burst {
+    animation: chalkBurst 3s ease-out infinite;
+  }
+
+  /* Instagram embed override — force dark border, hide white bg */
+  .ig-embed-wrapper iframe {
+    border-radius: 8px !important;
+    border: none !important;
+  }
+
+  /* Progress bar animation */
+  @keyframes progressFill {
+    from { width: 0%; }
+  }
+  .progress-fill {
+    animation: progressFill 1.2s ease-out forwards;
+  }
+
+  /* Shimmer loading effect */
+  @keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .shimmer {
+    background: linear-gradient(90deg, #1A1A1A 25%, #2A2A2A 50%, #1A1A1A 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  /* Horizontal logo marquee */
+  @keyframes marquee {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee 20s linear infinite;
+  }
+  .marquee-track:hover { animation-play-state: paused; }
 }

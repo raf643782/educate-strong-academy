@@ -98,9 +98,10 @@ export default function Navbar() {
           {/* Brand lockup */}
           <Link to="/" className="flex items-center gap-2.5 flex-shrink-0 group">
             <img
-              src="/assets/es-logo.png"
+              src="/assets/es-logo-v3.svg"
               alt="Educate.Strong owl mark"
               className={`w-auto transition-all duration-300 ${scrolled ? 'h-7' : 'h-8'}`}
+              onError={(e) => { (e.target as HTMLImageElement).src = '/assets/es-logo.png'; }}
             />
             <span className="text-sm font-black tracking-tight leading-none hidden sm:block" style={{ color: '#A41C64' }}>
               Educate<span style={{ color: '#A41C64' }}>.</span><span style={{ color: '#A41C64' }}>strong</span>
