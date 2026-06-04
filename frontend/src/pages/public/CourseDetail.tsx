@@ -177,13 +177,14 @@ export default function CourseDetail() {
         />
 
         {/* 3: Why this course */}
-        <section className="bg-white py-16 md:py-20 border-b border-gray-100">
+        <section style={{ background: '#0D0D0D', borderBottom: '1px solid #2C2C2C' }} className="py-14 md:py-18">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl">
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-5">
+              <p className="es-label mb-3">Overview</p>
+              <h2 className="text-2xl md:text-3xl font-black text-white mb-5" style={{ letterSpacing: '-0.03em' }}>
                 {richData.whyHeading}
               </h2>
-              <p className="text-gray-700 leading-relaxed text-base">{richData.whyCopy}</p>
+              <p className="text-es-muted leading-relaxed text-base">{richData.whyCopy}</p>
             </div>
           </div>
         </section>
@@ -264,34 +265,28 @@ export default function CourseDetail() {
           }}
         />
 
-        {/* LMS module accordion — shown for enrolled users or below the fold */}
+        {/* LMS module accordion */}
         {course.modules.length > 0 && (
-          <section className="bg-gray-50 py-16 border-t border-gray-200">
+          <section style={{ background: '#0A0A0A', borderTop: '1px solid #2C2C2C' }} className="py-14">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="max-w-3xl">
                 <div className="flex items-start justify-between gap-4 mb-6">
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900 mb-1">
-                      Online Learning Materials
-                    </h2>
-                    <p className="text-gray-500 text-sm">
-                      Pre-course preparation and post-course reference content, available through the Academy.
-                    </p>
+                    <p className="es-label mb-1">Online Materials</p>
+                    <h2 className="text-xl font-black text-white mb-1">Online Learning Materials</h2>
+                    <p className="text-es-muted text-sm">Pre-course preparation and reference content.</p>
                   </div>
                   {!enrolled && (
                     <button
                       onClick={isAuthenticated ? handleEnrol : () => navigate('/login')}
                       disabled={enrolling}
-                      className="flex-shrink-0 border border-amber-600 text-amber-600 hover:bg-amber-50 font-semibold px-4 py-2 rounded-lg transition-colors text-sm disabled:opacity-50"
+                      className="btn-secondary text-xs py-2 px-4 flex-shrink-0 disabled:opacity-50"
                     >
                       {enrolling ? 'Enrolling...' : 'Enrol Free'}
                     </button>
                   )}
                   {enrolled && firstLessonUrl && (
-                    <Link
-                      to={firstLessonUrl}
-                      className="flex-shrink-0 border border-amber-600 text-amber-600 hover:bg-amber-50 font-semibold px-4 py-2 rounded-lg transition-colors text-sm"
-                    >
+                    <Link to={firstLessonUrl} className="btn-primary text-xs py-2 px-4 flex-shrink-0">
                       Start Learning
                     </Link>
                   )}
@@ -301,25 +296,25 @@ export default function CourseDetail() {
                   {course.modules.map((mod, idx) => (
                     <div
                       key={mod.id}
-                      className="border border-gray-200 rounded-xl overflow-hidden bg-white"
+                      className="es-card overflow-hidden"
                     >
                       <button
                         onClick={() => toggleModule(mod.id)}
-                        className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
+                        className="w-full flex items-center justify-between p-4 text-left hover:bg-es-card transition-colors"
                       >
                         <div className="flex items-center gap-3">
-                          <span className="w-6 h-6 bg-amber-100 text-amber-700 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0">
+                          <span className="w-6 h-6 bg-es-grey text-white rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0">
                             {idx + 1}
                           </span>
                           <div>
-                            <p className="font-semibold text-gray-900 text-sm">{mod.title}</p>
-                            <p className="text-xs text-gray-400 mt-0.5">
+                            <p className="font-semibold text-white text-sm">{mod.title}</p>
+                            <p className="text-xs text-es-subtle mt-0.5">
                               {mod.lessons.length} lesson{mod.lessons.length !== 1 ? 's' : ''}
                             </p>
                           </div>
                         </div>
                         <svg
-                          className={`w-4 h-4 text-gray-400 transition-transform ${
+                          className={`w-4 h-4 text-es-subtle transition-transform ${
                             openModules.has(mod.id) ? 'rotate-180' : ''
                           }`}
                           fill="none"
@@ -335,7 +330,7 @@ export default function CourseDetail() {
                         </svg>
                       </button>
                       {openModules.has(mod.id) && (
-                        <div className="border-t border-gray-100 divide-y divide-gray-50">
+                        <div className="divide-y divide-es-grey-dark">
                           {mod.lessons.map((lesson) => (
                             <div
                               key={lesson.id}
@@ -343,7 +338,7 @@ export default function CourseDetail() {
                             >
                               <div className="flex items-center gap-3">
                                 <svg
-                                  className="w-4 h-4 text-gray-300 flex-shrink-0"
+                                  className="w-4 h-4 text-es-subtle flex-shrink-0"
                                   fill="none"
                                   viewBox="0 0 24 24"
                                   stroke="currentColor"
@@ -355,10 +350,10 @@ export default function CourseDetail() {
                                     d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
                                   />
                                 </svg>
-                                <span className="text-sm text-gray-700">{lesson.title}</span>
+                                <span className="text-sm text-es-muted">{lesson.title}</span>
                               </div>
                               {lesson.durationMinutes && (
-                                <span className="text-xs text-gray-400">{lesson.durationMinutes}m</span>
+                                <span className="text-xs text-es-subtle">{lesson.durationMinutes}m</span>
                               )}
                             </div>
                           ))}
@@ -384,7 +379,7 @@ export default function CourseDetail() {
       <Navbar />
 
       {/* Simple hero */}
-      <div className="bg-gray-900 text-white py-16">
+      <div className="pt-navbar py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-4 flex gap-2 flex-wrap">
             <Badge variant={pathwayVariant(course.pathway)}>{pathwayLabel(course.pathway)}</Badge>
@@ -422,9 +417,9 @@ export default function CourseDetail() {
       </div>
 
       {/* Coming soon notice for un-detailed courses */}
-      <div className="bg-amber-50 border-b border-amber-200">
+      <div className="border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <p className="text-sm text-amber-800">
+          <p className="text-sm text-es-amber">
             Full course details for this qualification are being prepared. Contact{' '}
             <a
               href="mailto:educate.strongltd@gmail.com"
@@ -440,27 +435,27 @@ export default function CourseDetail() {
       {/* Module list */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex-1">
         <div className="max-w-3xl">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Course Curriculum</h2>
+          <h2 className="text-2xl font-black text-white mb-6">Course Curriculum</h2>
           <div className="space-y-2">
             {course.modules.map((mod, idx) => (
-              <div key={mod.id} className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+              <div key={mod.id} className="es-card overflow-hidden">
                 <button
                   onClick={() => toggleModule(mod.id)}
-                  className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
+                  className="w-full flex items-center justify-between p-4 text-left hover:bg-es-card transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 bg-amber-100 text-amber-700 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0">
+                    <span className="w-6 h-6 bg-es-grey text-white rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0">
                       {idx + 1}
                     </span>
                     <div>
-                      <p className="font-semibold text-gray-900 text-sm">{mod.title}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">
+                      <p className="font-semibold text-white text-sm">{mod.title}</p>
+                      <p className="text-xs text-es-subtle mt-0.5">
                         {mod.lessons.length} lesson{mod.lessons.length !== 1 ? 's' : ''}
                       </p>
                     </div>
                   </div>
                   <svg
-                    className={`w-4 h-4 text-gray-400 transition-transform ${
+                    className={`w-4 h-4 text-es-subtle transition-transform ${
                       openModules.has(mod.id) ? 'rotate-180' : ''
                     }`}
                     fill="none"
@@ -471,12 +466,12 @@ export default function CourseDetail() {
                   </svg>
                 </button>
                 {openModules.has(mod.id) && (
-                  <div className="border-t border-gray-100 divide-y divide-gray-50">
+                  <div className="divide-y divide-es-grey-dark">
                     {mod.lessons.map((lesson) => (
                       <div key={lesson.id} className="flex items-center justify-between px-5 py-3">
-                        <span className="text-sm text-gray-700">{lesson.title}</span>
+                        <span className="text-sm text-es-muted">{lesson.title}</span>
                         {lesson.durationMinutes && (
-                          <span className="text-xs text-gray-400">{lesson.durationMinutes}m</span>
+                          <span className="text-xs text-es-subtle">{lesson.durationMinutes}m</span>
                         )}
                       </div>
                     ))}

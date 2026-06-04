@@ -6,34 +6,23 @@ interface CourseEndorsementsProps {
 
 export default function CourseEndorsements({ endorsements }: CourseEndorsementsProps) {
   return (
-    <section className="bg-white py-16 md:py-20 border-b border-gray-100">
+    <section style={{ background: '#111111', borderBottom: '1px solid #2C2C2C' }} className="py-14">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">Formally Endorsed</h2>
-        <p className="text-gray-600 mb-8 max-w-xl">
-          This certification is recognised by established Strongman governing bodies.
-        </p>
-
+        <p className="es-label mb-3">Formally Endorsed</p>
+        <h2 className="text-2xl font-black text-white mb-8" style={{ letterSpacing: '-0.03em' }}>Recognised by Governing Bodies</h2>
         <div className="grid sm:grid-cols-2 gap-5">
-          {endorsements.map((item) => (
-            <div
-              key={item.name}
-              className="border border-gray-200 rounded-xl p-6 flex flex-col gap-4"
-            >
-              {/* Logo placeholder */}
-              <div className="bg-gray-100 rounded-lg h-14 flex items-center justify-center">
-                <p className="text-xs text-gray-400 font-medium">{item.name} — Logo pending permission</p>
+          {endorsements.map(item => (
+            <div key={item.name} className="es-card p-6 flex flex-col gap-4">
+              <div className="h-12 rounded-lg flex items-center px-3" style={{ background: '#2A2A2A', border: '1px solid #3C3C3C' }}>
+                <span className="text-xs text-es-muted font-medium">{item.name} — Logo pending permission</span>
               </div>
-
-              <div>
-                <p className="font-bold text-gray-900 mb-2">{item.name}</p>
-                <p className="text-sm text-gray-600 leading-relaxed">{item.description}</p>
-              </div>
+              <p className="font-bold text-white">{item.name}</p>
+              <p className="text-sm text-es-muted leading-relaxed">{item.description}</p>
             </div>
           ))}
         </div>
-
-        <p className="text-xs text-gray-400 mt-6">
-          Logos displayed subject to permission from endorsing organisations. Contact Educate.Strong to confirm current endorsement status.
+        <p className="text-xs text-es-subtle mt-5">
+          Endorsement details subject to confirmation. Contact Educate.Strong to verify current endorsement status.
         </p>
       </div>
     </section>

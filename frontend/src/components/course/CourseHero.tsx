@@ -1,4 +1,5 @@
 import CourseBadgeRow from './CourseBadgeRow';
+import { Link } from 'react-router-dom';
 
 interface CourseHeroProps {
   badges: string[];
@@ -6,7 +7,6 @@ interface CourseHeroProps {
   subHeadline: string;
   keyFacts: string[];
   contactEmail: string;
-  // LMS enrolment state (optional — used when user is logged in)
   isEnrolled?: boolean;
   firstLessonUrl?: string;
   onEnrol?: () => void;
@@ -14,92 +14,69 @@ interface CourseHeroProps {
 }
 
 export default function CourseHero({
-  badges,
-  headline,
-  subHeadline,
-  keyFacts,
-  contactEmail,
-  isEnrolled,
-  firstLessonUrl,
-  onEnrol,
-  enrolling,
+  badges, headline, subHeadline, keyFacts, contactEmail,
+  isEnrolled, firstLessonUrl, onEnrol, enrolling,
 }: CourseHeroProps) {
   const securePlaceHref = `mailto:${contactEmail}?subject=Secure%20My%20Place%20on%20the%20Educate.Strong%20Course`;
 
   return (
-    <section className="bg-gray-900 text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+    <section
+      className="es-grit"
+      style={{
+        background: 'radial-gradient(ellipse 80% 50% at 50% -5%, rgba(164,28,100,0.28) 0%, transparent 65%), #141414',
+        borderBottom: '1px solid #2C2C2C',
+        position: 'relative',
+        paddingTop: '64px',
+      }}
+    >
+      {/* Grid texture */}
+      <div className="absolute inset-0 pointer-events-none" style={{
+        backgroundImage: 'linear-gradient(rgba(60,60,60,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(60,60,60,0.05) 1px, transparent 1px)',
+        backgroundSize: '48px 48px',
+      }} />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 relative z-10">
         <div className="max-w-3xl">
-          {/* Badges */}
-          <div className="mb-7">
+          <div className="mb-6">
             <CourseBadgeRow badges={badges} />
           </div>
-
-          {/* Headline */}
-          <h1 className="text-4xl md:text-5xl font-bold leading-tight tracking-tight mb-5">
+          <h1 className="font-black text-white leading-tight mb-5"
+            style={{ fontSize: 'clamp(2rem, 4.5vw, 3.25rem)', letterSpacing: '-0.04em' }}>
             {headline}
           </h1>
-
-          {/* Sub-headline */}
-          <p className="text-gray-300 text-lg md:text-xl leading-relaxed mb-8 max-w-2xl">
-            {subHeadline}
-          </p>
-
-          {/* Key facts strip */}
+          <p className="text-es-muted text-lg leading-relaxed mb-8 max-w-2xl">{subHeadline}</p>
           <div className="flex flex-wrap gap-x-6 gap-y-2 mb-10">
-            {keyFacts.map((fact) => (
-              <div key={fact} className="flex items-center gap-2 text-sm text-gray-400">
-                <span className="w-1 h-1 bg-amber-500 rounded-full flex-shrink-0" />
+            {keyFacts.map(fact => (
+              <div key={fact} className="flex items-center gap-2 text-sm text-es-muted">
+                <span className="w-1 h-1 rounded-full bg-es-accent flex-shrink-0" />
                 {fact}
               </div>
             ))}
           </div>
-
-          {/* CTA group */}
           <div className="flex flex-wrap items-center gap-4">
             {isEnrolled && firstLessonUrl ? (
-              /* Logged-in enrolled user — go to learning materials */
-              <a
-                href={firstLessonUrl}
-                className="bg-amber-600 hover:bg-amber-500 text-white font-semibold px-7 py-3.5 rounded-lg transition-colors text-sm"
-              >
-                Continue Learning
-              </a>
+              <Link to={firstLessonUrl} className="btn-primary text-sm">Continue Learning</Link>
             ) : isEnrolled ? (
-              <span className="bg-green-700 text-white font-semibold px-7 py-3.5 rounded-lg text-sm">
-                Enrolled in Online Materials
-              </span>
+              <span className="btn-primary text-sm opacity-70">Enrolled in Online Materials</span>
             ) : (
-              /* Default — in-person booking via email */
-              <a
-                href={securePlaceHref}
-                className="bg-amber-600 hover:bg-amber-500 text-white font-semibold px-7 py-3.5 rounded-lg transition-colors text-sm"
-              >
-                Secure Your Place
-              </a>
+              <a href={securePlaceHref} className="btn-primary text-sm">Secure Your Place</a>
             )}
-
-            {/* Secondary — enrol in online materials if logged in and not enrolled */}
             {onEnrol && !isEnrolled && (
-              <button
-                onClick={onEnrol}
-                disabled={enrolling}
-                className="border border-gray-600 hover:border-gray-400 text-gray-300 hover:text-white font-medium px-5 py-3.5 rounded-lg transition-colors text-sm disabled:opacity-50"
-              >
+              <button onClick={onEnrol} disabled={enrolling}
+                className="btn-secondary text-sm disabled:opacity-50">
                 {enrolling ? 'Enrolling...' : 'Access Online Materials'}
               </button>
             )}
-
-            {/* Scroll-down secondary link */}
-            <a
-              href="#course-details"
-              className="text-gray-400 hover:text-white text-sm font-medium transition-colors"
-            >
+            <a href="#course-details" className="text-es-muted hover:text-white text-sm transition-colors">
               View course details
             </a>
           </div>
         </div>
       </div>
+
+      {/* Bottom fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
+        style={{ background: 'linear-gradient(transparent, #0D0D0D)' }} />
     </section>
   );
 }

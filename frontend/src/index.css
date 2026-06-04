@@ -177,22 +177,44 @@
   .hide-scrollbar::-webkit-scrollbar { display: none; }
   .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-  /* ── Grit texture ──────────────────────────────────────────────────── */
-  /* Subtle noise texture overlay for dark sections */
-  .es-grit {
-    position: relative;
-  }
+  /* ── Grit texture system ───────────────────────────────────────────── */
+
+  /* Base grit — subtle fractal noise overlay */
+  .es-grit { position: relative; overflow: hidden; }
   .es-grit::after {
     content: '';
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
-    background-repeat: repeat;
     z-index: 1;
-    opacity: 0.6;
+    opacity: 0.5;
+    /* Layered noise + subtle diagonal scratch marks */
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"),
+      repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 120px,
+        rgba(255,255,255,0.008) 120px,
+        rgba(255,255,255,0.008) 121px
+      );
   }
   .es-grit > * { position: relative; z-index: 2; }
+
+  /* Heavy grit — more texture, for hero and CTA sections */
+  .es-grit-heavy { position: relative; overflow: hidden; }
+  .es-grit-heavy::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E"),
+      repeating-linear-gradient(-60deg, transparent, transparent 80px, rgba(255,255,255,0.01) 80px, rgba(255,255,255,0.01) 81px),
+      repeating-linear-gradient(30deg, transparent, transparent 100px, rgba(164,28,100,0.015) 100px, rgba(164,28,100,0.015) 101px);
+  }
+  .es-grit-heavy > * { position: relative; z-index: 2; }
 
   /* Chalk dust overlay (lighter, used on hero sections) */
   .es-chalk::before {

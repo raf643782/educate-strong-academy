@@ -10,52 +10,45 @@ export default function CoursePricingCard({ pricing, contactEmail }: CoursePrici
   const armedForcesHref = `mailto:${contactEmail}?subject=Armed%20Forces%20Discount%20Enquiry`;
 
   return (
-    <section className="bg-gray-50 py-16 md:py-20 border-b border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="es-grit" style={{ background: '#0A0A0A', borderBottom: '1px solid #2C2C2C', position: 'relative' }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-18">
         <div className="max-w-2xl">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8">Course Fee</h2>
+          <p className="es-label mb-3">Investment</p>
+          <h2 className="text-2xl md:text-3xl font-black text-white mb-8" style={{ letterSpacing: '-0.03em' }}>Course Fee</h2>
 
-          <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+          <div className="rounded-xl overflow-hidden" style={{ border: '1px solid #3C3C3C' }}>
             {/* Header */}
-            <div className="bg-gray-900 text-white px-6 py-5">
-              <p className="text-sm text-gray-400 mb-1">{pricing.title}</p>
+            <div className="px-6 py-5" style={{
+              background: 'linear-gradient(135deg, #1A1A1A, #141414)',
+              borderBottom: '1px solid #2C2C2C',
+            }}>
+              <p className="text-xs text-es-muted mb-1">{pricing.title}</p>
               <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-bold">£{pricing.totalFee}</span>
-                <span className="text-gray-400 text-sm">total course fee</span>
+                <span className="text-4xl font-black text-white">£{pricing.totalFee}</span>
+                <span className="text-es-muted text-sm">total course fee</span>
               </div>
             </div>
 
-            {/* Deposit structure */}
-            <div className="px-6 py-5 border-b border-gray-100">
-              <div className="flex items-center justify-between py-2">
-                <span className="text-sm text-gray-600">Deposit to secure your place</span>
-                <span className="text-sm font-semibold text-gray-900">£{pricing.deposit}</span>
+            {/* Deposit */}
+            <div className="px-6 py-4" style={{ borderBottom: '1px solid #2C2C2C', background: '#1C1C1C' }}>
+              <div className="flex items-center justify-between py-1.5">
+                <span className="text-sm text-es-muted">Deposit to secure your place</span>
+                <span className="text-sm font-bold text-white">£{pricing.deposit}</span>
               </div>
-              <div className="flex items-center justify-between py-2">
-                <span className="text-sm text-gray-600">Remaining balance</span>
-                <span className="text-sm font-semibold text-gray-900">
-                  £{pricing.totalFee - pricing.deposit}
-                </span>
+              <div className="flex items-center justify-between py-1.5">
+                <span className="text-sm text-es-muted">Remaining balance</span>
+                <span className="text-sm font-bold text-white">£{pricing.totalFee - pricing.deposit}</span>
               </div>
-              <div className="flex items-start justify-between py-2">
-                <span className="text-sm text-gray-500">{pricing.balanceTiming}</span>
-              </div>
+              <p className="text-xs text-es-subtle mt-1">{pricing.balanceTiming}</p>
             </div>
 
-            {/* What is included */}
-            <div className="px-6 py-5 border-b border-gray-100">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
-                What is included
-              </p>
+            {/* Included */}
+            <div className="px-6 py-4" style={{ borderBottom: '1px solid #2C2C2C', background: '#1A1A1A' }}>
+              <p className="text-xs font-bold uppercase tracking-widest text-es-muted mb-3">What is included</p>
               <ul className="space-y-2">
-                {pricing.included.map((item) => (
-                  <li key={item} className="flex items-start gap-2 text-sm text-gray-700">
-                    <svg
-                      className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                {pricing.included.map(item => (
+                  <li key={item} className="flex items-start gap-2 text-sm text-es-muted">
+                    <svg className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#A41C64' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                     {item}
@@ -64,30 +57,23 @@ export default function CoursePricingCard({ pricing, contactEmail }: CoursePrici
               </ul>
             </div>
 
-            {/* Group size note */}
+            {/* Group size */}
             {pricing.groupSizeNote && (
-              <div className="px-6 py-4 bg-amber-50 border-b border-amber-100">
-                <p className="text-sm text-amber-800 font-medium">{pricing.groupSizeNote}</p>
+              <div className="px-6 py-3" style={{ background: 'rgba(164,28,100,0.06)', borderBottom: '1px solid rgba(164,28,100,0.15)' }}>
+                <p className="text-sm font-semibold" style={{ color: '#A41C64' }}>{pricing.groupSizeNote}</p>
               </div>
             )}
 
             {/* CTAs */}
-            <div className="px-6 py-5">
-              <a
-                href={securePlaceHref}
-                className="block w-full text-center bg-amber-600 hover:bg-amber-500 text-white font-semibold px-6 py-3.5 rounded-lg transition-colors text-sm mb-3"
-              >
+            <div className="px-6 py-5" style={{ background: '#1C1C1C' }}>
+              <a href={securePlaceHref} className="btn-primary w-full text-center block text-sm mb-3">
                 Secure Your Place
               </a>
-              <p className="text-xs text-gray-500 text-center mb-4">
-                Secure your place by contacting Educate.Strong. Payment and booking details will be confirmed directly.
+              <p className="text-xs text-es-subtle text-center mb-4">
+                Secure your place by contacting Educate.Strong directly. Booking details confirmed on reply.
               </p>
-
               {pricing.armedForcesNote && (
-                <a
-                  href={armedForcesHref}
-                  className="block w-full text-center border border-gray-300 hover:border-gray-400 text-gray-700 hover:text-gray-900 font-medium px-6 py-3 rounded-lg transition-colors text-sm"
-                >
+                <a href={armedForcesHref} className="btn-secondary w-full text-center block text-sm">
                   Ask About Armed Forces Discount
                 </a>
               )}

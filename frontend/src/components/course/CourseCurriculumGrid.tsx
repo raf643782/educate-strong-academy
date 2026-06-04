@@ -6,31 +6,25 @@ interface CourseCurriculumGridProps {
   items: CurriculumItem[];
 }
 
-export default function CourseCurriculumGrid({
-  heading,
-  intro,
-  items,
-}: CourseCurriculumGridProps) {
+export default function CourseCurriculumGrid({ heading, intro, items }: CourseCurriculumGridProps) {
   return (
-    <section className="bg-white py-16 md:py-20 border-b border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="es-grit" style={{ background: '#111111', borderBottom: '1px solid #2C2C2C', position: 'relative' }}
+      id="course-details">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-18">
         <div className="mb-10 max-w-2xl">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">{heading}</h2>
-          <p className="text-gray-600 text-base leading-relaxed">{intro}</p>
+          <p className="es-label mb-2">Curriculum</p>
+          <h2 className="text-2xl md:text-3xl font-black text-white mb-3" style={{ letterSpacing: '-0.03em' }}>{heading}</h2>
+          <p className="text-es-muted text-base leading-relaxed">{intro}</p>
         </div>
-
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {items.map((item, idx) => (
-            <div
-              key={item.name}
-              className="border border-gray-200 rounded-xl p-5 hover:border-amber-300 hover:shadow-sm transition-all"
-            >
-              {/* Number marker */}
-              <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-white text-xs font-bold">{idx + 1}</span>
+            <div key={item.name} className="es-card-hover p-5">
+              <div className="w-8 h-8 rounded flex items-center justify-center mb-4 font-black text-xs text-white"
+                style={{ background: '#A41C64' }}>
+                {idx + 1}
               </div>
-              <h3 className="font-bold text-gray-900 mb-2">{item.name}</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">{item.focus}</p>
+              <h3 className="font-bold text-white mb-2">{item.name}</h3>
+              <p className="text-sm text-es-muted leading-relaxed">{item.focus}</p>
             </div>
           ))}
         </div>

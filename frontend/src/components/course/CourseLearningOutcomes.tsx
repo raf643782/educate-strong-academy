@@ -4,25 +4,26 @@ interface CourseLearningOutcomesProps {
   outcomes: string[];
 }
 
-export default function CourseLearningOutcomes({
-  heading,
-  intro,
-  outcomes,
-}: CourseLearningOutcomesProps) {
+export default function CourseLearningOutcomes({ heading, intro, outcomes }: CourseLearningOutcomesProps) {
   return (
-    <section className="bg-gray-900 text-white py-16 md:py-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="es-grit" style={{
+      background: 'radial-gradient(ellipse 80% 60% at 50% 50%, rgba(164,28,100,0.12) 0%, transparent 70%), #0A0A0A',
+      borderBottom: '1px solid #2C2C2C',
+      position: 'relative',
+    }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-18">
         <div className="max-w-3xl">
-          <h2 className="text-2xl md:text-3xl font-bold mb-3">{heading}</h2>
-          <p className="text-gray-400 mb-8">{intro}</p>
-
+          <p className="es-label mb-2">Outcomes</p>
+          <h2 className="text-2xl md:text-3xl font-black text-white mb-2" style={{ letterSpacing: '-0.03em' }}>{heading}</h2>
+          <p className="text-es-muted mb-8">{intro}</p>
           <ul className="space-y-4">
             {outcomes.map((outcome, idx) => (
               <li key={idx} className="flex items-start gap-4">
-                <span className="w-6 h-6 bg-amber-600 rounded flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">
+                <span className="w-7 h-7 rounded flex items-center justify-center text-white text-xs font-black flex-shrink-0 mt-0.5"
+                  style={{ background: '#A41C64' }}>
                   {idx + 1}
                 </span>
-                <span className="text-gray-200 leading-relaxed">{outcome}</span>
+                <span className="text-es-off-white leading-relaxed">{outcome}</span>
               </li>
             ))}
           </ul>

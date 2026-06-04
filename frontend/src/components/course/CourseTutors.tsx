@@ -6,67 +6,44 @@ interface CourseTutorsProps {
   tutors: TutorData[];
 }
 
-export default function CourseTutors({
-  heading = 'Taught by Coaches With the Record to Back It',
-  intro,
-  tutors,
-}: CourseTutorsProps) {
+export default function CourseTutors({ heading = 'Taught by Coaches With the Record to Back It', intro, tutors }: CourseTutorsProps) {
   return (
-    <section className="bg-white py-16 md:py-20 border-b border-gray-100">
+    <section style={{ background: '#111111', borderBottom: '1px solid #2C2C2C' }} className="py-14 md:py-18">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-10">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">{heading}</h2>
-          {intro && (
-            <p className="text-gray-600 text-base leading-relaxed max-w-2xl">{intro}</p>
-          )}
+        <div className="mb-8">
+          <h2 className="text-2xl md:text-3xl font-black text-white mb-2" style={{ letterSpacing: '-0.03em' }}>{heading}</h2>
+          {intro && <p className="text-es-muted text-base leading-relaxed max-w-2xl">{intro}</p>}
         </div>
-
-        <div className="grid md:grid-cols-2 gap-8">
-          {tutors.map((tutor) => (
-            <div
-              key={tutor.name}
-              className="border border-gray-200 rounded-xl overflow-hidden flex flex-col"
-            >
-              {/* Photo placeholder */}
-              <div className="bg-gray-100 h-56 flex items-center justify-center flex-shrink-0">
-                <div className="text-center px-6">
-                  <div className="w-16 h-16 bg-gray-300 rounded-full mx-auto mb-3" />
-                  <p className="text-xs text-gray-400 leading-snug">{tutor.photoAlt}</p>
-                  <p className="text-xs text-gray-300 mt-1">Photo to be provided by Educate.Strong</p>
-                </div>
+        <div className="grid md:grid-cols-2 gap-6">
+          {tutors.map(tutor => (
+            <div key={tutor.name} className="es-card overflow-hidden flex flex-col">
+              {/* Photo */}
+              <div className="h-52" style={{ background: '#3C3C3C' }}>
+                {tutor.photoAlt ? (
+                  <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center">
+                    <div className="w-16 h-16 rounded-full bg-es-grey-dark mb-3 flex items-center justify-center">
+                      <span className="text-xl font-black text-es-subtle">
+                        {tutor.name.split(' ').map((n: string) => n[0]).join('')}
+                      </span>
+                    </div>
+                    <p className="text-xs text-es-subtle">{tutor.photoAlt}</p>
+                  </div>
+                ) : null}
               </div>
-
-              {/* Content */}
-              <div className="p-6 flex flex-col flex-1">
-                <div className="mb-4">
-                  <h3 className="text-lg font-bold text-gray-900">{tutor.name}</h3>
-                  <p className="text-sm text-amber-600 font-medium">{tutor.role}</p>
-                </div>
-
-                {/* Credentials */}
-                <ul className="space-y-1.5 mb-5">
-                  {tutor.credentials.map((cred) => (
-                    <li key={cred} className="flex items-start gap-2 text-sm text-gray-700">
-                      <svg
-                        className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
+              <div className="p-5 flex flex-col flex-1">
+                <p className="font-black text-white mb-0.5">{tutor.name}</p>
+                <p className="text-xs font-semibold mb-4" style={{ color: '#A41C64' }}>{tutor.role}</p>
+                <ul className="space-y-1.5 mb-4">
+                  {tutor.credentials.slice(0, 4).map((c: string) => (
+                    <li key={c} className="flex items-start gap-2 text-sm text-es-muted">
+                      <svg className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#A41C64' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      {cred}
+                      {c}
                     </li>
                   ))}
                 </ul>
-
-                {/* Description */}
-                <p className="text-sm text-gray-600 leading-relaxed mt-auto">{tutor.description}</p>
+                <p className="text-xs text-es-subtle leading-relaxed mt-auto">{tutor.description}</p>
               </div>
             </div>
           ))}

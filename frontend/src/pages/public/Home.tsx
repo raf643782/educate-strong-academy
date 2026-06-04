@@ -215,17 +215,32 @@ export default function Home() {
 
       {/* ── HERO ─────────────────────────────────────────────────────── */}
       <section
-        className="relative es-chalk pt-navbar flex items-center min-h-screen overflow-hidden"
+        className="relative es-grit-heavy pt-navbar flex items-center min-h-screen overflow-hidden"
         style={{
-          background: 'radial-gradient(ellipse 90% 60% at 50% -10%, rgba(164,28,100,0.28) 0%, transparent 65%), #0D0D0D',
+          background: 'radial-gradient(ellipse 100% 70% at 50% -15%, rgba(164,28,100,0.32) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 80% 80%, rgba(164,28,100,0.08) 0%, transparent 60%), #090909',
           position: 'relative',
         }}
       >
-        {/* Background grid lines */}
+        {/* Grid texture */}
         <div className="absolute inset-0 pointer-events-none" style={{
-          backgroundImage: 'linear-gradient(rgba(60,60,60,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(60,60,60,0.07) 1px, transparent 1px)',
-          backgroundSize: '60px 60px',
+          backgroundImage: 'linear-gradient(rgba(60,60,60,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(60,60,60,0.06) 1px, transparent 1px)',
+          backgroundSize: '56px 56px',
         }} />
+        {/* Diagonal scratch marks */}
+        <div className="absolute inset-0 pointer-events-none" style={{
+          backgroundImage: 'repeating-linear-gradient(-30deg, transparent, transparent 200px, rgba(255,255,255,0.012) 200px, rgba(255,255,255,0.012) 201px)',
+        }} />
+        {/* Right-side visual: Strongman gym placeholder */}
+        <div className="absolute right-0 top-0 bottom-0 w-1/3 pointer-events-none hidden lg:block" style={{
+          background: 'linear-gradient(to right, transparent, rgba(164,28,100,0.04))',
+        }}>
+          <div className="absolute inset-8 rounded-2xl flex flex-col items-center justify-center gap-4"
+            style={{ background: 'rgba(20,20,20,0.4)', border: '1px solid rgba(60,60,60,0.4)', backdropFilter: 'blur(2px)' }}>
+            <p className="text-xs text-es-subtle text-center px-4 leading-snug">Strongman gym hero image</p>
+            <p className="text-xs text-es-subtle text-center px-4">Atlas stones · Yokes · Chalk · Implements</p>
+            <p className="text-xs" style={{ color: 'rgba(164,28,100,0.4)' }}>Educate.Strong to provide</p>
+          </div>
+        </div>
 
         <div className="es-container relative z-10 py-24 md:py-32">
           <div className="max-w-4xl">

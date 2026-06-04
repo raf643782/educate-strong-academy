@@ -102,8 +102,8 @@ export default function Navbar() {
               alt="Educate.Strong owl mark"
               className={`w-auto transition-all duration-300 ${scrolled ? 'h-7' : 'h-8'}`}
             />
-            <span className="text-sm font-black text-white tracking-tight leading-none hidden sm:block">
-              Educate<span style={{ color: '#A41C64' }}>.</span>strong
+            <span className="text-sm font-black tracking-tight leading-none hidden sm:block" style={{ color: '#A41C64' }}>
+              Educate<span style={{ color: '#A41C64' }}>.</span><span style={{ color: '#A41C64' }}>strong</span>
             </span>
           </Link>
 
