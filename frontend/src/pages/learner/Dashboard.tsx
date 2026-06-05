@@ -23,6 +23,8 @@ const QUICK = [
   { to: '/exercises', label: 'Exercise Library', desc: 'Technique and cues' },
   { to: '/events', label: 'Event Library', desc: 'Competition events' },
   { to: '/cpd', label: 'CPD Log', desc: 'Track professional development' },
+  { to: '/coursework', label: 'Coursework', desc: 'Assignments and submissions' },
+  { to: '/documents', label: 'Documents', desc: 'Course materials and resources' },
 ];
 
 export default function Dashboard() {

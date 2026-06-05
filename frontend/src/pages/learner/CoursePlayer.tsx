@@ -65,6 +65,7 @@ export default function CoursePlayer() {
   const [progress, setProgress] = useState<ProgressRecord[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [allModules, setAllModules] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'lesson' | 'resources' | 'assessments'>('lesson');
 
   const fetchLesson = useCallback(async () => {
     if (!lessonId) return;
@@ -249,6 +250,27 @@ export default function CoursePlayer() {
             </div>
           </div>
 
+          {/* Tab pills */}
+          <div className="border-b border-gray-200 px-6 pt-4 flex gap-1">
+            {([
+              { key: 'lesson' as const, label: 'Lesson Content' },
+              { key: 'resources' as const, label: 'Resources' },
+              { key: 'assessments' as const, label: 'Assessments' },
+            ]).map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`px-4 py-2 text-sm font-semibold rounded-t transition-colors ${
+                  activeTab === tab.key
+                    ? 'bg-white border border-b-white border-gray-200 text-amber-700 -mb-px'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
           {/* Lesson content */}
           <div className="max-w-3xl mx-auto px-6 py-10">
             <div className="mb-2 flex items-center gap-2">
@@ -262,51 +284,113 @@ export default function CoursePlayer() {
 
             <h1 className="text-3xl font-bold text-gray-900 mb-8 leading-tight">{lesson.title}</h1>
 
-            {/* Inline recommendations before content */}
-            {inlineRecommendations.map(rec => (
-              <InlineRecommendation
-                key={rec.id}
-                promptLabel={rec.promptLabel}
-                ctaText={rec.ctaText}
-                targetType={rec.targetType}
-                targetId={rec.targetId}
-                targetUrl={rec.targetUrl}
-                position="inline"
-              />
-            ))}
-
-            {/* Content */}
-            <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
-              {lesson.content ? (
-                <p className="whitespace-pre-wrap">{lesson.content}</p>
-              ) : (
-                <p className="text-gray-400 italic">Content coming soon.</p>
-              )}
-            </div>
-
-            {/* Knowledge check placeholder */}
-            <div className="mt-10 bg-blue-50 border border-blue-200 rounded-xl p-5">
-              <div className="flex items-center gap-3 mb-2">
-                <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="font-semibold text-blue-900 text-sm">Knowledge Check</span>
+            {/* Resources tab panel */}
+            {activeTab === 'resources' && (
+              <div className="mb-10">
+                <h2 className="text-lg font-bold text-gray-900 mb-4">Course Resources</h2>
+                <div className="space-y-3">
+                  {[
+                    'Level 1 Coaching — Course Handbook',
+                    'Pre-Course E-Learning Guide',
+                    'Athlete Intake Form',
+                    'Risk Assessment Template',
+                  ].map((doc) => (
+                    <div key={doc} className="flex items-center justify-between p-4 rounded-lg border border-gray-200 bg-gray-50">
+                      <div className="flex items-center gap-3">
+                        <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span className="text-sm text-gray-700 font-medium">{doc}</span>
+                      </div>
+                      <span className="text-xs text-gray-400 bg-gray-200 px-2 py-0.5 rounded">PDF</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4">
+                  <Link to="/documents" className="text-sm font-semibold text-amber-600 hover:text-amber-700">
+                    View all documents →
+                  </Link>
+                </div>
               </div>
-              <p className="text-blue-700 text-sm">Interactive knowledge check questions will be available here.</p>
-            </div>
+            )}
 
-            {/* End-of-lesson recommendations */}
-            {endRecommendations.map(rec => (
-              <InlineRecommendation
-                key={rec.id}
-                promptLabel={rec.promptLabel}
-                ctaText={rec.ctaText}
-                targetType={rec.targetType}
-                targetId={rec.targetId}
-                targetUrl={rec.targetUrl}
-                position="end_of_lesson"
-              />
-            ))}
+            {/* Assessments tab panel */}
+            {activeTab === 'assessments' && (
+              <div className="mb-10">
+                <h2 className="text-lg font-bold text-gray-900 mb-4">Course Assessments</h2>
+                <div className="space-y-3">
+                  {[
+                    { title: 'Written Coaching Scenario', note: 'Due before course date' },
+                    { title: 'Knowledge Examination', note: 'Available after all modules' },
+                    { title: 'Practical Coaching Observation', note: 'Completed on course day' },
+                  ].map((a) => (
+                    <div key={a.title} className="flex items-center justify-between p-4 rounded-lg border border-gray-200 bg-gray-50">
+                      <div>
+                        <p className="text-sm font-semibold text-gray-800">{a.title}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">{a.note}</p>
+                      </div>
+                      <span className="text-xs font-semibold bg-gray-200 text-gray-600 px-2 py-1 rounded">Not Started</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4">
+                  <Link to="/coursework" className="text-sm font-semibold text-amber-600 hover:text-amber-700">
+                    Go to coursework →
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            {/* Lesson tab content */}
+            {activeTab === 'lesson' && (
+              <>
+                {/* Inline recommendations before content */}
+                {inlineRecommendations.map(rec => (
+                  <InlineRecommendation
+                    key={rec.id}
+                    promptLabel={rec.promptLabel}
+                    ctaText={rec.ctaText}
+                    targetType={rec.targetType}
+                    targetId={rec.targetId}
+                    targetUrl={rec.targetUrl}
+                    position="inline"
+                  />
+                ))}
+
+                {/* Content */}
+                <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+                  {lesson.content ? (
+                    <p className="whitespace-pre-wrap">{lesson.content}</p>
+                  ) : (
+                    <p className="text-gray-400 italic">Content coming soon.</p>
+                  )}
+                </div>
+
+                {/* Knowledge check placeholder */}
+                <div className="mt-10 bg-blue-50 border border-blue-200 rounded-xl p-5">
+                  <div className="flex items-center gap-3 mb-2">
+                    <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="font-semibold text-blue-900 text-sm">Knowledge Check</span>
+                  </div>
+                  <p className="text-blue-700 text-sm">Interactive knowledge check questions will be available here.</p>
+                </div>
+
+                {/* End-of-lesson recommendations */}
+                {endRecommendations.map(rec => (
+                  <InlineRecommendation
+                    key={rec.id}
+                    promptLabel={rec.promptLabel}
+                    ctaText={rec.ctaText}
+                    targetType={rec.targetType}
+                    targetId={rec.targetId}
+                    targetUrl={rec.targetUrl}
+                    position="end_of_lesson"
+                  />
+                ))}
+              </>
+            )}
 
             {/* Complete button */}
             <div className="mt-10 pt-8 border-t border-gray-200">

@@ -3,6 +3,15 @@ import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 
+interface Article {
+  id: number;
+  category: string;
+  title: string;
+  summary: string;
+  readTime: string;
+  level: string;
+}
+
 const CATEGORIES = [
   { id: 'all', label: 'All Resources' },
   { id: 'coaching', label: 'Coaching' },
@@ -78,6 +87,7 @@ const LEVEL_COLOUR: Record<string, string> = {
 
 export default function KnowledgeHub() {
   const [activeCategory, setActiveCategory] = useState('all');
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
 
   const filtered = activeCategory === 'all'
     ? ARTICLES
@@ -149,7 +159,7 @@ export default function KnowledgeHub() {
                   <h3 className="font-bold text-white text-base leading-snug mb-2 flex-1">{article.title}</h3>
                   <p className="text-es-muted text-sm leading-relaxed mb-4">{article.summary}</p>
                   <button
-                    onClick={() => alert('Full article library launching with Phase 2 content. This article: "' + article.title + '"')}
+                    onClick={() => setSelectedArticle(article)}
                     className="btn-secondary text-sm text-center"
                   >
                     Read Article
@@ -175,6 +185,52 @@ export default function KnowledgeHub() {
       </section>
 
       <Footer />
+
+      {/* Article modal */}
+      {selectedArticle && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.85)' }}
+          onClick={(e) => { if (e.target === e.currentTarget) setSelectedArticle(null); }}
+        >
+          <div className="w-full max-w-2xl rounded-xl overflow-hidden" style={{ background: '#1A1A1A', border: '1px solid #2C2C2C' }}>
+            {/* Modal header */}
+            <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid #2C2C2C' }}>
+              <div className="flex items-center gap-3">
+                <span className={LEVEL_COLOUR[selectedArticle.level] || 'badge-grey'}>{selectedArticle.level}</span>
+                <span className="text-xs text-es-subtle">{selectedArticle.readTime}</span>
+              </div>
+              <button
+                onClick={() => setSelectedArticle(null)}
+                className="text-es-muted hover:text-white transition-colors p-1"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="px-6 py-6 max-h-[70vh] overflow-y-auto">
+              <h2 className="text-xl font-black text-white mb-4 leading-snug">{selectedArticle.title}</h2>
+              <p className="text-es-muted leading-relaxed mb-6">{selectedArticle.summary}</p>
+              <div
+                className="rounded-lg p-4 text-sm"
+                style={{ background: 'rgba(164,28,100,0.07)', border: '1px solid rgba(164,28,100,0.15)', color: '#A41C64' }}
+              >
+                Full article content for this category is launching with Phase 2. More articles in the{' '}
+                <strong>{CATEGORIES.find(c => c.id === selectedArticle.category)?.label || selectedArticle.category}</strong>{' '}
+                category are also in development.
+              </div>
+            </div>
+
+            <div className="px-6 py-4 flex justify-end" style={{ borderTop: '1px solid #2C2C2C' }}>
+              <button onClick={() => setSelectedArticle(null)} className="btn-secondary text-sm">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

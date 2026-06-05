@@ -18,6 +18,8 @@ import Dashboard from './pages/learner/Dashboard';
 import CoursePlayer from './pages/learner/CoursePlayer';
 import Certificates from './pages/learner/Certificates';
 import CPD from './pages/learner/CPD';
+import Coursework from './pages/learner/Coursework';
+import Documents from './pages/learner/Documents';
 
 // Library pages — all public
 import KnowledgeHub from './pages/knowledge/KnowledgeHub';
@@ -80,6 +82,12 @@ export default function App() {
           } />
           <Route path="/cpd" element={
             <ProtectedRoute><CPD /></ProtectedRoute>
+          } />
+          <Route path="/coursework" element={
+            <ProtectedRoute><Coursework /></ProtectedRoute>
+          } />
+          <Route path="/documents" element={
+            <ProtectedRoute><Documents /></ProtectedRoute>
           } />
 
           {/* ── Assessor / Admin ────────────────────────────────────────── */}

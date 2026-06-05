@@ -56,6 +56,7 @@ export default function EatStrongCategory() {
   const [downloads, setDownloads] = useState<Download[]>([]);
   const [categoryMeta, setCategoryMeta] = useState<CategoryMeta | null>(null);
   const [loading, setLoading] = useState(true);
+  const [downloadMsgId, setDownloadMsgId] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -206,10 +207,20 @@ export default function EatStrongCategory() {
                             )}
                             <button
                               className="mt-3 text-xs font-semibold" style={{ color: '#A41C64' }}
-                              onClick={() => alert('Downloads available once file hosting is configured.')}
+                              onClick={() => setDownloadMsgId(prev => prev === dl.id ? null : dl.id)}
                             >
                               Download {dl.fileType}
                             </button>
+                            {downloadMsgId === dl.id && (
+                              <div
+                                className="mt-2 rounded-lg p-3 text-xs leading-relaxed"
+                                style={{ background: 'rgba(225,154,71,0.08)', border: '1px solid rgba(225,154,71,0.2)', color: '#E19A47' }}
+                              >
+                                Download files will be available once document hosting is configured. In the meantime, contact{' '}
+                                <a href="mailto:educate.strongltd@gmail.com" className="underline">educate.strongltd@gmail.com</a>
+                                {' '}to request this resource.
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
