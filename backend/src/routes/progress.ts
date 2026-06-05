@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authenticate, AuthRequest } from '../middleware/auth';
+import { checkAndIssueCertificate } from '../services/certificateService';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -25,6 +26,7 @@ router.post('/start/:lessonId', authenticate, async (req: AuthRequest, res: Resp
 });
 
 // POST /api/progress/complete/:lessonId
+// After marking complete, runs the certificate trigger asynchronously.
 router.post('/complete/:lessonId', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { lessonId } = req.params;
@@ -36,7 +38,19 @@ router.post('/complete/:lessonId', authenticate, async (req: AuthRequest, res: R
       update: { completed: true, completedAt: new Date() },
     });
 
-    res.json(progress);
+    // Find which course this lesson belongs to, then check for certificate
+    const lesson = await prisma.lesson.findUnique({
+      where: { id: lessonId },
+      include: { module: { select: { courseId: true } } },
+    });
+
+    let certificateIssued = false;
+    if (lesson?.module?.courseId) {
+      const certResult = await checkAndIssueCertificate(userId, lesson.module.courseId);
+      certificateIssued = certResult.issued;
+    }
+
+    res.json({ progress, certificateIssued });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to complete lesson' });
@@ -49,12 +63,9 @@ router.get('/course/:courseId', authenticate, async (req: AuthRequest, res: Resp
     const { courseId } = req.params;
     const userId = req.userId!;
 
-    // Get all lessons for this course
     const modules = await prisma.module.findMany({
       where: { courseId },
-      include: {
-        lessons: { select: { id: true } },
-      },
+      include: { lessons: { select: { id: true } } },
     });
 
     const lessonIds = modules.flatMap(m => m.lessons.map(l => l.id));

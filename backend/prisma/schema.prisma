@@ -42,6 +42,7 @@ enum SubmissionStatus {
   PASSED
   FAILED
   REFERRED
+  NEEDS_CHANGES
 }
 
 enum CPDActivity {
@@ -143,6 +144,7 @@ model Course {
   enrolments   Enrolment[]
   certificates Certificate[]
   assessments  Assessment[]
+  documents    CourseDocument[]
 }
 
 model Module {
@@ -418,4 +420,40 @@ model BeStrongDownload {
   sortOrder    Int              @default(0)
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
+}
+
+// ─── Course Documents ─────────────────────────────────────────────────────────
+
+enum DocumentType {
+  HANDBOOK
+  ASSESSMENT_FORM
+  CHECKLIST
+  RESOURCE
+  CERTIFICATE
+  TEMPLATE
+  OTHER
+}
+
+enum DocumentStatus {
+  AVAILABLE    // learner can access
+  LOCKED       // only unlocked on completion
+  COMING_SOON  // placeholder — file not yet uploaded
+}
+
+model CourseDocument {
+  id          String         @id @default(uuid())
+  courseId    String?        // null = platform-wide resource
+  title       String
+  description String?
+  type        DocumentType   @default(RESOURCE)
+  status      DocumentStatus @default(AVAILABLE)
+  fileUrl     String?        // null until file hosting is set up
+  fileType    String         @default("PDF")
+  fileSizeMb  Float?
+  sortOrder   Int            @default(0)
+  isPublished Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  course Course? @relation(fields: [courseId], references: [id])
 }

@@ -1,224 +1,236 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
-import { StatusBadge, CourseStatus } from '../../data/lmsData';
+import api from '../../lib/api';
 
-interface Assignment {
-  id: string;
-  title: string;
-  course: string;
-  status: CourseStatus;
-  dueNote: string;
-  wordLimit: string;
-  instructions: string;
-  rubric: string[];
-  passMark: string;
+type SubmissionStatus = 'PENDING' | 'IN_REVIEW' | 'PASSED' | 'FAILED' | 'REFERRED' | 'NEEDS_CHANGES';
+interface Submission { id: string; status: SubmissionStatus; content?: string; feedback?: string; score?: number; submittedAt: string; gradedAt?: string; }
+interface Assessment { id: string; title: string; description?: string; type: string; passMark: number; maxAttempts: number; isActive: boolean; course?: { id: string; title: string; slug: string }; submissions: Submission[]; }
+
+const STATUS_DISPLAY: Record<string, { label: string; cls: string; color?: string }> = {
+  NOT_SUBMITTED: { label: 'Not Submitted',   cls: 'badge-grey' },
+  PENDING:       { label: 'Awaiting Review', cls: 'badge-accent' },
+  IN_REVIEW:     { label: 'In Review',       cls: 'badge-accent' },
+  PASSED:        { label: 'Passed',          cls: 'badge-grey',  color: '#22C55E' },
+  FAILED:        { label: 'Failed',          cls: 'badge-amber' },
+  REFERRED:      { label: 'Referred',        cls: 'badge-amber' },
+  NEEDS_CHANGES: { label: 'Needs Changes',   cls: 'badge-amber' },
+};
+const TYPE_DISPLAY: Record<string, string> = {
+  KNOWLEDGE_EXAM: 'Knowledge Exam', WRITTEN_SCENARIO: 'Written Scenario',
+  PROGRAMMING_ASSIGNMENT: 'Programming', PRACTICAL_OBSERVATION: 'Practical',
+  JUDGING_SCENARIO: 'Judging', SESSION_PLAN: 'Session Plan',
+};
+
+const TABS = ['My Assignments', 'Submitted', 'Completed'] as const;
+type Tab = typeof TABS[number];
+
+function SubmitPanel({ assessment, onSubmitted }: { assessment: Assessment; onSubmitted: () => void }) {
+  const [content, setContent] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [err, setErr] = useState('');
+  const [ok, setOk] = useState(false);
+  const latest = assessment.submissions[0];
+  const canResubmit = !latest || ['NEEDS_CHANGES', 'FAILED', 'REFERRED'].includes(latest.status);
+  const isBlocked = latest?.status === 'PASSED' || latest?.status === 'IN_REVIEW' || latest?.status === 'PENDING';
+
+  if (['KNOWLEDGE_EXAM', 'PRACTICAL_OBSERVATION'].includes(assessment.type)) {
+    return (
+      <div className="rounded-lg p-4 mt-4" style={{ background: 'rgba(225,154,71,0.08)', border: '1px solid rgba(225,154,71,0.2)' }}>
+        <p className="text-sm" style={{ color: '#E19A47' }}>
+          {assessment.type === 'KNOWLEDGE_EXAM'
+            ? 'Knowledge exams are conducted on the in-person course day or via supervised online session. Contact Educate.Strong for details.'
+            : 'Practical assessments are conducted on the course day. No online submission required.'}
+        </p>
+      </div>
+    );
+  }
+
+  if (isBlocked || !canResubmit) return null;
+  if (ok) return (
+    <div className="rounded-lg p-4 mt-4 border" style={{ background: 'rgba(34,197,94,0.08)', borderColor: 'rgba(34,197,94,0.3)' }}>
+      <p className="text-sm text-white font-semibold">Submission received. Your work is now awaiting assessor review.</p>
+    </div>
+  );
+
+  const handleSubmit = async () => {
+    if (!content.trim()) { setErr('Please write your response before submitting.'); return; }
+    setSubmitting(true); setErr('');
+    try {
+      await api.post(`/assessments/${assessment.id}/submit`, { content });
+      setOk(true);
+      setTimeout(() => onSubmitted(), 1500);
+    } catch (e: any) {
+      setErr(e?.response?.data?.error || 'Submission failed. Please try again.');
+    } finally { setSubmitting(false); }
+  };
+
+  return (
+    <div className="mt-4 space-y-3">
+      {latest?.feedback && (
+        <div className="rounded-lg p-4" style={{ background: 'rgba(225,154,71,0.08)', border: '1px solid rgba(225,154,71,0.2)' }}>
+          <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: '#E19A47' }}>Assessor Feedback</p>
+          <p className="text-sm text-es-muted">{latest.feedback}</p>
+        </div>
+      )}
+      <div>
+        <p className="text-xs text-es-muted mb-2 font-medium">Your written response</p>
+        <textarea value={content} onChange={e => setContent(e.target.value)} rows={10}
+          placeholder="Write your full response here..."
+          className="w-full text-sm text-white placeholder-es-subtle rounded-lg p-4 resize-y focus:outline-none"
+          style={{ background: '#1C1C1C', border: '1px solid #3C3C3C' }} />
+        <p className="text-xs text-es-subtle mt-1">{content.split(/\s+/).filter(Boolean).length} words</p>
+      </div>
+      <div className="rounded-lg p-4 border-dashed" style={{ border: '1px dashed #3C3C3C', background: '#141414' }}>
+        <p className="text-xs text-es-subtle text-center">
+          File attachments (Phase 3 — file storage not yet configured). For supporting files email{' '}
+          <a href="mailto:educate.strongltd@gmail.com" className="underline" style={{ color: '#A41C64' }}>educate.strongltd@gmail.com</a>
+        </p>
+      </div>
+      {err && <p className="text-xs text-red-400">{err}</p>}
+      <div className="flex items-center gap-3">
+        <button onClick={handleSubmit} disabled={submitting} className="btn-primary text-sm disabled:opacity-50">
+          {submitting ? 'Submitting...' : latest ? 'Resubmit' : 'Submit for Review'}
+        </button>
+        <p className="text-xs text-es-subtle">{assessment.submissions.length} / {assessment.maxAttempts} attempts used</p>
+      </div>
+    </div>
+  );
 }
 
-const ASSIGNMENTS: Assignment[] = [
-  {
-    id: 'a1',
-    title: 'Written Coaching Scenario',
-    course: 'Level 1 Fundamentals of Coaching Strongman',
-    status: 'NOT_STARTED',
-    dueNote: 'Due before course date',
-    wordLimit: '700–900 words',
-    instructions: 'You will be given a coaching scenario and asked to analyse the situation, identify the key issues, and propose a structured coaching response. This assessment tests your ability to apply course learning to real-world situations.',
-    rubric: ['Technical analysis accuracy (30%)', 'Coaching response quality (30%)', 'Programme planning (20%)', 'Communication quality (20%)'],
-    passMark: '65%',
-  },
-  {
-    id: 'a2',
-    title: 'Knowledge Examination',
-    course: 'Level 1 Fundamentals of Coaching Strongman',
-    status: 'NOT_STARTED',
-    dueNote: 'Available after completing all modules',
-    wordLimit: '40 questions — 60 minutes',
-    instructions: 'A timed knowledge examination covering all course content. Questions include multiple choice, true/false, and scenario-select formats.',
-    rubric: ['Event knowledge (35%)', 'Safety and professional responsibilities (25%)', 'Coaching fundamentals (25%)', 'Programming basics (15%)'],
-    passMark: '75%',
-  },
-  {
-    id: 'a3',
-    title: 'Practical Coaching Observation',
-    course: 'Level 1 Fundamentals of Coaching Strongman',
-    status: 'NOT_STARTED',
-    dueNote: 'Completed on in-person course day',
-    wordLimit: 'In-person assessment',
-    instructions: 'Your practical coaching will be observed and assessed on the in-person course day by Paul Smith or Dr Chris Fitzgerald. This is a competency-based assessment — all competencies must be demonstrated.',
-    rubric: ['Athlete screening (Pass/Fail)', 'Technical instruction quality (Pass/Fail)', 'Safety management (Pass/Fail)', 'Communication (Pass/Fail)'],
-    passMark: 'All competencies must pass',
-  },
-];
-
-type TabType = 'my_assignments' | 'submitted' | 'completed';
-
-const TABS: { key: TabType; label: string }[] = [
-  { key: 'my_assignments', label: 'My Assignments' },
-  { key: 'submitted', label: 'Submitted' },
-  { key: 'completed', label: 'Completed' },
-];
-
 export default function Coursework() {
-  const [activeTab, setActiveTab] = useState<TabType>('my_assignments');
+  const [assessments, setAssessments] = useState<Assessment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [fetchErr, setFetchErr] = useState('');
+  const [tab, setTab] = useState<Tab>('My Assignments');
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const toggleExpand = (id: string) => setExpanded(prev => prev === id ? null : id);
+  useEffect(() => {
+    setLoading(true);
+    api.get('/assessments/my')
+      .then(r => { setAssessments(r.data); setFetchErr(''); })
+      .catch(() => setFetchErr('Could not load assignments. Check your connection or try again.'))
+      .finally(() => setLoading(false));
+  }, [refreshKey]);
+
+  const getStatus = (a: Assessment) => a.submissions.length === 0 ? 'NOT_SUBMITTED' : a.submissions[0].status;
+
+  const filtered = assessments.filter(a => {
+    const s = getStatus(a);
+    if (tab === 'Submitted') return ['PENDING', 'IN_REVIEW', 'NEEDS_CHANGES', 'REFERRED'].includes(s);
+    if (tab === 'Completed') return ['PASSED', 'FAILED'].includes(s);
+    return true;
+  });
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
       <Navbar />
-
-      {/* Header */}
       <div className="pt-navbar" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C' }}>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="es-container py-8">
           <p className="es-label mb-2">Learner Area</p>
-          <h1 className="text-3xl font-black text-white mb-2">Coursework &amp; Assessments</h1>
-          <p className="text-es-muted">Complete and submit your course assignments and formal assessments.</p>
+          <h1 className="text-3xl font-black text-white">Coursework &amp; Assessments</h1>
+          <p className="text-es-muted mt-1 text-sm">Submit assignments and track assessment status.</p>
         </div>
       </div>
-
-      {/* Tabs */}
-      <div style={{ background: '#111111', borderBottom: '1px solid #2C2C2C' }}>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-1 py-3">
-          {TABS.map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className="px-4 py-2 rounded text-sm font-semibold transition-all"
-              style={activeTab === tab.key
-                ? { background: '#A41C64', color: '#fff', border: '1px solid rgba(164,28,100,0.6)' }
-                : { color: '#888', border: '1px solid transparent' }
-              }
-            >
-              {tab.label}
+      <div className="es-container py-8 flex-1">
+        <div className="flex gap-1 mb-6 p-1 rounded-lg w-fit" style={{ background: '#1C1C1C', border: '1px solid #2C2C2C' }}>
+          {TABS.map(t => (
+            <button key={t} onClick={() => setTab(t)}
+              className={`px-4 py-2 rounded text-sm font-semibold transition-all ${tab === t ? 'text-white' : 'text-es-muted hover:text-white'}`}
+              style={tab === t ? { background: '#A41C64' } : {}}>
+              {t}
             </button>
           ))}
         </div>
-      </div>
 
-      <div className="flex-1">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        {loading && <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="es-card h-20 animate-pulse" />)}</div>}
 
-          {activeTab === 'my_assignments' && (
-            <div className="space-y-5">
-              {ASSIGNMENTS.map(a => (
+        {fetchErr && !loading && (
+          <div className="es-card p-8 text-center">
+            <p className="text-es-muted mb-2">{fetchErr}</p>
+            <p className="text-es-subtle text-sm">Assignments appear once the backend is running and you have enrolled courses.</p>
+            <Link to="/courses" className="btn-secondary text-sm mt-4 inline-block">Browse Courses</Link>
+          </div>
+        )}
+
+        {!loading && !fetchErr && filtered.length === 0 && (
+          <div className="es-card p-10 text-center">
+            <p className="text-es-muted mb-3">
+              {assessments.length === 0 ? 'No assignments yet. Enrol in a course to see assessments here.' : `No items in ${tab}.`}
+            </p>
+            {assessments.length === 0 && <Link to="/courses" className="btn-primary text-sm inline-block">Explore Courses</Link>}
+          </div>
+        )}
+
+        {!loading && !fetchErr && filtered.length > 0 && (
+          <div className="space-y-4">
+            {filtered.map(a => {
+              const status = getStatus(a);
+              const sd = STATUS_DISPLAY[status] || { label: status, cls: 'badge-grey' };
+              const isOpen = expanded === a.id;
+              const latest = a.submissions[0];
+              return (
                 <div key={a.id} className="es-card overflow-hidden">
-                  {/* Card header */}
-                  <div
-                    className="px-6 py-5 cursor-pointer flex items-start justify-between gap-4"
-                    onClick={() => toggleExpand(a.id)}
-                  >
+                  <button onClick={() => setExpanded(isOpen ? null : a.id)}
+                    className="w-full flex items-start justify-between gap-4 p-5 text-left transition-colors"
+                    style={{ background: isOpen ? '#1C1C1C' : undefined }}>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-2 flex-wrap">
-                        <StatusBadge status={a.status} />
-                        <span className="text-xs text-es-subtle">{a.dueNote}</span>
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <span className={sd.cls} style={sd.color ? { color: sd.color } : {}}>{sd.label}</span>
+                        <span className="badge-grey">{TYPE_DISPLAY[a.type] || a.type}</span>
+                        {a.course && <span className="text-xs text-es-subtle">{a.course.title}</span>}
                       </div>
-                      <h3 className="font-black text-white text-base leading-snug">{a.title}</h3>
-                      <p className="text-xs text-es-muted mt-1">{a.course}</p>
+                      <h3 className="font-bold text-white text-sm">{a.title}</h3>
+                      {latest && (
+                        <p className="text-xs text-es-subtle mt-1">
+                          Submitted {new Date(latest.submittedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          {latest.score != null && ` · Score: ${latest.score}%`}
+                        </p>
+                      )}
                     </div>
-                    <svg
-                      className={`w-5 h-5 text-es-subtle flex-shrink-0 mt-1 transition-transform ${expanded === a.id ? 'rotate-180' : ''}`}
-                      fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                    >
+                    <svg className={`w-5 h-5 text-es-subtle flex-shrink-0 mt-0.5 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                      fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
-                  </div>
-
-                  {/* Expanded detail */}
-                  {expanded === a.id && (
-                    <div className="px-6 pb-6 space-y-5" style={{ borderTop: '1px solid #2C2C2C' }}>
-                      <div className="pt-5 grid sm:grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-xs font-semibold text-es-subtle uppercase tracking-wider mb-1">Format</p>
-                          <p className="text-sm text-white">{a.wordLimit}</p>
+                  </button>
+                  {isOpen && (
+                    <div className="px-5 pb-5" style={{ borderTop: '1px solid #2C2C2C' }}>
+                      <div className="pt-4 grid sm:grid-cols-3 gap-2 mb-4 text-xs text-es-muted">
+                        <span>Pass mark: {a.passMark}%</span>
+                        <span>Max attempts: {a.maxAttempts}</span>
+                        <span>Attempts used: {a.submissions.length}</span>
+                      </div>
+                      {a.description && <p className="text-sm text-es-muted leading-relaxed mb-4">{a.description}</p>}
+                      {latest?.feedback && !['NEEDS_CHANGES'].includes(status) && (
+                        <div className="rounded-lg p-4 mb-4" style={{
+                          background: status === 'PASSED' ? 'rgba(34,197,94,0.08)' : 'rgba(225,154,71,0.08)',
+                          border: `1px solid ${status === 'PASSED' ? 'rgba(34,197,94,0.3)' : 'rgba(225,154,71,0.2)'}`,
+                        }}>
+                          <p className="text-xs font-bold uppercase tracking-wide mb-1 text-es-muted">Assessor Feedback</p>
+                          <p className="text-sm text-es-off-white">{latest.feedback}</p>
                         </div>
-                        <div>
-                          <p className="text-xs font-semibold text-es-subtle uppercase tracking-wider mb-1">Pass Mark</p>
-                          <p className="text-sm text-white">{a.passMark}</p>
+                      )}
+                      <SubmitPanel assessment={a} onSubmitted={() => setRefreshKey(k => k + 1)} />
+                      {status === 'PASSED' && (
+                        <div className="rounded-lg p-3 mt-3" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)' }}>
+                          <p className="text-xs" style={{ color: '#22C55E' }}>Assessment passed. This assessment is complete.</p>
                         </div>
-                      </div>
-
-                      <div>
-                        <p className="text-xs font-semibold text-es-subtle uppercase tracking-wider mb-2">Instructions</p>
-                        <p className="text-sm text-es-muted leading-relaxed">{a.instructions}</p>
-                      </div>
-
-                      <div>
-                        <p className="text-xs font-semibold text-es-subtle uppercase tracking-wider mb-2">Assessment Criteria</p>
-                        <ul className="space-y-1">
-                          {a.rubric.map((r, i) => (
-                            <li key={i} className="text-sm text-es-muted flex items-start gap-2">
-                              <span style={{ color: '#A41C64', flexShrink: 0 }}>›</span>
-                              {r}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      {/* Text submission area */}
-                      <div>
-                        <p className="text-xs font-semibold text-es-subtle uppercase tracking-wider mb-2">Written Submission</p>
-                        <textarea
-                          rows={5}
-                          placeholder="Type your response here... (submission not yet enabled)"
-                          disabled
-                          className="w-full rounded-lg text-sm text-es-subtle placeholder-es-subtle p-3 resize-none cursor-not-allowed"
-                          style={{ background: '#111', border: '1px solid #2C2C2C', opacity: 0.7 }}
-                        />
-                      </div>
-
-                      {/* Upload area */}
-                      <div
-                        className="rounded-lg p-5 text-center"
-                        style={{ border: '2px dashed #2C2C2C', background: '#111' }}
-                      >
-                        <svg className="w-8 h-8 mx-auto mb-2 text-es-subtle" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                        </svg>
-                        <p className="text-sm font-semibold text-es-muted mb-1">Upload File</p>
-                        <p className="text-xs text-es-subtle">
-                          Coming Soon — upload functionality launching with Phase 2.
-                        </p>
-                      </div>
+                      )}
+                      {(status === 'PENDING' || status === 'IN_REVIEW') && (
+                        <div className="rounded-lg p-3 mt-3" style={{ background: 'rgba(164,28,100,0.08)', border: '1px solid rgba(164,28,100,0.2)' }}>
+                          <p className="text-xs" style={{ color: '#A41C64' }}>Your submission is with an assessor. You will be notified when feedback is available.</p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-              ))}
-            </div>
-          )}
-
-          {(activeTab === 'submitted' || activeTab === 'completed') && (
-            <div className="es-card p-12 text-center">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: '#1A1A1A' }}>
-                <svg className="w-8 h-8 text-es-subtle" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <h3 className="font-black text-es-muted mb-2">
-                {activeTab === 'submitted' ? 'No submissions yet' : 'No completed assessments yet'}
-              </h3>
-              <p className="text-es-subtle text-sm max-w-sm mx-auto mb-4">
-                {activeTab === 'submitted'
-                  ? 'Your submitted assessments will appear here once submission is enabled in Phase 2.'
-                  : 'Completed and passed assessments will appear here.'
-                }
-              </p>
-              <button onClick={() => setActiveTab('my_assignments')} className="btn-secondary text-sm">
-                View My Assignments
-              </button>
-            </div>
-          )}
-
-          <div className="mt-8">
-            <Link to="/documents" className="text-sm font-semibold" style={{ color: '#A41C64' }}>
-              View course documents and resources →
-            </Link>
+              );
+            })}
           </div>
-        </div>
+        )}
       </div>
-
       <Footer />
     </div>
   );

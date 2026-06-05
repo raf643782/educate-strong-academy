@@ -966,6 +966,223 @@ async function main() {
   }
   console.log(`EatStrong recommendation prompts seeded: ${beStrongPrompts.length}`);
 
+  // ── Seed Assessments for Level 1 Coaching ──────────────────────────────────
+  const l1CoachingCourse = await prisma.course.findUnique({
+    where: { slug: 'level-1-coaching-strongman' },
+  });
+
+  const l1RefereeCourse = await prisma.course.findUnique({
+    where: { slug: 'level-1-strongman-refereeing' },
+  });
+
+  if (l1CoachingCourse) {
+    const coachingAssessments = [
+      {
+        courseId: l1CoachingCourse.id,
+        title: 'Written Coaching Scenario',
+        description: 'Analyse a coaching scenario and propose a structured coaching response. 700–900 words. Tests your ability to apply course learning to real-world coaching situations.',
+        type: 'WRITTEN_SCENARIO' as const,
+        passMark: 65,
+        maxAttempts: 3,
+        isActive: true,
+      },
+      {
+        courseId: l1CoachingCourse.id,
+        title: 'Knowledge Examination',
+        description: '40 questions across event technique, safety, coaching fundamentals, and programming. 60 minutes. Pass mark: 75%.',
+        type: 'KNOWLEDGE_EXAM' as const,
+        passMark: 75,
+        maxAttempts: 3,
+        isActive: true,
+      },
+      {
+        courseId: l1CoachingCourse.id,
+        title: 'Practical Coaching Observation',
+        description: 'Observed on the in-person course day. Competency-based — all criteria must be passed. Assessed by Paul Smith or Dr Chris Fitzgerald.',
+        type: 'PRACTICAL_OBSERVATION' as const,
+        passMark: 100,
+        maxAttempts: 2,
+        isActive: true,
+      },
+    ];
+
+    for (const assessment of coachingAssessments) {
+      await prisma.assessment.upsert({
+        where: {
+          id: (await prisma.assessment.findFirst({ where: { courseId: assessment.courseId, title: assessment.title } }))?.id || 'new',
+        },
+        update: {},
+        create: assessment,
+      });
+    }
+    console.log('Level 1 Coaching assessments seeded.');
+  }
+
+  if (l1RefereeCourse) {
+    const refereingAssessments = [
+      {
+        courseId: l1RefereeCourse.id,
+        title: 'Rules Knowledge Examination',
+        description: '30 questions covering event rules, judging criteria, and refereeing responsibilities. 45 minutes. Pass mark: 75%.',
+        type: 'KNOWLEDGE_EXAM' as const,
+        passMark: 75,
+        maxAttempts: 3,
+        isActive: true,
+      },
+      {
+        courseId: l1RefereeCourse.id,
+        title: 'Judging Scenario Assessment',
+        description: 'Watch 20 competition attempt clips and record Good Lift / No Lift decisions with rule citations. 90 minutes.',
+        type: 'JUDGING_SCENARIO' as const,
+        passMark: 70,
+        maxAttempts: 2,
+        isActive: true,
+      },
+    ];
+
+    for (const assessment of refereingAssessments) {
+      await prisma.assessment.upsert({
+        where: {
+          id: (await prisma.assessment.findFirst({ where: { courseId: assessment.courseId, title: assessment.title } }))?.id || 'new',
+        },
+        update: {},
+        create: assessment,
+      });
+    }
+    console.log('Level 1 Refereeing assessments seeded.');
+  }
+
+  // ── Seed Course Documents ───────────────────────────────────────────────────
+  const documentDefs = [
+    // Level 1 Coaching documents
+    ...(l1CoachingCourse ? [
+      {
+        courseId: l1CoachingCourse.id,
+        title: 'Level 1 Coaching — Course Handbook',
+        description: 'Complete course handbook covering all modules, learning outcomes, and assessment requirements.',
+        type: 'HANDBOOK' as const,
+        status: 'AVAILABLE' as const,
+        fileType: 'PDF',
+        fileSizeMb: 2.4,
+        sortOrder: 1,
+        isPublished: true,
+      },
+      {
+        courseId: l1CoachingCourse.id,
+        title: 'Pre-Course E-Learning Guide',
+        description: 'Complete this guide before attending the in-person practical day. Covers module pre-reading and logistics.',
+        type: 'RESOURCE' as const,
+        status: 'AVAILABLE' as const,
+        fileType: 'PDF',
+        fileSizeMb: 1.1,
+        sortOrder: 2,
+        isPublished: true,
+      },
+      {
+        courseId: l1CoachingCourse.id,
+        title: 'Athlete Intake Form',
+        description: 'Use this form with all new athletes before coaching sessions.',
+        type: 'ASSESSMENT_FORM' as const,
+        status: 'AVAILABLE' as const,
+        fileType: 'PDF',
+        fileSizeMb: 0.3,
+        sortOrder: 3,
+        isPublished: true,
+      },
+      {
+        courseId: l1CoachingCourse.id,
+        title: 'Risk Assessment Template',
+        description: 'Required for all training environments. Complete and retain for your coaching records.',
+        type: 'CHECKLIST' as const,
+        status: 'AVAILABLE' as const,
+        fileType: 'PDF',
+        fileSizeMb: 0.4,
+        sortOrder: 4,
+        isPublished: true,
+      },
+      {
+        courseId: l1CoachingCourse.id,
+        title: 'Practical Coaching Observation Checklist',
+        description: 'The checklist used by assessors during the in-person practical coaching observation.',
+        type: 'ASSESSMENT_FORM' as const,
+        status: 'AVAILABLE' as const,
+        fileType: 'PDF',
+        fileSizeMb: 0.2,
+        sortOrder: 5,
+        isPublished: true,
+      },
+      {
+        courseId: l1CoachingCourse.id,
+        title: 'Level 1 Coaching Certificate',
+        description: 'Your Active IQ accredited certificate. Issued upon successful completion of all assessments.',
+        type: 'CERTIFICATE' as const,
+        status: 'LOCKED' as const,
+        fileType: 'PDF',
+        sortOrder: 6,
+        isPublished: true,
+      },
+    ] : []),
+
+    // Level 1 Refereeing documents
+    ...(l1RefereeCourse ? [
+      {
+        courseId: l1RefereeCourse.id,
+        title: 'Level 1 Refereeing — Course Handbook',
+        description: 'Complete course handbook covering refereeing ethos, event rules, and assessment criteria.',
+        type: 'HANDBOOK' as const,
+        status: 'AVAILABLE' as const,
+        fileType: 'PDF',
+        fileSizeMb: 1.8,
+        sortOrder: 1,
+        isPublished: true,
+      },
+      {
+        courseId: l1RefereeCourse.id,
+        title: 'Event Rules Quick Reference Card',
+        description: 'Laminated-ready quick reference for good lift and no lift criteria across all six core events.',
+        type: 'RESOURCE' as const,
+        status: 'AVAILABLE' as const,
+        fileType: 'PDF',
+        fileSizeMb: 0.2,
+        sortOrder: 2,
+        isPublished: true,
+      },
+      {
+        courseId: l1RefereeCourse.id,
+        title: 'Level 1 Refereeing Certificate',
+        description: 'Your WHEA.GB endorsed refereeing certification. Issued on successful completion.',
+        type: 'CERTIFICATE' as const,
+        status: 'LOCKED' as const,
+        fileType: 'PDF',
+        sortOrder: 3,
+        isPublished: true,
+      },
+    ] : []),
+
+    // Platform-wide resources (no courseId)
+    {
+      courseId: null,
+      title: 'Anti-Doping Awareness Guide',
+      description: 'Required reading for all Educate.Strong coaches. Covers WADA basics, supplement risks, and coach responsibilities.',
+      type: 'RESOURCE' as const,
+      status: 'AVAILABLE' as const,
+      fileType: 'PDF',
+      fileSizeMb: 0.5,
+      sortOrder: 1,
+      isPublished: true,
+    },
+  ];
+
+  for (const doc of documentDefs) {
+    const existing = await prisma.courseDocument.findFirst({
+      where: { courseId: doc.courseId, title: doc.title },
+    });
+    if (!existing) {
+      await prisma.courseDocument.create({ data: doc });
+    }
+  }
+  console.log(`Course documents seeded: ${documentDefs.length}`);
+
   console.log('\nSeed complete!');
   console.log('Admin login: admin@educate-strong.com / AdminPass123!');
   console.log('Learner login: coach@example.com / CoachPass123!');
