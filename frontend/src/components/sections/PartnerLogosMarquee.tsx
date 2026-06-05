@@ -14,61 +14,60 @@ interface Logo {
 
 const LOGOS: Logo[] = [
   {
-    src: '/assets/es-logo-v3.svg',
+    src: '/assets/logo_owl.svg',
     alt: 'Educate.Strong',
     label: 'Educate.Strong',
     sublabel: 'The Academy',
   },
   {
+    src: '/assets/partner-activeiq.png',
     alt: 'Active IQ',
     label: 'Active IQ',
     sublabel: 'Accredited',
   },
   {
-    src: '/assets/british-army-logo.webp',
+    src: '/assets/partner-british-army.webp',
     alt: 'British Army',
     label: 'British Army',
     sublabel: 'Partner',
   },
   {
+    src: '/assets/partner-waygb.jpg',
     alt: 'WHEA.GB',
     label: 'WHEA.GB',
     sublabel: 'Endorsed',
   },
   {
-    src: '/assets/mind-body-connect-logo.avif',
+    src: '/assets/partner-mindbodyconnect.avif',
     alt: 'Mind Body Connect',
     label: 'Mind Body Connect',
     sublabel: 'Charity No. 1173834',
-  },
-  {
-    alt: 'Armed Forces Strongman',
-    label: 'Armed Forces',
-    sublabel: 'Strongman',
   },
 ];
 
 function LogoItem({ logo }: { logo: Logo }) {
   return (
     <div
-      className="flex items-center gap-3 px-6 py-3 rounded-lg flex-shrink-0 mx-3"
+      className="flex items-center gap-3 px-8 py-4 rounded-lg flex-shrink-0 mx-3"
       style={{
         background: 'rgba(255,255,255,0.04)',
         border: '1px solid rgba(60,60,60,0.6)',
+        minWidth: '160px',
       }}
     >
       {logo.src && (
         <img
           src={logo.src}
           alt={logo.alt}
-          className="h-7 w-auto object-contain opacity-70"
+          className="h-9 w-auto object-contain opacity-80"
+          style={{ maxWidth: '90px' }}
           onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
         />
       )}
       <div>
-        <p className="text-xs font-bold text-white leading-none">{logo.label}</p>
+        <p className="text-sm font-bold text-white leading-none">{logo.label}</p>
         {logo.sublabel && (
-          <p className="text-xs text-es-subtle leading-none mt-0.5">{logo.sublabel}</p>
+          <p className="text-xs leading-none mt-1" style={{ color: '#666666' }}>{logo.sublabel}</p>
         )}
       </div>
     </div>

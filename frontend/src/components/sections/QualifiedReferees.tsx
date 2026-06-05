@@ -61,7 +61,7 @@ export default function QualifiedReferees() {
                 {/* Centered content */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
                   {/* Owl mark watermark */}
-                  <img src="/assets/es-logo-v3.svg" alt="" className="w-20 h-20 opacity-10 mb-6" />
+                  <img src="/assets/logo_owl.svg" alt="" className="w-20 h-20 opacity-10 mb-6" onError={(e) => { (e.target as HTMLImageElement).src = '/assets/es-logo.png'; }} />
                   <p className="text-sm font-bold" style={{ color: '#A41C64' }}>EDUCATE.STRONG</p>
                   <p className="text-xs text-es-subtle mt-2">Qualified Referees cohort photography</p>
                   <p className="text-xs text-es-subtle">Army banners · Certificates · Real outcomes</p>
@@ -79,7 +79,7 @@ export default function QualifiedReferees() {
               className="absolute bottom-4 left-4 right-4 rounded-lg px-4 py-3 flex items-center gap-3"
               style={{ background: 'rgba(10,10,10,0.9)', backdropFilter: 'blur(8px)', border: '1px solid rgba(164,28,100,0.3)' }}
             >
-              <img src="/assets/british-army-logo.webp" alt="British Army" className="h-6 w-auto opacity-80" />
+              <img src="/assets/partner-british-army.webp" alt="British Army" className="h-6 w-auto opacity-80" onError={(e) => { (e.target as HTMLImageElement).src = '/assets/british-army-logo.webp'; }} />
               <div>
                 <p className="text-xs font-bold text-white">Armed Forces Strongman Partner</p>
                 <p className="text-xs text-es-subtle">Serving and veteran personnel welcome</p>

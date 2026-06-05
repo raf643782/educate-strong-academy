@@ -33,23 +33,25 @@ export default function Footer() {
           <div className="flex flex-wrap items-center gap-3">
             {/* Active IQ */}
             <PartnerLogo
+              src="/assets/partner-activeiq.png"
+              alt="Active IQ Accredited"
               textFallback="Active IQ Accredited"
-              alt="Active IQ"
             />
             {/* WHEA.GB */}
             <PartnerLogo
-              textFallback="WHEA.GB Endorsed"
+              src="/assets/partner-waygb.jpg"
               alt="WHEA.GB — World Heavy Events Association"
+              textFallback="WHEA.GB Endorsed"
             />
             {/* British Army */}
             <PartnerLogo
-              src="/assets/british-army-logo.webp"
+              src="/assets/partner-british-army.webp"
               alt="British Army — Armed Forces Strongman Partner"
               textFallback="Armed Forces"
             />
             {/* Mind Body Connect */}
             <PartnerLogo
-              src="/assets/mind-body-connect-logo.avif"
+              src="/assets/partner-mindbodyconnect.avif"
               alt="Mind Body Connect — Charity No. 1173834"
               textFallback="Mind Body Connect"
             />
@@ -66,7 +68,7 @@ export default function Footer() {
 
           {/* Brand */}
           <div className="md:col-span-1">
-            <img src="/assets/es-logo.png" alt="Educate.Strong" className="h-9 w-auto mb-4" />
+            <img src="/assets/logo_owl.svg" alt="Educate.Strong" className="h-9 w-auto mb-4" onError={(e) => { (e.target as HTMLImageElement).src = '/assets/es-logo.png'; }} />
             <p className="text-es-muted text-sm leading-relaxed mb-3">
               Professional Strongman education. Accredited qualifications for coaches, referees, and youth session leaders.
             </p>

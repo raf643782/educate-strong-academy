@@ -85,7 +85,7 @@ export default function AcademyInAction() {
               >
                 {/* Frame header */}
                 <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: '1px solid #2C2C2C', background: '#141414' }}>
-                  <img src="/assets/es-logo.png" alt="" className="h-5 w-auto" />
+                  <img src="/assets/logo_owl.svg" alt="" className="h-5 w-auto" onError={(e) => { (e.target as HTMLImageElement).src = '/assets/es-logo.png'; }} />
                   <span className="text-xs font-bold" style={{ color: '#A41C64' }}>@educate.strong</span>
                   <div className="ml-auto flex gap-1">
                     <span className="w-2 h-2 rounded-full bg-es-grey" />

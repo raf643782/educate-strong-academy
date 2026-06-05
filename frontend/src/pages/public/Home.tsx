@@ -233,15 +233,45 @@ export default function Home() {
         <div className="absolute inset-0 pointer-events-none" style={{
           backgroundImage: 'repeating-linear-gradient(-30deg, transparent, transparent 200px, rgba(255,255,255,0.012) 200px, rgba(255,255,255,0.012) 201px)',
         }} />
-        {/* Right-side visual: Strongman gym placeholder */}
-        <div className="absolute right-0 top-0 bottom-0 w-1/3 pointer-events-none hidden lg:block" style={{
-          background: 'linear-gradient(to right, transparent, rgba(164,28,100,0.04))',
+        {/* Right-side visual: Atlas stone + hero video */}
+        <div className="absolute right-0 top-0 bottom-0 w-5/12 pointer-events-none hidden lg:flex items-center justify-center" style={{
+          background: 'linear-gradient(to right, transparent 0%, rgba(164,28,100,0.04) 100%)',
         }}>
-          <div className="absolute inset-8 rounded-2xl flex flex-col items-center justify-center gap-4"
-            style={{ background: 'rgba(20,20,20,0.4)', border: '1px solid rgba(60,60,60,0.4)', backdropFilter: 'blur(2px)' }}>
-            <p className="text-xs text-es-subtle text-center px-4 leading-snug">Strongman gym hero image</p>
-            <p className="text-xs text-es-subtle text-center px-4">Atlas stones · Yokes · Chalk · Implements</p>
-            <p className="text-xs" style={{ color: 'rgba(164,28,100,0.4)' }}>Educate.Strong to provide</p>
+          {/* Atlas stone parallax layer — behind video */}
+          <div className="absolute right-16 top-1/2 -translate-y-1/2" style={{ zIndex: 1 }}>
+            <div className="relative w-80 h-80 md:w-96 md:h-96">
+              <div className="absolute inset-0 rounded-full blur-3xl" style={{
+                background: 'radial-gradient(circle, rgba(164,28,100,0.35) 0%, transparent 70%)',
+                transform: 'scale(1.2)',
+              }} />
+              <img
+                src="/assets/atlas-stone-branded.png"
+                alt="Educate.Strong branded atlas stone"
+                className="relative w-full h-full object-contain"
+                style={{ filter: 'drop-shadow(0 0 40px rgba(164,28,100,0.4))', opacity: 0.92 }}
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              />
+            </div>
+          </div>
+          {/* Chalk burst overlay */}
+          <div className="chalk-burst absolute inset-0 pointer-events-none" style={{
+            background: 'radial-gradient(ellipse 50% 40% at 75% 40%, rgba(255,255,255,0.025) 0%, transparent 70%)',
+          }} />
+        </div>
+
+        {/* Mobile atlas stone — below copy, above fold */}
+        <div className="absolute bottom-16 right-4 lg:hidden pointer-events-none" style={{ zIndex: 1 }}>
+          <div className="w-32 h-32 relative opacity-30">
+            <div className="absolute inset-0 rounded-full blur-2xl" style={{
+              background: 'radial-gradient(circle, rgba(164,28,100,0.5) 0%, transparent 70%)',
+            }} />
+            <img
+              src="/assets/atlas-stone-branded.png"
+              alt=""
+              className="relative w-full h-full object-contain"
+              style={{ filter: 'drop-shadow(0 0 20px rgba(164,28,100,0.4))' }}
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            />
           </div>
         </div>
 
