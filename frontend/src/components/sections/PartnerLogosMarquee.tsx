@@ -1,8 +1,7 @@
 /**
- * PartnerLogosMarquee — animated horizontal drift of partner/trust logos.
- *
- * Uses CSS marquee animation for smooth infinite scroll.
- * Logos that have real files use them; others use styled text badges.
+ * PartnerLogosMarquee — clean ticker strip, no boxes around logos.
+ * Logos separated by subtle dividers, smooth infinite scroll.
+ * Pauses on hover.
  */
 
 interface Logo {
@@ -23,7 +22,7 @@ const LOGOS: Logo[] = [
     src: '/assets/partner-activeiq.png',
     alt: 'Active IQ',
     label: 'Active IQ',
-    sublabel: 'Accredited',
+    sublabel: 'Level 1 Accredited',
   },
   {
     src: '/assets/partner-british-army.webp',
@@ -35,7 +34,7 @@ const LOGOS: Logo[] = [
     src: '/assets/partner-waygb.jpg',
     alt: 'WHEA.GB',
     label: 'WHEA.GB',
-    sublabel: 'Endorsed',
+    sublabel: 'Refereeing Endorsed',
   },
   {
     src: '/assets/partner-mindbodyconnect.avif',
@@ -43,31 +42,54 @@ const LOGOS: Logo[] = [
     label: 'Mind Body Connect',
     sublabel: 'Charity No. 1173834',
   },
+  {
+    src: '/assets/british-army-logo.webp',
+    alt: 'Armed Forces Strongman',
+    label: 'Armed Forces Strongman',
+    sublabel: 'Endorsed',
+  },
 ];
 
-function LogoItem({ logo }: { logo: Logo }) {
+function LogoItem({ logo, index }: { logo: Logo; index: number }) {
   return (
     <div
-      className="flex items-center gap-3 px-8 py-4 rounded-lg flex-shrink-0 mx-3"
-      style={{
-        background: 'rgba(255,255,255,0.04)',
-        border: '1px solid rgba(60,60,60,0.6)',
-        minWidth: '160px',
-      }}
+      className="logo-ticker-item"
+      aria-label={`${logo.label}${logo.sublabel ? ' — ' + logo.sublabel : ''}`}
     >
+      {/* Subtle separator before (not before first) */}
+      {index > 0 && (
+        <span
+          aria-hidden="true"
+          style={{
+            display: 'inline-block',
+            width: '1px',
+            height: '24px',
+            background: 'rgba(60,60,60,0.6)',
+            marginRight: '40px',
+          }}
+        />
+      )}
+
+      {/* Logo image */}
       {logo.src && (
         <img
           src={logo.src}
           alt={logo.alt}
-          className="h-9 w-auto object-contain opacity-80"
-          style={{ maxWidth: '90px' }}
-          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+          className="h-7 w-auto object-contain"
+          style={{ maxWidth: '80px' }}
+          onError={(e) => {
+            (e.target as HTMLImageElement).style.display = 'none';
+          }}
         />
       )}
+
+      {/* Text */}
       <div>
-        <p className="text-sm font-bold text-white leading-none">{logo.label}</p>
+        <p className="text-xs font-semibold text-white leading-none">{logo.label}</p>
         {logo.sublabel && (
-          <p className="text-xs leading-none mt-1" style={{ color: '#666666' }}>{logo.sublabel}</p>
+          <p className="text-xs leading-none mt-0.5" style={{ color: '#555566' }}>
+            {logo.sublabel}
+          </p>
         )}
       </div>
     </div>
@@ -75,25 +97,47 @@ function LogoItem({ logo }: { logo: Logo }) {
 }
 
 export default function PartnerLogosMarquee() {
-  // Duplicate logos for seamless loop
+  // Duplicate for seamless loop
   const doubled = [...LOGOS, ...LOGOS];
 
   return (
-    <section style={{ background: '#0A0A0A', borderTop: '1px solid #2C2C2C', borderBottom: '1px solid #2C2C2C' }}>
-      <div className="py-5">
-        <div className="overflow-hidden" style={{ maskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)' }}>
+    <section
+      aria-label="Partners and accreditations"
+      style={{
+        background: '#080808',
+        borderTop: '1px solid rgba(40,40,40,0.8)',
+        borderBottom: '1px solid rgba(40,40,40,0.8)',
+      }}
+    >
+      {/* Fade masks left + right */}
+      <div className="relative">
+        <div
+          className="absolute left-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
+          style={{ background: 'linear-gradient(to right, #080808, transparent)' }}
+          aria-hidden="true"
+        />
+        <div
+          className="absolute right-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
+          style={{ background: 'linear-gradient(to left, #080808, transparent)' }}
+          aria-hidden="true"
+        />
+
+        {/* Scrolling track */}
+        <div className="overflow-hidden py-4" aria-hidden="true">
           <div className="marquee-track">
             {doubled.map((logo, i) => (
-              <LogoItem key={`${logo.label}-${i}`} logo={logo} />
+              <LogoItem key={`${logo.label}-${i}`} logo={logo} index={i % LOGOS.length} />
             ))}
           </div>
         </div>
       </div>
-      <div className="es-container pb-3">
-        <p className="text-xs text-es-subtle text-center">
-          Built around recognised education standards, practical Strongman experience, and trusted delivery partners.
-        </p>
-      </div>
+
+      {/* Accessible static list for screen readers */}
+      <ul className="sr-only">
+        {LOGOS.map(logo => (
+          <li key={logo.label}>{logo.label}{logo.sublabel ? ` — ${logo.sublabel}` : ''}</li>
+        ))}
+      </ul>
     </section>
   );
 }

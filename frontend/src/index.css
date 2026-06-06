@@ -341,7 +341,7 @@
     animation: shimmer 1.5s infinite;
   }
 
-  /* Horizontal logo marquee */
+  /* Horizontal logo marquee — clean, no box styling */
   @keyframes marquee {
     0%   { transform: translateX(0); }
     100% { transform: translateX(-50%); }
@@ -349,7 +349,77 @@
   .marquee-track {
     display: flex;
     width: max-content;
-    animation: marquee 20s linear infinite;
+    animation: marquee 28s linear infinite;
   }
   .marquee-track:hover { animation-play-state: paused; }
+
+  /* Atlas stone float animation */
+  @keyframes stoneFloat {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    33%       { transform: translateY(-8px) rotate(0.5deg); }
+    66%       { transform: translateY(-4px) rotate(-0.3deg); }
+  }
+  @keyframes stoneGlow {
+    0%, 100% { opacity: 0.85; filter: drop-shadow(0 0 32px rgba(164,28,100,0.35)); }
+    50%       { opacity: 0.95; filter: drop-shadow(0 0 52px rgba(164,28,100,0.55)); }
+  }
+  .stone-float {
+    animation: stoneFloat 7s ease-in-out infinite, stoneGlow 5s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .stone-float { animation: none; }
+    .marquee-track { animation-play-state: paused; }
+    .animate-fade-up { animation: none; opacity: 1; transform: none; }
+    .animate-pulse-glow { animation: none; }
+    .chalk-burst { animation: none; }
+  }
+
+  /* Enhanced chalk atmosphere — more visible */
+  .es-chalk-dense::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 55% 45% at 85% 15%, rgba(255,255,255,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 35% at 15% 85%, rgba(164,28,100,0.09) 0%, transparent 55%),
+      radial-gradient(ellipse 30% 25% at 70% 70%, rgba(225,154,71,0.05) 0%, transparent 50%);
+    z-index: 1;
+  }
+  .es-chalk-dense > * { position: relative; z-index: 2; }
+
+  /* Section reveal — subtle entrance effect */
+  .es-section-reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .es-section-reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Partner logo ticker item — no boxes */
+  .logo-ticker-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 40px;
+    flex-shrink: 0;
+    opacity: 0.65;
+    transition: opacity 0.2s;
+  }
+  .logo-ticker-item:hover { opacity: 1; }
+
+  /* Journey connector line */
+  .journey-line {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    right: -50%;
+    height: 2px;
+    background: linear-gradient(to right, #A41C64, transparent);
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
 }
