@@ -8,6 +8,8 @@ import CourseCatalogue from './pages/public/CourseCatalogue';
 import CourseDetail from './pages/public/CourseDetail';
 import About from './pages/public/About';
 import StrongKidz from './pages/public/StrongKidz';
+import CoachDirectory from './pages/public/CoachDirectory';
+import CoachProfile from './pages/public/CoachProfile';
 
 // Auth pages
 import Login from './pages/auth/Login';
@@ -20,6 +22,7 @@ import Certificates from './pages/learner/Certificates';
 import CPD from './pages/learner/CPD';
 import Coursework from './pages/learner/Coursework';
 import Documents from './pages/learner/Documents';
+import SkillTree from './pages/learner/SkillTree';
 
 // Library pages — all public
 import KnowledgeHub from './pages/knowledge/KnowledgeHub';
@@ -53,9 +56,11 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* Library */}
+          {/* Library & public pages */}
           <Route path="/about" element={<About />} />
           <Route path="/strongkidz" element={<StrongKidz />} />
+          <Route path="/coaches" element={<CoachDirectory />} />
+          <Route path="/coaches/:slug" element={<CoachProfile />} />
           <Route path="/knowledge" element={<KnowledgeHub />} />
           <Route path="/exercises" element={<ExerciseLibrary />} />
           <Route path="/events" element={<EventLibrary />} />
@@ -88,6 +93,9 @@ export default function App() {
           } />
           <Route path="/documents" element={
             <ProtectedRoute><Documents /></ProtectedRoute>
+          } />
+          <Route path="/dashboard/pathway" element={
+            <ProtectedRoute><SkillTree /></ProtectedRoute>
           } />
 
           {/* ── Assessor / Admin ────────────────────────────────────────── */}

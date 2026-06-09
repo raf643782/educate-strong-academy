@@ -37,6 +37,14 @@ const RESOURCES = [
   { to: '/events', label: 'Event Library', desc: 'Competition events' },
 ];
 
+const MY_LEARNING = [
+  { to: '/dashboard', label: 'My Dashboard', desc: 'Overview and enrolled courses' },
+  { to: '/dashboard/pathway', label: 'Skill Tree', desc: 'Visual pathway progress map' },
+  { to: '/certificates', label: 'My Certificates', desc: 'Download earned certificates' },
+  { to: '/cpd', label: 'CPD Log', desc: 'Track professional development' },
+  { to: '/coursework', label: 'Coursework', desc: 'Assignments and submissions' },
+];
+
 /* ── Dropdown wrapper ──────────────────────────────────────────────── */
 function NavDropdown({
   label, open, onOpen, onClose, children,
@@ -227,6 +235,19 @@ export default function Navbar() {
               ))}
             </NavDropdown>
 
+            {/* Certified Coaches */}
+            <NavLink
+              to="/coaches"
+              className={({ isActive }) => `
+                px-4 py-2 rounded-full text-sm font-medium transition-all duration-200
+                ${isActive
+                  ? 'bg-white/10 text-white ring-1 ring-white/20'
+                  : 'text-white/70 hover:text-white hover:bg-white/8'}
+              `}
+            >
+              Coaches
+            </NavLink>
+
             <NavLink
               to="/about"
               className={({ isActive }) => `
@@ -244,12 +265,27 @@ export default function Navbar() {
           <div className="hidden lg:flex items-center gap-2">
             {isAuthenticated ? (
               <>
-                <Link
-                  to="/dashboard"
-                  className="px-4 py-2 rounded-full text-sm text-white/65 hover:text-white hover:bg-white/8 transition-all duration-200"
+                {/* My Learning dropdown */}
+                <NavDropdown
+                  label="My Learning"
+                  open={openDrop === 'learning'}
+                  onOpen={() => setOpenDrop('learning')}
+                  onClose={() => setOpenDrop(null)}
                 >
-                  Dashboard
-                </Link>
+                  {MY_LEARNING.map(item => (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      onClick={close}
+                      role="menuitem"
+                      className="flex flex-col px-3 py-2.5 rounded-lg hover:bg-white/6 transition-all duration-150"
+                    >
+                      <span className="text-sm font-medium text-white leading-tight">{item.label}</span>
+                      <span className="text-xs text-white/45 mt-0.5">{item.desc}</span>
+                    </Link>
+                  ))}
+                </NavDropdown>
+
                 {user?.role === 'ADMIN' && (
                   <Link to="/admin" className="px-4 py-2 rounded-full text-sm text-white/65 hover:text-white hover:bg-white/8 transition-all duration-200">
                     Admin
@@ -357,6 +393,9 @@ export default function Navbar() {
                 {r.label}
               </Link>
             ))}
+            <Link to="/coaches" onClick={close} className="block px-3 py-2.5 rounded-xl text-sm text-white/70 hover:text-white hover:bg-white/6 transition-colors">
+              Certified Coaches
+            </Link>
             <Link to="/about" onClick={close} className="block px-3 py-2.5 rounded-xl text-sm text-white/70 hover:text-white hover:bg-white/6 transition-colors">
               About
             </Link>
@@ -365,7 +404,12 @@ export default function Navbar() {
 
             {isAuthenticated ? (
               <div className="space-y-1">
-                <Link to="/dashboard" onClick={close} className="block px-3 py-2.5 rounded-xl text-sm text-white/70 hover:text-white hover:bg-white/6 transition-colors">Dashboard</Link>
+                <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: '#A41C64' }}>My Learning</p>
+                {MY_LEARNING.map(item => (
+                  <Link key={item.to} to={item.to} onClick={close} className="block px-3 py-2.5 rounded-xl text-sm text-white/70 hover:text-white hover:bg-white/6 transition-colors">
+                    {item.label}
+                  </Link>
+                ))}
                 {user?.role === 'ADMIN' && <Link to="/admin" onClick={close} className="block px-3 py-2.5 rounded-xl text-sm text-white/70 hover:text-white hover:bg-white/6 transition-colors">Admin</Link>}
                 <button onClick={() => { logout(); navigate('/'); close(); }} className="block w-full text-left px-3 py-2.5 rounded-xl text-sm text-red-400 hover:text-red-300 hover:bg-white/6 transition-colors">Sign Out</button>
               </div>

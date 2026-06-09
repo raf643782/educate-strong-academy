@@ -128,6 +128,26 @@ export default function Dashboard() {
 
             {/* Sidebar */}
             <div className="space-y-5">
+              {/* Skill Tree */}
+              <Link
+                to="/dashboard/pathway"
+                className="block p-5 rounded-xl transition-all duration-200 hover:-translate-y-0.5"
+                style={{
+                  background: 'linear-gradient(135deg, #141420 0%, #0E0E1A 100%)',
+                  border: '1px solid rgba(164,28,100,0.3)',
+                  borderTop: '2px solid #A41C64',
+                  boxShadow: '0 4px 24px rgba(164,28,100,0.12)',
+                }}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-lg" aria-hidden="true">🗺️</span>
+                  <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#A41C64' }}>Skill Tree</p>
+                </div>
+                <p className="font-bold text-white text-sm mb-1">My Coaching Pathway</p>
+                <p className="text-xs text-es-muted">Visualise your progress through the Level 1 coaching pathway.</p>
+                <p className="text-xs mt-3 font-semibold" style={{ color: '#A41C64' }}>Open Skill Tree →</p>
+              </Link>
+
               {/* EatStrong */}
               <Link to="/eatstrong" className="block es-card p-5 hover:border-green-700 transition-colors" style={{ borderTop: '2px solid #166534' }}>
                 <p className="text-xs font-bold uppercase tracking-widest text-green-500 mb-1">EatStrong</p>
