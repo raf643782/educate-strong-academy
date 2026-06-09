@@ -101,6 +101,7 @@ export default function App() {
           <Route path="/dashboard/pathway" element={
             <ProtectedRoute><SkillTree /></ProtectedRoute>
           } />
+          {import.meta.env.DEV && <Route path="/dev/skilltree" element={<SkillTree />} />}
 
           {/* ── Assessor / Admin ────────────────────────────────────────── */}
           <Route path="/assessor" element={
