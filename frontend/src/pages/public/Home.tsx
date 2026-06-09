@@ -8,15 +8,15 @@
  *  4. PartnerLogosMarquee
  *  5. WhyEducateStrong
  *  6. AllPathwaysOverview  (Coaching · Refereeing · StrongKidz · EatStrong)
- *  7. PublicPathwayPreview (The Coaching Journey: L1 → L2 → L3 → CPD)
- *  8. CertifiedCoachesSection
- *  9. TutorCredibilityStrip
- * 10. TestimonialsSection
- * 11. KnowledgeHubPreview
- * 12. Final CTA
- * 13. Footer
+ *  7. CertifiedCoachesSection
+ *  8. TutorCredibilityStrip
+ *  9. TestimonialsSection
+ * 10. KnowledgeHubPreview
+ * 11. Final CTA
+ * 12. Footer
  *
  * Not on this page:
+ *  - Coaching Journey detail (moved to /coaching)
  *  - FeaturedCourses (on /courses)
  *  - Video section (on /courses/level-1-coaching-strongman)
  *  - StrongKidz detail section (on /strongkidz)
@@ -31,7 +31,6 @@ import PartnerLogosMarquee from '../../components/sections/PartnerLogosMarquee';
 import TestimonialsSection from '../../components/sections/TestimonialsSection';
 import WhyEducateStrong from '../../components/sections/WhyEducateStrong';
 import AllPathwaysOverview from '../../components/sections/AllPathwaysOverview';
-import PublicPathwayPreview from '../../components/sections/PublicPathwayPreview';
 import CertifiedCoachesSection from '../../components/sections/CertifiedCoachesSection';
 import TutorCredibilityStrip from '../../components/sections/TutorCredibilityStrip';
 import KnowledgeHubPreview from '../../components/sections/KnowledgeHubPreview';
@@ -222,11 +221,6 @@ export default function Home() {
       {/* EatStrong uses standard ES visual language (no green here) */}
       <AllPathwaysOverview />
 
-      {/* ── 6. COACHING JOURNEY ────────────────────────────────────── */}
-      {/* Level 1 → Level 2 → Level 3 → CPD — coaching pathway only */}
-      {/* id="coaching-journey" allows AllPathwaysOverview card to anchor here */}
-      <PublicPathwayPreview />
-
       {/* ── 7. CERTIFIED COACHES PREVIEW ───────────────────────────── */}
       <CertifiedCoachesSection />
 
@@ -238,6 +232,7 @@ export default function Home() {
 
       {/* ── 10. KNOWLEDGE HUB PREVIEW ──────────────────────────────── */}
       <KnowledgeHubPreview />
+
 
       {/* ── 11. FINAL CTA ──────────────────────────────────────────── */}
       <section

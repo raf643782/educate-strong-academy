@@ -11,6 +11,7 @@ import About from './pages/public/About';
 import StrongKidz from './pages/public/StrongKidz';
 import CoachDirectory from './pages/public/CoachDirectory';
 import CoachProfile from './pages/public/CoachProfile';
+import CoachingPathway from './pages/public/CoachingPathway';
 
 // Auth pages
 import Login from './pages/auth/Login';
@@ -61,6 +62,7 @@ export default function App() {
           {/* Library & public pages */}
           <Route path="/about" element={<About />} />
           <Route path="/strongkidz" element={<StrongKidz />} />
+          <Route path="/coaching" element={<CoachingPathway />} />
           <Route path="/coaches" element={<CoachDirectory />} />
           <Route path="/coaches/:slug" element={<CoachProfile />} />
           <Route path="/knowledge" element={<KnowledgeHub />} />

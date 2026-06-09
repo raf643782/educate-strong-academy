@@ -42,7 +42,7 @@ const PATHWAYS: Pathway[] = [
       'Progress to Level 2 & 3',
     ],
     cta: 'Explore Coaching',
-    to: '#coaching-journey',
+    to: '/coaching',
   },
   {
     id: 'refereeing',
@@ -268,11 +268,12 @@ export default function AllPathwaysOverview() {
               lineHeight: '1.1',
             }}
           >
-            Four Pathways. One Purpose.
+            Choose Your Pathway
           </h2>
           <p className="text-white/45 text-base leading-relaxed max-w-2xl">
-            Whether you coach, officiate, train young people, or support athletes through
-            nutrition — Educate.Strong has a structured qualification pathway for you.
+            Educate.Strong covers the full spectrum of Strongman education — from coaching
+            qualifications and officiating certification to youth development and performance
+            nutrition. Find the route that fits your role in the sport.
           </p>
         </div>
 
