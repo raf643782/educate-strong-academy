@@ -1,26 +1,27 @@
 /**
  * Home — public landing page.
  *
- * Section order (post-cleanup):
+ * Section order:
  *  1. Navbar
  *  2. Hero
- *  3. PartnerLogosMarquee
- *  4. WhyEducateStrong
- *  5. PublicPathwayPreview
- *  6. CertifiedCoachesSection
- *  7. NextCourseSection
- *  8. TutorCredibilityStrip
- *  9. TestimonialsSection
- * 10. KnowledgeHubPreview
- * 11. Final CTA
- * 12. Footer
+ *  3. UpcomingCohortAlert  (compact banner — hides when no confirmed date)
+ *  4. PartnerLogosMarquee
+ *  5. WhyEducateStrong
+ *  6. AllPathwaysOverview  (Coaching · Refereeing · StrongKidz · EatStrong)
+ *  7. PublicPathwayPreview (The Coaching Journey: L1 → L2 → L3 → CPD)
+ *  8. CertifiedCoachesSection
+ *  9. TutorCredibilityStrip
+ * 10. TestimonialsSection
+ * 11. KnowledgeHubPreview
+ * 12. Final CTA
+ * 13. Footer
  *
- * Removed from homepage:
- *  - FeaturedCourses (detail lives on course pages)
- *  - VideoSection (belongs on Level 1 course page)
- *  - StrongKidzSection (has dedicated /strongkidz page)
- *  - EatStrongSection (has dedicated /eatstrong section)
- *  - Grid background (replaced with premium dark texture)
+ * Not on this page:
+ *  - FeaturedCourses (on /courses)
+ *  - Video section (on /courses/level-1-coaching-strongman)
+ *  - StrongKidz detail section (on /strongkidz)
+ *  - EatStrong detail section (on /eatstrong)
+ *  - Next Course large section (replaced by compact UpcomingCohortAlert)
  */
 
 import { Link } from 'react-router-dom';
@@ -29,11 +30,12 @@ import Footer from '../../components/layout/Footer';
 import PartnerLogosMarquee from '../../components/sections/PartnerLogosMarquee';
 import TestimonialsSection from '../../components/sections/TestimonialsSection';
 import WhyEducateStrong from '../../components/sections/WhyEducateStrong';
+import AllPathwaysOverview from '../../components/sections/AllPathwaysOverview';
 import PublicPathwayPreview from '../../components/sections/PublicPathwayPreview';
 import CertifiedCoachesSection from '../../components/sections/CertifiedCoachesSection';
-import NextCourseSection from '../../components/sections/NextCourseSection';
 import TutorCredibilityStrip from '../../components/sections/TutorCredibilityStrip';
 import KnowledgeHubPreview from '../../components/sections/KnowledgeHubPreview';
+import UpcomingCohortAlert from '../../components/sections/UpcomingCohortAlert';
 
 /* ═══════════════════════════════════════════════════════════════════ */
 export default function Home() {
@@ -41,9 +43,9 @@ export default function Home() {
     <div className="min-h-screen flex flex-col" style={{ background: '#090909' }}>
       <Navbar />
 
-      {/* ──────────────────────────────────────────────────────────── */}
-      {/* 1. HERO                                                      */}
-      {/* ──────────────────────────────────────────────────────────── */}
+      {/* ─────────────────────────────────────────────────────────── */}
+      {/* 1. HERO                                                     */}
+      {/* ─────────────────────────────────────────────────────────── */}
       <section
         className="relative overflow-hidden"
         style={{
@@ -55,7 +57,7 @@ export default function Home() {
         }}
         aria-label="Hero — Educate.Strong Academy"
       >
-        {/* Premium dark gradient — replaces grid */}
+        {/* Premium dark gradient — layered radials */}
         <div
           className="absolute inset-0 pointer-events-none"
           aria-hidden="true"
@@ -68,7 +70,7 @@ export default function Home() {
           }}
         />
 
-        {/* Subtle diagonal scratches — very faint Strongman chalk feel */}
+        {/* Subtle diagonal scratches — faint chalk feel */}
         <div
           className="absolute inset-0 pointer-events-none"
           aria-hidden="true"
@@ -98,18 +100,7 @@ export default function Home() {
           }}
         />
 
-        {/* Fine noise texture overlay */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          aria-hidden="true"
-          style={{
-            backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\' opacity=\'0.025\'/%3E%3C/svg%3E")',
-            backgroundSize: '180px 180px',
-            opacity: 0.6,
-          }}
-        />
-
-        {/* Atlas stone — right desktop */}
+        {/* Atlas stone — desktop right */}
         <div
           className="absolute right-0 top-0 bottom-0 hidden lg:flex items-center pointer-events-none"
           aria-hidden="true"
@@ -117,12 +108,9 @@ export default function Home() {
         >
           <div
             className="relative"
-            style={{
-              width: 'clamp(280px, 30vw, 420px)',
-              height: 'clamp(280px, 30vw, 420px)',
-            }}
+            style={{ width: 'clamp(280px, 30vw, 420px)', height: 'clamp(280px, 30vw, 420px)' }}
           >
-            {/* Outer ambient glow */}
+            {/* Glow */}
             <div
               className="absolute inset-0 rounded-full"
               style={{
@@ -136,41 +124,28 @@ export default function Home() {
               src="/assets/atlas-stone-branded.png"
               alt=""
               className="relative w-full h-full object-contain select-none motion-safe:animate-[stoneFloat_7s_ease-in-out_infinite]"
-              style={{
-                filter: 'drop-shadow(0 16px 64px rgba(164,28,100,0.55)) drop-shadow(0 0 32px rgba(164,28,100,0.28))',
-              }}
+              style={{ filter: 'drop-shadow(0 16px 64px rgba(164,28,100,0.55)) drop-shadow(0 0 32px rgba(164,28,100,0.28))' }}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
               loading="eager"
             />
           </div>
         </div>
 
-        {/* ── Hero content ────────────────────────────────────────── */}
+        {/* ── Content ───────────────────────────────────────────── */}
         <div className="es-container relative z-10 w-full py-20 md:py-28 lg:py-32">
-          <div
-            style={{
-              maxWidth: 'clamp(480px, 48vw, 600px)',
-              paddingLeft: 'clamp(0px, 2vw, 32px)',
-            }}
-          >
+          <div style={{ maxWidth: 'clamp(480px, 48vw, 600px)', paddingLeft: 'clamp(0px, 2vw, 32px)' }}>
+
             {/* Academy label */}
             <div className="flex items-center gap-3 mb-7">
               <span className="es-label">The Academy</span>
-              <span
-                className="h-px w-12 opacity-60"
-                style={{ background: '#A41C64' }}
-                aria-hidden="true"
-              />
+              <span className="h-px w-12 opacity-60" style={{ background: '#A41C64' }} aria-hidden="true" />
               <span className="text-xs text-white/30 font-medium">UK's #1 Strongman Coach Education</span>
             </div>
 
             {/* H1 */}
             <h1
               className="font-black text-white leading-[0.92] mb-7"
-              style={{
-                fontSize: 'clamp(3rem, 7vw, 6rem)',
-                letterSpacing: '-0.05em',
-              }}
+              style={{ fontSize: 'clamp(3rem, 7vw, 6rem)', letterSpacing: '-0.05em' }}
             >
               Train Coaches.
               <br />
@@ -187,32 +162,21 @@ export default function Home() {
               coaching to advanced leadership — built by champions, recognised by the sport.
             </p>
 
-            {/* Accreditation trust pills */}
-            <div
-              className="flex flex-wrap gap-2 mb-10"
-              role="list"
-              aria-label="Accreditations and endorsements"
-            >
-              {[
-                'Active IQ Accredited',
-                'WHEA.GB Endorsed',
-                'Armed Forces Strongman',
-              ].map(t => (
+            {/* Accreditation pills */}
+            <div className="flex flex-wrap gap-2 mb-10" role="list" aria-label="Accreditations and endorsements">
+              {['Active IQ Accredited', 'WHEA.GB Endorsed', 'Armed Forces Strongman'].map(t => (
                 <span
                   key={t}
                   role="listitem"
                   className="text-[11px] font-medium text-white/45 px-3 py-1.5 rounded-full"
-                  style={{
-                    background: 'rgba(255,255,255,0.055)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                  }}
+                  style={{ background: 'rgba(255,255,255,0.055)', border: '1px solid rgba(255,255,255,0.1)' }}
                 >
                   {t}
                 </span>
               ))}
             </div>
 
-            {/* CTA row */}
+            {/* CTAs */}
             <div className="flex flex-wrap gap-3">
               <Link
                 to="/courses"
@@ -227,11 +191,7 @@ export default function Home() {
               <Link
                 to="/coaches"
                 className="px-8 py-4 rounded-full font-semibold text-sm transition-all duration-200 hover:bg-white/8"
-                style={{
-                  background: 'transparent',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  color: 'rgba(255,255,255,0.75)',
-                }}
+                style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.75)' }}
               >
                 Find a Coach
               </Link>
@@ -247,31 +207,39 @@ export default function Home() {
         />
       </section>
 
-      {/* ── 2. PARTNER TICKER ──────────────────────────────────────── */}
+      {/* ── 2. UPCOMING COHORT ALERT ───────────────────────────────── */}
+      {/* Compact banner — shows register interest when no confirmed date */}
+      <UpcomingCohortAlert />
+
+      {/* ── 3. PARTNER TICKER ──────────────────────────────────────── */}
       <PartnerLogosMarquee />
 
-      {/* ── 3. WHY EDUCATE.STRONG ──────────────────────────────────── */}
+      {/* ── 4. WHY EDUCATE.STRONG ──────────────────────────────────── */}
       <WhyEducateStrong />
 
-      {/* ── 4. PUBLIC PATHWAY PREVIEW ──────────────────────────────── */}
+      {/* ── 5. ALL PATHWAYS OVERVIEW ───────────────────────────────── */}
+      {/* Coaching · Refereeing · StrongKidz · EatStrong */}
+      {/* EatStrong uses standard ES visual language (no green here) */}
+      <AllPathwaysOverview />
+
+      {/* ── 6. COACHING JOURNEY ────────────────────────────────────── */}
+      {/* Level 1 → Level 2 → Level 3 → CPD — coaching pathway only */}
+      {/* id="coaching-journey" allows AllPathwaysOverview card to anchor here */}
       <PublicPathwayPreview />
 
-      {/* ── 5. CERTIFIED COACHES MAP PREVIEW ───────────────────────── */}
+      {/* ── 7. CERTIFIED COACHES PREVIEW ───────────────────────────── */}
       <CertifiedCoachesSection />
 
-      {/* ── 6. NEXT COURSE LOCATION ────────────────────────────────── */}
-      <NextCourseSection />
-
-      {/* ── 7. TUTOR CREDIBILITY STRIP ─────────────────────────────── */}
+      {/* ── 8. TUTOR CREDIBILITY STRIP ─────────────────────────────── */}
       <TutorCredibilityStrip />
 
-      {/* ── 8. TESTIMONIALS ────────────────────────────────────────── */}
+      {/* ── 9. TESTIMONIALS ────────────────────────────────────────── */}
       <TestimonialsSection />
 
-      {/* ── 9. KNOWLEDGE HUB PREVIEW ───────────────────────────────── */}
+      {/* ── 10. KNOWLEDGE HUB PREVIEW ──────────────────────────────── */}
       <KnowledgeHubPreview />
 
-      {/* ── 10. FINAL CTA ──────────────────────────────────────────── */}
+      {/* ── 11. FINAL CTA ──────────────────────────────────────────── */}
       <section
         className="relative overflow-hidden"
         style={{
@@ -283,7 +251,6 @@ export default function Home() {
           borderTop: '1px solid rgba(255,255,255,0.04)',
         }}
       >
-        {/* Scratch lines */}
         <div
           className="absolute inset-0 pointer-events-none"
           aria-hidden="true"
@@ -295,11 +262,7 @@ export default function Home() {
           <p className="es-label mb-4">Get Started</p>
           <h2
             className="font-black text-white mb-5"
-            style={{
-              fontSize: 'clamp(2.25rem, 5.5vw, 4rem)',
-              letterSpacing: '-0.045em',
-              lineHeight: '1.02',
-            }}
+            style={{ fontSize: 'clamp(2.25rem, 5.5vw, 4rem)', letterSpacing: '-0.045em', lineHeight: '1.02' }}
           >
             Ready to Take the
             <br />
@@ -323,10 +286,7 @@ export default function Home() {
             <a
               href="mailto:educate.strongltd@gmail.com?subject=Register%20Interest"
               className="px-8 py-4 rounded-full font-semibold transition-all duration-200 hover:bg-white/6"
-              style={{
-                border: '1px solid rgba(255,255,255,0.15)',
-                color: 'rgba(255,255,255,0.7)',
-              }}
+              style={{ border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.7)' }}
             >
               Register Interest
             </a>
