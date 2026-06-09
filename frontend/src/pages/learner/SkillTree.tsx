@@ -1,14 +1,25 @@
 /**
- * SkillTree — LMS coaching pathway skill tree.
+ * SkillTree — LMS Coaching Pathway · Constellation Edition
  * Route: /dashboard/pathway (protected)
+ *
+ * Design: Geometric diamond nodes on a deep-space SVG constellation canvas.
+ * Skyrim-style immersion adapted for a premium Strongman coaching LMS.
+ * Dark atmosphere · Magenta accents · SVG glow lines · Star field.
+ *
+ * Visual metaphor chosen: Constellation + geometric hybrid
+ *   – Diamond nodes feel architectural and precise (not game-y)
+ *   – SVG glow lines create the Skyrim constellation feeling
+ *   – Star field and nebula blobs give depth without being cheesy
+ *   – Strongman icons inside each node ground it in the sport
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Navbar from '../../components/layout/Navbar';
 
-/* ── Types ───────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════ TYPES ═══ */
+
 type NodeStatus = 'completed' | 'in-progress' | 'available' | 'locked';
 
 interface SkillNode {
@@ -18,1021 +29,1164 @@ interface SkillNode {
   description: string;
   icon: string;
   status: NodeStatus;
-  lessonRef?: string;
-  x: number;
-  y: number;
-  connections: string[];
+  col: number;    // 0–4
+  row: number;    // 0–5 for L1; isCPD nodes use fixed Y
+  connects: string[];
   isCPD?: boolean;
+  category?: string;
 }
 
-/* ── Node data ──────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════ DATA ════ */
+
 const NODES: SkillNode[] = [
-  // Row 0 — Foundation
+  /* ── Root ─────────────────────────────────────── */
   {
     id: 'foundation',
     title: 'Level 1 Foundation',
     shortTitle: 'Foundation',
-    description: 'Your entry point into the Strongman coaching pathway. Introduction to the programme, tutors, and expectations.',
-    icon: '🏋️',
+    description:
+      'Your entry point into the Strongman coaching pathway. Programme overview, tutor introductions, and learning expectations.',
+    icon: '🏋',
     status: 'completed',
-    x: 2, y: 0,
-    connections: ['intro', 'screening'],
+    col: 2, row: 0,
+    connects: ['intro', 'screening'],
+    category: 'Core',
   },
-
-  // Row 1
+  /* ── Row 1 ─────────────────────────────────────── */
   {
     id: 'intro',
     title: 'Introduction to Strongman Coaching',
-    shortTitle: 'Intro',
-    description: 'History, philosophy, and coaching principles of Strongman. What makes it different from other strength sports.',
+    shortTitle: 'SM Intro',
+    description:
+      'History, philosophy, and core principles of Strongman. What separates it from other strength sports and why it demands specialist coaching.',
     icon: '📋',
     status: 'completed',
-    x: 1, y: 1,
-    connections: ['session'],
+    col: 1, row: 1,
+    connects: ['session'],
+    category: 'Foundation',
   },
   {
     id: 'screening',
     title: 'Athlete Screening & Safety',
     shortTitle: 'Screening',
-    description: 'How to assess readiness, screen for injury risk, and build safe session environments for Strongman athletes.',
-    icon: '🛡️',
+    description:
+      'How to assess readiness, screen for injury risk, and build safe training environments for Strongman athletes of all levels.',
+    icon: '🛡',
     status: 'completed',
-    x: 3, y: 1,
-    connections: ['session'],
+    col: 3, row: 1,
+    connects: ['session'],
+    category: 'Safety',
   },
-
-  // Row 2
+  /* ── Row 2 ─────────────────────────────────────── */
   {
     id: 'session',
     title: 'Session Structure',
     shortTitle: 'Sessions',
-    description: 'Planning, delivery, and review of Strongman training sessions. Warm-up protocols and coaching flow.',
+    description:
+      'Planning, delivering, and reviewing Strongman sessions. Warm-up protocols, event sequencing, and coaching flow.',
     icon: '📅',
     status: 'in-progress',
-    x: 2, y: 2,
-    connections: ['log', 'axle', 'deadlift'],
+    col: 2, row: 2,
+    connects: ['log', 'axle', 'deadlift', 'farmer', 'yoke'],
+    category: 'Delivery',
   },
-
-  // Row 3 — Events
+  /* ── Row 3 — Core Events ───────────────────────── */
   {
     id: 'log',
     title: 'Log Press Fundamentals',
     shortTitle: 'Log Press',
-    description: 'Technique, loading progressions, and coaching cues for the log press — the signature Strongman overhead event.',
+    description:
+      'Technique, loading progressions, and coaching cues for the log press — the signature Strongman overhead event.',
     icon: '🪵',
     status: 'available',
-    lessonRef: 'log-press',
-    x: 0, y: 3,
-    connections: ['practical'],
+    col: 0, row: 3,
+    connects: ['practical'],
+    category: 'Events',
   },
   {
     id: 'axle',
     title: 'Axle Press Fundamentals',
     shortTitle: 'Axle Press',
-    description: 'Axle press mechanics, grip differences, and how to coach the continental clean for axle bar events.',
+    description:
+      'Axle press mechanics, grip differences, and continental clean coaching for axle bar events.',
     icon: '⚡',
     status: 'available',
-    lessonRef: 'axle-press',
-    x: 1, y: 3,
-    connections: ['practical'],
+    col: 1, row: 3,
+    connects: ['practical'],
+    category: 'Events',
   },
   {
     id: 'deadlift',
     title: 'Deadlift Fundamentals',
     shortTitle: 'Deadlift',
-    description: 'Strongman deadlift variations including the silver dollar, car deadlift, and frame deadlift — technique and coaching cues.',
+    description:
+      'Strongman deadlift variations: silver dollar, car deadlift, frame deadlift. Technique, coaching cues, and loading strategy.',
     icon: '🔩',
     status: 'locked',
-    x: 2, y: 3,
-    connections: ['practical'],
+    col: 2, row: 3,
+    connects: ['practical'],
+    category: 'Events',
   },
   {
     id: 'farmer',
-    title: 'Farmer Walk Fundamentals',
-    shortTitle: 'Farmer Walk',
-    description: 'Grip, turn mechanics, and speed work for farmer walks. Foot placement and coaching for competition performance.',
+    title: "Farmer's Walk Fundamentals",
+    shortTitle: "Farmer's Walk",
+    description:
+      'Grip, turn mechanics, and speed work for farmer walks. Foot placement and competition-specific coaching strategies.',
     icon: '🚶',
     status: 'locked',
-    x: 3, y: 3,
-    connections: ['yoke'],
+    col: 3, row: 3,
+    connects: ['yoke'],
+    category: 'Events',
   },
   {
     id: 'yoke',
     title: 'Yoke Fundamentals',
     shortTitle: 'Yoke',
-    description: 'Load placement, leg drive, and visual cue techniques for the yoke. Common errors and correction strategies.',
-    icon: '⚖️',
+    description:
+      'Load placement, leg drive, and visual cue techniques for the yoke. Common errors and correction strategies.',
+    icon: '⚖',
     status: 'locked',
-    x: 4, y: 3,
-    connections: ['stones'],
+    col: 4, row: 3,
+    connects: ['stones'],
+    category: 'Events',
   },
-
-  // Row 4
+  /* ── Row 4 ─────────────────────────────────────── */
   {
     id: 'stones',
     title: 'Atlas Stones Fundamentals',
     shortTitle: 'Atlas Stones',
-    description: 'The pinnacle Strongman event. Tacky application, lap mechanics, and safe loading progressions for the atlas stone.',
+    description:
+      'The pinnacle Strongman event. Tacky application, lap mechanics, and safe loading progressions for the atlas stone.',
     icon: '🪨',
     status: 'locked',
-    x: 3, y: 4,
-    connections: ['practical'],
+    col: 3, row: 4,
+    connects: ['practical'],
+    category: 'Events',
   },
   {
     id: 'practical',
     title: 'Practical Coaching Skills',
     shortTitle: 'Practical',
-    description: 'On-floor coaching delivery, communication styles, feedback loops, and real-time athlete support during training.',
+    description:
+      'On-floor delivery, communication styles, feedback loops, and real-time athlete support during Strongman training sessions.',
     icon: '🎯',
     status: 'locked',
-    x: 1, y: 4,
-    connections: ['assessment'],
+    col: 1, row: 4,
+    connects: ['assessment'],
+    category: 'Delivery',
   },
-
-  // Row 5 — Assessment
+  /* ── Row 5 — Assessment ────────────────────────── */
   {
     id: 'assessment',
     title: 'Assessment Preparation',
     shortTitle: 'Assessment',
-    description: 'Preparing for the formal assessment. Portfolio requirements, practical demonstration, and written components.',
+    description:
+      'Preparing for the formal Active IQ assessment. Portfolio requirements, practical demonstration, and written components.',
     icon: '📜',
     status: 'locked',
-    x: 2, y: 5,
-    connections: [],
+    col: 2, row: 5,
+    connects: [],
+    category: 'Core',
   },
-
-  // CPD nodes — row 7
+  /* ── CPD — locked until Level 1 complete ───────── */
   {
     id: 'cpd-cues',
     title: 'Coaching Cues Masterclass',
     shortTitle: 'Cues CPD',
-    description: 'Advanced cueing strategies for Strongman events. Verbal, visual, and tactile coaching cues for performance gains.',
+    description:
+      'Advanced cueing strategies for Strongman events. Verbal, visual, and tactile coaching cues for measurable performance gains.',
     icon: '💡',
     status: 'locked',
     isCPD: true,
-    x: 0, y: 7,
-    connections: [],
+    col: 0, row: 7,
+    connects: [],
   },
   {
     id: 'cpd-programming',
     title: 'Beginner Programme Design',
     shortTitle: 'Programming',
-    description: 'Periodisation and programme design for beginner Strongman athletes. Progression models and training frequency.',
+    description:
+      'Periodisation and programme design for beginner Strongman athletes. Progression models and training frequency principles.',
     icon: '📊',
     status: 'locked',
     isCPD: true,
-    x: 1, y: 7,
-    connections: [],
+    col: 1, row: 7,
+    connects: [],
   },
   {
     id: 'cpd-competition',
     title: 'Competition Day Coaching',
     shortTitle: 'Competition',
-    description: 'Preparing athletes for competition. Warm-up protocols, attempt selection, and coaching under pressure.',
+    description:
+      'Preparing athletes for competition. Warm-up protocols, attempt selection, and coaching performance under pressure.',
     icon: '🏆',
     status: 'locked',
     isCPD: true,
-    x: 2, y: 7,
-    connections: [],
+    col: 2, row: 7,
+    connects: [],
   },
   {
     id: 'cpd-troubleshoot',
     title: 'Event Troubleshooting',
     shortTitle: 'Troubleshoot',
-    description: 'Diagnosing and correcting common technical errors across all six core Strongman events.',
+    description:
+      'Diagnosing and correcting common technical errors across all six core Strongman events. A coach\'s reference guide.',
     icon: '🔧',
     status: 'locked',
     isCPD: true,
-    x: 3, y: 7,
-    connections: [],
+    col: 3, row: 7,
+    connects: [],
   },
   {
     id: 'cpd-youth',
     title: 'Youth Strength Foundations',
     shortTitle: 'Youth',
-    description: 'Adapting Strongman principles for youth athletes. Age-appropriate loading, safety considerations, and session design.',
+    description:
+      'Adapting Strongman principles for youth athletes. Age-appropriate loading, safeguarding, and session design.',
     icon: '⭐',
     status: 'locked',
     isCPD: true,
-    x: 4, y: 7,
-    connections: [],
+    col: 4, row: 7,
+    connects: [],
   },
 ];
 
-/* ── Layout constants ─────────────────────────────────────────────── */
-const COL_WIDTH = 180;
-const ROW_HEIGHT = 140;
-const NODE_RADIUS = 40; // half of 80px diameter
-const CANVAS_COLS = 5;
-const CANVAS_ROWS = 8; // rows 0–7
-const CANVAS_WIDTH = CANVAS_COLS * COL_WIDTH;   // 900
-const CANVAS_HEIGHT = CANVAS_ROWS * ROW_HEIGHT; // 1120
+const NODE_MAP = new Map<string, SkillNode>(NODES.map(n => [n.id, n]));
 
-/* ── Helpers ────────────────────────────────────────────────────────── */
-function nodeCenter(node: SkillNode): { cx: number; cy: number } {
-  return {
-    cx: node.x * COL_WIDTH + COL_WIDTH / 2,
-    cy: node.y * ROW_HEIGHT + ROW_HEIGHT / 2,
-  };
+/* ═══════════════════════════════════════════════════════ LAYOUT ══ */
+
+const CW   = 180;   // column width  (5 cols → 900px canvas)
+const RH   = 150;   // row height
+const NS   = 26;    // node half-size — diamond: 52×52 visual footprint
+const COLS = 5;
+const CANVAS_W = COLS * CW;  // 900
+
+// CPD separator sits below the Level 1 tree
+const L1_LAST_ROW    = 5;
+const CPD_SEP_Y      = L1_LAST_ROW * RH + RH + 24;   // 924
+const CPD_SEP_H      = 64;
+const CPD_NODE_CY    = CPD_SEP_Y + CPD_SEP_H + 80;   // centre y of CPD nodes
+const CANVAS_H       = CPD_NODE_CY + 90;               // total SVG height
+
+/* ─── Position helpers ──────────────────────────────── */
+function cx(n: SkillNode): number {
+  return n.col * CW + CW / 2;
+}
+function cy(n: SkillNode): number {
+  return n.isCPD ? CPD_NODE_CY : n.row * RH + RH / 2;
+}
+function diamond(px: number, py: number, s: number): string {
+  return `${px},${py - s} ${px + s},${py} ${px},${py + s} ${px - s},${py}`;
 }
 
-function nodeLeft(node: SkillNode): number {
-  return node.x * COL_WIDTH + COL_WIDTH / 2 - NODE_RADIUS;
+/* ═══════════════════════════════════════════════════ STAR FIELD ══ */
+
+// Deterministic pseudo-random — same output every render, no Date/Math.random
+function pr(seed: number): number {
+  const x = Math.sin(seed * 9301 + 49297) * 233280;
+  return Math.abs(x - Math.floor(x));
 }
+const STARS = Array.from({ length: 64 }, (_, i) => ({
+  x: pr(i * 7 + 1)   * CANVAS_W,
+  y: pr(i * 13 + 2)  * CANVAS_H,
+  r: pr(i * 3 + 3)   * 1.4 + 0.3,
+  o: pr(i * 11 + 4)  * 0.22 + 0.04,
+}));
 
-function nodeTop(node: SkillNode): number {
-  return node.y * ROW_HEIGHT + ROW_HEIGHT / 2 - NODE_RADIUS;
-}
+/* ═══════════════════════════════════════════════════ LEGEND DATA ═ */
+const LEGEND = [
+  { label: 'Completed',   stroke: '#A41C64', fill: 'rgba(164,28,100,0.2)'  },
+  { label: 'In Progress', stroke: '#E19A47', fill: 'rgba(225,154,71,0.18)' },
+  { label: 'Available',   stroke: 'rgba(255,255,255,0.5)', fill: 'rgba(255,255,255,0.06)' },
+  { label: 'Locked',      stroke: 'rgba(255,255,255,0.12)', fill: 'rgba(255,255,255,0.03)' },
+] as const;
 
-function nodeBg(node: SkillNode): string {
-  if (node.isCPD) return '#0A0A12';
-  switch (node.status) {
-    case 'completed':    return 'radial-gradient(circle at 35% 35%, #A41C64, #7A1349)';
-    case 'in-progress':  return 'radial-gradient(circle at 35% 35%, #E19A47, #B87932)';
-    case 'available':    return '#1A1A2A';
-    case 'locked':       return '#111118';
-  }
-}
+/* ═══════════════════════════════════════════════════ PROGRESS CALC */
+const L1_NODES       = NODES.filter(n => !n.isCPD);
+const COMPLETED_CNT  = L1_NODES.filter(n => n.status === 'completed').length;
+const TOTAL_CNT      = L1_NODES.length;
+const PROGRESS_PCT   = Math.round((COMPLETED_CNT / TOTAL_CNT) * 100);
+const IN_PROGRESS    = NODES.find(n => n.status === 'in-progress');
+const NEXT_AVAILABLE = NODES.find(n => !n.isCPD && n.status === 'available');
+const NEXT_NODE      = IN_PROGRESS ?? NEXT_AVAILABLE ?? null;
 
-function nodeBorder(node: SkillNode): string {
-  if (node.isCPD)       return '1px dashed rgba(164,28,100,0.3)';
-  switch (node.status) {
-    case 'completed':   return '2px solid #A41C64';
-    case 'in-progress': return '2px solid #E19A47';
-    case 'available':   return '2px solid rgba(255,255,255,0.4)';
-    case 'locked':      return '1px solid rgba(255,255,255,0.1)';
-  }
-}
-
-function nodeGlow(node: SkillNode): string {
-  switch (node.status) {
-    case 'completed':   return '0 0 24px rgba(164,28,100,0.55)';
-    case 'in-progress': return '0 0 24px rgba(225,154,71,0.55)';
-    default:            return 'none';
-  }
-}
-
-function nodeOpacity(node: SkillNode): number {
-  if (node.isCPD) return 0.4;
-  return node.status === 'locked' ? 0.5 : 1;
-}
-
-function nodeTextColour(node: SkillNode): string {
-  if (node.status === 'locked' || node.isCPD) return 'rgba(255,255,255,0.3)';
-  return 'rgba(255,255,255,0.85)';
-}
-
-/* ── SVG Lines ───────────────────────────────────────────────────────── */
-function ConnectionLines({ reducedMotion: _rm }: { reducedMotion: boolean }) {
-  const nodeMap = new Map<string, SkillNode>(NODES.map(n => [n.id, n]));
-
+/* ═══════════════════════════════════════════════ SVG DEFS COMPONENT */
+function TreeDefs() {
   return (
-    <svg
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        pointerEvents: 'none',
-        overflow: 'visible',
-      }}
-    >
-      {NODES.flatMap(node =>
-        node.connections.map(targetId => {
-          const target = nodeMap.get(targetId);
-          if (!target) return null;
-          const { cx: x1, cy: y1 } = nodeCenter(node);
-          const { cx: x2, cy: y2 } = nodeCenter(target);
-          const isActive = node.status === 'completed' && target.status === 'completed';
-          return (
-            <line
-              key={`${node.id}-${targetId}`}
-              x1={x1}
-              y1={y1}
-              x2={x2}
-              y2={y2}
-              stroke={isActive ? '#A41C64' : 'rgba(255,255,255,0.1)'}
-              strokeWidth={isActive ? 2 : 1}
-              strokeDasharray={isActive ? undefined : '4 4'}
-              opacity={isActive ? 0.6 : 1}
-            />
-          );
-        })
-      )}
-    </svg>
+    <defs>
+      {/* ── Nebula atmosphere ─────────────────────────────────── */}
+      <radialGradient id="nb1" cx="28%" cy="18%" r="45%">
+        <stop offset="0%"   stopColor="#A41C64" stopOpacity="0.14" />
+        <stop offset="100%" stopColor="#A41C64" stopOpacity="0"    />
+      </radialGradient>
+      <radialGradient id="nb2" cx="72%" cy="65%" r="38%">
+        <stop offset="0%"   stopColor="#2D1060" stopOpacity="0.11" />
+        <stop offset="100%" stopColor="#2D1060" stopOpacity="0"    />
+      </radialGradient>
+      <radialGradient id="nb3" cx="50%" cy="95%" r="30%">
+        <stop offset="0%"   stopColor="#A41C64" stopOpacity="0.09" />
+        <stop offset="100%" stopColor="#A41C64" stopOpacity="0"    />
+      </radialGradient>
+      <radialGradient id="nb4" cx="15%" cy="55%" r="25%">
+        <stop offset="0%"   stopColor="#A41C64" stopOpacity="0.06" />
+        <stop offset="100%" stopColor="#A41C64" stopOpacity="0"    />
+      </radialGradient>
+
+      {/* ── Node fills ────────────────────────────────────────── */}
+      <radialGradient id="fill-done" cx="35%" cy="30%" r="70%">
+        <stop offset="0%"   stopColor="#C0246E" />
+        <stop offset="100%" stopColor="#6B0F3D" />
+      </radialGradient>
+      <radialGradient id="fill-prog" cx="35%" cy="30%" r="70%">
+        <stop offset="0%"   stopColor="#261506" />
+        <stop offset="100%" stopColor="#150B03" />
+      </radialGradient>
+
+      {/* ── Connection line gradient ───────────────────────────── */}
+      <linearGradient id="line-active" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%"   stopColor="#A41C64" stopOpacity="0.9" />
+        <stop offset="100%" stopColor="#C0246E" stopOpacity="0.6" />
+      </linearGradient>
+
+      {/* ── Glow filters ──────────────────────────────────────── */}
+      <filter id="glow-m" x="-90%" y="-90%" width="280%" height="280%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b" />
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="glow-a" x="-90%" y="-90%" width="280%" height="280%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b" />
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="glow-sel" x="-120%" y="-120%" width="340%" height="340%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="b" />
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="glow-line" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="b" />
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
   );
 }
 
-/* ── Single Node ─────────────────────────────────────────────────────── */
-function SkillNodeDot({
-  node,
-  isSelected,
-  reducedMotion,
-  onClick,
-}: {
+/* ═══════════════════════════════════════════════ CONNECTION LINES ═ */
+function ConnectionLines() {
+  const segments: React.ReactNode[] = [];
+
+  for (const node of NODES) {
+    for (const tid of node.connects) {
+      const tgt = NODE_MAP.get(tid);
+      if (!tgt) continue;
+
+      const x1 = cx(node), y1 = cy(node);
+      const x2 = cx(tgt),  y2 = cy(tgt);
+
+      const bothDone = node.status === 'completed' && tgt.status === 'completed';
+      const halfLit  = node.status === 'completed' &&
+                       (tgt.status === 'in-progress' || tgt.status === 'available');
+
+      let stroke  = 'rgba(255,255,255,0.07)';
+      let sw      = 1;
+      let dash: string | undefined = '5 7';
+      let filter: string | undefined;
+      let opacity = 1;
+
+      if (bothDone) {
+        stroke  = 'url(#line-active)';
+        sw      = 2;
+        dash    = undefined;
+        filter  = 'url(#glow-line)';
+        opacity = 0.85;
+      } else if (halfLit) {
+        stroke  = 'rgba(164,28,100,0.45)';
+        sw      = 1.5;
+        dash    = '3 5';
+        opacity = 0.8;
+      }
+
+      segments.push(
+        <line
+          key={`${node.id}→${tid}`}
+          x1={x1} y1={y1}
+          x2={x2} y2={y2}
+          stroke={stroke}
+          strokeWidth={sw}
+          strokeDasharray={dash}
+          opacity={opacity}
+          filter={filter}
+          strokeLinecap="round"
+        />
+      );
+    }
+  }
+  return <>{segments}</>;
+}
+
+/* ═══════════════════════════════════════════════════ DIAMOND NODE ═ */
+interface DiamondProps {
   node: SkillNode;
   isSelected: boolean;
   reducedMotion: boolean;
   onClick: () => void;
-}) {
-  const pulseStyle: React.CSSProperties =
-    node.status === 'in-progress' && !reducedMotion
-      ? {
-          animation: 'nodeRipple 2s ease-out infinite',
-        }
-      : {};
+}
+
+function DiamondNode({ node, isSelected, reducedMotion, onClick }: DiamondProps) {
+  const px = cx(node);
+  const py = cy(node);
+  const isCPD = !!node.isCPD;
+
+  // ── Per-state visual tokens ─────────────────────────
+  let fill    = '#0A0A14';
+  let stroke  = 'rgba(255,255,255,0.1)';
+  let sw      = 1;
+  let opacity = 1;
+  let filterId: string | undefined;
+  let innerRing = false;
+  let innerStroke = 'transparent';
+
+  if (isCPD) {
+    fill    = '#090910';
+    stroke  = 'rgba(164,28,100,0.22)';
+    sw      = 1;
+    opacity = 0.42;
+  } else {
+    switch (node.status) {
+      case 'completed':
+        fill        = 'url(#fill-done)';
+        stroke      = '#A41C64';
+        sw          = 2;
+        filterId    = isSelected ? 'glow-sel' : 'glow-m';
+        innerRing   = true;
+        innerStroke = 'rgba(255,255,255,0.18)';
+        break;
+      case 'in-progress':
+        fill        = 'url(#fill-prog)';
+        stroke      = '#E19A47';
+        sw          = 2;
+        filterId    = isSelected ? 'glow-sel' : 'glow-a';
+        innerRing   = true;
+        innerStroke = 'rgba(225,154,71,0.35)';
+        break;
+      case 'available':
+        fill     = '#111120';
+        stroke   = 'rgba(255,255,255,0.4)';
+        sw       = 1.5;
+        filterId = isSelected ? 'glow-sel' : undefined;
+        break;
+      case 'locked':
+        fill    = '#0A0A12';
+        stroke  = 'rgba(255,255,255,0.07)';
+        sw      = 1;
+        opacity = 0.4;
+        break;
+    }
+  }
+
+  if (isSelected && !filterId) filterId = 'glow-sel';
+
+  const tipColour =
+    node.status === 'completed'   ? '#C0246E'
+    : node.status === 'in-progress' ? '#E19A47'
+    : isSelected                    ? 'rgba(255,255,255,0.7)'
+    : 'transparent';
+
+  const labelColour = (node.status === 'locked' || isCPD)
+    ? 'rgba(255,255,255,0.25)'
+    : 'rgba(255,255,255,0.82)';
+
+  const isClickable = !(node.status === 'locked' && !isCPD);
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        left: nodeLeft(node),
-        top: nodeTop(node),
-        width: NODE_RADIUS * 2,
-        height: NODE_RADIUS * 2,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        cursor: node.status === 'locked' && !node.isCPD ? 'default' : 'pointer',
-        zIndex: isSelected ? 10 : 1,
-      }}
+    <g
       onClick={onClick}
+      style={{ cursor: isClickable ? 'pointer' : 'default' }}
+      opacity={opacity}
+      filter={filterId ? `url(#${filterId})` : undefined}
     >
-      {/* Pulse ring for in-progress */}
+      {/* Pulse ring — in-progress, animated via SVG */}
       {node.status === 'in-progress' && !reducedMotion && (
-        <div
-          style={{
-            position: 'absolute',
-            inset: -8,
-            borderRadius: '50%',
-            border: '2px solid rgba(225,154,71,0.4)',
-            ...pulseStyle,
-          }}
+        <polygon
+          points={diamond(px, py, NS + 11)}
+          fill="none"
+          stroke="#E19A47"
+          strokeWidth={1}
+        >
+          <animate attributeName="opacity"
+            values="0.55;0;0.55" dur="2.4s"
+            repeatCount="indefinite" />
+        </polygon>
+      )}
+
+      {/* Outer diamond */}
+      <polygon
+        points={diamond(px, py, NS)}
+        fill={fill}
+        stroke={stroke}
+        strokeWidth={sw}
+        strokeDasharray={isCPD ? '3 4' : undefined}
+      />
+
+      {/* Inner decorative ring */}
+      {innerRing && (
+        <polygon
+          points={diamond(px, py, NS - 7)}
+          fill="none"
+          stroke={innerStroke}
+          strokeWidth={1}
         />
       )}
 
-      {/* Circle */}
-      <div
-        style={{
-          width: NODE_RADIUS * 2,
-          height: NODE_RADIUS * 2,
-          borderRadius: '50%',
-          background: nodeBg(node),
-          border: isSelected ? '2px solid #fff' : nodeBorder(node),
-          boxShadow: isSelected ? '0 0 0 3px rgba(255,255,255,0.2), ' + nodeGlow(node) : nodeGlow(node),
-          opacity: nodeOpacity(node),
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '24px',
-          transition: 'border 0.2s, box-shadow 0.2s, transform 0.15s',
-          transform: isSelected ? 'scale(1.08)' : 'scale(1)',
-          position: 'relative',
-        }}
-      >
-        {node.status === 'locked' && !node.isCPD && (
-          <span style={{ position: 'absolute', top: '4px', right: '4px', fontSize: '10px', opacity: 0.5 }}>🔒</span>
-        )}
-        {node.icon}
-      </div>
+      {/* Diamond tip accent dots — selected or completed */}
+      {(isSelected || node.status === 'completed' || node.status === 'in-progress') && (
+        <>
+          <circle cx={px}      cy={py - NS} r={2.5} fill={tipColour} opacity={0.9} />
+          <circle cx={px + NS} cy={py}      r={2.5} fill={tipColour} opacity={0.9} />
+          <circle cx={px}      cy={py + NS} r={2.5} fill={tipColour} opacity={0.9} />
+          <circle cx={px - NS} cy={py}      r={2.5} fill={tipColour} opacity={0.9} />
+        </>
+      )}
 
-      {/* Label below */}
-      <div
-        style={{
-          marginTop: '8px',
-          fontSize: '10px',
-          fontWeight: 600,
-          color: nodeTextColour(node),
-          textAlign: 'center',
-          maxWidth: COL_WIDTH - 12,
-          lineHeight: 1.3,
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-        }}
+      {/* Icon */}
+      <text
+        x={px} y={py + 5}
+        textAnchor="middle"
+        fontSize={13}
+        style={{ userSelect: 'none', pointerEvents: 'none' }}
+      >
+        {node.icon}
+      </text>
+
+      {/* Short label below node */}
+      <text
+        x={px} y={py + NS + 18}
+        textAnchor="middle"
+        fontSize={8.5}
+        fontWeight="600"
+        fill={labelColour}
+        letterSpacing="0.04em"
+        style={{ userSelect: 'none', pointerEvents: 'none' }}
       >
         {node.shortTitle}
-      </div>
-    </div>
+      </text>
+
+      {/* Lock mark — locked (non-CPD) nodes */}
+      {node.status === 'locked' && !isCPD && (
+        <text
+          x={px + NS - 6} y={py - NS + 8}
+          textAnchor="middle"
+          fontSize={8}
+          opacity={0.5}
+          style={{ userSelect: 'none', pointerEvents: 'none' }}
+        >
+          🔒
+        </text>
+      )}
+    </g>
   );
 }
 
-/* ── CPD Separator Band ─────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════ CPD SEPARATOR SVG */
 function CPDSeparator() {
+  const y = CPD_SEP_Y;
+  const h = CPD_SEP_H;
+  const mid = y + h / 2;
+
   return (
-    <div
-      style={{
-        position: 'absolute',
-        top: 6 * ROW_HEIGHT,
-        left: 0,
-        width: '100%',
-        height: ROW_HEIGHT,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '12px',
-        borderTop: '1px dashed rgba(164,28,100,0.2)',
-        borderBottom: '1px dashed rgba(164,28,100,0.2)',
-        background: 'rgba(164,28,100,0.03)',
-        zIndex: 2,
-      }}
-    >
-      <span style={{ fontSize: '14px', opacity: 0.5 }}>🔒</span>
-      <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '12px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-        CPD — Unlocks after Level 1 Completion
-      </span>
-    </div>
+    <g>
+      {/* Tinted band */}
+      <rect x={0} y={y} width={CANVAS_W} height={h} fill="rgba(164,28,100,0.028)" />
+      {/* Top rule */}
+      <line x1={24} y1={y} x2={CANVAS_W - 24} y2={y}
+        stroke="rgba(164,28,100,0.22)" strokeWidth={1} strokeDasharray="5 7" />
+      {/* Bottom rule */}
+      <line x1={24} y1={y + h} x2={CANVAS_W - 24} y2={y + h}
+        stroke="rgba(164,28,100,0.12)" strokeWidth={1} strokeDasharray="5 7" />
+      {/* Centre text */}
+      <text x={CANVAS_W / 2} y={mid - 6}
+        textAnchor="middle" fontSize={9.5} fontWeight="700"
+        fill="rgba(255,255,255,0.18)" letterSpacing="0.14em"
+      >
+        CPD — CONTINUING PROFESSIONAL DEVELOPMENT
+      </text>
+      <text x={CANVAS_W / 2} y={mid + 11}
+        textAnchor="middle" fontSize={8} fontWeight="600"
+        fill="rgba(164,28,100,0.55)" letterSpacing="0.1em"
+      >
+        UNLOCKS AFTER LEVEL 1 ASSESSMENT
+      </text>
+    </g>
   );
 }
 
-/* ── Detail Panel ─────────────────────────────────────────────────── */
-function DetailPanel({
+/* ════════════════════════════════════════════════ PROGRESS RING SVG */
+function ProgressRing({ pct }: { pct: number }) {
+  const size  = 60;
+  const sw    = 4.5;
+  const r     = (size - sw * 2) / 2;
+  const circ  = 2 * Math.PI * r;
+  const arc   = (pct / 100) * circ;
+
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ flexShrink: 0 }}>
+      <defs>
+        <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"   stopColor="#A41C64" />
+          <stop offset="100%" stopColor="#E19A47" />
+        </linearGradient>
+      </defs>
+      {/* Track */}
+      <circle cx={size/2} cy={size/2} r={r}
+        fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={sw} />
+      {/* Arc */}
+      <circle cx={size/2} cy={size/2} r={r}
+        fill="none"
+        stroke="url(#rg)"
+        strokeWidth={sw}
+        strokeDasharray={`${arc} ${circ - arc}`}
+        strokeDashoffset={circ / 4}
+        strokeLinecap="round"
+      />
+      {/* Label */}
+      <text x={size/2} y={size/2 + 4}
+        textAnchor="middle"
+        fontSize={12} fontWeight="800" fill="#fff"
+      >{pct}%</text>
+    </svg>
+  );
+}
+
+/* ════════════════════════════════════════════ SIDEBAR NODE DETAIL ═ */
+function SidebarNodeDetail({
   node,
   onClose,
 }: {
   node: SkillNode;
   onClose: () => void;
 }) {
-  const statusColour: Record<NodeStatus, string> = {
-    completed: '#A41C64',
-    'in-progress': '#E19A47',
-    available: 'rgba(255,255,255,0.6)',
-    locked: 'rgba(255,255,255,0.25)',
-  };
-  const statusLabel: Record<NodeStatus, string> = {
-    completed: 'Completed',
+  const STATUS_LABEL: Record<NodeStatus, string> = {
+    'completed':   'Completed',
     'in-progress': 'In Progress',
-    available: 'Available',
-    locked: 'Locked',
+    'available':   'Available',
+    'locked':      'Locked',
+  };
+  const STATUS_COLOUR: Record<NodeStatus, string> = {
+    'completed':   '#A41C64',
+    'in-progress': '#E19A47',
+    'available':   'rgba(255,255,255,0.55)',
+    'locked':      'rgba(255,255,255,0.22)',
   };
 
-  const colour = statusColour[node.status];
+  const isCPD  = !!node.isCPD;
+  const colour = isCPD ? 'rgba(164,28,100,0.6)' : STATUS_COLOUR[node.status];
 
   return (
-    <div
-      style={{
-        position: 'sticky',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        background: 'rgba(10,10,20,0.97)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        borderTop: '1px solid rgba(164,28,100,0.25)',
-        padding: '20px 24px',
-        zIndex: 50,
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '20px',
-        flexWrap: 'wrap',
-      }}
-    >
-      {/* Icon + info */}
-      <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start', flex: 1, minWidth: '260px' }}>
-        <div
-          style={{
-            width: 48,
-            height: 48,
-            borderRadius: '12px',
-            background: nodeBg(node),
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '20px',
-            flexShrink: 0,
-            border: nodeBorder(node),
-          }}
-        >
-          {node.icon}
-        </div>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-            <h3 style={{ color: '#fff', fontSize: '15px', fontWeight: 700, margin: 0 }}>
+    <div style={{ padding: '18px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)', flex: 1, overflowY: 'auto' }}>
+      {/* Header row */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '14px' }}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', flex: 1, minWidth: 0 }}>
+          <div
+            style={{
+              width: 38, height: 38,
+              background: node.status === 'completed' ? 'radial-gradient(circle, #C0246E, #6B0F3D)' : '#111120',
+              border: `1px solid ${colour}55`,
+              borderRadius: '8px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '16px', flexShrink: 0,
+            }}
+          >
+            {node.icon}
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ color: '#fff', fontSize: '12px', fontWeight: 700, lineHeight: 1.35, marginBottom: '5px' }}>
               {node.title}
-            </h3>
-            <span
-              style={{
-                background: `${colour}22`,
-                border: `1px solid ${colour}55`,
-                color: colour,
-                borderRadius: '4px',
-                padding: '1px 8px',
-                fontSize: '10px',
-                fontWeight: 700,
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-                flexShrink: 0,
-              }}
-            >
-              {statusLabel[node.status]}
+            </div>
+            <span style={{
+              background: `${colour}22`,
+              border: `1px solid ${colour}44`,
+              color: colour,
+              borderRadius: '4px',
+              padding: '1px 8px',
+              fontSize: '9px',
+              fontWeight: 700,
+              letterSpacing: '0.07em',
+              textTransform: 'uppercase' as const,
+              whiteSpace: 'nowrap' as const,
+            }}>
+              {isCPD ? 'CPD — Locked' : STATUS_LABEL[node.status]}
             </span>
           </div>
-          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '13px', margin: 0, lineHeight: 1.6, maxWidth: '480px' }}>
-            {node.description}
-          </p>
-          {node.isCPD && (
-            <p style={{ color: 'rgba(164,28,100,0.7)', fontSize: '11px', marginTop: '6px' }}>
-              CPD module — available after Level 1 completion
-            </p>
-          )}
         </div>
-      </div>
-
-      {/* Actions */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-        {node.status === 'completed' && (
-          <Link
-            to="/dashboard"
-            style={{
-              display: 'inline-block',
-              background: 'rgba(164,28,100,0.2)',
-              border: '1px solid rgba(164,28,100,0.4)',
-              color: '#A41C64',
-              padding: '10px 20px',
-              borderRadius: '8px',
-              fontWeight: 600,
-              fontSize: '13px',
-              textDecoration: 'none',
-            }}
-          >
-            Review →
-          </Link>
-        )}
-        {node.status === 'in-progress' && (
-          <Link
-            to="/dashboard"
-            style={{
-              display: 'inline-block',
-              background: 'linear-gradient(135deg, #A41C64, #C0246E)',
-              color: '#fff',
-              padding: '10px 20px',
-              borderRadius: '8px',
-              fontWeight: 700,
-              fontSize: '13px',
-              textDecoration: 'none',
-            }}
-          >
-            Continue →
-          </Link>
-        )}
-        {node.status === 'available' && (
-          <Link
-            to="/dashboard"
-            style={{
-              display: 'inline-block',
-              background: 'linear-gradient(135deg, #A41C64, #C0246E)',
-              color: '#fff',
-              padding: '10px 20px',
-              borderRadius: '8px',
-              fontWeight: 700,
-              fontSize: '13px',
-              textDecoration: 'none',
-            }}
-          >
-            Start Lesson →
-          </Link>
-        )}
-        {(node.status === 'locked' || node.isCPD) && (
-          <button
-            disabled
-            style={{
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: 'rgba(255,255,255,0.25)',
-              padding: '10px 20px',
-              borderRadius: '8px',
-              fontWeight: 600,
-              fontSize: '13px',
-              cursor: 'not-allowed',
-            }}
-          >
-            🔒 Locked
-          </button>
-        )}
-
-        {/* Close */}
         <button
           onClick={onClose}
+          aria-label="Close"
           style={{
-            background: 'rgba(255,255,255,0.07)',
+            background: 'rgba(255,255,255,0.06)',
             border: '1px solid rgba(255,255,255,0.1)',
-            color: 'rgba(255,255,255,0.5)',
-            width: 36,
-            height: 36,
-            borderRadius: '8px',
+            color: 'rgba(255,255,255,0.4)',
+            width: 26, height: 26,
+            borderRadius: '6px',
             cursor: 'pointer',
-            fontSize: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
+            fontSize: '14px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0, marginLeft: '8px',
           }}
         >
           ×
         </button>
       </div>
+
+      {/* Description */}
+      <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.38)', lineHeight: 1.7, marginBottom: '14px' }}>
+        {node.description}
+      </p>
+
+      {isCPD && (
+        <p style={{ fontSize: '10px', color: 'rgba(164,28,100,0.7)', marginBottom: '14px', lineHeight: 1.5 }}>
+          Complete your Level 1 assessment to unlock CPD content.
+        </p>
+      )}
+
+      {node.category && !isCPD && (
+        <div style={{ marginBottom: '14px' }}>
+          <span style={{
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            color: 'rgba(255,255,255,0.3)',
+            borderRadius: '4px',
+            padding: '2px 8px',
+            fontSize: '9px',
+            fontWeight: 700,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase' as const,
+          }}>
+            {node.category}
+          </span>
+        </div>
+      )}
+
+      {/* CTA */}
+      {node.status === 'completed' && (
+        <Link to="/dashboard" style={{
+          display: 'block', textAlign: 'center',
+          background: 'rgba(164,28,100,0.14)',
+          border: '1px solid rgba(164,28,100,0.35)',
+          color: '#A41C64',
+          padding: '9px 12px', borderRadius: '8px',
+          fontWeight: 600, fontSize: '12px', textDecoration: 'none',
+        }}>Review Lesson</Link>
+      )}
+      {node.status === 'in-progress' && (
+        <Link to="/dashboard" style={{
+          display: 'block', textAlign: 'center',
+          background: 'linear-gradient(135deg, #A41C64, #C0246E)',
+          color: '#fff',
+          padding: '9px 12px', borderRadius: '8px',
+          fontWeight: 700, fontSize: '12px', textDecoration: 'none',
+          boxShadow: '0 4px 18px rgba(164,28,100,0.4)',
+        }}>Continue Learning →</Link>
+      )}
+      {node.status === 'available' && (
+        <Link to="/dashboard" style={{
+          display: 'block', textAlign: 'center',
+          background: 'linear-gradient(135deg, #A41C64, #C0246E)',
+          color: '#fff',
+          padding: '9px 12px', borderRadius: '8px',
+          fontWeight: 700, fontSize: '12px', textDecoration: 'none',
+          boxShadow: '0 4px 18px rgba(164,28,100,0.4)',
+        }}>Start Lesson →</Link>
+      )}
+      {(node.status === 'locked' || isCPD) && (
+        <div style={{
+          textAlign: 'center',
+          background: 'rgba(255,255,255,0.035)',
+          border: '1px solid rgba(255,255,255,0.07)',
+          color: 'rgba(255,255,255,0.2)',
+          padding: '9px 12px', borderRadius: '8px',
+          fontSize: '12px', fontWeight: 600,
+        }}>
+          🔒 Complete prerequisites first
+        </div>
+      )}
     </div>
   );
 }
 
-/* ── Progress Sidebar ────────────────────────────────────────────────── */
-function ProgressSidebar({ user }: { user: { firstName: string; lastName: string } | null }) {
-  const firstName = user?.firstName ?? 'Learner';
-  const lastName = user?.lastName ?? '';
+/* ════════════════════════════════════════════════════════ SIDEBAR ═ */
+interface SidebarProps {
+  user: { firstName: string; lastName: string } | null;
+  selectedNode: SkillNode | null;
+  onCloseNode: () => void;
+}
+
+function ProgressSidebar({ user, selectedNode, onCloseNode }: SidebarProps) {
+  const fn = user?.firstName ?? 'Learner';
+  const ln = user?.lastName  ?? '';
+  const initials = `${fn[0] ?? '?'}${(ln[0] ?? '')}`;
 
   return (
-    <div
-      style={{
-        width: 320,
-        flexShrink: 0,
-        background: '#0E0E1A',
-        borderLeft: '1px solid rgba(164,28,100,0.15)',
-        overflowY: 'auto',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 0,
-      }}
-    >
-      {/* Learner info */}
-      <div
-        style={{
-          padding: '24px',
-          borderBottom: '1px solid rgba(255,255,255,0.05)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
-          <div
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: '50%',
-              background: 'radial-gradient(circle at 35% 35%, #A41C64, #7A1349)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '14px',
-              fontWeight: 700,
-              color: '#fff',
-              flexShrink: 0,
-            }}
-          >
-            {firstName[0]}{lastName[0]}
+    <aside className="st-sidebar" style={{
+      width: 292,
+      flexShrink: 0,
+      background: '#09090F',
+      borderLeft: '1px solid rgba(164,28,100,0.14)',
+      display: 'flex',
+      flexDirection: 'column',
+      overflowY: 'auto',
+    }}>
+
+      {/* ── Learner header ──────────────────────────────── */}
+      <div style={{
+        padding: '20px',
+        background: 'linear-gradient(160deg, rgba(164,28,100,0.10) 0%, transparent 100%)',
+        borderBottom: '1px solid rgba(255,255,255,0.05)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '11px', marginBottom: '16px' }}>
+          <div style={{
+            width: 40, height: 40, borderRadius: '50%',
+            background: 'radial-gradient(circle at 35% 30%, #C0246E, #7A1349)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '13px', fontWeight: 800, color: '#fff', flexShrink: 0,
+            boxShadow: '0 0 14px rgba(164,28,100,0.45)',
+          }}>
+            {initials}
           </div>
           <div>
-            <div style={{ color: '#fff', fontSize: '14px', fontWeight: 700 }}>{firstName} {lastName}</div>
-            <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '11px' }}>Learner</div>
+            <div style={{ color: '#fff', fontSize: '13px', fontWeight: 700 }}>{fn} {ln}</div>
+            <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '9.5px', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+              Enrolled Learner
+            </div>
           </div>
+        </div>
+
+        {/* Pathway badge */}
+        <div style={{
+          background: 'rgba(164,28,100,0.10)',
+          border: '1px solid rgba(164,28,100,0.22)',
+          borderRadius: '8px',
+          padding: '10px 12px',
+        }}>
+          <div style={{ color: 'rgba(164,28,100,0.8)', fontSize: '8.5px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '3px' }}>
+            Active Pathway
+          </div>
+          <div style={{ color: '#fff', fontSize: '13px', fontWeight: 700 }}>Coaching Level 1</div>
+          <div style={{ color: 'rgba(255,255,255,0.32)', fontSize: '10px' }}>Fundamentals of Coaching Strongman</div>
         </div>
       </div>
 
-      {/* Pathway progress */}
-      <div
-        style={{
-          padding: '20px 24px',
-          borderBottom: '1px solid rgba(255,255,255,0.05)',
-        }}
-      >
-        <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px' }}>
-          Pathway
-        </div>
-        <div style={{ color: '#fff', fontSize: '15px', fontWeight: 700, marginBottom: '4px' }}>
-          Coaching Level 1
-        </div>
-        <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '12px', marginBottom: '16px' }}>
-          Fundamentals of Coaching Strongman
-        </div>
-
-        {/* Progress bar */}
-        <div style={{ marginBottom: '8px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>Progress</span>
-            <span style={{ color: '#E19A47', fontSize: '11px', fontWeight: 700 }}>45%</span>
+      {/* ── Progress ring + stats ───────────────────────── */}
+      <div style={{
+        padding: '18px 20px',
+        borderBottom: '1px solid rgba(255,255,255,0.05)',
+        display: 'flex',
+        gap: '16px',
+        alignItems: 'center',
+      }}>
+        <ProgressRing pct={PROGRESS_PCT} />
+        <div style={{ flex: 1 }}>
+          <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '8.5px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '9px' }}>
+            Overall Progress
           </div>
-          <div
-            style={{
-              height: 6,
-              background: 'rgba(255,255,255,0.08)',
-              borderRadius: '999px',
-              overflow: 'hidden',
-            }}
-          >
-            <div
-              style={{
-                width: '45%',
-                height: '100%',
-                background: 'linear-gradient(90deg, #E19A47, #C07A32)',
-                borderRadius: '999px',
-                transition: 'width 0.6s ease',
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Lesson count */}
-        <div style={{ display: 'flex', gap: '16px', marginTop: '12px' }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ color: '#E19A47', fontSize: '20px', fontWeight: 800 }}>5</div>
-            <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '10px' }}>Completed</div>
-          </div>
-          <div style={{ color: 'rgba(255,255,255,0.1)', fontSize: '20px', alignSelf: 'center' }}>/</div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '20px', fontWeight: 800 }}>11</div>
-            <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '10px' }}>Total Lessons</div>
-          </div>
+          {[
+            { label: 'Lessons',
+              value: `${COMPLETED_CNT} / ${TOTAL_CNT}`,
+              colour: '#E19A47',
+            },
+            { label: 'Certificate',
+              value: 'In Progress',
+              badge: true,
+              badgeStyle: { background: 'rgba(234,179,8,0.14)', border: '1px solid rgba(234,179,8,0.3)', color: '#EAB308' },
+            },
+            { label: 'CPD',
+              value: 'Locked',
+              badge: true,
+              badgeStyle: { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', color: 'rgba(255,255,255,0.28)' },
+            },
+          ].map(row => (
+            <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>{row.label}</span>
+              {row.badge ? (
+                <span style={{ ...(row.badgeStyle as React.CSSProperties), borderRadius: '4px', padding: '1px 7px', fontSize: '9px', fontWeight: 700, letterSpacing: '0.05em' }}>
+                  {row.value}
+                </span>
+              ) : (
+                <span style={{ color: row.colour ?? '#fff', fontSize: '11px', fontWeight: 700 }}>{row.value}</span>
+              )}
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Certificate status */}
-      <div
-        style={{
-          padding: '20px 24px',
-          borderBottom: '1px solid rgba(255,255,255,0.05)',
-        }}
-      >
-        <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px' }}>
-          Certificate
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>Level 1 Certificate</div>
-          <span
-            style={{
-              background: 'rgba(234,179,8,0.15)',
-              border: '1px solid rgba(234,179,8,0.3)',
-              color: '#EAB308',
-              borderRadius: '6px',
-              padding: '3px 10px',
-              fontSize: '10px',
-              fontWeight: 700,
-              letterSpacing: '0.06em',
-            }}
-          >
-            IN PROGRESS
-          </span>
-        </div>
-      </div>
-
-      {/* CPD status */}
-      <div
-        style={{
-          padding: '20px 24px',
-          borderBottom: '1px solid rgba(255,255,255,0.05)',
-        }}
-      >
-        <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px' }}>
-          CPD
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '14px', opacity: 0.5 }}>🔒</span>
-          <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px', lineHeight: 1.5 }}>
-            Locked — complete Level 1 first
-          </span>
-        </div>
-      </div>
-
-      {/* Next lesson */}
-      <div
-        style={{
-          padding: '20px 24px',
-          borderBottom: '1px solid rgba(255,255,255,0.05)',
-        }}
-      >
-        <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px' }}>
-          Next Up
-        </div>
-        <div
-          style={{
-            background: '#131320',
+      {/* ── Node detail or Next Up ───────────────────────── */}
+      {selectedNode ? (
+        <SidebarNodeDetail node={selectedNode} onClose={onCloseNode} />
+      ) : NEXT_NODE ? (
+        <div style={{ padding: '18px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '8.5px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '10px' }}>
+            Next Up
+          </div>
+          <div style={{
+            background: 'rgba(164,28,100,0.08)',
             border: '1px solid rgba(164,28,100,0.2)',
             borderRadius: '10px',
             padding: '12px 14px',
-          }}
-        >
-          <div style={{ color: 'rgba(164,28,100,0.8)', fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '4px' }}>
-            Event Module
+          }}>
+            <div style={{ fontSize: '16px', marginBottom: '7px' }}>{NEXT_NODE.icon}</div>
+            <div style={{ color: 'rgba(164,28,100,0.8)', fontSize: '8.5px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '4px' }}>
+              {NEXT_NODE.category ?? 'Lesson'}
+            </div>
+            <div style={{ color: '#fff', fontSize: '12px', fontWeight: 700, lineHeight: 1.4 }}>
+              {NEXT_NODE.title}
+            </div>
+            <div style={{ color: NEXT_NODE.status === 'in-progress' ? '#E19A47' : 'rgba(255,255,255,0.4)', fontSize: '10px', marginTop: '4px' }}>
+              {NEXT_NODE.status === 'in-progress' ? '● In progress' : '○ Available now'}
+            </div>
           </div>
-          <div style={{ color: '#fff', fontSize: '13px', fontWeight: 700 }}>
-            Log Press Fundamentals
-          </div>
+          <p style={{ color: 'rgba(255,255,255,0.22)', fontSize: '10px', marginTop: '10px', lineHeight: 1.6 }}>
+            Click any node on the constellation to view details.
+          </p>
         </div>
+      ) : null}
+
+      {/* ── Legend ──────────────────────────────────────── */}
+      <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '8.5px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '10px' }}>
+          Legend
+        </div>
+        {LEGEND.map(item => (
+          <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '9px', marginBottom: '7px' }}>
+            {/* Mini diamond */}
+            <svg width={14} height={14} viewBox="0 0 14 14" style={{ flexShrink: 0 }}>
+              <polygon points="7,1 13,7 7,13 1,7"
+                fill={item.fill}
+                stroke={item.stroke}
+                strokeWidth={1.5}
+              />
+            </svg>
+            <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.38)' }}>{item.label}</span>
+          </div>
+        ))}
       </div>
 
-      {/* CTA */}
-      <div style={{ padding: '20px 24px', marginTop: 'auto' }}>
-        <Link
-          to="/dashboard"
-          style={{
-            display: 'block',
-            background: 'linear-gradient(135deg, #A41C64, #C0246E)',
-            color: '#fff',
-            padding: '14px',
-            borderRadius: '10px',
-            fontWeight: 700,
-            fontSize: '14px',
-            textDecoration: 'none',
-            textAlign: 'center',
-            boxShadow: '0 4px 20px rgba(164,28,100,0.4)',
-            transition: 'opacity 0.2s',
-          }}
-        >
+      {/* ── CTAs ────────────────────────────────────────── */}
+      <div style={{ padding: '18px 20px', marginTop: 'auto' }}>
+        <Link to="/dashboard" style={{
+          display: 'block',
+          background: 'linear-gradient(135deg, #A41C64, #C0246E)',
+          color: '#fff',
+          padding: '12px',
+          borderRadius: '10px',
+          fontWeight: 700, fontSize: '13px',
+          textDecoration: 'none',
+          textAlign: 'center',
+          boxShadow: '0 4px 22px rgba(164,28,100,0.42)',
+          marginBottom: '10px',
+        }}>
           Continue Learning →
         </Link>
+        <Link to="/dashboard" style={{
+          display: 'block',
+          color: 'rgba(255,255,255,0.28)',
+          fontSize: '11px',
+          textDecoration: 'none',
+          textAlign: 'center',
+        }}>
+          ← Back to Dashboard
+        </Link>
       </div>
+    </aside>
+  );
+}
+
+/* ════════════════════════════════════════════════════ MOBILE HINT ═ */
+function MobileProgress() {
+  return (
+    <div className="st-mobile-bar" style={{
+      display: 'none', // shown via CSS on narrow screens
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '10px 16px',
+      background: '#09090F',
+      borderBottom: '1px solid rgba(164,28,100,0.14)',
+      flexShrink: 0,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>Coaching L1</div>
+        <div style={{
+          height: 6, width: 80,
+          background: 'rgba(255,255,255,0.08)',
+          borderRadius: 999, overflow: 'hidden',
+        }}>
+          <div style={{
+            width: `${PROGRESS_PCT}%`, height: '100%',
+            background: 'linear-gradient(90deg, #A41C64, #E19A47)',
+            borderRadius: 999,
+          }} />
+        </div>
+        <span style={{ color: '#E19A47', fontSize: '11px', fontWeight: 700 }}>{PROGRESS_PCT}%</span>
+      </div>
+      <Link to="/dashboard" style={{
+        background: 'linear-gradient(135deg, #A41C64, #C0246E)',
+        color: '#fff', padding: '6px 12px',
+        borderRadius: '6px', fontSize: '11px',
+        fontWeight: 700, textDecoration: 'none',
+      }}>Continue</Link>
     </div>
   );
 }
 
-/* ── Canvas title bar ─────────────────────────────────────────────── */
-const LEGEND: { label: string; colour: string; bg: string; dash?: boolean }[] = [
-  { label: 'Completed', colour: '#A41C64', bg: 'rgba(164,28,100,0.2)' },
-  { label: 'In Progress', colour: '#E19A47', bg: 'rgba(225,154,71,0.2)' },
-  { label: 'Available', colour: 'rgba(255,255,255,0.6)', bg: 'rgba(255,255,255,0.07)' },
-  { label: 'Locked', colour: 'rgba(255,255,255,0.25)', bg: 'rgba(255,255,255,0.04)' },
-];
-
-/* ── Main Page ───────────────────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════ MAIN PAGE ═══ */
 export default function SkillTree() {
   const { user } = useAuth();
-  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [selectedId, setSelectedId]       = useState<string | null>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
     setReducedMotion(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
+    const h = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+    mq.addEventListener('change', h);
+    return () => mq.removeEventListener('change', h);
   }, []);
 
-  const selectedNode = NODES.find(n => n.id === selectedNodeId) ?? null;
+  const selectedNode = selectedId ? (NODE_MAP.get(selectedId) ?? null) : null;
 
-  function handleNodeClick(node: SkillNode) {
-    setSelectedNodeId(prev => (prev === node.id ? null : node.id));
-  }
+  const handleClick = useCallback((node: SkillNode) => {
+    setSelectedId(prev => prev === node.id ? null : node.id);
+  }, []);
 
   return (
     <>
+      {/* ── Global styles for this page only ── */}
       <style>{`
-        @keyframes nodeRipple {
-          0%   { box-shadow: 0 0 0 0 rgba(225,154,71,0.5); }
-          70%  { box-shadow: 0 0 0 14px rgba(225,154,71,0); }
-          100% { box-shadow: 0 0 0 0 rgba(225,154,71,0); }
+        .st-sidebar    { display: flex; }
+        .st-mobile-bar { display: none; }
+        @media (max-width: 720px) {
+          .st-sidebar    { display: none !important; }
+          .st-mobile-bar { display: flex !important; }
         }
       `}</style>
 
-      <div
-        style={{
-          background: '#080810',
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          color: '#fff',
-        }}
-      >
+      <div style={{
+        background: '#06060F',
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        color: '#fff',
+      }}>
         <Navbar />
 
-        {/* Main layout below navbar */}
-        <div
-          style={{
-            display: 'flex',
-            flex: 1,
-            paddingTop: 64,
-            overflow: 'hidden',
-          }}
-        >
-          {/* ── Left: Skill Tree Canvas ─────────────────────────────── */}
-          <div
-            style={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-              minWidth: 0,
-            }}
-          >
-            {/* Title bar */}
-            <div
-              style={{
-                background: '#0E0E18',
-                borderBottom: '1px solid rgba(164,28,100,0.12)',
-                padding: '0 24px',
-                height: 56,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexShrink: 0,
-                gap: '16px',
-              }}
-            >
-              {/* Breadcrumb + label */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '13px' }}>
-                  Coaching Pathway
-                </span>
-                <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '13px' }}>—</span>
-                <span style={{ color: '#fff', fontSize: '13px', fontWeight: 700 }}>Level 1</span>
-                <span
-                  style={{
-                    background: 'rgba(164,28,100,0.15)',
-                    border: '1px solid rgba(164,28,100,0.3)',
-                    color: '#A41C64',
-                    borderRadius: '4px',
-                    padding: '2px 8px',
-                    fontSize: '10px',
-                    fontWeight: 700,
-                    letterSpacing: '0.08em',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  Skill Tree
-                </span>
-              </div>
+        {/* ── Page body (below navbar) ─────────────────── */}
+        <div style={{
+          display: 'flex',
+          flex: 1,
+          paddingTop: 64,
+          height: '100vh',
+          overflow: 'hidden',
+        }}>
 
-              {/* Legend */}
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {LEGEND.map(item => (
-                  <span
-                    key={item.label}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                      background: item.bg,
-                      border: `1px solid ${item.colour}44`,
-                      borderRadius: '4px',
-                      padding: '2px 8px',
-                      fontSize: '10px',
-                      color: item.colour,
-                      fontWeight: 600,
-                    }}
-                  >
-                    <span
-                      style={{
-                        width: 6,
-                        height: 6,
-                        borderRadius: '50%',
-                        background: item.colour,
-                        flexShrink: 0,
-                      }}
-                    />
-                    {item.label}
-                  </span>
-                ))}
+          {/* ── Canvas column ─────────────────────────── */}
+          <div style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            minWidth: 0,
+          }}>
+
+            {/* Title bar */}
+            <div style={{
+              background: '#09090F',
+              borderBottom: '1px solid rgba(164,28,100,0.14)',
+              padding: '0 20px',
+              height: 46,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexShrink: 0,
+              gap: '12px',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Link to="/dashboard" style={{ color: 'rgba(255,255,255,0.28)', fontSize: '11.5px', textDecoration: 'none' }}>
+                  Dashboard
+                </Link>
+                <span style={{ color: 'rgba(255,255,255,0.15)', fontSize: '11px' }}>›</span>
+                <span style={{ color: 'rgba(255,255,255,0.28)', fontSize: '11.5px' }}>Coaching Pathway</span>
+                <span style={{ color: 'rgba(255,255,255,0.15)', fontSize: '11px' }}>›</span>
+                <span style={{ color: '#fff', fontSize: '11.5px', fontWeight: 600 }}>Skill Tree</span>
+              </div>
+              <div style={{
+                background: 'rgba(164,28,100,0.12)',
+                border: '1px solid rgba(164,28,100,0.28)',
+                color: '#A41C64',
+                borderRadius: '5px',
+                padding: '3px 10px',
+                fontSize: '10px',
+                fontWeight: 700,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                flexShrink: 0,
+              }}>
+                Level 1 · {PROGRESS_PCT}% Complete
               </div>
             </div>
 
-            {/* Scrollable canvas + sticky detail panel */}
-            <div
-              style={{
-                flex: 1,
-                overflowY: 'auto',
-                overflowX: 'auto',
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-            >
-              {/* Canvas */}
-              <div
-                style={{
-                  position: 'relative',
-                  width: CANVAS_WIDTH,
-                  minWidth: CANVAS_WIDTH,
-                  height: CANVAS_HEIGHT,
-                  minHeight: 'calc(100vh - 120px)',
-                  margin: '0 auto',
-                  padding: '16px 0',
-                }}
+            {/* Mobile progress bar */}
+            <MobileProgress />
+
+            {/* Scrollable SVG canvas */}
+            <div style={{
+              flex: 1,
+              overflow: 'auto',
+              background: '#06060F',
+            }}>
+              <svg
+                width={CANVAS_W}
+                height={CANVAS_H}
+                viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`}
+                style={{ display: 'block', minWidth: CANVAS_W }}
+                aria-label="Coaching Level 1 skill constellation"
+                role="img"
               >
-                {/* SVG connection lines (rendered behind nodes) */}
-                <ConnectionLines reducedMotion={reducedMotion} />
+                <TreeDefs />
+
+                {/* Nebula atmosphere layers */}
+                <rect x={0} y={0} width={CANVAS_W} height={CANVAS_H} fill="url(#nb1)" />
+                <rect x={0} y={0} width={CANVAS_W} height={CANVAS_H} fill="url(#nb2)" />
+                <rect x={0} y={0} width={CANVAS_W} height={CANVAS_H} fill="url(#nb3)" />
+                <rect x={0} y={0} width={CANVAS_W} height={CANVAS_H} fill="url(#nb4)" />
+
+                {/* Star field */}
+                {STARS.map((s, i) => (
+                  <circle key={i} cx={s.x} cy={s.y} r={s.r} fill="#fff" opacity={s.o} />
+                ))}
+
+                {/* Connection lines — rendered under nodes */}
+                <ConnectionLines />
 
                 {/* CPD separator band */}
                 <CPDSeparator />
 
                 {/* Nodes */}
                 {NODES.map(node => (
-                  <SkillNodeDot
+                  <DiamondNode
                     key={node.id}
                     node={node}
-                    isSelected={selectedNodeId === node.id}
+                    isSelected={selectedId === node.id}
                     reducedMotion={reducedMotion}
-                    onClick={() => handleNodeClick(node)}
+                    onClick={() => handleClick(node)}
                   />
                 ))}
-              </div>
-
-              {/* Detail panel — sticky at bottom of scroll container */}
-              {selectedNode && (
-                <DetailPanel
-                  node={selectedNode}
-                  onClose={() => setSelectedNodeId(null)}
-                />
-              )}
+              </svg>
             </div>
           </div>
 
-          {/* ── Right: Progress Sidebar ─────────────────────────────── */}
-          <ProgressSidebar user={user} />
+          {/* ── Sidebar ───────────────────────────────── */}
+          <ProgressSidebar
+            user={user}
+            selectedNode={selectedNode}
+            onCloseNode={() => setSelectedId(null)}
+          />
         </div>
       </div>
     </>
