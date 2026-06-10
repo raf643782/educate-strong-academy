@@ -1,369 +1,309 @@
 /**
- * SkillTree — Coaching Pathway Level 1
- * Full SVG coordinate-driven rewrite matching design screenshot.
- * Route: /dashboard/pathway  (ProtectedRoute)
+ * SkillTree - Coaching Pathway Level 1
+ * Route: /dashboard/pathway
+ *
+ * The pathway diagram is intentionally SVG coordinate driven. The supplied
+ * reference image uses a fixed visual composition, so the nodes, connectors,
+ * CPD band, and labels below are positioned from the canonical 1100 x 820
+ * viewBox rather than through normal document layout.
  */
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
-/* ═══════════════════════════════════════════════════════════ TYPES ═══ */
-
-type SkillNodeStatus = 'completed' | 'in-progress' | 'available' | 'locked' | 'cpd-locked';
-type SkillNodeType   = 'foundation' | 'lesson' | 'skill' | 'assessment' | 'cpd';
+type SkillNodeStatus = 'completed' | 'in-progress' | 'locked' | 'cpd-locked';
+type SkillNodeType = 'foundation' | 'lesson' | 'skill' | 'assessment' | 'cpd';
 
 interface SkillNode {
-  id          : string;
-  title       : string;
-  subtitle?   : string;
-  description : string;
-  type        : SkillNodeType;
-  status      : SkillNodeStatus;
-  progress?   : number;
-  x           : number;
-  y           : number;
-  icon        : string;
-  duration?   : string;
+  id: string;
+  title: string;
+  subtitle?: string;
+  description: string;
+  type: SkillNodeType;
+  status: SkillNodeStatus;
+  progress?: number;
+  x: number;
+  y: number;
+  icon: string;
+  duration?: string;
   lessonCount?: number;
-  lessonLink? : string;
+  lessonLink?: string;
 }
 
-/* ═══════════════════════════════════════════════════════════ DATA ════ */
+const PALETTE = {
+  page: '#050506',
+  canvas: '#08080A',
+  deep: '#0B0B0E',
+  panel: '#101014',
+  panelElevated: '#151519',
+  text: '#F5F5F7',
+  secondary: '#B8B8BE',
+  muted: '#75757D',
+  magenta: '#C2186A',
+  magentaBright: '#F02C93',
+  amber: '#F2A93B',
+  lockedGrey: '#4D4D55',
+  lockedDark: '#17171B',
+} as const;
 
 const LEARNER = {
-  name               : 'James Mitchell',
-  role               : 'Learner',
-  pathway            : 'Coaching Pathway Level 1',
-  progress           : 42,
-  lessonsCompleted   : 42,
-  totalLessons       : 100,
-  totalTime          : '12h 35m',
-  currentModule      : 'Session Structure',
+  name: 'James Mitchell',
+  role: 'Learner',
+  pathway: 'Coaching Pathway Level 1',
+  progress: 42,
+  lessonsCompleted: 42,
+  totalLessons: 100,
+  totalTime: '12h 35m',
+  currentModule: 'Session Structure',
   currentModuleProgress: 65,
-  nextLesson         : 'Session Planning Principles',
-  nextLessonNumber   : 18,
-  nextLessonDuration : '25 min',
-  nextLessonLink     : '/learn/level-1-coaching-strongman/lessons/18',
-  certEarned         : false,
+  nextLesson: 'Session Planning Principles',
+  nextLessonNumber: 18,
+  nextLessonDuration: '25 min',
+  nextLessonLink: '/learn/level-1-coaching-strongman/lessons/18',
+  certEarned: false,
 };
 
 const NODES: SkillNode[] = [
-  /* CPD row ─ y=145 */
-  { id:'cpd-mobility',    x:430,  y:145, icon:'runner',   type:'cpd',        status:'cpd-locked', title:'Mobility for Strongman',          description:'Evidence-based mobility protocols for Strongman athletes.',          duration:'3h 20m', lessonCount:12 },
-  { id:'cpd-programming', x:620,  y:145, icon:'clipboard',type:'cpd',        status:'cpd-locked', title:'Programming Essentials',          description:'Periodisation and block programming for Strongman training cycles.',  duration:'4h 15m', lessonCount:15 },
-  { id:'cpd-analysis',    x:810,  y:145, icon:'barchart', type:'cpd',        status:'cpd-locked', title:'Event Analysis',                  description:'Video analysis methodology for Strongman events.',                   duration:'2h 45m', lessonCount:10 },
-  /* Spine ─ y=255…505 */
-  { id:'foundation', x:620, y:255, icon:'landmark', type:'foundation', status:'completed',   title:'Foundation',                        description:"Core principles of Strongman coaching. Sport history, culture, and the coach's role in athlete development.", duration:'2h 10m', lessonCount:8,  lessonLink:'/learn/level-1-coaching-strongman/lessons/1'  },
-  { id:'intro',      x:620, y:335, icon:'present',  type:'lesson',     status:'completed',   title:'Introduction to Strongman Coaching', description:'Coaching communication frameworks, athlete relationships, and professional standards.',                          duration:'3h 05m', lessonCount:11, lessonLink:'/learn/level-1-coaching-strongman/lessons/9'  },
-  { id:'screening',  x:620, y:415, icon:'shield',   type:'lesson',     status:'completed',   title:'Athlete Screening and Safety',       description:'PAR-Q, injury history, movement screening, and safe load progression protocols.',                                 duration:'2h 40m', lessonCount:9,  lessonLink:'/learn/level-1-coaching-strongman/lessons/20' },
-  { id:'session',    x:620, y:505, icon:'whistle',  type:'lesson',     status:'in-progress', progress:65, title:'Session Structure',      description:'Building effective Strongman training sessions. Warm-up protocols, exercise sequencing, and coaching flow.',         duration:'3h 50m', lessonCount:14, lessonLink:'/learn/level-1-coaching-strongman/lessons/30' },
-  /* Event row ─ y=585 */
-  { id:'log-press',    x:210, y:585, icon:'dumbbell', type:'skill', status:'completed', title:'Log Press',    subtitle:'Fundamentals', description:'Log clean mechanics, overhead lockout, and loading progressions.',          duration:'1h 20m', lessonCount:5, lessonLink:'/learn/level-1-coaching-strongman/lessons/44' },
-  { id:'axle-press',   x:360, y:585, icon:'dumbbell', type:'skill', status:'completed', title:'Axle Press',   subtitle:'Fundamentals', description:'Axle bar grip mechanics, continental clean technique, and push press cues.',  duration:'55m',   lessonCount:4, lessonLink:'/learn/level-1-coaching-strongman/lessons/49' },
-  { id:'deadlift',     x:510, y:585, icon:'dumbbell', type:'skill', status:'completed', title:'Deadlift',     subtitle:'Fundamentals', description:'Silver dollar, car deadlift, and frame variations. Technique and rules.',     duration:'1h 10m', lessonCount:4, lessonLink:'/learn/level-1-coaching-strongman/lessons/53' },
-  { id:'farmers-walk', x:660, y:585, icon:'milk',     type:'skill', status:'completed', title:"Farmer's Walk",subtitle:'Fundamentals', description:'Grip loading, turn mechanics, and pacing strategies for performance.',       duration:'50m',   lessonCount:3, lessonLink:'/learn/level-1-coaching-strongman/lessons/57' },
-  { id:'yoke',         x:810, y:585, icon:'frame',    type:'skill', status:'completed', title:'Yoke',         subtitle:'Fundamentals', description:'Load placement, leg drive mechanics, and visual cuing strategies.',           duration:'55m',   lessonCount:3, lessonLink:'/learn/level-1-coaching-strongman/lessons/60' },
-  { id:'atlas-stones', x:960, y:585, icon:'stone',    type:'skill', status:'completed', title:'Atlas Stones', subtitle:'Fundamentals', description:'Tacky application, lap mechanics, and safe loading progressions.',            duration:'1h 15m', lessonCount:5, lessonLink:'/learn/level-1-coaching-strongman/lessons/63' },
-  /* Locked ─ y=675…755 */
-  { id:'practical',  x:620, y:675, icon:'users', type:'assessment', status:'locked', title:'Practical Coaching Skills', description:'Practical session delivery, communication under pressure, and real-time athlete feedback.', duration:'4h 30m', lessonCount:16 },
-  { id:'assessment', x:620, y:755, icon:'medal', type:'assessment', status:'locked', title:'Assessment Preparation',    description:'Preparing for the Level 1 certificate assessment. Theory test and practical walkthrough.',  duration:'2h 00m', lessonCount:7  },
+  { id: 'cpd-mobility', x: 430, y: 145, icon: 'runner', type: 'cpd', status: 'cpd-locked', title: 'Mobility for Strongman', description: 'Evidence-based mobility protocols for Strongman athletes.', duration: '3h 20m', lessonCount: 12 },
+  { id: 'cpd-programming', x: 620, y: 145, icon: 'clipboard', type: 'cpd', status: 'cpd-locked', title: 'Programming Essentials', description: 'Periodisation and block programming for Strongman training cycles.', duration: '4h 15m', lessonCount: 15 },
+  { id: 'cpd-analysis', x: 810, y: 145, icon: 'barchart', type: 'cpd', status: 'cpd-locked', title: 'Event Analysis', description: 'Video analysis methodology for Strongman events.', duration: '2h 45m', lessonCount: 10 },
+
+  { id: 'foundation', x: 620, y: 255, icon: 'foundation', type: 'foundation', status: 'completed', title: 'Foundation', description: "Core principles of Strongman coaching. Sport history, culture, and the coach's role in athlete development.", duration: '2h 10m', lessonCount: 8, lessonLink: '/learn/level-1-coaching-strongman/lessons/1' },
+  { id: 'intro', x: 620, y: 335, icon: 'coach', type: 'lesson', status: 'completed', title: 'Introduction to Strongman Coaching', description: 'Coaching communication frameworks, athlete relationships, and professional standards.', duration: '3h 05m', lessonCount: 11, lessonLink: '/learn/level-1-coaching-strongman/lessons/9' },
+  { id: 'screening', x: 620, y: 415, icon: 'shield', type: 'lesson', status: 'completed', title: 'Athlete Screening and Safety', description: 'PAR-Q, injury history, movement screening, and safe load progression protocols.', duration: '2h 40m', lessonCount: 9, lessonLink: '/learn/level-1-coaching-strongman/lessons/20' },
+  { id: 'session', x: 620, y: 505, icon: 'whistle', type: 'lesson', status: 'in-progress', progress: 65, title: 'Session Structure', description: 'Building effective Strongman training sessions. Warm-up protocols, exercise sequencing, and coaching flow.', duration: '3h 50m', lessonCount: 14, lessonLink: '/learn/level-1-coaching-strongman/lessons/30' },
+
+  { id: 'log-press', x: 210, y: 585, icon: 'log', type: 'skill', status: 'completed', title: 'Log Press', subtitle: 'Fundamentals', description: 'Log clean mechanics, overhead lockout, and loading progressions.', duration: '1h 20m', lessonCount: 5, lessonLink: '/learn/level-1-coaching-strongman/lessons/44' },
+  { id: 'axle-press', x: 360, y: 585, icon: 'axle', type: 'skill', status: 'completed', title: 'Axle Press', subtitle: 'Fundamentals', description: 'Axle bar grip mechanics, continental clean technique, and push press cues.', duration: '55m', lessonCount: 4, lessonLink: '/learn/level-1-coaching-strongman/lessons/49' },
+  { id: 'deadlift', x: 510, y: 585, icon: 'deadlift', type: 'skill', status: 'completed', title: 'Deadlift', subtitle: 'Fundamentals', description: 'Silver dollar, car deadlift, and frame variations. Technique and rules.', duration: '1h 10m', lessonCount: 4, lessonLink: '/learn/level-1-coaching-strongman/lessons/53' },
+  { id: 'farmers-walk', x: 660, y: 585, icon: 'farmers', type: 'skill', status: 'completed', title: "Farmer's Walk", subtitle: 'Fundamentals', description: 'Grip loading, turn mechanics, and pacing strategies for performance.', duration: '50m', lessonCount: 3, lessonLink: '/learn/level-1-coaching-strongman/lessons/57' },
+  { id: 'yoke', x: 810, y: 585, icon: 'yoke', type: 'skill', status: 'completed', title: 'Yoke', subtitle: 'Fundamentals', description: 'Load placement, leg drive mechanics, and visual cuing strategies.', duration: '55m', lessonCount: 3, lessonLink: '/learn/level-1-coaching-strongman/lessons/60' },
+  { id: 'atlas-stones', x: 960, y: 585, icon: 'stone', type: 'skill', status: 'completed', title: 'Atlas Stones', subtitle: 'Fundamentals', description: 'Tacky application, lap mechanics, and safe loading progressions.', duration: '1h 15m', lessonCount: 5, lessonLink: '/learn/level-1-coaching-strongman/lessons/63' },
+
+  { id: 'practical', x: 620, y: 675, icon: 'users', type: 'assessment', status: 'locked', title: 'Practical Coaching Skills', description: 'Practical session delivery, communication under pressure, and real-time athlete feedback.', duration: '4h 30m', lessonCount: 16 },
+  { id: 'assessment', x: 620, y: 755, icon: 'medal', type: 'assessment', status: 'locked', title: 'Assessment Preparation', description: 'Preparing for the Level 1 certificate assessment. Theory test and practical walkthrough.', duration: '2h 00m', lessonCount: 7 },
 ];
 
-const EVENT_IDS = ['log-press','axle-press','deadlift','farmers-walk','yoke','atlas-stones'];
-const byId = (id: string) => NODES.find(n => n.id === id)!;
+const EVENT_IDS = ['log-press', 'axle-press', 'deadlift', 'farmers-walk', 'yoke', 'atlas-stones'];
+const HEX_POINTS = '42,2 78,20 78,44 42,62 6,44 6,20';
+const HEX_CX = 42;
+const HEX_CY = 32;
 
-/* ════════════════════════════════════════════════ INLINE ICON PATHS ═ */
+const byId = (id: string) => NODES.find((node) => node.id === id)!;
 
-interface IconDef { d: string; stroke?: boolean }
-
-const ICON_MAP: Record<string, IconDef> = {
-  landmark : { d:'M3 21V9.5L12 4L21 9.5V21H3ZM7 21V14H11V21H7ZM13 21V14H17V21H13Z', stroke:false },
-  present  : { d:'M2 4H22V17H2V4ZM12 4V17M2 4L12 1L22 4M7 10H17M7 13H13', stroke:true },
-  shield   : { d:'M12 2L4 6V12C4 16.5 7.4 20.7 12 22C16.6 20.7 20 16.5 20 12V6L12 2ZM9 12L11 14L16 9', stroke:true },
-  whistle  : { d:'M10 15A5 5 0 1 0 10 5A5 5 0 0 0 10 15ZM10 10H21M10 7V10M16.5 7.5L18 6', stroke:true },
-  dumbbell : { d:'M6.5 5V19M17.5 5V19M3.5 8.5H6.5M17.5 8.5H20.5M3.5 15.5H6.5M17.5 15.5H20.5M6.5 10.5H17.5M6.5 13.5H17.5', stroke:true },
-  milk     : { d:'M8 8V20H16V8M6 4H18L16 8H8L6 4ZM10 12H14M10 16H14', stroke:true },
-  frame    : { d:'M3 5H7V19H3ZM17 5H21V19H17ZM7 9H17M7 15H17M7 12H17', stroke:true },
-  stone    : { d:'M12 4C8.13 4 5 7.13 5 11C5 13.6 6.4 15.9 8.5 17.1L9 20H15L15.5 17.1C17.6 15.9 19 13.6 19 11C19 7.13 15.87 4 12 4Z', stroke:false },
-  users    : { d:'M17 21V19C17 16.8 15.2 15 13 15H5C2.8 15 1 16.8 1 19V21M9 11C11.2 11 13 9.2 13 7S11.2 3 9 3 5 4.8 5 7 6.8 11 9 11ZM23 21V19C23 17.1 21.7 15.5 20 15.1M16 3.1C17.7 3.6 19 5.2 19 7S17.7 10.4 16 10.9', stroke:true },
-  medal    : { d:'M12 15C15.3 15 18 12.3 18 9S15.3 3 12 3 6 5.7 6 9 8.7 15 12 15ZM12 15L9.5 22L12 20.5L14.5 22L12 15', stroke:true },
-  runner   : { d:'M13 5.5A1.5 1.5 0 1 0 13 2.5A1.5 1.5 0 0 0 13 5.5ZM8 22L10.5 16L13.5 18.5V22H16V17L12.5 14L13.5 9L17 12H20V9H16L13 6C12 5.5 10.5 5.5 10 6.5L7 11L5 12V15L7.5 14L9.5 11L8.5 16L6 22H8Z', stroke:false },
-  clipboard: { d:'M9 3C9 3 9 5 12 5C15 5 15 3 15 3H18C19.1 3 20 3.9 20 5V21C20 22.1 19.1 23 18 23H6C4.9 23 4 22.1 4 21V5C4 3.9 4.9 3 6 3H9ZM9 13L11 15L15 11', stroke:true },
-  barchart : { d:'M6 20V14M12 20V4M18 20V10', stroke:true },
-  lock     : { d:'M7 11V7C7 4.24 9.24 2 12 2S17 4.24 17 7V11M5 11H19C19.6 11 20 11.4 20 12V21C20 21.6 19.6 22 19 22H5C4.4 22 4 21.6 4 21V12C4 11.4 4.4 11 5 11Z', stroke:true },
+const DISPLAY_Y: Record<string, number> = {
+  'cpd-mobility': 145,
+  'cpd-programming': 145,
+  'cpd-analysis': 145,
+  foundation: 255,
+  intro: 315,
+  screening: 375,
+  session: 430,
+  'log-press': 525,
+  'axle-press': 525,
+  deadlift: 525,
+  'farmers-walk': 525,
+  yoke: 525,
+  'atlas-stones': 525,
+  practical: 650,
+  assessment: 730,
 };
 
-function NodeIcon({ icon, cx, cy, color, size = 17 }: { icon: string; cx: number; cy: number; color: string; size?: number }) {
-  const def = ICON_MAP[icon] || ICON_MAP.stone;
+const displayY = (node: SkillNode) => DISPLAY_Y[node.id] ?? node.y;
+
+interface PathIconDef {
+  d: string;
+  fill?: boolean;
+}
+
+const PATH_ICONS: Record<string, PathIconDef> = {
+  runner: { d: 'M13 5.5A1.7 1.7 0 1 0 13 2.1A1.7 1.7 0 0 0 13 5.5ZM8 22L10.4 16.2L13.4 18.5V22H16V17L12.4 13.7L13.6 8.8L17 12H20V9.3H16.2L13.1 6.2C12.2 5.5 10.7 5.6 10 6.7L7.4 10.8L5 12.1V15L7.8 13.7L9.8 10.7L8.8 15.8L6 22H8Z', fill: true },
+  clipboard: { d: 'M8.5 4H6C4.9 4 4 4.9 4 6V21C4 22.1 4.9 23 6 23H18C19.1 23 20 22.1 20 21V6C20 4.9 19.1 4 18 4H15.5M8.5 4C8.5 5.4 9.7 6.5 12 6.5C14.3 6.5 15.5 5.4 15.5 4M8.5 4C8.5 2.9 9.4 2 10.5 2H13.5C14.6 2 15.5 2.9 15.5 4M8 13H16M8 17H13M8 10H16' },
+  barchart: { d: 'M6 20V13M12 20V5M18 20V9M4 20H20' },
+  foundation: { d: 'M4 20H20M6 18V10H18V18M5 10L12 5L19 10M9 18V13H15V18' },
+  coach: { d: 'M3 5H21V17H3V5ZM12 5V17M7 10H10M7 13H12M15.5 11.5L18 9M18 9V13M18 9H14.5' },
+  shield: { d: 'M12 3L5 6.2V11.5C5 16 7.9 19.6 12 21C16.1 19.6 19 16 19 11.5V6.2L12 3ZM9 12L11.2 14.2L16 9.4' },
+  whistle: { d: 'M9.2 15.5A5.2 5.2 0 1 0 9.2 5.1A5.2 5.2 0 0 0 9.2 15.5ZM9.2 10.3H21M9.2 7.2V10.3M16.6 7.2L18.4 5.8' },
+  users: { d: 'M17 21V19C17 16.8 15.2 15 13 15H5C2.8 15 1 16.8 1 19V21M9 11C11.2 11 13 9.2 13 7S11.2 3 9 3 5 4.8 5 7 6.8 11 9 11ZM23 21V19C23 17.1 21.7 15.5 20 15.1M16 3.1C17.7 3.6 19 5.2 19 7S17.7 10.4 16 10.9' },
+  medal: { d: 'M12 15C15.3 15 18 12.3 18 9S15.3 3 12 3 6 5.7 6 9 8.7 15 12 15ZM12 15L9.5 22L12 20.5L14.5 22L12 15' },
+};
+
+function ScaledPathIcon({ icon, cx, cy, color, size = 19, opacity = 1 }: { icon: string; cx: number; cy: number; color: string; size?: number; opacity?: number }) {
+  const def = PATH_ICONS[icon] ?? PATH_ICONS.shield;
   const scale = size / 24;
   const ox = cx - size / 2;
   const oy = cy - size / 2;
+
   return (
     <path
       d={def.d}
-      fill={def.stroke ? 'none' : color}
-      stroke={def.stroke ? color : 'none'}
-      strokeWidth={def.stroke ? (1.6 / scale) : 0}
+      fill={def.fill ? color : 'none'}
+      stroke={def.fill ? 'none' : color}
+      strokeWidth={def.fill ? 0 : 1.8 / scale}
       strokeLinecap="round"
       strokeLinejoin="round"
-      transform={`translate(${ox.toFixed(1)},${oy.toFixed(1)}) scale(${scale.toFixed(4)})`}
+      opacity={opacity}
+      transform={`translate(${ox},${oy}) scale(${scale})`}
     />
   );
 }
 
-/* ════════════════════════════════════════════════ GYM BACKGROUND ═════ */
+function EventGlyph({ icon, color, locked = false }: { icon: string; color: string; locked?: boolean }) {
+  const stroke = locked ? 'rgba(255,255,255,0.55)' : color;
+  const fill = locked ? 'rgba(255,255,255,0.22)' : 'rgba(245,245,247,0.82)';
 
-function GymBackground() {
-  return (
-    <div
-      aria-hidden="true"
-      style={{
-        position: 'absolute', inset: 0, overflow: 'hidden',
-        pointerEvents: 'none', userSelect: 'none',
-      }}
-    >
-      {/* Base dark wash */}
-      <div style={{ position:'absolute', inset:0, background:'#08080A' }} />
+  if (icon === 'log') {
+    return (
+      <g stroke={stroke} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="21" y="25" width="35" height="14" rx="7" fill={fill} transform="rotate(-18 38.5 32)" />
+        <line x1="14" y1="32" x2="62" y2="32" />
+        <circle cx="18" cy="32" r="5" fill={PALETTE.panel} />
+        <circle cx="58" cy="32" r="5" fill={PALETTE.panel} />
+      </g>
+    );
+  }
 
-      {/* Magenta atmospheric glow — upper centre */}
-      <div style={{
-        position:'absolute', inset:0,
-        background:[
-          'radial-gradient(ellipse 65% 42% at 46% 18%, rgba(240,44,147,0.13) 0%, transparent 60%)',
-          'radial-gradient(ellipse 44% 55% at 6%  62%, rgba(180,20,80,0.08)  0%, transparent 55%)',
-          'radial-gradient(ellipse 38% 40% at 94% 70%, rgba(160,15,70,0.07)  0%, transparent 55%)',
-        ].join(','),
-      }} />
+  if (icon === 'axle') {
+    return (
+      <g stroke={stroke} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="15" y1="32" x2="69" y2="32" />
+        <rect x="20" y="24" width="6" height="16" rx="2" fill={fill} />
+        <rect x="58" y="24" width="6" height="16" rx="2" fill={fill} />
+        <rect x="28" y="27" width="6" height="10" rx="1.5" fill={fill} />
+        <rect x="50" y="27" width="6" height="10" rx="1.5" fill={fill} />
+      </g>
+    );
+  }
 
-      {/* Chalk grain texture */}
-      <svg style={{ position:'absolute', inset:0, width:'100%', height:'100%', opacity:0.045 }}>
-        <filter id='bg-grain'>
-          <feTurbulence type='fractalNoise' baseFrequency='0.68' numOctaves='4' stitchTiles='stitch'/>
-          <feColorMatrix type='saturate' values='0'/>
-        </filter>
-        <rect width='100%' height='100%' filter='url(#bg-grain)'/>
-      </svg>
-
-      {/* LEFT power rack — prominent uprights */}
-      <svg
-        style={{ position:'absolute', left:0, top:0, bottom:0, opacity:0.13 }}
-        width="130" height="100%" viewBox="0 0 130 700" preserveAspectRatio="xMinYMin meet"
-      >
-        {/* Left upright */}
-        <rect x="10" y="0" width="14" height="680" rx="3" fill="white"/>
-        {/* Right upright */}
-        <rect x="96" y="0" width="14" height="680" rx="3" fill="white"/>
-        {/* Top crossbar */}
-        <rect x="10" y="0" width="100" height="14" rx="3" fill="white"/>
-        {/* Safety bars */}
-        <rect x="10" y="160" width="100" height="10" rx="2" fill="white" opacity="0.8"/>
-        <rect x="10" y="290" width="100" height="10" rx="2" fill="white" opacity="0.7"/>
-        <rect x="10" y="400" width="100" height="10" rx="2" fill="white" opacity="0.55"/>
-        <rect x="10" y="510" width="100" height="10" rx="2" fill="white" opacity="0.4"/>
-        {/* Bolt holes on uprights */}
-        {[80,105,130,175,220,305,340,415,450,520].map(y2 => (
-          <g key={y2}>
-            <circle cx="17" cy={y2} r="4" fill="#08080A" opacity="0.9"/>
-            <circle cx="103" cy={y2} r="4" fill="#08080A" opacity="0.9"/>
-          </g>
+  if (icon === 'deadlift') {
+    return (
+      <g stroke={stroke} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="15" y1="32" x2="69" y2="32" />
+        {[22, 28, 34, 50, 56, 62].map((x) => (
+          <rect key={x} x={x} y={19} width="4" height="26" rx="1.5" fill={fill} />
         ))}
-        {/* J-hooks */}
-        <rect x="24" y="152" width="28" height="18" rx="3" fill="white" opacity="0.9"/>
-        <rect x="68" y="152" width="28" height="18" rx="3" fill="white" opacity="0.9"/>
-        {/* Foot base */}
-        <rect x="0" y="664" width="44" height="16" rx="3" fill="white"/>
-        <rect x="86" y="664" width="44" height="16" rx="3" fill="white"/>
-        {/* EDUCATE.STRONG text on bar */}
-        <text x="55" y="172" textAnchor="middle" fill="black" fontSize="6.5"
-          fontFamily="system-ui, sans-serif" fontWeight="700" letterSpacing="1.5" opacity="0.9">
-          EDUCATE.STRONG
-        </text>
+      </g>
+    );
+  }
+
+  if (icon === 'farmers') {
+    return (
+      <g stroke={stroke} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M28 25H38V45H25V32C25 28.1 26.3 25 28 25Z" fill={fill} />
+        <path d="M46 25H56C57.7 25 59 28.1 59 32V45H46V25Z" fill={fill} />
+        <path d="M31 25V19H35V25M49 25V19H53V25" />
+      </g>
+    );
+  }
+
+  if (icon === 'yoke') {
+    return (
+      <g stroke={stroke} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20 20H64M24 20V48M60 20V48M24 30H60M19 48H31M53 48H65" />
+        <rect x="34" y="28" width="16" height="5" rx="2" fill={fill} />
+      </g>
+    );
+  }
+
+  if (icon === 'stone') {
+    return (
+      <g>
+        <circle cx="42" cy="32" r="18" fill="url(#stone-texture)" stroke={stroke} strokeWidth="2" />
+        <circle cx="34" cy="25" r="2.2" fill="rgba(255,255,255,0.28)" />
+        <circle cx="49" cy="39" r="1.8" fill="rgba(0,0,0,0.28)" />
+      </g>
+    );
+  }
+
+  return <ScaledPathIcon icon={icon} cx={42} cy={32} color={stroke} />;
+}
+
+function LockGlyph({ x = 0, y = 0, color = 'rgba(245,245,247,0.68)' }: { x?: number; y?: number; color?: string }) {
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <rect x="4" y="8" width="16" height="13" rx="2.5" fill={color} />
+      <path d="M7.5 8V6.2C7.5 3.7 9.5 1.8 12 1.8S16.5 3.7 16.5 6.2V8" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" />
+    </g>
+  );
+}
+
+function MiniNavIcon({ type }: { type: string }) {
+  const props = { width: 21, height: 21, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
+  if (type === 'dashboard') return <svg {...props}><path d="M3 11L12 3L21 11" /><path d="M5 10V21H19V10" /><path d="M9 21V14H15V21" /></svg>;
+  if (type === 'courses') return <svg {...props}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20V22H6.5A2.5 2.5 0 0 1 4 19.5V4.5Z" /></svg>;
+  if (type === 'pathway') return <svg {...props}><path d="M5 5H12V19H5Z" /><path d="M12 7L19 4V18L12 21" /><path d="M8.5 8H10M8.5 12H10M15 9H17M15 13H17" /></svg>;
+  if (type === 'hub') return <svg {...props}><path d="M9 18H15" /><path d="M10 22H14" /><path d="M12 2A7 7 0 0 0 8 14C9 15 9.5 16 9.5 18H14.5C14.5 16 15 15 16 14A7 7 0 0 0 12 2Z" /></svg>;
+  return <svg {...props}><rect x="4" y="4" width="16" height="17" rx="2" /><path d="M8 2V6M16 2V6M8 10H16M8 14H13" /></svg>;
+}
+
+function BrandMark() {
+  return (
+    <div className="sk-brand">
+      <svg width="50" height="58" viewBox="0 0 52 60" aria-hidden="true">
+        <defs>
+          <linearGradient id="brandShield" x1="0" y1="0" x2="1" y2="1">
+            <stop stopColor="#151519" />
+            <stop offset="1" stopColor="#050506" />
+          </linearGradient>
+        </defs>
+        <path d="M26 3L48 9V36C48 47 38 55 26 58C14 55 4 47 4 36V9L26 3Z" fill="url(#brandShield)" stroke="#F02C93" strokeWidth="2" />
+        <path d="M26 8L43 13V35C43 43.5 35.4 50 26 52.5C16.6 50 9 43.5 9 35V13L26 8Z" fill="none" stroke="rgba(245,245,247,0.76)" strokeWidth="1.1" />
+        <circle cx="26" cy="18" r="3.2" fill="#F5F5F7" />
+        <path d="M26 22L20 29M26 22L32 29M22 28L19 42M30 28L33 42M19 32H33M22 42H18M30 42H34" stroke="#F5F5F7" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
-
-      {/* Weight plates — bottom left */}
-      <svg style={{ position:'absolute', bottom:0, left:'110px', opacity:0.07 }}
-        width="160" height="90" viewBox="0 0 160 90">
-        <ellipse cx="35" cy="60" rx="22" ry="14" fill="white"/>
-        <ellipse cx="35" cy="60" rx="13"  ry="8"  fill="#08080A"/>
-        <rect x="33" y="26" width="4" height="34" fill="white"/>
-        <ellipse cx="85" cy="65" rx="18" ry="11" fill="white"/>
-        <ellipse cx="85" cy="65" rx="10"  ry="6"  fill="#08080A"/>
-        <rect x="83" y="35" width="4" height="30" fill="white"/>
-        <ellipse cx="130" cy="68" rx="20" ry="12" fill="white"/>
-        <ellipse cx="130" cy="68" rx="12"  ry="7"  fill="#08080A"/>
-      </svg>
-
-      {/* Atlas stone — bottom right large */}
-      <div style={{
-        position:'absolute', bottom:'28px', right:'72px',
-        width:'96px', height:'96px', borderRadius:'50%',
-        background:'radial-gradient(circle at 34% 30%, rgba(255,255,255,0.22), rgba(255,255,255,0.04) 65%, transparent)',
-        opacity:0.10,
-      }}/>
-      {/* Atlas stone — bottom right small */}
-      <div style={{
-        position:'absolute', bottom:'18px', right:'162px',
-        width:'66px', height:'66px', borderRadius:'50%',
-        background:'radial-gradient(circle at 38% 32%, rgba(255,255,255,0.18), rgba(255,255,255,0.03) 65%, transparent)',
-        opacity:0.08,
-      }}/>
-
-      {/* RIGHT sandbag / barrel */}
-      <svg style={{ position:'absolute', right:'14px', top:'180px', opacity:0.09 }}
-        width="52" height="320" viewBox="0 0 52 320">
-        <rect x="10" y="0" width="32" height="300" rx="16" fill="white"/>
-        <ellipse cx="26" cy="10" rx="16" ry="8" fill="white"/>
-        {/* straps */}
-        <rect x="8" y="80" width="36" height="6" rx="3" fill="#08080A" opacity="0.6"/>
-        <rect x="8" y="150" width="36" height="6" rx="3" fill="#08080A" opacity="0.6"/>
-        <rect x="8" y="220" width="36" height="6" rx="3" fill="#08080A" opacity="0.6"/>
-        {/* text on barrel */}
-        <text x="26" y="130" textAnchor="middle" fill="#08080A" fontSize="5.5"
-          fontFamily="system-ui,sans-serif" fontWeight="700" letterSpacing="1.2"
-          transform="rotate(90,26,130)" opacity="0.8">
-          EDUCATE.STRONG
-        </text>
-      </svg>
-
-      {/* Magenta glow wash behind event row area (roughly 55-70% down) */}
-      <div style={{
-        position:'absolute', left:0, right:0, top:'56%', height:'22%',
-        background:'radial-gradient(ellipse 80% 100% at 50% 50%, rgba(240,44,147,0.09) 0%, transparent 70%)',
-      }}/>
-
-      {/* Edge vignette */}
-      <div style={{
-        position:'absolute', inset:0,
-        background:'radial-gradient(ellipse 115% 115% at 50% 50%, transparent 22%, rgba(8,8,10,0.92) 100%)',
-      }}/>
-      {/* Top fade */}
-      <div style={{ position:'absolute', top:0, left:0, right:0, height:'120px',
-        background:'linear-gradient(#08080A, transparent)' }}/>
-      {/* Bottom fade */}
-      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'80px',
-        background:'linear-gradient(transparent, #08080A)' }}/>
+      <div className="sk-wordmark">
+        <span>EDUCATE.STRONG</span>
+        <small>ACADEMY</small>
+      </div>
     </div>
   );
 }
 
-/* ════════════════════════════════════════════════ CUSTOM LMS NAV ═════ */
-
 function LmsNav({ userName, userRole }: { userName: string; userRole: string }) {
-  const initials = userName.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
   return (
-    <nav style={{
-      position:'fixed', top:0, left:0, right:0, zIndex:100,
-      height:80,
-      background:'rgba(5,5,6,0.94)',
-      borderBottom:'1px solid rgba(255,255,255,0.08)',
-      backdropFilter:'blur(16px)',
-      display:'flex', alignItems:'center',
-      padding:'0 28px',
-      gap:32,
-    }}>
-      {/* Logo */}
-      <Link to="/dashboard" style={{
-        display:'flex', alignItems:'center', gap:10,
-        textDecoration:'none', flexShrink:0,
-      }}>
-        <div style={{
-          width:38, height:38,
-          background:'linear-gradient(135deg,#B91563,#E02B83)',
-          borderRadius:8, display:'flex', alignItems:'center', justifyContent:'center',
-          boxShadow:'0 0 0 1px rgba(240,44,147,0.4)',
-        }}>
-          <svg viewBox="0 0 24 24" width="20" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
-            <path d="M12 2L4 7V13C4 17.4 7.5 21.5 12 23C16.5 21.5 20 17.4 20 13V7L12 2Z"/>
-          </svg>
-        </div>
-        <div>
-          <div style={{ color:'#F5F5F7', fontWeight:800, fontSize:'0.9rem', letterSpacing:'0.03em', lineHeight:1.1 }}>
-            EDUCATE<span style={{ color:'#F02C93' }}>.</span>STRONG
-          </div>
-          <div style={{ color:'rgba(255,255,255,0.38)', fontSize:'0.6rem', letterSpacing:'0.15em', fontWeight:600 }}>
-            ACADEMY
-          </div>
-        </div>
+    <nav className="sk-nav">
+      <Link to="/dashboard" className="sk-logo-link" aria-label="Educate Strong Academy dashboard">
+        <BrandMark />
       </Link>
 
-      {/* Nav links */}
-      <div style={{ display:'flex', alignItems:'center', gap:6, flex:1, justifyContent:'center' }}>
+      <div className="sk-nav-links">
         {[
-          { label:'Dashboard',         to:'/dashboard'         },
-          { label:'Courses',           to:'/courses'           },
-          { label:'Coaching Pathways', to:'/dashboard/pathway', active:true },
-          { label:'Knowledge Hub',     to:'/knowledge'         },
-          { label:'Assessments',       to:'/assessments'       },
-        ].map(({ label, to, active }) => (
-          <Link key={label} to={to} style={{
-            position:'relative',
-            color: active ? '#F02C93' : 'rgba(255,255,255,0.58)',
-            textDecoration:'none',
-            fontSize:'0.875rem',
-            fontWeight: active ? 600 : 500,
-            padding:'8px 14px',
-            letterSpacing:'0.01em',
-            transition:'color 0.15s',
-          }}>
-            {label}
-            {active && (
-              <span style={{
-                position:'absolute', bottom:-1, left:14, right:14,
-                height:2, background:'#F02C93',
-                borderRadius:2,
-              }}/>
-            )}
+          { label: 'Dashboard', to: '/dashboard', type: 'dashboard' },
+          { label: 'Courses', to: '/courses', type: 'courses' },
+          { label: 'Coaching Pathways', to: '/dashboard/pathway', type: 'pathway', active: true },
+          { label: 'Knowledge Hub', to: '/knowledge', type: 'hub' },
+          { label: 'Assessments', to: '/assessments', type: 'assessments' },
+        ].map((item) => (
+          <Link key={item.label} to={item.to} className={`sk-nav-link ${item.active ? 'is-active' : ''}`}>
+            <MiniNavIcon type={item.type} />
+            <span>{item.label}</span>
           </Link>
         ))}
       </div>
 
-      {/* Right side */}
-      <div style={{ display:'flex', alignItems:'center', gap:14, flexShrink:0 }}>
-        {/* Search */}
-        <div style={{
-          display:'flex', alignItems:'center', gap:8,
-          background:'rgba(255,255,255,0.06)',
-          border:'1px solid rgba(255,255,255,0.1)',
-          borderRadius:8, padding:'7px 12px',
-          width:176,
-        }}>
-          <svg viewBox="0 0 24 24" width="14" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="2">
-            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+      <div className="sk-nav-actions">
+        <div className="sk-search">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="11" cy="11" r="7" />
+            <path d="M20 20L16.5 16.5" />
           </svg>
-          <span style={{ color:'rgba(255,255,255,0.30)', fontSize:'0.78rem' }}>Search Academy</span>
+          <span>Search Academy</span>
         </div>
-
-        {/* Bell */}
-        <button style={{
-          width:36, height:36, borderRadius:'50%',
-          background:'rgba(255,255,255,0.06)',
-          border:'1px solid rgba(255,255,255,0.1)',
-          display:'flex', alignItems:'center', justifyContent:'center',
-          cursor:'pointer',
-        }}>
-          <svg viewBox="0 0 24 24" width="16" fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="2">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/>
+        <button className="sk-bell" aria-label="Notifications">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <path d="M18 8A6 6 0 0 0 6 8C6 15 3 17 3 17H21S18 15 18 8Z" />
+            <path d="M13.7 21A2 2 0 0 1 10.3 21" />
           </svg>
         </button>
-
-        {/* Avatar + name */}
-        <div style={{ display:'flex', alignItems:'center', gap:10, cursor:'pointer' }}>
-          <div style={{
-            width:36, height:36, borderRadius:'50%',
-            background:'linear-gradient(135deg,#3a1a2a,#5a1a3a)',
-            border:'2px solid rgba(240,44,147,0.4)',
-            display:'flex', alignItems:'center', justifyContent:'center',
-            color:'#F5F5F7', fontSize:'0.72rem', fontWeight:700,
-          }}>
-            {initials}
-          </div>
+        <div className="sk-top-profile">
+          <img src="/assets/krish-herbert.jpg" alt="" />
           <div>
-            <div style={{ color:'#F5F5F7', fontSize:'0.82rem', fontWeight:600, lineHeight:1.2 }}>{userName}</div>
-            <div style={{ color:'#F02C93', fontSize:'0.68rem', fontWeight:500 }}>{userRole}</div>
+            <strong>{userName}</strong>
+            <span>{userRole}</span>
           </div>
-          <svg viewBox="0 0 12 8" width="10" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="1.5">
-            <path d="M1 1l5 5 5-5"/>
+          <svg viewBox="0 0 12 8" width="10" fill="none" stroke="currentColor" strokeWidth="1.6">
+            <path d="M1 1L6 6L11 1" />
           </svg>
         </div>
       </div>
@@ -371,233 +311,247 @@ function LmsNav({ userName, userRole }: { userName: string; userRole: string }) 
   );
 }
 
-/* ════════════════════════════════════════════════ SVG SKILL TREE ═════ */
+function GymBackground() {
+  const dust = [
+    [90, 88, 1.2], [215, 156, 0.8], [340, 74, 1.1], [505, 180, 0.7], [690, 108, 1.3],
+    [860, 162, 0.9], [1040, 96, 1.1], [1130, 250, 0.8], [148, 420, 0.7], [990, 470, 0.9],
+    [720, 670, 0.8], [455, 718, 0.7], [1015, 760, 1.1], [600, 36, 0.7], [780, 42, 0.8],
+  ];
 
-function SkillTreeSVG({
-  onNodeClick,
-  selectedId,
-  eventsExpanded,
-  onToggleEvents,
-}: {
-  onNodeClick     : (n: SkillNode) => void;
-  selectedId      : string | null;
-  eventsExpanded  : boolean;
-  onToggleEvents  : () => void;
-}) {
-  // Hex geometry helpers
-  const HEX_PTS  = '42,2 78,20 78,44 42,62 6,44 6,20';
-  const HEX_CX   = 42;
-  const HEX_CY   = 32;
-  const HEX_W    = 84;
-  // const HEX_H = 64;
+  return (
+    <div className="sk-gym" aria-hidden="true">
+      <div className="sk-gym-base" />
+      <div className="sk-smoke sk-smoke-one" />
+      <div className="sk-smoke sk-smoke-two" />
+      <svg className="sk-gym-svg" viewBox="0 0 1216 856" preserveAspectRatio="none">
+        <defs>
+          <filter id="gymNoise">
+            <feTurbulence type="fractalNoise" baseFrequency="0.78" numOctaves="4" stitchTiles="stitch" />
+            <feColorMatrix type="saturate" values="0" />
+          </filter>
+          <linearGradient id="metalFade" x1="0" y1="0" x2="1" y2="0">
+            <stop stopColor="rgba(245,245,247,0.20)" />
+            <stop offset="0.45" stopColor="rgba(245,245,247,0.08)" />
+            <stop offset="1" stopColor="rgba(245,245,247,0.02)" />
+          </linearGradient>
+          <radialGradient id="stoneBg" cx="35%" cy="28%" r="72%">
+            <stop stopColor="rgba(245,245,247,0.30)" />
+            <stop offset="1" stopColor="rgba(245,245,247,0.035)" />
+          </radialGradient>
+        </defs>
 
-  // Vertical positions derived
-  const foundationBottom = 255 + HEX_CY; // 287
-  const introTop         = 335 - HEX_CY; // 303
-  const introBottom      = 335 + HEX_CY; // 367
-  const screenTop        = 415 - HEX_CY; // 383
-  const screenBottom     = 415 + HEX_CY; // 447
-  const sessionTop       = 505 - HEX_CY; // 473
-  const sessionBottom    = 505 + HEX_CY; // 537
-  const eventTop         = 585 - HEX_CY; // 553
-  const eventBottom      = 585 + HEX_CY; // 617
-  const practicalTop     = 675 - HEX_CY; // 643
-  const practicalBottom  = 675 + HEX_CY; // 707
-  const assessmentTop    = 755 - HEX_CY; // 723
-  const HBAR_Y           = 545;          // horizontal event bar Y
+        <rect width="1216" height="856" fill="url(#gymNoise)" opacity="0.105" />
 
-  function hexFill(n: SkillNode) {
-    if (n.status === 'completed')   return `url(#grad-${n.id})`;
-    if (n.status === 'in-progress') return `url(#grad-${n.id})`;
+        <g opacity="0.19">
+          <rect x="32" y="112" width="28" height="618" rx="3" fill="url(#metalFade)" />
+          <rect x="206" y="194" width="22" height="530" rx="3" fill="url(#metalFade)" />
+          <rect x="48" y="322" width="176" height="16" rx="4" fill="rgba(245,245,247,0.16)" />
+          <rect x="44" y="434" width="175" height="13" rx="4" fill="rgba(245,245,247,0.10)" />
+          <rect x="22" y="688" width="86" height="15" rx="4" fill="rgba(245,245,247,0.16)" />
+          <rect x="178" y="688" width="79" height="15" rx="4" fill="rgba(245,245,247,0.12)" />
+          <text x="95" y="332" fill="rgba(245,245,247,0.32)" fontSize="10" fontWeight="800" letterSpacing="1.3" transform="rotate(8 95 332)">EDUCATE.STRONG</text>
+          {[154, 180, 207, 234, 286, 340, 408, 485, 566, 646].map((y) => (
+            <g key={y}>
+              <circle cx="46" cy={y} r="4" fill="rgba(5,5,6,0.95)" />
+              <circle cx="217" cy={y + 5} r="4" fill="rgba(5,5,6,0.95)" />
+            </g>
+          ))}
+        </g>
+
+        <g opacity="0.14">
+          <rect x="1086" y="330" width="24" height="280" rx="3" fill="rgba(245,245,247,0.18)" />
+          <rect x="1145" y="302" width="50" height="188" rx="22" fill="rgba(245,245,247,0.14)" transform="rotate(8 1170 396)" />
+          <rect x="1148" y="367" width="46" height="8" rx="3" fill="rgba(5,5,6,0.62)" transform="rotate(8 1171 371)" />
+          <rect x="1148" y="440" width="46" height="8" rx="3" fill="rgba(5,5,6,0.60)" transform="rotate(8 1171 444)" />
+          <text x="1172" y="410" textAnchor="middle" fill="rgba(5,5,6,0.75)" fontSize="8" fontWeight="800" letterSpacing="1.5" transform="rotate(98 1172 410)">EDUCATE.STRONG</text>
+        </g>
+
+        <g opacity="0.18">
+          <ellipse cx="42" cy="706" rx="46" ry="50" fill="url(#stoneBg)" />
+          <ellipse cx="1192" cy="704" rx="58" ry="64" fill="url(#stoneBg)" />
+          <ellipse cx="1130" cy="718" rx="34" ry="36" fill="url(#stoneBg)" opacity="0.65" />
+          <g transform="translate(78 608)">
+            {[0, 12, 24, 36, 48].map((x) => (
+              <ellipse key={x} cx={x} cy="82" rx="24" ry="20" fill="rgba(245,245,247,0.12)" />
+            ))}
+            <rect x="0" y="24" width="10" height="60" rx="3" fill="rgba(245,245,247,0.13)" />
+            <rect x="84" y="18" width="10" height="66" rx="3" fill="rgba(245,245,247,0.10)" />
+          </g>
+        </g>
+
+        <g opacity="0.42">
+          {dust.map(([cx, cy, r]) => (
+            <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r={r} fill="rgba(245,245,247,0.62)" />
+          ))}
+        </g>
+      </svg>
+      <div className="sk-row-glow" />
+      <div className="sk-vignette" />
+      <div className="sk-top-fade" />
+      <div className="sk-bottom-fade" />
+    </div>
+  );
+}
+
+function SkillTreeSVG({ onNodeClick, selectedId, eventsExpanded, onToggleEvents }: { onNodeClick: (node: SkillNode) => void; selectedId: string | null; eventsExpanded: boolean; onToggleEvents: () => void }) {
+  const foundationY = displayY(byId('foundation'));
+  const introY = displayY(byId('intro'));
+  const screeningY = displayY(byId('screening'));
+  const sessionY = displayY(byId('session'));
+  const eventY = displayY(byId('log-press'));
+  const practicalY = displayY(byId('practical'));
+  const assessmentY = displayY(byId('assessment'));
+  const foundationBottom = foundationY + HEX_CY;
+  const introTop = introY - HEX_CY;
+  const introBottom = introY + HEX_CY;
+  const screeningTop = screeningY - HEX_CY;
+  const screeningBottom = screeningY + HEX_CY;
+  const sessionTop = sessionY - HEX_CY;
+  const sessionBottom = sessionY + HEX_CY;
+  const eventTop = eventY - HEX_CY;
+  const eventBottom = eventY + HEX_CY;
+  const practicalTop = practicalY - HEX_CY;
+  const practicalBottom = practicalY + HEX_CY;
+  const assessmentTop = assessmentY - HEX_CY;
+  const eventLineY = 476;
+
+  const handleNodeClick = (node: SkillNode) => {
+    if (node.id === 'session') onToggleEvents();
+    onNodeClick(node);
+  };
+
+  function nodeFill(node: SkillNode) {
+    if (node.status === 'completed') return `url(#completed-${node.id})`;
+    if (node.status === 'in-progress') return `url(#active-${node.id})`;
     return '#111114';
   }
-  function hexStroke(n: SkillNode) {
-    if (n.status === 'completed')   return '#F02C93';
-    if (n.status === 'in-progress') return '#F2A93B';
-    if (n.status === 'available')   return 'rgba(255,255,255,0.74)';
-    if (n.status === 'cpd-locked')  return 'rgba(240,44,147,0.36)';
+
+  function nodeStroke(node: SkillNode) {
+    if (node.status === 'completed') return PALETTE.magentaBright;
+    if (node.status === 'in-progress') return PALETTE.amber;
+    if (node.status === 'cpd-locked') return 'rgba(240,44,147,0.36)';
     return 'rgba(255,255,255,0.24)';
   }
-  function hexDash(n: SkillNode) {
-    return n.status === 'cpd-locked' ? '6 5' : undefined;
-  }
-  function hexOpacity(n: SkillNode) {
-    if (n.status === 'locked')      return 0.48;
-    if (n.status === 'cpd-locked')  return 0.62;
+
+  function nodeOpacity(node: SkillNode) {
+    if (node.status === 'locked') return 0.48;
+    if (node.status === 'cpd-locked') return 0.62;
     return 1;
   }
-  function iconColor(n: SkillNode) {
-    if (n.status === 'completed')   return '#F5F5F7';
-    if (n.status === 'in-progress') return '#F2A93B';
-    return '#85858B';
-  }
-  function glowFilter(n: SkillNode) {
-    if (n.status === 'completed')   return 'url(#glow-magenta)';
-    if (n.status === 'in-progress') return 'url(#glow-amber)';
+
+  function nodeFilter(node: SkillNode) {
+    if (node.status === 'completed') return 'url(#nodeGlowMagenta)';
+    if (node.status === 'in-progress') return 'url(#nodeGlowAmber)';
     return undefined;
   }
 
-  function renderHexNode(n: SkillNode) {
-    const tx = n.x - HEX_CX;
-    const ty = n.y - HEX_CY;
-    const isInteractive = n.status !== 'locked' && n.status !== 'cpd-locked';
-    const isSession     = n.id === 'session';
+  function iconColor(node: SkillNode) {
+    if (node.status === 'in-progress') return PALETTE.amber;
+    if (node.status === 'completed') return '#F5F5F7';
+    return 'rgba(245,245,247,0.58)';
+  }
+
+  function renderNode(node: SkillNode) {
+    const tx = node.x - HEX_CX;
+    const ty = displayY(node) - HEX_CY;
 
     return (
       <g
-        key={n.id}
+        key={node.id}
         transform={`translate(${tx},${ty})`}
-        onClick={() => {
-          if (isSession) onToggleEvents();
-          if (isInteractive) onNodeClick(n);
-        }}
-        style={{ cursor: isInteractive ? 'pointer' : 'default' }}
-        role={isInteractive ? 'button' : undefined}
-        tabIndex={isInteractive ? 0 : undefined}
-        aria-label={n.title}
-        onKeyDown={e => e.key === 'Enter' && isInteractive && onNodeClick(n)}
+        className="sk-svg-node"
+        onClick={() => handleNodeClick(node)}
+        onKeyDown={(event) => event.key === 'Enter' && handleNodeClick(node)}
+        role="button"
+        tabIndex={0}
+        aria-label={node.title}
       >
-        {/* Selection ring */}
-        {selectedId === n.id && (
-          <ellipse cx={HEX_CX} cy={HEX_CY} rx={52} ry={42}
-            fill="none"
-            stroke={n.status === 'in-progress' ? 'rgba(242,169,59,0.4)' : 'rgba(240,44,147,0.4)'}
-            strokeWidth="1.5"/>
+        {selectedId === node.id && (
+          <ellipse cx={42} cy={32} rx={55} ry={42} fill="none" stroke={node.status === 'in-progress' ? 'rgba(242,169,59,0.55)' : 'rgba(240,44,147,0.48)'} strokeWidth="1.8" />
         )}
 
-        {/* Pulse ring for in-progress */}
-        {n.status === 'in-progress' && (
-          <ellipse cx={HEX_CX} cy={HEX_CY} rx={54} ry={43}
-            fill="rgba(242,169,59,0.08)"
-            className="sk-pulse"/>
+        {node.status === 'in-progress' && (
+          <ellipse cx={42} cy={32} rx={57} ry={43} fill="rgba(242,169,59,0.13)" className="sk-node-pulse" />
         )}
 
-        {/* Hex polygon with glow */}
-        <g filter={glowFilter(n)} opacity={hexOpacity(n)}>
-          <polygon
-            points={HEX_PTS}
-            fill={hexFill(n)}
-            stroke={hexStroke(n)}
-            strokeWidth="2"
-            strokeDasharray={hexDash(n)}
-          />
+        <g filter={nodeFilter(node)} opacity={nodeOpacity(node)}>
+          <polygon points={HEX_POINTS} fill={nodeFill(node)} stroke={nodeStroke(node)} strokeWidth="2" strokeDasharray={node.status === 'cpd-locked' ? '6 5' : undefined} />
+          {(node.status === 'completed' || node.status === 'in-progress') && (
+            <polygon points="42,7 72,22 72,42 42,57 12,42 12,22" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+          )}
         </g>
 
-        {/* Icon */}
-        <NodeIcon icon={n.icon} cx={HEX_CX} cy={HEX_CY - 2} color={iconColor(n)} size={n.status === 'locked' || n.status === 'cpd-locked' ? 15 : 17}/>
+        {EVENT_IDS.includes(node.id) || node.id === 'atlas-stones' ? (
+          <EventGlyph icon={node.icon} color={iconColor(node)} locked={node.status === 'locked'} />
+        ) : (
+          <ScaledPathIcon icon={node.icon} cx={42} cy={30} color={iconColor(node)} size={node.status === 'cpd-locked' || node.status === 'locked' ? 17 : 20} opacity={node.status === 'locked' || node.status === 'cpd-locked' ? 0.74 : 1} />
+        )}
 
-        {/* Completed check badge */}
-        {n.status === 'completed' && (
+        {node.status === 'completed' && (
           <g transform="translate(65,51)">
-            <circle cx="0" cy="0" r="11" fill="#2B0B1E" stroke="#F02C93" strokeWidth="1.5"/>
-            <path d="M-4.5,0.5 L-1.5,3.5 L4.5,-3" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            <circle cx="0" cy="0" r="12" fill="#2B0B1E" stroke="#F02C93" strokeWidth="1.7" />
+            <path d="M-5.2 0L-1.8 3.7L5.5 -4.1" fill="none" stroke="#F5F5F7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </g>
         )}
 
-        {/* 65% badge for in-progress — sits to the right of the hex */}
-        {n.status === 'in-progress' && n.progress !== undefined && (
-          <g transform={`translate(${HEX_W + 26},${HEX_CY})`}>
-            <circle cx="0" cy="0" r="26" fill="#0E0E12" stroke="#F2A93B" strokeWidth="2"/>
-            <text x="0" y="5" textAnchor="middle" fill="#F2A93B"
-              fontSize="12" fontWeight="700" fontFamily="system-ui,sans-serif">
-              {n.progress}%
-            </text>
+        {node.status === 'in-progress' && node.progress !== undefined && (
+          <g transform="translate(92,32)">
+            <circle cx="0" cy="0" r="28" fill="#0C0C10" stroke="#F2A93B" strokeWidth="2" />
+            <text x="0" y="5" textAnchor="middle" fill="#F2A93B" fontSize="12" fontWeight="800" fontFamily="Inter, system-ui, sans-serif">{node.progress}%</text>
           </g>
         )}
 
-        {/* Lock icon for locked / cpd-locked */}
-        {(n.status === 'locked' || n.status === 'cpd-locked') && (
-          <g transform={`translate(${HEX_CX - 6},${HEX_CY + 10})`} opacity="0.55">
-            <rect x="0" y="5" width="12" height="9" rx="1.5" fill="white"/>
-            <path d="M2.5 5V3.5A3 3 0 0 1 9.5 3.5V5" fill="none" stroke="white" strokeWidth="1.4"/>
-          </g>
+        {(node.status === 'locked' || node.status === 'cpd-locked') && (
+          <LockGlyph x={node.status === 'cpd-locked' ? 66 : 70} y={node.status === 'cpd-locked' ? 37 : 43} />
         )}
       </g>
     );
   }
 
-  /* ── Node labels ──────────────────────────────────────────────────── */
   function renderLabels() {
     return (
-      <g style={{ pointerEvents:'none' }}>
-        {/* CPD node labels (below node) */}
-        {['cpd-mobility','cpd-programming','cpd-analysis'].map(id => {
-          const n = byId(id);
+      <g className="sk-tree-labels" pointerEvents="none">
+        {['cpd-mobility', 'cpd-programming', 'cpd-analysis'].map((id) => {
+          const node = byId(id);
           return (
-            <text key={id} x={n.x} y={n.y + HEX_CY + 18}
-              textAnchor="middle" fill="#8A8A92" fontSize="10"
-              fontFamily="system-ui,sans-serif" fontWeight="500">
-              {n.title}
+            <text key={id} x={node.x} y={displayY(node) + 51} textAnchor="middle" fill="#B8B8BE" opacity="0.8" fontSize="11" fontWeight="500">
+              {node.title}
             </text>
           );
         })}
 
-        {/* Spine node labels — to the right, title only */}
-        {['foundation','intro','screening'].map(id => {
-          const n = byId(id);
+        {['foundation', 'intro', 'screening'].map((id) => {
+          const node = byId(id);
           return (
-            <text key={id} x={n.x + HEX_CX + 22} y={n.y + 5}
-              fill="#F4F4F6" fontSize="14" fontWeight="600"
-              fontFamily="system-ui,sans-serif" dominantBaseline="middle">
-              {n.title}
+            <text key={id} x={node.x + 74} y={displayY(node) + 4} fill="#F5F5F7" fontSize="15" fontWeight="600" dominantBaseline="middle">
+              {node.title}
             </text>
           );
         })}
 
-        {/* Session Structure label (amber) */}
-        {(() => {
-          const n = byId('session');
-          return (
-            <g>
-              {/* label starts after the 65% badge */}
-              <text x={n.x + HEX_CX + 22 + 56} y={n.y - 3}
-                fill="#F2A93B" fontSize="13.5" fontWeight="700"
-                fontFamily="system-ui,sans-serif">
-                Session Structure
-              </text>
-              <text x={n.x + HEX_CX + 22 + 56} y={n.y + 14}
-                fill="#F2A93B" fontSize="10.5" fontWeight="500"
-                fontFamily="system-ui,sans-serif">
-                In Progress
-              </text>
-            </g>
-          );
-        })()}
+        <g>
+          <text x="712" y={sessionY - 3} fill="#F2A93B" fontSize="15" fontWeight="700">Session Structure</text>
+          <text x="712" y={sessionY + 18} fill="#F2A93B" fontSize="12" fontWeight="500">In Progress</text>
+        </g>
 
-        {/* Event row labels (below each hex, two lines) */}
-        {EVENT_IDS.map(id => {
-          const n = byId(id);
+        {eventsExpanded && EVENT_IDS.map((id) => {
+          const node = byId(id);
+          const y = displayY(node);
           return (
             <g key={id}>
-              <text x={n.x} y={n.y + HEX_CY + 17}
-                textAnchor="middle" fill="#F4F4F6" fontSize="11.5" fontWeight="600"
-                fontFamily="system-ui,sans-serif">
-                {n.title}
-              </text>
-              <text x={n.x} y={n.y + HEX_CY + 31}
-                textAnchor="middle" fill="rgba(255,255,255,0.45)" fontSize="10" fontWeight="400"
-                fontFamily="system-ui,sans-serif">
-                {n.subtitle}
-              </text>
+              <text x={node.x} y={y + 52} textAnchor="middle" fill="#F5F5F7" fontSize="13" fontWeight="600">{node.title}</text>
+              <text x={node.x} y={y + 69} textAnchor="middle" fill="#F5F5F7" fontSize="13" fontWeight="600">{node.subtitle}</text>
             </g>
           );
         })}
 
-        {/* Locked node labels — to the right */}
-        {['practical','assessment'].map(id => {
-          const n = byId(id);
+        {['practical', 'assessment'].map((id) => {
+          const node = byId(id);
+          const y = displayY(node);
           return (
-            <g key={id}>
-              <text x={n.x + HEX_CX + 22} y={n.y - 3}
-                fill="#B8B8BE" fontSize="13.5" fontWeight="600"
-                fontFamily="system-ui,sans-serif" opacity="0.65">
-                {n.title}
-              </text>
-              <text x={n.x + HEX_CX + 22} y={n.y + 14}
-                fill="#7A7A82" fontSize="10" fontWeight="500"
-                fontFamily="system-ui,sans-serif" opacity="0.65">
-                Locked
-              </text>
+            <g key={id} opacity="0.72">
+              <text x={node.x + 74} y={y - 2} fill="#B8B8BE" fontSize="14" fontWeight="600">{node.title}</text>
+              <text x={node.x + 74} y={y + 18} fill="#75757D" fontSize="12" fontWeight="500">Locked</text>
             </g>
           );
         })}
@@ -605,583 +559,768 @@ function SkillTreeSVG({
     );
   }
 
+  const visibleCompleted = NODES.filter((node) => node.status === 'completed' && (eventsExpanded || !EVENT_IDS.includes(node.id)));
+
   return (
-    <svg
-      viewBox="0 0 1100 820"
-      width="100%"
-      style={{ display:'block', overflow:'visible' }}
-      aria-label="Coaching Pathway Level 1 skill tree"
-    >
-      {/* ── DEFS ────────────────────────────────────────────────── */}
+    <svg className="sk-tree-svg" viewBox="0 0 1100 820" width="100%" height="100%" aria-label="Coaching Pathway Level 1 skill tree">
       <defs>
-        {/* Radial gradients for each completed node */}
-        {NODES.filter(n => n.status === 'completed').map(n => (
-          <radialGradient key={n.id} id={`grad-${n.id}`} cx="35%" cy="28%" r="75%">
-            <stop offset="0%"   stopColor="#5B1239"/>
-            <stop offset="100%" stopColor="#161016"/>
+        {NODES.filter((node) => node.status === 'completed').map((node) => (
+          <radialGradient key={node.id} id={`completed-${node.id}`} cx="35%" cy="28%" r="76%">
+            <stop offset="0%" stopColor="#5B1239" />
+            <stop offset="100%" stopColor="#161016" />
           </radialGradient>
         ))}
-        {/* In-progress gradient */}
-        {NODES.filter(n => n.status === 'in-progress').map(n => (
-          <radialGradient key={n.id} id={`grad-${n.id}`} cx="35%" cy="28%" r="75%">
-            <stop offset="0%"   stopColor="#5A3514"/>
-            <stop offset="100%" stopColor="#17120B"/>
+        {NODES.filter((node) => node.status === 'in-progress').map((node) => (
+          <radialGradient key={node.id} id={`active-${node.id}`} cx="35%" cy="28%" r="76%">
+            <stop offset="0%" stopColor="#5A3514" />
+            <stop offset="100%" stopColor="#17120B" />
           </radialGradient>
         ))}
-        {/* Completed-to-inprogress spine connector gradient */}
-        <linearGradient id="spine-grad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#F02C93"/>
-          <stop offset="100%" stopColor="#F2A93B"/>
+        <radialGradient id="stone-texture" cx="36%" cy="30%" r="74%">
+          <stop offset="0%" stopColor="#D4C6B8" />
+          <stop offset="52%" stopColor="#746760" />
+          <stop offset="100%" stopColor="#211C1D" />
+        </radialGradient>
+        <linearGradient id="completedToAmber" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#F02C93" />
+          <stop offset="100%" stopColor="#F2A93B" />
         </linearGradient>
-        {/* Magenta glow filter */}
-        <filter id="glow-magenta" x="-60%" y="-60%" width="220%" height="220%">
-          <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur"/>
-          <feFlood floodColor="#F02C93" floodOpacity="0.75" result="clr"/>
-          <feComposite in="clr" in2="blur" operator="in" result="shadow"/>
-          <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        <filter id="nodeGlowMagenta" x="-70%" y="-70%" width="240%" height="240%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="4.8" result="blur" />
+          <feFlood floodColor="#F02C93" floodOpacity="0.72" result="color" />
+          <feComposite in="color" in2="blur" operator="in" result="shadow" />
+          <feMerge><feMergeNode in="shadow" /><feMergeNode in="SourceGraphic" /></feMerge>
         </filter>
-        {/* Amber glow filter */}
-        <filter id="glow-amber" x="-60%" y="-60%" width="220%" height="220%">
-          <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur"/>
-          <feFlood floodColor="#F2A93B" floodOpacity="0.72" result="clr"/>
-          <feComposite in="clr" in2="blur" operator="in" result="shadow"/>
-          <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        <filter id="nodeGlowAmber" x="-70%" y="-70%" width="240%" height="240%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur" />
+          <feFlood floodColor="#F2A93B" floodOpacity="0.70" result="color" />
+          <feComposite in="color" in2="blur" operator="in" result="shadow" />
+          <feMerge><feMergeNode in="shadow" /><feMergeNode in="SourceGraphic" /></feMerge>
         </filter>
-        {/* Horizontal bar glow */}
-        <filter id="glow-bar" x="-5%" y="-500%" width="110%" height="1100%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="blur1"/>
-          <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur2"/>
-          <feMerge>
-            <feMergeNode in="blur1"/>
-            <feMergeNode in="blur2"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
+        <filter id="lineGlow" x="-12%" y="-500%" width="124%" height="1100%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="big" />
+          <feGaussianBlur in="SourceGraphic" stdDeviation="2.4" result="small" />
+          <feMerge><feMergeNode in="big" /><feMergeNode in="small" /><feMergeNode in="SourceGraphic" /></feMerge>
         </filter>
       </defs>
 
-      {/* ── CPD LOCKED BAND ─────────────────────────────────────── */}
-      <rect x="330" y="60" width="620" height="152" rx="10"
-        fill="rgba(255,255,255,0.022)" stroke="rgba(255,255,255,0.08)" strokeWidth="1"/>
-      {/* Lock icon */}
-      <g transform="translate(392,87)">
-        <rect x="0" y="5" width="13" height="10" rx="1.5" fill="#D7D7DD" opacity="0.65"/>
-        <path d="M3 5V3A3.5 3.5 0 0 1 10 3V5" fill="none" stroke="#D7D7DD" strokeWidth="1.4" opacity="0.65"/>
-      </g>
-      <text x="640" y="93" textAnchor="middle" fill="#D7D7DD" fontSize="11" fontWeight="700"
-        letterSpacing="1.8" fontFamily="system-ui,sans-serif">
-        CONTINUING PROFESSIONAL DEVELOPMENT (CPD)
-      </text>
-      <text x="640" y="111" textAnchor="middle" fill="#A0A0A8" fontSize="10"
-        fontFamily="system-ui,sans-serif">
-        Locked until Level 1 completion
-      </text>
-      {/* CPD dashed connectors */}
-      <line x1={430+42} y1="145" x2={620-42} y2="145"
-        stroke="rgba(255,255,255,0.22)" strokeWidth="1.5" strokeDasharray="5 4"/>
-      <line x1={620+42} y1="145" x2={810-42} y2="145"
-        stroke="rgba(255,255,255,0.22)" strokeWidth="1.5" strokeDasharray="5 4"/>
+      <rect x="360" y="70" width="600" height="145" rx="8" fill="rgba(255,255,255,0.026)" stroke="rgba(255,255,255,0.09)" strokeWidth="1" />
+      <LockGlyph x={484} y={82} color="rgba(245,245,247,0.64)" />
+      <text x="660" y="94" textAnchor="middle" fill="#F5F5F7" opacity="0.8" fontSize="11" fontWeight="800" letterSpacing="1.6">CONTINUING PROFESSIONAL DEVELOPMENT (CPD)</text>
+      <text x="660" y="113" textAnchor="middle" fill="#B8B8BE" opacity="0.86" fontSize="11">Locked until Level 1 completion</text>
 
-      {/* ── CPD BAND → FOUNDATION connector ─────────────────────── */}
-      <line x1="620" y1="212" x2="620" y2="223"
-        stroke="rgba(240,44,147,0.22)" strokeWidth="1.5" strokeDasharray="4 3"/>
+      <line x1="472" y1="145" x2="578" y2="145" stroke="rgba(255,255,255,0.28)" strokeWidth="1.8" strokeDasharray="6 6" />
+      <line x1="662" y1="145" x2="768" y2="145" stroke="rgba(255,255,255,0.28)" strokeWidth="1.8" strokeDasharray="6 6" />
+      <line x1="620" y1="215" x2="620" y2="223" stroke="rgba(255,255,255,0.22)" strokeWidth="1.5" strokeDasharray="5 5" />
 
-      {/* ── VERTICAL SPINE CONNECTORS ────────────────────────────── */}
-      {/* Foundation → Intro (completed→completed) */}
-      <line x1="620" y1={foundationBottom} x2="620" y2={introTop}
-        stroke="#F02C93" strokeWidth="3" filter="url(#glow-magenta)" opacity="0.75"/>
-      {/* Intro → Screening (completed→completed) */}
-      <line x1="620" y1={introBottom} x2="620" y2={screenTop}
-        stroke="#F02C93" strokeWidth="3" filter="url(#glow-magenta)" opacity="0.75"/>
-      {/* Screening → Session (completed→in-progress, gradient) */}
-      <line x1="620" y1={screenBottom} x2="620" y2={sessionTop}
-        stroke="url(#spine-grad)" strokeWidth="3"/>
+      <line x1="620" y1={foundationBottom} x2="620" y2={introTop} stroke="#F02C93" strokeWidth="4" opacity="0.86" filter="url(#lineGlow)" />
+      <line x1="620" y1={introBottom} x2="620" y2={screeningTop} stroke="#F02C93" strokeWidth="4" opacity="0.86" filter="url(#lineGlow)" />
+      <line x1="620" y1={screeningBottom} x2="620" y2={sessionTop} stroke="url(#completedToAmber)" strokeWidth="4" opacity="0.92" filter="url(#lineGlow)" />
 
-      {/* ── SESSION → EVENT ROW ──────────────────────────────────── */}
       {eventsExpanded && (
-        <>
-          {/* Short drop from session bottom */}
-          <line x1="620" y1={sessionBottom} x2="620" y2={HBAR_Y}
-            stroke="#F02C93" strokeWidth="3"/>
-          {/* Main horizontal magenta glow bar */}
-          <line x1="210" y1={HBAR_Y} x2="960" y2={HBAR_Y}
-            stroke="#F02C93" strokeWidth="5" filter="url(#glow-bar)" opacity="0.95"/>
-          {/* Per-node drops to event hexes */}
-          {EVENT_IDS.map(id => {
-            const n = byId(id);
-            return (
-              <line key={id} x1={n.x} y1={HBAR_Y} x2={n.x} y2={eventTop}
-                stroke="#F02C93" strokeWidth="2.5"/>
-            );
+        <g>
+          <line x1="620" y1={sessionBottom} x2="620" y2={eventLineY} stroke="#F02C93" strokeWidth="4" opacity="0.94" filter="url(#lineGlow)" />
+          <path d={`M210 ${eventLineY}H960`} stroke="#F02C93" strokeWidth="4" strokeLinecap="round" filter="url(#lineGlow)" />
+          {EVENT_IDS.map((id) => {
+            const node = byId(id);
+            return <line key={id} x1={node.x} y1={eventLineY} x2={node.x} y2={eventTop} stroke="#F02C93" strokeWidth="2.4" opacity="0.95" />;
           })}
-        </>
+        </g>
       )}
 
-      {/* ── EVENT ROW → PRACTICAL (dashed) ──────────────────────── */}
-      <line x1="620" y1={eventsExpanded ? eventBottom : sessionBottom + 8}
-            x2="620" y2={practicalTop}
-        stroke="rgba(255,255,255,0.28)" strokeWidth="1.5" strokeDasharray="5 4"/>
-      {/* Practical → Assessment (dashed) */}
-      <line x1="620" y1={practicalBottom} x2="620" y2={assessmentTop}
-        stroke="rgba(255,255,255,0.28)" strokeWidth="1.5" strokeDasharray="5 4"/>
+      <line x1="620" y1={eventsExpanded ? eventBottom : sessionBottom + 8} x2="620" y2={practicalTop} stroke="rgba(255,255,255,0.34)" strokeWidth="1.7" strokeDasharray="6 6" />
+      <line x1="620" y1={practicalBottom} x2="620" y2={assessmentTop} stroke="rgba(255,255,255,0.30)" strokeWidth="1.7" strokeDasharray="6 6" />
 
-      {/* ── NODE RENDERING ORDER (bottom first for z-stacking) ───── */}
-      {/* Locked nodes first */}
-      {NODES.filter(n => n.status === 'locked').map(renderHexNode)}
-      {/* CPD nodes */}
-      {NODES.filter(n => n.status === 'cpd-locked').map(renderHexNode)}
-      {/* Completed nodes */}
-      {eventsExpanded
-        ? NODES.filter(n => n.status === 'completed').map(renderHexNode)
-        : NODES.filter(n => n.status === 'completed' && !EVENT_IDS.includes(n.id)).map(renderHexNode)
-      }
-      {/* In-progress (on top) */}
-      {NODES.filter(n => n.status === 'in-progress').map(renderHexNode)}
-
-      {/* ── LABELS ──────────────────────────────────────────────── */}
+      {NODES.filter((node) => node.status === 'locked').map(renderNode)}
+      {NODES.filter((node) => node.status === 'cpd-locked').map(renderNode)}
+      {visibleCompleted.map(renderNode)}
+      {NODES.filter((node) => node.status === 'in-progress').map(renderNode)}
       {renderLabels()}
     </svg>
   );
 }
 
-/* ═══════════════════════════════════════════════════════ SIDEBAR ═════ */
+function SidebarIcon({ type, color = PALETTE.magentaBright }: { type: string; color?: string }) {
+  const props = { viewBox: '0 0 24 24', width: 31, height: 31, fill: 'none', stroke: color, strokeWidth: 1.9, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
+  if (type === 'lessons') return <svg {...props}><path d="M3 7L12 3L21 7L12 11L3 7Z" /><path d="M5 10V15L12 19L19 15V10" /></svg>;
+  if (type === 'time') return <svg {...props}><circle cx="12" cy="12" r="9" /><path d="M12 7V12L16 15" /></svg>;
+  if (type === 'whistle') return <svg {...props} stroke={color}><circle cx="9.5" cy="12" r="5.3" /><path d="M9.5 6.8H21M9.5 9.6V12M16.5 8L18.2 6.5" /></svg>;
+  if (type === 'play') return <svg {...props}><circle cx="12" cy="12" r="10" /><path d="M10 8.5L16 12L10 15.5V8.5Z" fill={color} stroke="none" /></svg>;
+  if (type === 'cert') return <svg {...props}><circle cx="12" cy="8" r="5" /><path d="M8 13L6 22L12 18.5L18 22L16 13" /><path d="M9.5 8L11.3 9.8L15 6.2" /></svg>;
+  return <svg {...props}><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7A4 4 0 0 1 16 7V11" /></svg>;
+}
 
 function LearnerSidebar({ learner }: { learner: typeof LEARNER }) {
-  const initials = learner.name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
   return (
-    <aside style={{
-      width:'100%',
-      background:'linear-gradient(180deg,rgba(20,20,24,0.97),rgba(11,11,14,0.98))',
-      border:'1px solid rgba(255,255,255,0.10)',
-      borderRadius:14,
-      padding:'28px 24px',
-      boxShadow:'0 20px 60px rgba(0,0,0,0.50)',
-      display:'flex', flexDirection:'column', gap:0,
-      height:'100%', overflowY:'auto',
-    }}>
-
-      {/* ─ Avatar + Name ─ */}
-      <div style={{ display:'flex', alignItems:'center', gap:14, marginBottom:20, paddingBottom:20, borderBottom:'1px solid rgba(255,255,255,0.10)' }}>
-        <div style={{
-          width:72, height:72, borderRadius:'50%', flexShrink:0,
-          background:'linear-gradient(135deg,#3a1525,#5a1a35)',
-          border:'2.5px solid rgba(240,44,147,0.35)',
-          boxShadow:'0 0 0 4px rgba(240,44,147,0.08)',
-          display:'flex', alignItems:'center', justifyContent:'center',
-          color:'#F5F5F7', fontWeight:800, fontSize:'1.2rem',
-        }}>
-          {initials}
-        </div>
+    <aside className="sk-sidebar">
+      <div className="sk-sidebar-head">
+        <img src="/assets/krish-herbert.jpg" alt="" />
         <div>
-          <div style={{ color:'#F5F5F7', fontWeight:700, fontSize:'1.1rem', letterSpacing:'-0.02em' }}>
-            {learner.name}
-          </div>
-          <span style={{
-            display:'inline-block', marginTop:4,
-            color:'#F02C93', fontSize:'0.78rem', fontWeight:600,
-          }}>
-            {learner.role}
-          </span>
+          <h2>{learner.name}</h2>
+          <span>{learner.role}</span>
         </div>
       </div>
 
-      {/* ─ Pathway ─ */}
-      <div style={{ marginBottom:18 }}>
-        <div style={{ color:'rgba(255,255,255,0.38)', fontSize:'0.7rem', fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', marginBottom:4 }}>
-          Pathway
-        </div>
-        <div style={{ color:'#F5F5F7', fontSize:'0.92rem', fontWeight:600 }}>
-          {learner.pathway}
-        </div>
-      </div>
+      <section className="sk-sidebar-section">
+        <p className="sk-kicker">Pathway</p>
+        <p className="sk-path-name">{learner.pathway}</p>
+      </section>
 
-      {/* ─ Overall Progress ─ */}
-      <div style={{ marginBottom:18, paddingBottom:18, borderBottom:'1px solid rgba(255,255,255,0.08)' }}>
-        <div style={{ color:'rgba(255,255,255,0.38)', fontSize:'0.7rem', fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', marginBottom:8 }}>
-          Overall Progress
+      <section className="sk-sidebar-section">
+        <p className="sk-kicker">Overall Progress</p>
+        <div className="sk-progress-row">
+          <strong>{learner.progress}%</strong>
+          <span>{learner.lessonsCompleted} of {learner.totalLessons} lessons<br />completed</span>
         </div>
-        <div style={{ display:'flex', alignItems:'flex-end', justifyContent:'space-between', marginBottom:10 }}>
-          <div style={{ color:'#C2186A', fontWeight:900, fontSize:'2.4rem', letterSpacing:'-0.05em', lineHeight:1 }}>
-            {learner.progress}%
-          </div>
-          <div style={{ textAlign:'right' }}>
-            <div style={{ color:'rgba(255,255,255,0.55)', fontSize:'0.82rem', fontWeight:600 }}>
-              {learner.lessonsCompleted} of {learner.totalLessons} lessons
-            </div>
-            <div style={{ color:'rgba(255,255,255,0.28)', fontSize:'0.72rem' }}>completed</div>
-          </div>
-        </div>
-        {/* Progress bar */}
-        <div style={{ height:6, borderRadius:6, background:'rgba(255,255,255,0.13)', overflow:'hidden' }}>
-          <div style={{
-            height:'100%', borderRadius:6,
-            width:`${learner.progress}%`,
-            background:'#C2186A',
-            transition:'width 0.6s ease',
-          }}/>
-        </div>
-        {/* Stats row */}
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginTop:14 }}>
-          {[
-            { icon:'📚', val: String(learner.lessonsCompleted), label:'Lessons Completed' },
-            { icon:'⏱', val: learner.totalTime,                 label:'Total Learning Time' },
-          ].map(({ icon, val, label }) => (
-            <div key={label} style={{
-              background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.07)',
-              borderRadius:10, padding:'10px 12px',
-            }}>
-              <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:3 }}>
-                <span style={{ fontSize:'0.85rem' }}>{icon}</span>
-              </div>
-              <div style={{ color:'#F5F5F7', fontWeight:800, fontSize:'1rem', letterSpacing:'-0.02em' }}>{val}</div>
-              <div style={{ color:'rgba(255,255,255,0.28)', fontSize:'0.7rem', marginTop:2 }}>{label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
+        <div className="sk-progress-track"><div style={{ width: `${learner.progress}%` }} /></div>
+      </section>
 
-      {/* ─ Current Module ─ */}
-      <div style={{ marginBottom:16 }}>
-        <div style={{ color:'#F2A93B', fontSize:'0.7rem', fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', marginBottom:8 }}>
-          Current Module
+      <section className="sk-stat-row">
+        <div className="sk-stat">
+          <SidebarIcon type="lessons" />
+          <div><span>Lessons Completed</span><strong>{learner.lessonsCompleted}</strong></div>
         </div>
-        <div style={{
-          background:'rgba(242,169,59,0.07)', border:'1px solid rgba(242,169,59,0.18)',
-          borderRadius:10, padding:'12px 14px',
-          display:'flex', alignItems:'center', gap:12,
-        }}>
-          {/* whistle icon in amber */}
-          <div style={{
-            width:42, height:42, borderRadius:10, flexShrink:0,
-            background:'rgba(242,169,59,0.12)',
-            display:'flex', alignItems:'center', justifyContent:'center',
-          }}>
-            <svg viewBox="0 0 24 24" width="20" fill="none" stroke="#F2A93B" strokeWidth="2" strokeLinecap="round">
-              <circle cx="10" cy="10" r="5"/><path d="M10 5h11M10 8v2M15.5 7.5L17 6"/>
-            </svg>
-          </div>
+        <div className="sk-stat">
+          <SidebarIcon type="time" />
+          <div><span>Total Learning Time</span><strong>{learner.totalTime}</strong></div>
+        </div>
+      </section>
+
+      <section className="sk-sidebar-section">
+        <p className="sk-kicker amber">Current Module</p>
+        <div className="sk-module-row">
+          <SidebarIcon type="whistle" color={PALETTE.amber} />
           <div>
-            <div style={{ color:'#F5F5F7', fontWeight:700, fontSize:'0.9rem' }}>{learner.currentModule}</div>
-            <div style={{ color:'#F2A93B', fontSize:'0.8rem', marginTop:2 }}>
-              In Progress ({learner.currentModuleProgress}%)
-            </div>
+            <strong>{learner.currentModule}</strong>
+            <span>In Progress ({learner.currentModuleProgress}%)</span>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* ─ Next Recommended Lesson ─ */}
-      <div style={{ marginBottom:18, paddingBottom:18, borderBottom:'1px solid rgba(255,255,255,0.08)' }}>
-        <div style={{ color:'rgba(255,255,255,0.38)', fontSize:'0.7rem', fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', marginBottom:8 }}>
-          Next Recommended Lesson
-        </div>
-        <div style={{
-          background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)',
-          borderRadius:10, padding:'12px 14px',
-          display:'flex', alignItems:'center', gap:12,
-        }}>
-          <div style={{
-            width:32, height:32, borderRadius:'50%', flexShrink:0,
-            background:'rgba(240,44,147,0.15)',
-            display:'flex', alignItems:'center', justifyContent:'center',
-          }}>
-            <svg viewBox="0 0 12 14" width="12" fill="#F02C93"><path d="M2 1l9 6-9 6V1z"/></svg>
-          </div>
+      <section className="sk-sidebar-section">
+        <p className="sk-kicker">Next Recommended Lesson</p>
+        <div className="sk-lesson-row">
+          <SidebarIcon type="play" />
           <div>
-            <div style={{ color:'rgba(255,255,255,0.82)', fontWeight:600, fontSize:'0.88rem' }}>
-              {learner.nextLesson}
-            </div>
-            <div style={{ color:'rgba(255,255,255,0.36)', fontSize:'0.75rem', marginTop:2 }}>
-              Lesson {learner.nextLessonNumber} · {learner.nextLessonDuration}
-            </div>
+            <strong>{learner.nextLesson}</strong>
+            <span>Lesson {learner.nextLessonNumber}  |  {learner.nextLessonDuration}</span>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* ─ Certificate Status ─ */}
-      <div style={{ marginBottom:16 }}>
-        <div style={{ color:'rgba(255,255,255,0.38)', fontSize:'0.7rem', fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', marginBottom:8 }}>
-          Certificate Status
-        </div>
-        <div style={{
-          background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)',
-          borderRadius:10, padding:'12px 14px',
-          display:'flex', alignItems:'flex-start', gap:12,
-        }}>
-          <div style={{
-            width:38, height:38, borderRadius:'50%', flexShrink:0,
-            background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.09)',
-            display:'flex', alignItems:'center', justifyContent:'center',
-          }}>
-            <svg viewBox="0 0 24 24" width="16" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1.8">
-              <circle cx="12" cy="8" r="5"/><path d="M8 13.5L6 21L12 19L18 21L16 13.5"/>
-            </svg>
-          </div>
+      <section className="sk-sidebar-section">
+        <p className="sk-kicker">Certificate Status</p>
+        <div className="sk-cert-row">
+          <SidebarIcon type="cert" />
           <div>
-            <div style={{ color:'rgba(255,255,255,0.52)', fontWeight:600, fontSize:'0.88rem' }}>
-              Not Yet Earned
-            </div>
-            <div style={{ color:'rgba(255,255,255,0.28)', fontSize:'0.75rem', marginTop:3, lineHeight:1.45 }}>
-              Complete all lessons and pass the assessment to earn your certificate.
-            </div>
+            <strong>Not Yet Earned</strong>
+            <span>Complete all lessons and pass the assessment to earn your certificate.</span>
           </div>
         </div>
+      </section>
+
+      <div className="sk-cpd-notice">
+        <SidebarIcon type="lock" color="rgba(245,245,247,0.62)" />
+        <p>Continuing Professional Development (CPD) is locked until you complete Coaching Pathway Level 1.</p>
       </div>
 
-      {/* ─ CPD Locked box ─ */}
-      <div style={{ marginBottom:22 }}>
-        <div style={{
-          background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.09)',
-          borderRadius:10, padding:'12px 14px',
-          display:'flex', alignItems:'flex-start', gap:10,
-        }}>
-          <svg viewBox="0 0 24 24" width="15" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1.8" style={{ marginTop:1, flexShrink:0 }}>
-            <rect x="5" y="11" width="14" height="11" rx="2"/>
-            <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
-          </svg>
-          <div style={{ color:'rgba(255,255,255,0.38)', fontSize:'0.78rem', lineHeight:1.5 }}>
-            Continuing Professional Development (CPD) is locked until you complete Coaching Pathway Level 1.
-          </div>
-        </div>
-      </div>
-
-      {/* ─ CTA ─ */}
-      <Link to={LEARNER.nextLessonLink} style={{
-        display:'flex', alignItems:'center', justifyContent:'center', gap:10,
-        height:52, borderRadius:8,
-        background:'linear-gradient(90deg,#B91563,#E02B83)',
-        boxShadow:'0 4px 24px rgba(240,44,147,0.38)',
-        color:'white', fontWeight:800, fontSize:'0.88rem',
-        letterSpacing:'0.08em', textTransform:'uppercase',
-        textDecoration:'none',
-        transition:'transform 0.15s, box-shadow 0.15s',
-        marginBottom:12,
-      }}>
-        CONTINUE LEARNING
-        <svg viewBox="0 0 20 20" width="18" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round">
-          <path d="M4 10h12M10 4l6 6-6 6"/>
+      <Link to={learner.nextLessonLink} className="sk-cta">
+        <span>Continue Learning</span>
+        <svg viewBox="0 0 20 20" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 3L14 10L6 17" />
         </svg>
-      </Link>
-
-      <Link to="/dashboard" style={{
-        display:'flex', alignItems:'center', justifyContent:'center',
-        color:'rgba(255,255,255,0.28)', fontSize:'0.78rem', gap:4,
-        textDecoration:'none',
-      }}>
-        ← Back to Dashboard
       </Link>
     </aside>
   );
 }
 
-/* ═══════════════════════════════════════════════ BOTTOM DETAIL PANEL ═ */
-
 function NodeDetailPanel({ node, onClose }: { node: SkillNode; onClose: () => void }) {
-  const statusMeta = {
-    completed    : { label:'Complete',    bg:'rgba(240,44,147,0.15)',  color:'#F02C93'  },
-    'in-progress': { label:'In Progress', bg:'rgba(242,169,59,0.15)',  color:'#F2A93B'  },
-    available    : { label:'Available',   bg:'rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.6)' },
-    locked       : { label:'Locked',      bg:'rgba(255,255,255,0.05)', color:'rgba(255,255,255,0.3)' },
-    'cpd-locked' : { label:'CPD — Locked',bg:'rgba(240,44,147,0.08)', color:'rgba(240,44,147,0.6)'  },
-  } as const;
-  const s = statusMeta[node.status];
+  const color = node.status === 'in-progress' ? PALETTE.amber : node.status === 'completed' ? PALETTE.magentaBright : PALETTE.secondary;
+  const label = node.status === 'cpd-locked' ? 'CPD Locked' : node.status === 'in-progress' ? 'In Progress' : node.status === 'completed' ? 'Complete' : 'Locked';
 
   return (
-    <div style={{
-      position:'fixed', bottom:0, left:0, right:0, zIndex:200,
-      background:'rgba(12,12,16,0.96)',
-      borderTop:'1px solid rgba(255,255,255,0.12)',
-      backdropFilter:'blur(20px)',
-      boxShadow:'0 -16px 60px rgba(0,0,0,0.75)',
-      padding:'20px 32px 24px',
-      animation:'sk-slide-up 0.22s ease-out',
-    }}>
-      <div style={{ maxWidth:760, display:'flex', alignItems:'flex-start', gap:20 }}>
-        <div style={{ flex:1 }}>
-          <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:8 }}>
-            <span style={{ fontWeight:700, fontSize:'1rem', color:'#F5F5F7', letterSpacing:'-0.015em' }}>
-              {node.title}{node.subtitle ? ` — ${node.subtitle}` : ''}
-            </span>
-            <span style={{
-              fontSize:'0.7rem', fontWeight:700, letterSpacing:'0.1em', textTransform:'uppercase',
-              padding:'3px 10px', borderRadius:20,
-              background:s.bg, color:s.color,
-            }}>
-              {s.label}
-            </span>
-            {node.duration && (
-              <span style={{ color:'rgba(255,255,255,0.3)', fontSize:'0.75rem' }}>
-                {node.duration} · {node.lessonCount} lessons
-              </span>
-            )}
-          </div>
-          <p style={{ color:'rgba(255,255,255,0.42)', fontSize:'0.88rem', lineHeight:1.55, maxWidth:520, margin:'0 0 16px' }}>
-            {node.description}
-          </p>
-          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-            {node.status === 'completed' && node.lessonLink && (
-              <Link to={node.lessonLink} style={{
-                background:'linear-gradient(135deg,#B91563,#E02B83)', color:'white',
-                padding:'9px 22px', borderRadius:8, fontWeight:600, fontSize:'0.85rem',
-                textDecoration:'none',
-              }}>Review Lessons</Link>
-            )}
-            {node.status === 'in-progress' && node.lessonLink && (
-              <Link to={node.lessonLink} style={{
-                background:'linear-gradient(135deg,#C8792A,#F2A93B)', color:'#1a0c00',
-                padding:'9px 22px', borderRadius:8, fontWeight:600, fontSize:'0.85rem',
-                textDecoration:'none',
-              }}>Continue →</Link>
-            )}
-            {node.status === 'available' && node.lessonLink && (
-              <Link to={node.lessonLink} style={{
-                border:'1px solid rgba(255,255,255,0.22)', color:'white',
-                padding:'9px 22px', borderRadius:8, fontWeight:600, fontSize:'0.85rem',
-                textDecoration:'none', background:'transparent',
-              }}>Start Module</Link>
-            )}
-            {(node.status === 'locked' || node.status === 'cpd-locked') && (
-              <span style={{
-                border:'1px solid rgba(255,255,255,0.07)', color:'rgba(255,255,255,0.22)',
-                padding:'9px 22px', borderRadius:8, fontSize:'0.85rem',
-                background:'rgba(255,255,255,0.03)',
-              }}>🔒 Locked</span>
-            )}
-          </div>
+    <div className="sk-detail-panel">
+      <div>
+        <div className="sk-detail-title">
+          <strong>{node.title}{node.subtitle ? ` - ${node.subtitle}` : ''}</strong>
+          <span style={{ color, borderColor: color }}>{label}</span>
+          {node.duration && <em>{node.duration} | {node.lessonCount} lessons</em>}
         </div>
-        <button onClick={onClose} style={{
-          flexShrink:0, width:34, height:34, borderRadius:'50%',
-          background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)',
-          display:'flex', alignItems:'center', justifyContent:'center',
-          color:'rgba(255,255,255,0.45)', cursor:'pointer',
-        }} aria-label="Close">
-          <svg viewBox="0 0 14 14" width="12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-            <path d="M1 1l12 12M13 1L1 13"/>
-          </svg>
-        </button>
+        <p>{node.description}</p>
+        {node.lessonLink && node.status !== 'locked' && node.status !== 'cpd-locked' && (
+          <Link to={node.lessonLink} className={node.status === 'in-progress' ? 'sk-detail-action amber' : 'sk-detail-action'}>{node.status === 'in-progress' ? 'Continue' : 'Review Lessons'}</Link>
+        )}
       </div>
+      <button onClick={onClose} aria-label="Close details">
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <path d="M2 2L14 14M14 2L2 14" />
+        </svg>
+      </button>
     </div>
   );
 }
 
-/* ════════════════════════════════════════════════════════ PAGE ROOT ══ */
-
 export default function SkillTree() {
   const { user } = useAuth();
-
   const displayName = user ? `${user.firstName} ${user.lastName}` : LEARNER.name;
   const displayRole = user ? (user.role.charAt(0) + user.role.slice(1).toLowerCase()) : LEARNER.role;
-
-  const [selectedNode,   setSelectedNode]   = useState<SkillNode | null>(null);
+  const [selectedNode, setSelectedNode] = useState<SkillNode | null>(null);
   const [eventsExpanded, setEventsExpanded] = useState(true);
 
   return (
     <>
-      {/* ── Global keyframes ─────────────────────────────────── */}
       <style>{`
-        @keyframes sk-pulse {
-          0%,100% { opacity:0.9; transform:scale(1);    }
-          50%      { opacity:0.1; transform:scale(1.45); }
+        :root {
+          --sk-page: ${PALETTE.page};
+          --sk-canvas: ${PALETTE.canvas};
+          --sk-deep: ${PALETTE.deep};
+          --sk-panel: ${PALETTE.panel};
+          --sk-panel-elevated: ${PALETTE.panelElevated};
+          --sk-text: ${PALETTE.text};
+          --sk-secondary: ${PALETTE.secondary};
+          --sk-muted: ${PALETTE.muted};
+          --sk-magenta: ${PALETTE.magenta};
+          --sk-magenta-bright: ${PALETTE.magentaBright};
+          --sk-amber: ${PALETTE.amber};
         }
-        .sk-pulse {
-          animation: sk-pulse 2.4s ease-in-out infinite;
+        @keyframes skNodePulse {
+          0%, 100% { opacity: 0.78; transform: scale(1); }
+          50% { opacity: 0.16; transform: scale(1.38); }
+        }
+        @keyframes skDetailIn {
+          from { transform: translateY(100%); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        .sk-page-root {
+          min-height: 100vh;
+          background: var(--sk-page);
+          color: var(--sk-text);
+          font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+          overflow: hidden;
+        }
+        .sk-nav {
+          position: fixed;
+          z-index: 100;
+          inset: 0 0 auto 0;
+          height: 80px;
+          display: flex;
+          align-items: center;
+          gap: 34px;
+          padding: 0 28px;
+          background: rgba(5, 5, 6, 0.96);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+          box-shadow: 0 1px 0 rgba(255, 255, 255, 0.02);
+        }
+        .sk-logo-link { text-decoration: none; color: inherit; flex: 0 0 286px; }
+        .sk-brand { display: flex; align-items: center; gap: 10px; }
+        .sk-wordmark span {
+          display: block;
+          color: #F5F5F7;
+          font-size: 20px;
+          font-weight: 900;
+          letter-spacing: 0.055em;
+          line-height: 1;
+          text-shadow: 0 0 18px rgba(255,255,255,0.05);
+        }
+        .sk-wordmark small {
+          display: block;
+          margin-top: 6px;
+          color: #F02C93;
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.34em;
+          text-align: right;
+          line-height: 1;
+        }
+        .sk-nav-links {
+          display: flex;
+          align-items: stretch;
+          justify-content: center;
+          align-self: stretch;
+          gap: 34px;
+          flex: 1 1 auto;
+        }
+        .sk-nav-link {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          color: rgba(245,245,247,0.72);
+          text-decoration: none;
+          font-size: 14px;
+          font-weight: 600;
+          white-space: nowrap;
+          letter-spacing: 0.01em;
+        }
+        .sk-nav-link.is-active { color: #F02C93; }
+        .sk-nav-link.is-active:after {
+          content: "";
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          height: 3px;
+          background: #F02C93;
+          box-shadow: 0 0 18px rgba(240,44,147,0.45);
+        }
+        .sk-nav-actions {
+          display: flex;
+          align-items: center;
+          gap: 18px;
+          flex: 0 0 auto;
+        }
+        .sk-search {
+          width: 240px;
+          height: 42px;
+          border-radius: 14px;
+          border: 1px solid rgba(255,255,255,0.11);
+          background: rgba(255,255,255,0.045);
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 0 14px;
+          color: rgba(245,245,247,0.58);
+        }
+        .sk-search span { color: rgba(245,245,247,0.46); font-size: 14px; }
+        .sk-bell {
+          width: 40px;
+          height: 40px;
+          border-radius: 999px;
+          border: 1px solid rgba(255,255,255,0.11);
+          background: transparent;
+          color: rgba(245,245,247,0.72);
+          display: grid;
+          place-items: center;
+        }
+        .sk-top-profile {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          color: rgba(245,245,247,0.7);
+        }
+        .sk-top-profile img {
+          width: 45px;
+          height: 45px;
+          border-radius: 999px;
+          object-fit: cover;
+          object-position: 50% 19%;
+          filter: brightness(0.74) contrast(1.14) saturate(0.78);
+          border: 1px solid rgba(255,255,255,0.16);
+        }
+        .sk-top-profile strong { display: block; color: #F5F5F7; font-size: 13px; font-weight: 800; line-height: 1.15; }
+        .sk-top-profile span { display: block; margin-top: 4px; color: #F02C93; font-size: 12px; font-weight: 700; }
+        .sk-main {
+          padding-top: 80px;
+          min-height: 100vh;
+          display: flex;
+          align-items: stretch;
+        }
+        .sk-left {
+          position: relative;
+          flex: 1 1 auto;
+          min-width: 0;
+          min-height: calc(100vh - 80px);
+          overflow: hidden;
+          background: #08080A;
+        }
+        .sk-gym, .sk-gym-base, .sk-gym-svg, .sk-smoke, .sk-vignette, .sk-top-fade, .sk-bottom-fade, .sk-row-glow {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+        }
+        .sk-gym-base {
+          background:
+            radial-gradient(ellipse 60% 42% at 51% 60%, rgba(240,44,147,0.09) 0%, transparent 62%),
+            radial-gradient(ellipse 44% 48% at 48% 24%, rgba(240,44,147,0.075) 0%, transparent 58%),
+            linear-gradient(180deg, #09090B 0%, #050506 100%);
+        }
+        .sk-smoke {
+          opacity: 0.18;
+          mix-blend-mode: screen;
+          filter: blur(18px);
+        }
+        .sk-smoke-one {
+          background: radial-gradient(ellipse 50% 24% at 44% 38%, rgba(245,245,247,0.16), transparent 70%);
+        }
+        .sk-smoke-two {
+          background: radial-gradient(ellipse 46% 22% at 48% 70%, rgba(240,44,147,0.16), transparent 68%);
+        }
+        .sk-gym-svg { width: 100%; height: 100%; }
+        .sk-row-glow {
+          top: 58%;
+          height: 22%;
+          background: radial-gradient(ellipse 70% 75% at 47% 45%, rgba(240,44,147,0.16) 0%, rgba(240,44,147,0.045) 48%, transparent 72%);
+        }
+        .sk-vignette {
+          background:
+            radial-gradient(ellipse 98% 92% at 50% 52%, transparent 22%, rgba(5,5,6,0.54) 72%, rgba(5,5,6,0.96) 100%),
+            linear-gradient(90deg, rgba(5,5,6,0.3), transparent 13%, transparent 75%, rgba(5,5,6,0.88));
+        }
+        .sk-top-fade { height: 170px; bottom: auto; background: linear-gradient(180deg, rgba(5,5,6,0.92), transparent); }
+        .sk-bottom-fade { top: auto; height: 170px; background: linear-gradient(0deg, rgba(5,5,6,0.96), transparent); }
+        .sk-title-block {
+          position: absolute;
+          z-index: 3;
+          top: 24px;
+          left: 28px;
+        }
+        .sk-title-block h1 {
+          margin: 0;
+          font-family: Impact, Haettenschweiler, "Arial Narrow Bold", Oswald, sans-serif;
+          color: #F5F5F7;
+          text-transform: uppercase;
+          font-size: 42px;
+          line-height: 0.96;
+          letter-spacing: 0.055em;
+          font-weight: 900;
+          text-shadow: 0 0 18px rgba(255,255,255,0.04);
+        }
+        .sk-title-block p {
+          margin: 11px 0 0;
+          color: #B8B8BE;
+          font-size: 14px;
+          line-height: 1.35;
+        }
+        .sk-stage-scroll {
+          position: absolute;
+          inset: 0;
+          z-index: 2;
+          overflow-x: auto;
+          overflow-y: hidden;
+        }
+        .sk-svg-stage {
+          position: absolute;
+          top: 24px;
+          left: 0;
+          width: 1130px;
+          height: 842px;
+        }
+        .sk-tree-svg {
+          display: block;
+          overflow: visible;
+          font-family: Inter, system-ui, sans-serif;
+        }
+        .sk-svg-node {
+          cursor: pointer;
+          outline: none;
+        }
+        .sk-svg-node:focus-visible polygon {
+          stroke-width: 3;
+        }
+        .sk-node-pulse {
+          animation: skNodePulse 2.5s ease-in-out infinite;
           transform-origin: 42px 32px;
         }
-        @keyframes sk-slide-up {
-          from { transform:translateY(100%); opacity:0; }
-          to   { transform:translateY(0);    opacity:1; }
+        .sk-tree-labels text {
+          paint-order: stroke;
+          stroke: rgba(5,5,6,0.78);
+          stroke-width: 3px;
+          stroke-linejoin: round;
+        }
+        .sk-sidebar-rail {
+          position: sticky;
+          top: 80px;
+          z-index: 5;
+          width: 456px;
+          flex: 0 0 456px;
+          height: calc(100vh - 80px);
+          display: flex;
+          align-items: flex-start;
+          justify-content: flex-start;
+          padding-top: 22px;
+          padding-left: 0;
+          background: linear-gradient(90deg, rgba(5,5,6,0.1), #050506 28%);
+        }
+        .sk-sidebar {
+          width: 420px;
+          max-height: calc(100vh - 104px);
+          overflow-y: auto;
+          background: linear-gradient(180deg, rgba(20,20,24,0.94), rgba(11,11,14,0.96));
+          border: 1px solid rgba(255,255,255,0.10);
+          border-radius: 14px;
+          padding: 26px 28px;
+          box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+        }
+        .sk-sidebar-head {
+          display: flex;
+          align-items: center;
+          gap: 18px;
+          padding-bottom: 18px;
+          border-bottom: 1px solid rgba(255,255,255,0.12);
+        }
+        .sk-sidebar-head img {
+          width: 72px;
+          height: 72px;
+          border-radius: 999px;
+          object-fit: cover;
+          object-position: 50% 18%;
+          filter: brightness(0.72) contrast(1.16) saturate(0.72);
+          border: 1px solid rgba(255,255,255,0.16);
+        }
+        .sk-sidebar h2 {
+          margin: 0;
+          font-size: 22px;
+          line-height: 1.08;
+          letter-spacing: -0.02em;
+          color: #F5F5F7;
+        }
+        .sk-sidebar-head span { display: block; margin-top: 7px; color: #F02C93; font-size: 14px; font-weight: 700; }
+        .sk-sidebar-section {
+          padding: 13px 0;
+          border-bottom: 1px solid rgba(255,255,255,0.10);
+        }
+        .sk-kicker {
+          margin: 0 0 8px;
+          color: rgba(184,184,190,0.74);
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+        .sk-kicker.amber { color: #F2A93B; }
+        .sk-path-name {
+          margin: 0;
+          color: #F5F5F7;
+          font-size: 16px;
+          line-height: 1.3;
+        }
+        .sk-progress-row {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 18px;
+          margin-bottom: 13px;
+        }
+        .sk-progress-row strong {
+          color: #F02C93;
+          font-size: 33px;
+          line-height: 1;
+          font-weight: 900;
+          letter-spacing: -0.04em;
+        }
+        .sk-progress-row span {
+          color: #B8B8BE;
+          font-size: 13px;
+          line-height: 1.32;
+          text-align: left;
+          padding-top: 3px;
+        }
+        .sk-progress-track {
+          height: 10px;
+          border-radius: 999px;
+          overflow: hidden;
+          background: rgba(255,255,255,0.12);
+        }
+        .sk-progress-track div {
+          height: 100%;
+          border-radius: inherit;
+          background: #C2186A;
+          box-shadow: 0 0 18px rgba(240,44,147,0.38);
+        }
+        .sk-stat-row {
+          display: flex;
+          gap: 16px;
+          padding: 14px 0;
+          border-bottom: 1px solid rgba(255,255,255,0.10);
+        }
+        .sk-stat {
+          min-width: 0;
+          flex: 1;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        .sk-stat span, .sk-module-row span, .sk-lesson-row span, .sk-cert-row span {
+          display: block;
+          color: #B8B8BE;
+          font-size: 12px;
+          line-height: 1.35;
+        }
+        .sk-stat strong {
+          display: block;
+          margin-top: 2px;
+          color: #F5F5F7;
+          font-size: 15px;
+        }
+        .sk-module-row, .sk-lesson-row, .sk-cert-row, .sk-cpd-notice {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+        .sk-module-row strong, .sk-lesson-row strong, .sk-cert-row strong {
+          display: block;
+          color: #F5F5F7;
+          font-size: 16px;
+          margin-bottom: 3px;
+          line-height: 1.2;
+        }
+        .sk-module-row span { color: #F2A93B; font-weight: 700; }
+        .sk-cert-row { align-items: flex-start; }
+        .sk-cert-row span { max-width: 260px; }
+        .sk-cpd-notice {
+          margin-top: 13px;
+          padding: 13px 15px;
+          border-radius: 8px;
+          background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.055));
+          border: 1px solid rgba(255,255,255,0.08);
+        }
+        .sk-cpd-notice p {
+          margin: 0;
+          color: #D3D3D8;
+          font-size: 12px;
+          line-height: 1.35;
+        }
+        .sk-cta {
+          margin-top: 13px;
+          height: 52px;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 26px;
+          background: linear-gradient(90deg, #B91563, #E02B83);
+          color: white;
+          text-decoration: none;
+          text-transform: uppercase;
+          font-weight: 900;
+          letter-spacing: 0.05em;
+          box-shadow: 0 14px 32px rgba(194,24,106,0.28), inset 0 1px 0 rgba(255,255,255,0.18);
+        }
+        .sk-detail-panel {
+          position: fixed;
+          z-index: 180;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          padding: 19px 32px 22px;
+          background: rgba(12,12,16,0.96);
+          border-top: 1px solid rgba(255,255,255,0.12);
+          box-shadow: 0 -18px 64px rgba(0,0,0,0.72);
+          backdrop-filter: blur(18px);
+          animation: skDetailIn 0.2s ease-out;
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 24px;
+        }
+        .sk-detail-panel > div { max-width: 780px; }
+        .sk-detail-title {
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 11px;
+        }
+        .sk-detail-title strong { color: #F5F5F7; font-size: 16px; }
+        .sk-detail-title span {
+          border: 1px solid currentColor;
+          border-radius: 999px;
+          padding: 4px 10px;
+          font-size: 11px;
+          font-weight: 900;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          background: rgba(255,255,255,0.05);
+        }
+        .sk-detail-title em {
+          color: #75757D;
+          font-style: normal;
+          font-size: 13px;
+        }
+        .sk-detail-panel p {
+          margin: 9px 0 13px;
+          color: #B8B8BE;
+          max-width: 620px;
+          line-height: 1.45;
+          font-size: 14px;
+        }
+        .sk-detail-action {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 36px;
+          padding: 0 20px;
+          border-radius: 8px;
+          color: #fff;
+          text-decoration: none;
+          font-weight: 800;
+          background: linear-gradient(90deg, #B91563, #E02B83);
+        }
+        .sk-detail-action.amber {
+          background: linear-gradient(90deg, #B97622, #F2A93B);
+          color: #17120B;
+        }
+        .sk-detail-panel button {
+          width: 36px;
+          height: 36px;
+          border-radius: 999px;
+          border: 1px solid rgba(255,255,255,0.12);
+          background: rgba(255,255,255,0.06);
+          color: rgba(245,245,247,0.72);
+          display: grid;
+          place-items: center;
+          cursor: pointer;
+        }
+        @media (max-width: 1320px) {
+          .sk-nav { gap: 20px; padding-left: 22px; padding-right: 22px; }
+          .sk-logo-link { flex-basis: 270px; }
+          .sk-nav-links { gap: 20px; }
+          .sk-search { width: 210px; }
+          .sk-sidebar-rail { width: 436px; flex-basis: 436px; }
+        }
+        @media (max-width: 1120px) {
+          .sk-page-root { overflow: auto; }
+          .sk-nav { position: sticky; overflow-x: auto; }
+          .sk-nav-links { justify-content: flex-start; }
+          .sk-nav-actions { margin-left: auto; }
+          .sk-search { display: none; }
+          .sk-main { display: block; }
+          .sk-left { min-height: 900px; overflow-x: auto; }
+          .sk-stage-scroll { overflow-x: auto; }
+          .sk-svg-stage { min-width: 1130px; }
+          .sk-sidebar-rail {
+            position: relative;
+            top: auto;
+            width: 100%;
+            height: auto;
+            padding: 22px 20px 30px;
+            background: #050506;
+          }
+          .sk-sidebar { width: min(420px, 100%); max-height: none; }
         }
         @media (prefers-reduced-motion: reduce) {
-          .sk-pulse { animation:none !important; opacity:0.35 !important; }
-          [style*="sk-slide-up"] { animation:none !important; }
+          .sk-node-pulse, .sk-detail-panel { animation: none !important; }
         }
       `}</style>
 
-      {/* Full viewport wrapper */}
-      <div style={{ minHeight:'100vh', background:'#050506', display:'flex', flexDirection:'column' }}>
+      <div className="sk-page-root">
+        <LmsNav userName={displayName} userRole={displayRole} />
 
-        {/* ── Nav ──────────────────────────────────────────────── */}
-        <LmsNav userName={displayName} userRole={displayRole}/>
-
-        {/* ── Main content (below 80px nav) ────────────────────── */}
-        <div style={{
-          display:'flex', flex:1, paddingTop:80,
-          minHeight:0, alignItems:'flex-start',
-        }}>
-
-          {/* ── LEFT CANVAS ─────────────────────────────────────── */}
-          <div style={{
-            flex:1, position:'relative',
-            minHeight:'calc(100vh - 80px)',
-            overflowY:'auto', overflowX:'hidden',
-          }}>
-            <GymBackground/>
-
-            {/* Page title */}
-            <div style={{ position:'relative', zIndex:10, padding:'28px 32px 0' }}>
-              <h1 style={{
-                margin:0,
-                fontFamily: 'Impact, "Anton", "Oswald", system-ui, sans-serif',
-                fontSize:'clamp(2.1rem, 3vw, 3.25rem)',
-                fontWeight:900,
-                textTransform:'uppercase',
-                letterSpacing:'0.08em',
-                color:'#F7F7F7',
-                lineHeight:1.05,
-              }}>
-                Coaching Pathway Level 1
-              </h1>
-              <p style={{
-                margin:'8px 0 0',
-                color:'#C8C8CE', fontSize:'0.97rem', fontWeight:400, lineHeight:1.5,
-              }}>
-                Build the knowledge and practical skills to coach Strongman safely and effectively.
-              </p>
+        <main className="sk-main">
+          <section className="sk-left">
+            <GymBackground />
+            <div className="sk-title-block">
+              <h1>Coaching Pathway Level 1</h1>
+              <p>Build the knowledge and practical skills to coach Strongman safely and effectively.</p>
             </div>
-
-            {/* SVG tree canvas */}
-            <div style={{ position:'relative', zIndex:10, padding:'4px 8px 60px' }}>
-              <SkillTreeSVG
-                onNodeClick={setSelectedNode}
-                selectedId={selectedNode?.id ?? null}
-                eventsExpanded={eventsExpanded}
-                onToggleEvents={() => setEventsExpanded(p => !p)}
-              />
+            <div className="sk-stage-scroll">
+              <div className="sk-svg-stage">
+                <SkillTreeSVG
+                  onNodeClick={setSelectedNode}
+                  selectedId={selectedNode?.id ?? null}
+                  eventsExpanded={eventsExpanded}
+                  onToggleEvents={() => setEventsExpanded((expanded) => !expanded)}
+                />
+              </div>
             </div>
+          </section>
+
+          <div className="sk-sidebar-rail">
+            <LearnerSidebar learner={{ ...LEARNER, name: displayName, role: displayRole }} />
           </div>
+        </main>
 
-          {/* ── RIGHT SIDEBAR ─────────────────────────────────── */}
-          <div style={{
-            width:390, flexShrink:0,
-            padding:'24px 20px 24px 0',
-            height:'calc(100vh - 80px)',
-            position:'sticky', top:80,
-            overflowY:'auto',
-          }} className="hidden-on-mobile-sk">
-            <LearnerSidebar learner={{ ...LEARNER, name: displayName, role: displayRole }}/>
-          </div>
-        </div>
-
-        {/* ── Mobile sidebar (below tree) ──────────────────────── */}
-        <div style={{
-          borderTop:'1px solid rgba(255,255,255,0.07)',
-          padding:'20px',
-        }} className="mobile-only-sk">
-          <LearnerSidebar learner={{ ...LEARNER, name: displayName, role: displayRole }}/>
-        </div>
-
-        {/* ── Bottom detail panel ───────────────────────────────── */}
-        {selectedNode && (
-          <NodeDetailPanel node={selectedNode} onClose={() => setSelectedNode(null)}/>
-        )}
+        {selectedNode && <NodeDetailPanel node={selectedNode} onClose={() => setSelectedNode(null)} />}
       </div>
-
-      <style>{`
-        @media (min-width: 1024px) {
-          .mobile-only-sk { display: none !important; }
-        }
-        @media (max-width: 1023px) {
-          .hidden-on-mobile-sk { display: none !important; }
-        }
-      `}</style>
     </>
   );
 }
