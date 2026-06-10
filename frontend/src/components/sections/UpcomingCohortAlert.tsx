@@ -128,7 +128,7 @@ function LocationFinder() {
               className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-3"
               style={{ background: 'rgba(164,28,100,0.1)', border: '1px solid rgba(164,28,100,0.2)' }}
             >
-              <PinIcon className="w-5 h-5" style={{ color: '#A41C64' } as React.CSSProperties} />
+              <PinIcon className="w-5 h-5" />
             </div>
             <p className="text-sm text-white/35">Enter your postcode to find the nearest cohort location</p>
           </div>
