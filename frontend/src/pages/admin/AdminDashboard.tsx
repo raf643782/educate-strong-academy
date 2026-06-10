@@ -67,7 +67,25 @@ export default function AdminDashboard() {
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
               {statCards.map(stat => (
-                <div key={stat.label} className="es-card p-5" style={{ background: '#1A1A1A' }}>
+                <div
+                  key={stat.label}
+                  className="p-5 rounded-xl cursor-pointer transition-all duration-200 hover:-translate-y-0.5"
+                  style={{
+                    background: '#1A1A1A',
+                    border: '1px solid rgba(255,255,255,0.07)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                  }}
+                  onMouseEnter={e => {
+                    const el = e.currentTarget;
+                    el.style.border = '1px solid rgba(194,24,106,0.35)';
+                    el.style.boxShadow = '0 6px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(194,24,106,0.15)';
+                  }}
+                  onMouseLeave={e => {
+                    const el = e.currentTarget;
+                    el.style.border = '1px solid rgba(255,255,255,0.07)';
+                    el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+                  }}
+                >
                   <p className="text-3xl font-black text-white mb-1">{stat.value}</p>
                   <p className="text-sm text-es-muted font-medium">{stat.label}</p>
                 </div>
@@ -84,10 +102,10 @@ export default function AdminDashboard() {
                   key={link.href}
                   to={link.href}
                   className="es-card-hover rounded-xl p-5 flex items-start gap-4"
-                  style={link.highlight ? { borderTop: '2px solid #166534' } : {}}
+                  style={link.highlight ? { borderTop: '2px solid #A41C64' } : {}}
                 >
                   <div>
-                    <p className={`font-semibold mb-0.5 ${link.highlight ? 'text-green-400' : 'text-white'}`}>
+                    <p className={`font-semibold mb-0.5 ${link.highlight ? 'text-[#F02C93]' : 'text-white'}`}>
                       {link.label}
                     </p>
                     <p className="text-sm text-es-muted">{link.desc}</p>

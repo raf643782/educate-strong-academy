@@ -11,9 +11,9 @@ interface Tutor {
 const TUTORS: Tutor[] = [
   { name: 'Paul Smith', role: 'Lead Tutor', credential: "3× UK's Strongest Man", img: '/assets/paul-smith.avif', initials: 'PS' },
   { name: 'Dr Chris Fitzgerald', role: 'Tutor & Programme Lead', credential: 'PhD · Natural WSM Athlete', img: '/assets/chris-fitzgerald.avif', initials: 'CF' },
+  { name: 'Kris Herbert', role: 'Digital & Media', credential: 'Natural WSM 2024 Bronze', img: '/assets/krish-herbert.jpg', initials: 'KH' },
   { name: 'Laura Hollywood', role: 'StrongKidz Coach', credential: "Britain's Strongest Woman u73", img: '/assets/laura-hollywood.avif', initials: 'LH' },
   { name: 'Victoria Wilson', role: 'StrongKidz Coach', credential: 'S&C Coach · Youth Specialist', img: '/assets/victoria-wilson.avif', initials: 'VW' },
-  { name: 'Kris Herbert', role: 'Digital & Media', credential: 'Natural WSM 2024 Bronze', img: '/assets/krish-herbert.jpg', initials: 'KH' },
 ];
 
 function TutorCard({ tutor }: { tutor: Tutor }) {

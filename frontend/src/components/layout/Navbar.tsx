@@ -144,11 +144,11 @@ export default function Navbar() {
       <div className="es-container">
         <div className={`flex items-center justify-between ${navH} transition-all duration-300`}>
 
-          {/* ── Brand: icon only (pink owl, no text) ─────────────────── */}
+          {/* ── Brand: owl icon + wordmark ───────────────────────────── */}
           <Link
             to="/"
             aria-label="Educate.Strong — Home"
-            className="flex-shrink-0 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A41C64] rounded-full"
+            className="flex-shrink-0 group flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A41C64] rounded-xl px-1"
           >
             <div className="relative">
               {/* Glow ring on hover */}
@@ -159,15 +159,20 @@ export default function Navbar() {
               />
               <img
                 src="/assets/logo_owl.svg"
-                alt="Educate.Strong"
+                alt=""
                 className={`relative w-auto transition-all duration-300 ${scrolled ? 'h-7' : 'h-8'}`}
                 style={{ filter: 'brightness(0) saturate(100%) invert(14%) sepia(91%) saturate(2500%) hue-rotate(310deg) brightness(85%) contrast(105%)' }}
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = '/assets/es-logo.png';
-                  (e.target as HTMLImageElement).style.filter = 'none';
+                  (e.target as HTMLImageElement).style.display = 'none';
                 }}
               />
             </div>
+            <span
+              className={`font-black tracking-tight leading-none select-none transition-all duration-300 ${scrolled ? 'text-base' : 'text-lg'}`}
+              style={{ color: '#C2186A', letterSpacing: '-0.03em' }}
+            >
+              Educate<span style={{ color: 'rgba(255,255,255,0.85)' }}>.</span>Strong
+            </span>
           </Link>
 
           {/* ── Desktop nav ───────────────────────────────────────────── */}
