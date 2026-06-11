@@ -133,14 +133,19 @@ export default function Dashboard() {
                 to="/dashboard/pathway"
                 className="block p-5 rounded-xl transition-all duration-200 hover:-translate-y-0.5"
                 style={{
-                  background: 'linear-gradient(135deg, #141420 0%, #0E0E1A 100%)',
+                  background: '#131313',
                   border: '1px solid rgba(164,28,100,0.3)',
                   borderTop: '2px solid #A41C64',
-                  boxShadow: '0 4px 24px rgba(164,28,100,0.12)',
+                  boxShadow: '0 4px 24px rgba(164,28,100,0.10)',
                 }}
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg" aria-hidden="true">🗺️</span>
+                  <svg className="w-4 h-4 flex-shrink-0" style={{ color: '#A41C64' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+                    <circle cx="12" cy="5" r="2" />
+                    <circle cx="5" cy="19" r="2" />
+                    <circle cx="19" cy="19" r="2" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 7v4l-5 6M12 11l5 6" />
+                  </svg>
                   <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#A41C64' }}>Skill Tree</p>
                 </div>
                 <p className="font-bold text-white text-sm mb-1">My Coaching Pathway</p>
@@ -149,8 +154,18 @@ export default function Dashboard() {
               </Link>
 
               {/* EatStrong */}
-              <Link to="/eatstrong" className="block es-card p-5 hover:border-green-700 transition-colors" style={{ borderTop: '2px solid #166534' }}>
-                <p className="text-xs font-bold uppercase tracking-widest text-green-500 mb-1">EatStrong</p>
+              <Link
+                to="/eatstrong"
+                className="block es-card p-5 transition-all duration-200 hover:-translate-y-0.5"
+                style={{ borderTop: '2px solid #888899' }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLAnchorElement).style.borderColor = '#A41C64';
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLAnchorElement).style.borderColor = '#888899';
+                }}
+              >
+                <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: '#888899' }}>EatStrong</p>
                 <p className="font-bold text-white text-sm mb-1">Nutrition Education</p>
                 <p className="text-xs text-es-muted">Performance nutrition for Strongman coaches and athletes.</p>
               </Link>

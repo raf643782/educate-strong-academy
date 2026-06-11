@@ -4,24 +4,16 @@
  * Section order:
  *  1. Navbar
  *  2. Hero
- *  3. UpcomingCohortAlert  (compact banner — hides when no confirmed date)
- *  4. PartnerLogosMarquee
- *  5. WhyEducateStrong
- *  6. AllPathwaysOverview  (Coaching · Refereeing · StrongKidz · EatStrong)
+ *  3. PartnerLogosMarquee
+ *  4. WhyEducateStrong
+ *  5. AllPathwaysOverview  (Coaching · Refereeing · StrongKidz · EatStrong)
+ *  6. UpcomingCohortsSection  (full section — cohort dates + location finder)
  *  7. CertifiedCoachesSection
  *  8. TutorCredibilityStrip
  *  9. TestimonialsSection
  * 10. KnowledgeHubPreview
  * 11. Final CTA
  * 12. Footer
- *
- * Not on this page:
- *  - Coaching Journey detail (moved to /coaching)
- *  - FeaturedCourses (on /courses)
- *  - Video section (on /courses/level-1-coaching-strongman)
- *  - StrongKidz detail section (on /strongkidz)
- *  - EatStrong detail section (on /eatstrong)
- *  - Next Course large section (replaced by compact UpcomingCohortAlert)
  */
 
 import { Link } from 'react-router-dom';
@@ -34,7 +26,7 @@ import AllPathwaysOverview from '../../components/sections/AllPathwaysOverview';
 import CertifiedCoachesSection from '../../components/sections/CertifiedCoachesSection';
 import TutorCredibilityStrip from '../../components/sections/TutorCredibilityStrip';
 import KnowledgeHubPreview from '../../components/sections/KnowledgeHubPreview';
-import UpcomingCohortAlert from '../../components/sections/UpcomingCohortAlert';
+import UpcomingCohortsSection from '../../components/sections/UpcomingCohortsSection';
 
 /* ═══════════════════════════════════════════════════════════════════ */
 export default function Home() {
@@ -206,22 +198,20 @@ export default function Home() {
         />
       </section>
 
-      {/* ── 2. UPCOMING COHORT ALERT ───────────────────────────────── */}
-      {/* Compact banner — shows register interest when no confirmed date */}
-      <UpcomingCohortAlert />
-
-      {/* ── 3. PARTNER TICKER ──────────────────────────────────────── */}
+      {/* ── 2. PARTNER TICKER ──────────────────────────────────────── */}
       <PartnerLogosMarquee />
 
-      {/* ── 4. WHY EDUCATE.STRONG ──────────────────────────────────── */}
+      {/* ── 3. WHY EDUCATE.STRONG ──────────────────────────────────── */}
       <WhyEducateStrong />
 
-      {/* ── 5. ALL PATHWAYS OVERVIEW ───────────────────────────────── */}
-      {/* Coaching · Refereeing · StrongKidz · EatStrong */}
-      {/* EatStrong uses standard ES visual language (no green here) */}
+      {/* ── 4. ALL PATHWAYS OVERVIEW ───────────────────────────────── */}
+      {/* Coaching · Refereeing · StrongKidz · EatStrong — no green */}
       <AllPathwaysOverview />
 
-      {/* ── 7. CERTIFIED COACHES PREVIEW ───────────────────────────── */}
+      {/* ── 5. UPCOMING COURSES & COHORTS ──────────────────────────── */}
+      <UpcomingCohortsSection />
+
+      {/* ── 6. CERTIFIED COACHES PREVIEW ───────────────────────────── */}
       <CertifiedCoachesSection />
 
       {/* ── 8. TUTOR CREDIBILITY STRIP ─────────────────────────────── */}

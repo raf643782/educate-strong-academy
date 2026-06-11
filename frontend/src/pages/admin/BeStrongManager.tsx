@@ -45,14 +45,14 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 const CATEGORY_COLOURS: Record<string, string> = {
-  BASICS:          'bg-green-100 text-green-700',
-  COMPETITION:     'bg-amber-100 text-amber-700',
+  BASICS:          'bg-amber-100 text-amber-700',
+  COMPETITION:     'bg-orange-100 text-orange-700',
   RECOVERY:        'bg-blue-100 text-blue-700',
   MAKING_WEIGHT:   'bg-purple-100 text-purple-700',
   HYDRATION:       'bg-cyan-100 text-cyan-700',
   SUPPLEMENTS:     'bg-red-100 text-red-700',
   COACHES_GUIDE:   'bg-indigo-100 text-indigo-700',
-  YOUTH_NUTRITION: 'bg-teal-100 text-teal-700',
+  YOUTH_NUTRITION: 'bg-violet-100 text-violet-700',
   DOWNLOADS:       'bg-gray-100 text-gray-700',
 };
 
@@ -102,8 +102,8 @@ export default function BeStrongManager() {
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
-              <p className="text-green-600 text-sm font-medium uppercase tracking-wide mb-1">
-                <Link to="/admin" className="hover:text-green-700">Admin</Link> › EatStrong
+              <p className="text-sm font-medium uppercase tracking-wide mb-1" style={{ color: '#A41C64' }}>
+                <Link to="/admin" className="hover:opacity-80">Admin</Link> › EatStrong
               </p>
               <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
                 EatStrong Content Manager
@@ -112,7 +112,8 @@ export default function BeStrongManager() {
             </div>
             <Link
               to="/eatstrong"
-              className="text-sm text-green-600 hover:text-green-700 font-medium border border-green-200 rounded-lg px-4 py-2 hover:bg-green-50 transition-colors"
+              className="text-sm font-medium border rounded-lg px-4 py-2 transition-colors hover:opacity-80"
+              style={{ color: '#A41C64', borderColor: 'rgba(164,28,100,0.3)' }}
             >
               View EatStrong →
             </Link>
@@ -122,7 +123,7 @@ export default function BeStrongManager() {
           {stats && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
               {[
-                { label: 'Total Articles', value: stats.totalArticles, colour: 'text-green-600', bg: 'bg-green-50' },
+                { label: 'Total Articles', value: stats.totalArticles, colour: 'text-pink-700', bg: 'bg-pink-50' },
                 { label: 'Published', value: stats.publishedArticles, colour: 'text-blue-600', bg: 'bg-blue-50' },
                 { label: 'Featured', value: stats.featuredArticles, colour: 'text-amber-600', bg: 'bg-amber-50' },
                 { label: 'Downloads', value: stats.totalDownloads, colour: 'text-purple-600', bg: 'bg-purple-50' },
@@ -211,7 +212,7 @@ export default function BeStrongManager() {
                               onClick={() => togglePublish(article.id, article.isPublished)}
                               disabled={updating === article.id}
                               className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors disabled:opacity-50 ${
-                                article.isPublished ? 'bg-green-500' : 'bg-gray-300'
+                                article.isPublished ? 'bg-pink-600' : 'bg-gray-300'
                               }`}
                             >
                               <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
@@ -222,7 +223,7 @@ export default function BeStrongManager() {
                           <td className="px-6 py-4 text-right">
                             <Link
                               to={`/eatstrong/articles/${article.slug}`}
-                              className="text-xs text-green-600 hover:text-green-700 font-medium"
+                              className="text-xs font-medium hover:opacity-80" style={{ color: '#A41C64' }}
                             >
                               View
                             </Link>
@@ -258,13 +259,13 @@ export default function BeStrongManager() {
                           </span>
                           <span className="text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded font-medium">{dl.fileType}</span>
                           {dl.accessLevel === 'FREE' && (
-                            <span className="text-xs text-green-600 font-medium">Free</span>
+                            <span className="text-xs font-medium" style={{ color: '#A41C64' }}>Free</span>
                           )}
                         </div>
                         <p className="font-medium text-gray-900 text-sm">{dl.title}</p>
                       </div>
                       <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                        dl.isPublished ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                        dl.isPublished ? 'bg-pink-100 text-pink-700' : 'bg-gray-100 text-gray-500'
                       }`}>
                         {dl.isPublished ? 'Live' : 'Draft'}
                       </span>
