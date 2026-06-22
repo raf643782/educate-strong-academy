@@ -17,6 +17,8 @@ import CertificateVerify from './pages/public/CertificateVerify';
 // Auth pages
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
 
 // Learner pages
 import Dashboard from './pages/learner/Dashboard';
@@ -59,6 +61,8 @@ export default function App() {
           <Route path="/courses/:slug" element={<CourseDetail />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
 
           {/* Library & public pages */}
           <Route path="/about" element={<About />} />
