@@ -12,6 +12,7 @@ interface Testimonial {
   photo?: string;
   initials: string;
   accentColour: string;
+  consentConfirmed?: boolean;
 }
 
 const TESTIMONIALS: Testimonial[] = [
@@ -163,6 +164,8 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
 }
 
 export default function TestimonialsSection() {
+  const confirmed = TESTIMONIALS.filter(t => t.consentConfirmed === true);
+
   return (
     <section
       style={{ background: '#0A0A0A', padding: '96px 0', borderTop: '1px solid rgba(255,255,255,0.05)' }}
@@ -171,31 +174,42 @@ export default function TestimonialsSection() {
       <div className="es-container">
         {/* Heading */}
         <div className="mb-12">
-          <p className="es-label mb-3">Social Proof</p>
+          <p className="es-label mb-3">What Coaches and Referees Say</p>
           <h2
             id="testimonials-heading"
             className="font-black text-white mb-4"
             style={{ fontSize: 'clamp(1.75rem, 4vw, 3rem)', letterSpacing: '-0.035em' }}
           >
-            What Coaches and Referees Say
+            Hear From Our Graduates
           </h2>
           <p className="text-white/45 max-w-lg text-base">
-            Real outcomes from real practitioners. Hover each card to read their story.
+            Testimonials from certified coaches and referees will appear here as the community grows.
           </p>
         </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {TESTIMONIALS.map(t => (
-            <TestimonialCard key={t.id} testimonial={t} />
-          ))}
-        </div>
-
-        {/* Placeholder note */}
-        <p className="mt-6 text-xs text-white/25 text-center">
-          {/* Remove this paragraph once real headshots are provided */}
-          Testimonial photographs — provide /assets/testimonials/[name].jpg for each coach or referee to replace initials.
-        </p>
+        {confirmed.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {confirmed.map(t => (
+              <TestimonialCard key={t.id} testimonial={t} />
+            ))}
+          </div>
+        ) : (
+          <div
+            style={{
+              background: '#111',
+              border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: '16px',
+              padding: '48px 32px',
+              textAlign: 'center',
+            }}
+          >
+            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '14px', lineHeight: 1.7 }}>
+              No testimonials have been published yet.
+              <br />
+              Verified coach and referee feedback will appear here once consent is confirmed.
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );

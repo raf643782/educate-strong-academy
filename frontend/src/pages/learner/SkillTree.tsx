@@ -48,19 +48,19 @@ const PALETTE = {
 } as const;
 
 const LEARNER = {
-  name: 'James Mitchell',
+  name: '',
   role: 'Learner',
   pathway: 'Coaching Pathway Level 1',
-  progress: 42,
-  lessonsCompleted: 42,
-  totalLessons: 100,
-  totalTime: '12h 35m',
-  currentModule: 'Session Structure',
-  currentModuleProgress: 65,
-  nextLesson: 'Session Planning Principles',
-  nextLessonNumber: 18,
-  nextLessonDuration: '25 min',
-  nextLessonLink: '/learn/level-1-coaching-strongman/lessons/18',
+  progress: 0,
+  lessonsCompleted: 0,
+  totalLessons: 0,
+  totalTime: '—',
+  currentModule: '',
+  currentModuleProgress: 0,
+  nextLesson: '',
+  nextLessonNumber: 0,
+  nextLessonDuration: '',
+  nextLessonLink: '/dashboard',
   certEarned: false,
 };
 
@@ -69,17 +69,17 @@ const NODES: SkillNode[] = [
   { id: 'cpd-programming', x: 620, y: 145, icon: 'clipboard', type: 'cpd', status: 'cpd-locked', title: 'Programming Essentials', description: 'Periodisation and block programming for Strongman training cycles.', duration: '4h 15m', lessonCount: 15 },
   { id: 'cpd-analysis', x: 810, y: 145, icon: 'barchart', type: 'cpd', status: 'cpd-locked', title: 'Event Analysis', description: 'Video analysis methodology for Strongman events.', duration: '2h 45m', lessonCount: 10 },
 
-  { id: 'foundation', x: 620, y: 255, icon: 'foundation', type: 'foundation', status: 'completed', title: 'Foundation', description: "Core principles of Strongman coaching. Sport history, culture, and the coach's role in athlete development.", duration: '2h 10m', lessonCount: 8, lessonLink: '/learn/level-1-coaching-strongman/lessons/1' },
-  { id: 'intro', x: 620, y: 335, icon: 'coach', type: 'lesson', status: 'completed', title: 'Introduction to Strongman Coaching', description: 'Coaching communication frameworks, athlete relationships, and professional standards.', duration: '3h 05m', lessonCount: 11, lessonLink: '/learn/level-1-coaching-strongman/lessons/9' },
-  { id: 'screening', x: 620, y: 415, icon: 'shield', type: 'lesson', status: 'completed', title: 'Athlete Screening and Safety', description: 'PAR-Q, injury history, movement screening, and safe load progression protocols.', duration: '2h 40m', lessonCount: 9, lessonLink: '/learn/level-1-coaching-strongman/lessons/20' },
-  { id: 'session', x: 620, y: 505, icon: 'whistle', type: 'lesson', status: 'in-progress', progress: 65, title: 'Session Structure', description: 'Building effective Strongman training sessions. Warm-up protocols, exercise sequencing, and coaching flow.', duration: '3h 50m', lessonCount: 14, lessonLink: '/learn/level-1-coaching-strongman/lessons/30' },
+  { id: 'foundation', x: 620, y: 255, icon: 'foundation', type: 'foundation', status: 'locked', title: 'Foundation', description: "Core principles of Strongman coaching. Sport history, culture, and the coach's role in athlete development.", duration: '2h 10m', lessonCount: 8, lessonLink: '/learn/level-1-coaching-strongman/lessons/1' },
+  { id: 'intro', x: 620, y: 335, icon: 'coach', type: 'lesson', status: 'locked', title: 'Introduction to Strongman Coaching', description: 'Coaching communication frameworks, athlete relationships, and professional standards.', duration: '3h 05m', lessonCount: 11, lessonLink: '/learn/level-1-coaching-strongman/lessons/9' },
+  { id: 'screening', x: 620, y: 415, icon: 'shield', type: 'lesson', status: 'locked', title: 'Athlete Screening and Safety', description: 'PAR-Q, injury history, movement screening, and safe load progression protocols.', duration: '2h 40m', lessonCount: 9, lessonLink: '/learn/level-1-coaching-strongman/lessons/20' },
+  { id: 'session', x: 620, y: 505, icon: 'whistle', type: 'lesson', status: 'locked', title: 'Session Structure', description: 'Building effective Strongman training sessions. Warm-up protocols, exercise sequencing, and coaching flow.', duration: '3h 50m', lessonCount: 14, lessonLink: '/learn/level-1-coaching-strongman/lessons/30' },
 
-  { id: 'log-press', x: 210, y: 585, icon: 'log', type: 'skill', status: 'completed', title: 'Log Press', subtitle: 'Fundamentals', description: 'Log clean mechanics, overhead lockout, and loading progressions.', duration: '1h 20m', lessonCount: 5, lessonLink: '/learn/level-1-coaching-strongman/lessons/44' },
-  { id: 'axle-press', x: 360, y: 585, icon: 'axle', type: 'skill', status: 'completed', title: 'Axle Press', subtitle: 'Fundamentals', description: 'Axle bar grip mechanics, continental clean technique, and push press cues.', duration: '55m', lessonCount: 4, lessonLink: '/learn/level-1-coaching-strongman/lessons/49' },
-  { id: 'deadlift', x: 510, y: 585, icon: 'deadlift', type: 'skill', status: 'completed', title: 'Deadlift', subtitle: 'Fundamentals', description: 'Silver dollar, car deadlift, and frame variations. Technique and rules.', duration: '1h 10m', lessonCount: 4, lessonLink: '/learn/level-1-coaching-strongman/lessons/53' },
-  { id: 'farmers-walk', x: 660, y: 585, icon: 'farmers', type: 'skill', status: 'completed', title: "Farmer's Walk", subtitle: 'Fundamentals', description: 'Grip loading, turn mechanics, and pacing strategies for performance.', duration: '50m', lessonCount: 3, lessonLink: '/learn/level-1-coaching-strongman/lessons/57' },
-  { id: 'yoke', x: 810, y: 585, icon: 'yoke', type: 'skill', status: 'completed', title: 'Yoke', subtitle: 'Fundamentals', description: 'Load placement, leg drive mechanics, and visual cuing strategies.', duration: '55m', lessonCount: 3, lessonLink: '/learn/level-1-coaching-strongman/lessons/60' },
-  { id: 'atlas-stones', x: 960, y: 585, icon: 'stone', type: 'skill', status: 'completed', title: 'Atlas Stones', subtitle: 'Fundamentals', description: 'Tacky application, lap mechanics, and safe loading progressions.', duration: '1h 15m', lessonCount: 5, lessonLink: '/learn/level-1-coaching-strongman/lessons/63' },
+  { id: 'log-press', x: 210, y: 585, icon: 'log', type: 'skill', status: 'locked', title: 'Log Press', subtitle: 'Fundamentals', description: 'Log clean mechanics, overhead lockout, and loading progressions.', duration: '1h 20m', lessonCount: 5, lessonLink: '/learn/level-1-coaching-strongman/lessons/44' },
+  { id: 'axle-press', x: 360, y: 585, icon: 'axle', type: 'skill', status: 'locked', title: 'Axle Press', subtitle: 'Fundamentals', description: 'Axle bar grip mechanics, continental clean technique, and push press cues.', duration: '55m', lessonCount: 4, lessonLink: '/learn/level-1-coaching-strongman/lessons/49' },
+  { id: 'deadlift', x: 510, y: 585, icon: 'deadlift', type: 'skill', status: 'locked', title: 'Deadlift', subtitle: 'Fundamentals', description: 'Silver dollar, car deadlift, and frame variations. Technique and rules.', duration: '1h 10m', lessonCount: 4, lessonLink: '/learn/level-1-coaching-strongman/lessons/53' },
+  { id: 'farmers-walk', x: 660, y: 585, icon: 'farmers', type: 'skill', status: 'locked', title: "Farmer's Walk", subtitle: 'Fundamentals', description: 'Grip loading, turn mechanics, and pacing strategies for performance.', duration: '50m', lessonCount: 3, lessonLink: '/learn/level-1-coaching-strongman/lessons/57' },
+  { id: 'yoke', x: 810, y: 585, icon: 'yoke', type: 'skill', status: 'locked', title: 'Yoke', subtitle: 'Fundamentals', description: 'Load placement, leg drive mechanics, and visual cuing strategies.', duration: '55m', lessonCount: 3, lessonLink: '/learn/level-1-coaching-strongman/lessons/60' },
+  { id: 'atlas-stones', x: 960, y: 585, icon: 'stone', type: 'skill', status: 'locked', title: 'Atlas Stones', subtitle: 'Fundamentals', description: 'Tacky application, lap mechanics, and safe loading progressions.', duration: '1h 15m', lessonCount: 5, lessonLink: '/learn/level-1-coaching-strongman/lessons/63' },
 
   { id: 'practical', x: 620, y: 675, icon: 'users', type: 'assessment', status: 'locked', title: 'Practical Coaching Skills', description: 'Practical session delivery, communication under pressure, and real-time athlete feedback.', duration: '4h 30m', lessonCount: 16 },
   { id: 'assessment', x: 620, y: 755, icon: 'medal', type: 'assessment', status: 'locked', title: 'Assessment Preparation', description: 'Preparing for the Level 1 certificate assessment. Theory test and practical walkthrough.', duration: '2h 00m', lessonCount: 7 },
@@ -297,7 +297,9 @@ function LmsNav({ userName, userRole }: { userName: string; userRole: string }) 
           </svg>
         </button>
         <div className="sk-top-profile">
-          <img src="/assets/krish-herbert.jpg" alt="" />
+          <div style={{ width: 45, height: 45, borderRadius: '999px', background: 'rgba(164,28,100,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 700, color: '#fff', border: '1px solid rgba(255,255,255,0.16)', flexShrink: 0, letterSpacing: '0.04em' }}>
+            {userName.split(' ').slice(0, 2).map((w: string) => w[0]).join('').toUpperCase() || '?'}
+          </div>
           <div>
             <strong>{userName}</strong>
             <span>{userRole}</span>
@@ -530,8 +532,8 @@ function SkillTreeSVG({ onNodeClick, selectedId, eventsExpanded, onToggleEvents 
         })}
 
         <g>
-          <text x="712" y={sessionY - 3} fill="#F2A93B" fontSize="15" fontWeight="700">Session Structure</text>
-          <text x="712" y={sessionY + 18} fill="#F2A93B" fontSize="12" fontWeight="500">In Progress</text>
+          <text x="712" y={sessionY - 3} fill="#B8B8BE" fontSize="15" fontWeight="600">Session Structure</text>
+          <text x="712" y={sessionY + 18} fill="#75757D" fontSize="12" fontWeight="500">Locked</text>
         </g>
 
         {eventsExpanded && EVENT_IDS.map((id) => {
@@ -613,17 +615,17 @@ function SkillTreeSVG({ onNodeClick, selectedId, eventsExpanded, onToggleEvents 
       <line x1="662" y1="145" x2="768" y2="145" stroke="rgba(255,255,255,0.28)" strokeWidth="1.8" strokeDasharray="6 6" />
       <line x1="620" y1="215" x2="620" y2="223" stroke="rgba(255,255,255,0.22)" strokeWidth="1.5" strokeDasharray="5 5" />
 
-      <line x1="620" y1={foundationBottom} x2="620" y2={introTop} stroke="#F02C93" strokeWidth="4" opacity="0.86" filter="url(#lineGlow)" />
-      <line x1="620" y1={introBottom} x2="620" y2={screeningTop} stroke="#F02C93" strokeWidth="4" opacity="0.86" filter="url(#lineGlow)" />
-      <line x1="620" y1={screeningBottom} x2="620" y2={sessionTop} stroke="url(#completedToAmber)" strokeWidth="4" opacity="0.92" filter="url(#lineGlow)" />
+      <line x1="620" y1={foundationBottom} x2="620" y2={introTop} stroke="rgba(255,255,255,0.22)" strokeWidth="1.7" strokeDasharray="6 6" />
+      <line x1="620" y1={introBottom} x2="620" y2={screeningTop} stroke="rgba(255,255,255,0.22)" strokeWidth="1.7" strokeDasharray="6 6" />
+      <line x1="620" y1={screeningBottom} x2="620" y2={sessionTop} stroke="rgba(255,255,255,0.22)" strokeWidth="1.7" strokeDasharray="6 6" />
 
       {eventsExpanded && (
         <g>
-          <line x1="620" y1={sessionBottom} x2="620" y2={eventLineY} stroke="#F02C93" strokeWidth="4" opacity="0.94" filter="url(#lineGlow)" />
-          <path d={`M210 ${eventLineY}H960`} stroke="#F02C93" strokeWidth="4" strokeLinecap="round" filter="url(#lineGlow)" />
+          <line x1="620" y1={sessionBottom} x2="620" y2={eventLineY} stroke="rgba(255,255,255,0.22)" strokeWidth="1.7" strokeDasharray="6 6" />
+          <path d={`M210 ${eventLineY}H960`} stroke="rgba(255,255,255,0.22)" strokeWidth="1.7" strokeLinecap="round" strokeDasharray="6 6" />
           {EVENT_IDS.map((id) => {
             const node = byId(id);
-            return <line key={id} x1={node.x} y1={eventLineY} x2={node.x} y2={eventTop} stroke="#F02C93" strokeWidth="2.4" opacity="0.95" />;
+            return <line key={id} x1={node.x} y1={eventLineY} x2={node.x} y2={eventTop} stroke="rgba(255,255,255,0.18)" strokeWidth="1.5" strokeDasharray="5 5" />;
           })}
         </g>
       )}
@@ -651,12 +653,24 @@ function SidebarIcon({ type, color = PALETTE.magentaBright }: { type: string; co
 }
 
 function LearnerSidebar({ learner }: { learner: typeof LEARNER }) {
+  const nameForInitials = learner.name || 'Your Coaching Pathway';
+  const initials = nameForInitials
+    .split(' ')
+    .slice(0, 2)
+    .map((w: string) => w[0])
+    .join('')
+    .toUpperCase() || '?';
+
+  const displayLabel = learner.name || 'Your Coaching Pathway';
+
   return (
     <aside className="sk-sidebar">
       <div className="sk-sidebar-head">
-        <img src="/assets/krish-herbert.jpg" alt="" />
+        <div style={{ width: 54, height: 54, borderRadius: '50%', background: 'rgba(164,28,100,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 700, color: '#fff', flexShrink: 0, letterSpacing: '0.04em' }}>
+          {initials}
+        </div>
         <div>
-          <h2>{learner.name}</h2>
+          <h2>{displayLabel}</h2>
           <span>{learner.role}</span>
         </div>
       </div>
@@ -668,44 +682,9 @@ function LearnerSidebar({ learner }: { learner: typeof LEARNER }) {
 
       <section className="sk-sidebar-section">
         <p className="sk-kicker">Overall Progress</p>
-        <div className="sk-progress-row">
-          <strong>{learner.progress}%</strong>
-          <span>{learner.lessonsCompleted} of {learner.totalLessons} lessons<br />completed</span>
-        </div>
-        <div className="sk-progress-track"><div style={{ width: `${learner.progress}%` }} /></div>
-      </section>
-
-      <section className="sk-stat-row">
-        <div className="sk-stat">
-          <SidebarIcon type="lessons" />
-          <div><span>Lessons Completed</span><strong>{learner.lessonsCompleted}</strong></div>
-        </div>
-        <div className="sk-stat">
-          <SidebarIcon type="time" />
-          <div><span>Total Learning Time</span><strong>{learner.totalTime}</strong></div>
-        </div>
-      </section>
-
-      <section className="sk-sidebar-section">
-        <p className="sk-kicker amber">Current Module</p>
-        <div className="sk-module-row">
-          <SidebarIcon type="whistle" color={PALETTE.amber} />
-          <div>
-            <strong>{learner.currentModule}</strong>
-            <span>In Progress ({learner.currentModuleProgress}%)</span>
-          </div>
-        </div>
-      </section>
-
-      <section className="sk-sidebar-section">
-        <p className="sk-kicker">Next Recommended Lesson</p>
-        <div className="sk-lesson-row">
-          <SidebarIcon type="play" />
-          <div>
-            <strong>{learner.nextLesson}</strong>
-            <span>Lesson {learner.nextLessonNumber}  |  {learner.nextLessonDuration}</span>
-          </div>
-        </div>
+        <p style={{ color: 'rgba(245,245,247,0.45)', fontSize: '13px', lineHeight: 1.6, marginTop: '8px' }}>
+          No course activity has been recorded yet. Progress will appear once your course activity begins.
+        </p>
       </section>
 
       <section className="sk-sidebar-section">
@@ -723,13 +702,6 @@ function LearnerSidebar({ learner }: { learner: typeof LEARNER }) {
         <SidebarIcon type="lock" color="rgba(245,245,247,0.62)" />
         <p>Continuing Professional Development (CPD) is locked until you complete Coaching Pathway Level 1.</p>
       </div>
-
-      <Link to={learner.nextLessonLink} className="sk-cta">
-        <span>Continue Learning</span>
-        <svg viewBox="0 0 20 20" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M6 3L14 10L6 17" />
-        </svg>
-      </Link>
     </aside>
   );
 }
@@ -762,7 +734,7 @@ function NodeDetailPanel({ node, onClose }: { node: SkillNode; onClose: () => vo
 
 export default function SkillTree() {
   const { user } = useAuth();
-  const displayName = user ? `${user.firstName} ${user.lastName}` : LEARNER.name;
+  const displayName = user ? `${user.firstName} ${user.lastName}`.trim() : 'Your Coaching Pathway';
   const displayRole = user ? (user.role.charAt(0) + user.role.slice(1).toLowerCase()) : LEARNER.role;
   const [selectedNode, setSelectedNode] = useState<SkillNode | null>(null);
   const [eventsExpanded, setEventsExpanded] = useState(true);

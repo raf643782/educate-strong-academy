@@ -1,21 +1,6 @@
 import { Link } from 'react-router-dom';
 
-const COACHES = [
-  { name: 'Tom Bradley', location: 'Sheffield, UK', level: 'Level 1 Coaching', speciality: 'Strength & Conditioning', initials: 'TB', colour: '#A41C64' },
-  { name: 'Jessica Park', location: 'Manchester, UK', level: 'Level 1 Coaching', speciality: 'Gym Owner', initials: 'JP', colour: '#C0246E' },
-  { name: 'Daniel Ross', location: 'Birmingham, UK', level: 'Level 1 Refereeing', speciality: 'Competition Official', initials: 'DR', colour: '#E19A47' },
-];
-
 const FILTERS = ['All Levels', 'Coaching', 'Refereeing', 'StrongKidz'];
-
-const MARKERS: { top: string; left: string }[] = [
-  { top: '25%', left: '33%' },
-  { top: '50%', left: '65%' },
-  { top: '33%', left: '75%' },
-  { top: '65%', left: '42%' },
-  { top: '20%', left: '55%' },
-  { top: '72%', left: '22%' },
-];
 
 export default function CertifiedCoachesSection() {
   return (
@@ -30,7 +15,7 @@ export default function CertifiedCoachesSection() {
               Find a Certified Coach Near You
             </h2>
             <p className="leading-relaxed mb-6" style={{ color: '#888' }}>
-              Every coach who completes an Educate.Strong qualification appears in our verified coach directory. Find certified coaches in your area or browse worldwide.
+              Every coach who completes an Educate.Strong qualification will appear in our verified coach directory. Find certified coaches in your area or browse worldwide.
             </p>
 
             {/* Search */}
@@ -52,12 +37,13 @@ export default function CertifiedCoachesSection() {
                 <button
                   key={f}
                   type="button"
-                  className="text-xs font-semibold px-3 py-1.5 rounded-full transition-colors"
+                  className="text-xs font-semibold px-3 py-1.5 rounded-full"
                   style={{
                     background: i === 0 ? '#A41C64' : '#1C1C1C',
                     color: i === 0 ? '#fff' : '#888',
                     border: '1px solid',
                     borderColor: i === 0 ? '#A41C64' : '#2C2C2C',
+                    cursor: 'default',
                   }}
                 >
                   {f}
@@ -103,78 +89,52 @@ export default function CertifiedCoachesSection() {
             />
 
             {/* Centre label */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-sm font-semibold" style={{ color: '#444' }}>Map</span>
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-8 text-center">
+              <span style={{ fontSize: '32px' }}>🎖️</span>
+              <p className="text-sm font-semibold" style={{ color: '#555' }}>Certified Coach Map</p>
+              <p className="text-xs leading-relaxed" style={{ color: '#3A3A3A' }}>
+                Coach locations will appear here once the directory is live
+              </p>
             </div>
-
-            {/* Markers */}
-            {MARKERS.map((m, i) => (
-              <div
-                key={i}
-                className="absolute"
-                style={{ top: m.top, left: m.left, transform: 'translate(-50%, -50%)' }}
-                aria-hidden="true"
-              >
-                <div
-                  className="w-3 h-3 rounded-full motion-safe:animate-ping absolute"
-                  style={{ background: 'rgba(164,28,100,0.4)' }}
-                />
-                <div
-                  className="w-3 h-3 rounded-full relative"
-                  style={{ background: '#A41C64' }}
-                />
-              </div>
-            ))}
 
             {/* Bottom overlay */}
             <div
               className="absolute bottom-0 inset-x-0 px-4 py-3 text-xs text-center"
-              style={{ background: 'rgba(0,0,0,0.6)', color: '#666' }}
+              style={{ background: 'rgba(0,0,0,0.6)', color: '#555' }}
             >
-              Interactive coach map — coming soon
+              Interactive coach map — launching with directory
             </div>
           </div>
         </div>
 
-        {/* Coach cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {COACHES.map((coach) => {
-            const slug = coach.name.toLowerCase().replace(' ', '-');
-            return (
-              <div
-                key={coach.name}
-                className="rounded-xl p-5"
-                style={{ background: '#111', border: '1px solid #2C2C2C' }}
-              >
-                <div className="flex items-center gap-4 mb-4">
-                  <div
-                    className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-white text-sm shrink-0"
-                    style={{ background: coach.colour }}
-                  >
-                    {coach.initials}
-                  </div>
-                  <div>
-                    <p className="font-bold text-white text-sm">{coach.name}</p>
-                    <p className="text-xs" style={{ color: '#888' }}>{coach.location}</p>
-                  </div>
-                </div>
-                <span
-                  className="inline-block text-xs font-semibold px-2.5 py-1 rounded-full mb-2"
-                  style={{ background: `${coach.colour}22`, color: coach.colour }}
-                >
-                  {coach.level}
-                </span>
-                <p className="text-xs mb-4" style={{ color: '#666' }}>{coach.speciality}</p>
-                <Link
-                  to={`/coaches/${slug}`}
-                  className="text-xs font-semibold transition-colors"
-                  style={{ color: '#A41C64' }}
-                >
-                  View Profile →
-                </Link>
-              </div>
-            );
-          })}
+        {/* Empty state where coach cards were */}
+        <div
+          style={{
+            background: '#111',
+            border: '1px solid #2C2C2C',
+            borderRadius: '16px',
+            padding: '48px 32px',
+            textAlign: 'center',
+          }}
+        >
+          <p className="text-sm font-semibold mb-2" style={{ color: '#A41C64' }}>
+            No certified coaches are live yet
+          </p>
+          <p className="text-sm leading-relaxed" style={{ color: '#555' }}>
+            EducateStrong certified coaches will appear here once qualifications and verification records are live.
+            Complete a Level 1 qualification to be among the first listed.
+          </p>
+          <div className="flex flex-wrap gap-3 justify-center mt-6">
+            <a
+              href="mailto:info@educate-strong.com?subject=Certified Coach Directory - Register Interest"
+              className="btn-primary"
+            >
+              Register Interest
+            </a>
+            <Link to="/coaches" className="btn-secondary">
+              View Full Directory
+            </Link>
+          </div>
         </div>
       </div>
     </section>
