@@ -4,15 +4,11 @@ import Navbar from '../../components/layout/Navbar';
 /*
  * Coach Workspace — placeholder
  *
- * BACKEND RELATIONSHIP NEEDED:
- * - Add COACH role to the Role enum in schema.prisma
+ * COACH role is now in the schema. When the platform is ready to onboard coaches,
+ * the following backend work is still needed:
  * - Add a CoachAssignment model (coachId → learnerId, optional courseId)
  * - Add GET /api/coach/students endpoint returning assigned learners + progress
- * - Update ProtectedRoute guard here to roles={['COACH', 'ADMIN']}
- *
- * Until the COACH role and assignment model exist, this workspace shows
- * an honest placeholder state. Access is currently restricted to ADMIN
- * for preview purposes.
+ * - Expose assignment management in the admin panel
  */
 
 const COMING_FEATURES = [

@@ -6,6 +6,8 @@ import Navbar from '../../components/layout/Navbar';
 function roleHome(role: string): string {
   if (role === 'ADMIN') return '/admin';
   if (role === 'ASSESSOR') return '/assessor';
+  if (role === 'COACH') return '/coach';
+  if (role === 'TUTOR') return '/tutor';
   return '/dashboard';
 }
 

@@ -4,12 +4,10 @@ import Navbar from '../../components/layout/Navbar';
 /*
  * Tutor Workspace — placeholder
  *
- * BACKEND RELATIONSHIP NEEDED:
- * - Add TUTOR role to the Role enum in schema.prisma
+ * TUTOR role is now in the schema. When the platform is ready to onboard tutors,
+ * the following backend work is still needed:
  * - Add tutor-specific endpoints (assigned courses, learner groups, session notes)
- * - Update ProtectedRoute guard here to roles={['TUTOR', 'ADMIN']}
- *
- * Until the TUTOR role exists, access is restricted to ADMIN for preview.
+ * - Expose tutor assignment in the admin panel
  */
 
 const COMING_FEATURES = [

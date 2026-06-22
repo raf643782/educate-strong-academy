@@ -118,12 +118,11 @@ export default function App() {
           {import.meta.env.DEV && <Route path="/dev/skilltree" element={<SkillTree />} />}
 
           {/* ── Coach & Tutor workspaces ───────────────────────────────── */}
-          {/* Guarded by ADMIN only until COACH/TUTOR roles are added to schema */}
           <Route path="/coach" element={
-            <ProtectedRoute roles={['ADMIN']}><CoachWorkspace /></ProtectedRoute>
+            <ProtectedRoute roles={['COACH', 'ADMIN']}><CoachWorkspace /></ProtectedRoute>
           } />
           <Route path="/tutor" element={
-            <ProtectedRoute roles={['ADMIN']}><TutorWorkspace /></ProtectedRoute>
+            <ProtectedRoute roles={['TUTOR', 'ADMIN']}><TutorWorkspace /></ProtectedRoute>
           } />
 
           {/* ── Assessor / Admin ────────────────────────────────────────── */}
