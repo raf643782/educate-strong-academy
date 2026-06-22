@@ -13,6 +13,8 @@ interface Stats {
 
 const QUICK_LINKS = [
   { label: 'Manage Courses', href: '/admin/courses', desc: 'View, edit, and publish courses' },
+  { label: 'Documents', href: '/admin/documents', desc: 'Manage course documents and resources' },
+  { label: 'Assessments', href: '/admin/assessments', desc: 'Manage assessment records' },
   { label: 'EatStrong Content', href: '/admin/eatstrong', desc: 'Manage nutrition articles and downloads', highlight: true },
   { label: 'Knowledge Hub', href: '/knowledge', desc: 'Browse the knowledge library' },
   { label: 'Exercise Library', href: '/exercises', desc: 'View exercise reference library' },

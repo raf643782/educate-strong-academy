@@ -419,4 +419,107 @@ router.delete('/lessons/:id', authenticate, requireRole('ADMIN'), async (req: Au
   }
 });
 
+// ── Documents ─────────────────────────────────────────────────────────────────
+
+// GET /api/admin/documents
+router.get('/documents', authenticate, requireRole('ADMIN'), async (_req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const documents = await prisma.courseDocument.findMany({
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
+      include: { course: { select: { id: true, title: true, slug: true } } },
+    });
+    res.json(documents);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch documents' });
+  }
+});
+
+// POST /api/admin/documents
+router.post('/documents', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { title, description, type, status, courseId, fileUrl, fileType, fileSizeMb, sortOrder, isPublished } = req.body;
+
+    if (!title || !title.trim()) {
+      res.status(400).json({ error: 'Title is required.' });
+      return;
+    }
+
+    const resolvedStatus = status ?? 'COMING_SOON';
+
+    if (resolvedStatus === 'AVAILABLE' && (!fileUrl || !fileUrl.trim())) {
+      res.status(400).json({ error: 'A file URL is required when status is AVAILABLE.' });
+      return;
+    }
+
+    const maxSort = await prisma.courseDocument.aggregate({ _max: { sortOrder: true } });
+    const nextSort = sortOrder ?? (maxSort._max.sortOrder ?? 0) + 10;
+
+    const doc = await prisma.courseDocument.create({
+      data: {
+        title: title.trim(),
+        description: description ?? null,
+        type: type ?? 'RESOURCE',
+        status: resolvedStatus,
+        courseId: courseId || null,
+        fileUrl: fileUrl?.trim() || null,
+        fileType: fileType ?? 'PDF',
+        fileSizeMb: fileSizeMb ? Number(fileSizeMb) : null,
+        sortOrder: nextSort,
+        isPublished: isPublished ?? false,
+      },
+      include: { course: { select: { id: true, title: true, slug: true } } },
+    });
+    res.status(201).json(doc);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to create document' });
+  }
+});
+
+// PUT /api/admin/documents/:id
+router.put('/documents/:id', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { title, description, type, status, courseId, fileUrl, fileType, fileSizeMb, sortOrder, isPublished } = req.body;
+
+    if (status === 'AVAILABLE' && fileUrl !== undefined && (!fileUrl || !fileUrl.trim())) {
+      res.status(400).json({ error: 'A file URL is required when status is AVAILABLE.' });
+      return;
+    }
+
+    const data: Record<string, unknown> = {};
+    if (title !== undefined) data.title = title;
+    if (description !== undefined) data.description = description;
+    if (type !== undefined) data.type = type;
+    if (status !== undefined) data.status = status;
+    if (courseId !== undefined) data.courseId = courseId || null;
+    if (fileUrl !== undefined) data.fileUrl = fileUrl?.trim() || null;
+    if (fileType !== undefined) data.fileType = fileType;
+    if (fileSizeMb !== undefined) data.fileSizeMb = fileSizeMb ? Number(fileSizeMb) : null;
+    if (sortOrder !== undefined) data.sortOrder = sortOrder;
+    if (isPublished !== undefined) data.isPublished = isPublished;
+
+    const doc = await prisma.courseDocument.update({
+      where: { id: req.params.id },
+      data,
+      include: { course: { select: { id: true, title: true, slug: true } } },
+    });
+    res.json(doc);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update document' });
+  }
+});
+
+// DELETE /api/admin/documents/:id
+router.delete('/documents/:id', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    await prisma.courseDocument.delete({ where: { id: req.params.id } });
+    res.json({ message: 'Document deleted.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to delete document' });
+  }
+});
+
 export default router;
