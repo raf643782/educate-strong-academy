@@ -419,6 +419,112 @@ router.delete('/lessons/:id', authenticate, requireRole('ADMIN'), async (req: Au
   }
 });
 
+// ── Assessments ───────────────────────────────────────────────────────────────
+
+// GET /api/admin/assessments
+router.get('/assessments', authenticate, requireRole('ADMIN'), async (_req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const assessments = await prisma.assessment.findMany({
+      orderBy: [{ courseId: 'asc' }, { createdAt: 'asc' }],
+      include: {
+        course: { select: { id: true, title: true, slug: true } },
+        _count: { select: { submissions: true } },
+      },
+    });
+    res.json(assessments);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch assessments' });
+  }
+});
+
+// POST /api/admin/assessments
+router.post('/assessments', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { courseId, title, description, type, passMark, maxAttempts, isActive } = req.body;
+
+    if (!courseId) {
+      res.status(400).json({ error: 'courseId is required.' });
+      return;
+    }
+    if (!title || !title.trim()) {
+      res.status(400).json({ error: 'Title is required.' });
+      return;
+    }
+    if (!type) {
+      res.status(400).json({ error: 'Type is required.' });
+      return;
+    }
+
+    const assessment = await prisma.assessment.create({
+      data: {
+        courseId,
+        title: title.trim(),
+        description: description ?? null,
+        type,
+        passMark: passMark != null ? Number(passMark) : 75,
+        maxAttempts: maxAttempts != null ? Number(maxAttempts) : 3,
+        isActive: isActive ?? false,
+      },
+      include: {
+        course: { select: { id: true, title: true, slug: true } },
+        _count: { select: { submissions: true } },
+      },
+    });
+    res.status(201).json(assessment);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to create assessment' });
+  }
+});
+
+// PUT /api/admin/assessments/:id
+router.put('/assessments/:id', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { courseId, title, description, type, passMark, maxAttempts, isActive } = req.body;
+    const data: Record<string, unknown> = {};
+    if (courseId !== undefined) data.courseId = courseId;
+    if (title !== undefined) data.title = title;
+    if (description !== undefined) data.description = description;
+    if (type !== undefined) data.type = type;
+    if (passMark !== undefined) data.passMark = Number(passMark);
+    if (maxAttempts !== undefined) data.maxAttempts = Number(maxAttempts);
+    if (isActive !== undefined) data.isActive = isActive;
+
+    const assessment = await prisma.assessment.update({
+      where: { id: req.params.id },
+      data,
+      include: {
+        course: { select: { id: true, title: true, slug: true } },
+        _count: { select: { submissions: true } },
+      },
+    });
+    res.json(assessment);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update assessment' });
+  }
+});
+
+// DELETE /api/admin/assessments/:id
+router.delete('/assessments/:id', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const submissionCount = await prisma.assessmentSubmission.count({ where: { assessmentId: req.params.id } });
+    if (submissionCount > 0) {
+      res.status(409).json({
+        error: `Cannot delete: ${submissionCount} learner submission(s) exist. Set this assessment to inactive instead.`,
+        suggestion: 'deactivate',
+      });
+      return;
+    }
+    await prisma.assessment.delete({ where: { id: req.params.id } });
+    res.json({ message: 'Assessment deleted.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to delete assessment' });
+  }
+});
+
 // ── Documents ─────────────────────────────────────────────────────────────────
 
 // GET /api/admin/documents

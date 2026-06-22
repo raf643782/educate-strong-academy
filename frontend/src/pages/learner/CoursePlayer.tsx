@@ -57,6 +57,15 @@ interface CourseDoc {
   fileType: string;
 }
 
+interface CourseAssessment {
+  id: string;
+  title: string;
+  description: string | null;
+  type: string;
+  passMark: number;
+  maxAttempts: number;
+}
+
 const lessonTypeLabel: Record<string, string> = {
   TEXT: 'Reading',
   VIDEO: 'Video',
@@ -78,6 +87,8 @@ export default function CoursePlayer() {
   const [activeTab, setActiveTab] = useState<'lesson' | 'resources' | 'assessments'>('lesson');
   const [courseDocs, setCourseDocs] = useState<CourseDoc[]>([]);
   const [docsLoading, setDocsLoading] = useState(false);
+  const [courseAssessments, setCourseAssessments] = useState<CourseAssessment[]>([]);
+  const [assessmentsLoading, setAssessmentsLoading] = useState(false);
 
   const fetchLesson = useCallback(async () => {
     if (!lessonId) return;
@@ -111,6 +122,11 @@ export default function CoursePlayer() {
         .then(docRes => setCourseDocs(docRes.data))
         .catch(() => setCourseDocs([]))
         .finally(() => setDocsLoading(false));
+      setAssessmentsLoading(true);
+      api.get<CourseAssessment[]>(`/assessments/course/${courseId}`)
+        .then(aRes => setCourseAssessments(aRes.data))
+        .catch(() => setCourseAssessments([]))
+        .finally(() => setAssessmentsLoading(false));
     }).catch(() => {});
   }, [courseSlug]);
 
@@ -367,21 +383,33 @@ export default function CoursePlayer() {
             {activeTab === 'assessments' && (
               <div className="mb-10">
                 <h2 className="text-lg font-bold text-gray-900 mb-4">Course Assessments</h2>
-                <div className="space-y-3">
-                  {[
-                    { title: 'Written Coaching Scenario', note: 'Due before course date' },
-                    { title: 'Knowledge Examination', note: 'Available after all modules' },
-                    { title: 'Practical Coaching Observation', note: 'Completed on course day' },
-                  ].map((a) => (
-                    <div key={a.title} className="flex items-center justify-between p-4 rounded-lg border border-gray-200 bg-gray-50">
-                      <div>
-                        <p className="text-sm font-semibold text-gray-800">{a.title}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">{a.note}</p>
+                {assessmentsLoading ? (
+                  <div className="space-y-3">
+                    {[...Array(2)].map((_, i) => (
+                      <div key={i} className="h-16 rounded-lg bg-gray-100 animate-pulse" />
+                    ))}
+                  </div>
+                ) : courseAssessments.length === 0 ? (
+                  <div className="p-6 rounded-lg border border-gray-200 bg-gray-50 text-center">
+                    <p className="text-sm text-gray-500">No assessments have been assigned to this course yet.</p>
+                    <p className="text-xs text-gray-400 mt-1">Check back later or contact your assessor.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {courseAssessments.map((a) => (
+                      <div key={a.id} className="flex items-start justify-between p-4 rounded-lg border border-gray-200 bg-gray-50 gap-4">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-gray-800">{a.title}</p>
+                          {a.description && (
+                            <p className="text-xs text-gray-500 mt-0.5">{a.description}</p>
+                          )}
+                          <p className="text-xs text-gray-400 mt-1">Pass mark: {a.passMark}% · Max attempts: {a.maxAttempts}</p>
+                        </div>
+                        <span className="text-xs font-semibold bg-amber-100 text-amber-700 px-2 py-1 rounded whitespace-nowrap flex-shrink-0">Not yet available</span>
                       </div>
-                      <span className="text-xs font-semibold bg-gray-200 text-gray-600 px-2 py-1 rounded">Not Started</span>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
                 <div className="mt-4">
                   <Link to="/coursework" className="text-sm font-semibold text-amber-600 hover:text-amber-700">
                     Go to coursework →

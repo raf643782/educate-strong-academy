@@ -69,6 +69,37 @@ router.get('/my', authenticate, async (req: AuthRequest, res: Response): Promise
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// LEARNER — GET /api/assessments/course/:courseId
+// Active assessments for a specific course the learner is enrolled in.
+// Returns metadata only — no exam engine, no submission detail.
+// ─────────────────────────────────────────────────────────────────────────────
+router.get('/course/:courseId', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { courseId } = req.params;
+    const userId = req.userId!;
+
+    const enrolment = await prisma.enrolment.findUnique({
+      where: { userId_courseId: { userId, courseId } },
+    });
+    if (!enrolment) {
+      res.status(403).json({ error: 'You are not enrolled in this course.' });
+      return;
+    }
+
+    const assessments = await prisma.assessment.findMany({
+      where: { courseId, isActive: true },
+      orderBy: { createdAt: 'asc' },
+      select: { id: true, title: true, description: true, type: true, passMark: true, maxAttempts: true },
+    });
+
+    res.json(assessments);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch assessments' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // LEARNER — GET /api/assessments/:assessmentId
 // Single assessment + learner's submission history
 // ─────────────────────────────────────────────────────────────────────────────
