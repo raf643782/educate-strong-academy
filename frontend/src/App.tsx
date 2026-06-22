@@ -47,6 +47,7 @@ import AssessorPortal from './pages/assessor/AssessorPortal';
 // Admin
 import AdminDashboard from './pages/admin/AdminDashboard';
 import CourseManager from './pages/admin/CourseManager';
+import CourseEditor from './pages/admin/CourseEditor';
 import BeStrongManager from './pages/admin/BeStrongManager';
 
 export default function App() {
@@ -119,6 +120,9 @@ export default function App() {
           } />
           <Route path="/admin/courses" element={
             <ProtectedRoute roles={['ADMIN']}><CourseManager /></ProtectedRoute>
+          } />
+          <Route path="/admin/courses/:id" element={
+            <ProtectedRoute roles={['ADMIN']}><CourseEditor /></ProtectedRoute>
           } />
           <Route path="/admin/be-strong" element={
             <Navigate to="/admin/eatstrong" replace />
