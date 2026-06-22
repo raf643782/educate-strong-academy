@@ -4,6 +4,14 @@ import { useAuth } from '../../context/AuthContext';
 import Navbar from '../../components/layout/Navbar';
 import api from '../../lib/api';
 
+function checkStrength(pw: string) {
+  return {
+    length: pw.length >= 8,
+    upper: /[A-Z]/.test(pw),
+    number: /[0-9]/.test(pw),
+  };
+}
+
 export default function Register() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -14,64 +22,193 @@ export default function Register() {
   const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm(f => ({ ...f, [field]: e.target.value }));
 
+  const strength = checkStrength(form.password);
+  const passwordValid = strength.length && strength.upper && strength.number;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (form.password !== form.confirm) { setError('Passwords do not match.'); return; }
-    setLoading(true); setError('');
+    if (!passwordValid) {
+      setError('Password must be at least 8 characters, include an uppercase letter and a number.');
+      return;
+    }
+    if (form.password !== form.confirm) {
+      setError('Passwords do not match.');
+      return;
+    }
+    setLoading(true);
+    setError('');
     try {
-      await api.post('/auth/register', { firstName: form.firstName, lastName: form.lastName, email: form.email, password: form.password });
+      await api.post('/auth/register', {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        password: form.password,
+      });
       await login(form.email, form.password);
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Registration failed.');
-    } finally { setLoading(false); }
+      setError(err?.response?.data?.error || 'Could not create account. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const Field = ({ label, field, type = 'text', placeholder }: { label: string; field: string; type?: string; placeholder?: string }) => (
-    <div>
-      <label className="block text-xs font-semibold text-es-muted mb-1.5 uppercase tracking-wide">{label}</label>
-      <input
-        type={type} value={(form as any)[field]} onChange={set(field)} required
-        placeholder={placeholder}
-        className="w-full px-4 py-3 rounded-es text-sm text-white placeholder-es-subtle border border-es-grey-dark focus:border-es-accent focus:outline-none transition-colors"
-        style={{ background: '#1C1C1C' }}
-      />
-    </div>
-  );
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    background: '#111',
+    border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: '8px',
+    padding: '11px 14px',
+    color: '#fff',
+    fontSize: '14px',
+    outline: 'none',
+    boxSizing: 'border-box',
+  };
+
+  const labelStyle: React.CSSProperties = {
+    display: 'block',
+    fontSize: '11px',
+    fontWeight: 700,
+    color: 'rgba(255,255,255,0.4)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.08em',
+    marginBottom: '6px',
+  };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
+    <div style={{ minHeight: '100vh', background: '#0D0D0D', display: 'flex', flexDirection: 'column' }}>
       <Navbar />
-      <div className="pt-navbar flex-1 flex items-center justify-center px-4 py-16">
-        <div className="w-full max-w-sm">
-          <div className="text-center mb-8">
-            <img src="/assets/es-logo.png" alt="Educate.Strong" className="h-10 w-auto mx-auto mb-6" />
-            <h1 className="text-2xl font-black text-white mb-2">Create Account</h1>
-            <p className="text-es-muted text-sm">Join the Educate.Strong Academy.</p>
+
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 16px 48px' }}>
+        <div style={{ width: '100%', maxWidth: '400px' }}>
+
+          {/* Header */}
+          <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+            <img src="/assets/es-logo.png" alt="EducateStrong Academy" style={{ height: '40px', width: 'auto', margin: '0 auto 18px' }} />
+            <h1 style={{ fontSize: 'clamp(1.25rem, 5vw, 1.5rem)', fontWeight: 800, color: '#fff', margin: '0 0 8px' }}>
+              Create a Learner Account
+            </h1>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', lineHeight: 1.6, margin: 0 }}>
+              Join the EducateStrong Academy. Access courses, track progress, and earn certificates.
+            </p>
           </div>
-          <div className="es-card p-7">
+
+          {/* Form card */}
+          <div style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '24px' }}>
             {error && (
-              <div className="mb-4 p-3 rounded text-sm text-red-400 border border-red-900/40" style={{ background: 'rgba(239,68,68,0.06)' }}>
+              <div style={{ marginBottom: '16px', padding: '10px 14px', background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px', color: 'rgba(239,68,68,0.9)', fontSize: '13px' }}>
                 {error}
               </div>
             )}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="First Name" field="firstName" placeholder="Jane" />
-                <Field label="Last Name" field="lastName" placeholder="Smith" />
+
+            <form onSubmit={handleSubmit}>
+              {/* Name row */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
+                <div>
+                  <label style={labelStyle}>First Name</label>
+                  <input type="text" value={form.firstName} onChange={set('firstName')} required placeholder="Jane" style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Last Name</label>
+                  <input type="text" value={form.lastName} onChange={set('lastName')} required placeholder="Smith" style={inputStyle} />
+                </div>
               </div>
-              <Field label="Email" field="email" type="email" placeholder="you@example.com" />
-              <Field label="Password" field="password" type="password" placeholder="••••••••" />
-              <Field label="Confirm Password" field="confirm" type="password" placeholder="••••••••" />
-              <button type="submit" disabled={loading} className="btn-primary w-full mt-2 disabled:opacity-50">
+
+              {/* Email */}
+              <div style={{ marginBottom: '14px' }}>
+                <label style={labelStyle}>Email</label>
+                <input type="email" value={form.email} onChange={set('email')} required placeholder="you@example.com" style={inputStyle} />
+              </div>
+
+              {/* Password */}
+              <div style={{ marginBottom: '8px' }}>
+                <label style={labelStyle}>Password</label>
+                <input type="password" value={form.password} onChange={set('password')} required placeholder="••••••••" style={inputStyle} />
+              </div>
+
+              {/* Strength rules */}
+              {form.password.length > 0 && (
+                <div style={{ marginBottom: '14px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  {[
+                    [strength.length, '8+ characters'],
+                    [strength.upper, 'Uppercase letter'],
+                    [strength.number, 'Number'],
+                  ].map(([met, label]) => (
+                    <span
+                      key={label as string}
+                      style={{
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        padding: '2px 8px',
+                        borderRadius: '999px',
+                        background: met ? 'rgba(164,28,100,0.15)' : 'rgba(255,255,255,0.06)',
+                        color: met ? '#C0246E' : 'rgba(255,255,255,0.3)',
+                      }}
+                    >
+                      {met ? '✓' : '·'} {label as string}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Confirm password */}
+              <div style={{ marginBottom: '20px' }}>
+                <label style={labelStyle}>Confirm Password</label>
+                <input
+                  type="password"
+                  value={form.confirm}
+                  onChange={set('confirm')}
+                  required
+                  placeholder="••••••••"
+                  style={{
+                    ...inputStyle,
+                    borderColor: form.confirm.length > 0 && form.confirm !== form.password
+                      ? 'rgba(239,68,68,0.4)'
+                      : 'rgba(255,255,255,0.1)',
+                  }}
+                />
+                {form.confirm.length > 0 && form.confirm !== form.password && (
+                  <p style={{ marginTop: '5px', fontSize: '12px', color: 'rgba(239,68,68,0.8)' }}>Passwords do not match.</p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  background: loading ? 'rgba(164,28,100,0.5)' : 'linear-gradient(135deg,#A41C64,#C0246E)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontWeight: 800,
+                  fontSize: '14px',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  letterSpacing: '0.02em',
+                }}
+              >
                 {loading ? 'Creating account...' : 'Create Account'}
               </button>
             </form>
           </div>
-          <p className="text-center text-sm text-es-muted mt-6">
-            Already have an account?{' '}
-            <Link to="/login" className="text-es-accent hover:text-es-accent-mid font-semibold">Sign in</Link>
+
+          {/* Password rules note */}
+          <p style={{ textAlign: 'center', fontSize: '11px', color: 'rgba(255,255,255,0.2)', marginTop: '12px', lineHeight: 1.5 }}>
+            Password must be at least 8 characters, include an uppercase letter and a number.
           </p>
+
+          {/* Sign in link */}
+          <p style={{ textAlign: 'center', fontSize: '13px', color: 'rgba(255,255,255,0.4)', marginTop: '14px' }}>
+            Already have an account?{' '}
+            <Link to="/login" style={{ color: '#A41C64', fontWeight: 700, textDecoration: 'none' }}>Sign in</Link>
+          </p>
+
+          {/* Role note */}
+          <p style={{ textAlign: 'center', fontSize: '12px', color: 'rgba(255,255,255,0.2)', marginTop: '8px', lineHeight: 1.5 }}>
+            Coach, tutor, and assessor accounts are set up by the platform admin.
+          </p>
+
         </div>
       </div>
     </div>

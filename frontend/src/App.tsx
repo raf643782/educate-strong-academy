@@ -41,6 +41,10 @@ import BeStrongHub from './pages/bestrong/BeStrongHub';
 import BeStrongCategory from './pages/bestrong/BeStrongCategory';
 import BeStrongArticlePage from './pages/bestrong/BeStrongArticlePage';
 
+// Coach & Tutor workspaces (placeholders — COACH/TUTOR roles pending schema update)
+import CoachWorkspace from './pages/coach/CoachWorkspace';
+import TutorWorkspace from './pages/tutor/TutorWorkspace';
+
 // Assessor
 import AssessorPortal from './pages/assessor/AssessorPortal';
 
@@ -112,6 +116,15 @@ export default function App() {
             <ProtectedRoute><SkillTree /></ProtectedRoute>
           } />
           {import.meta.env.DEV && <Route path="/dev/skilltree" element={<SkillTree />} />}
+
+          {/* ── Coach & Tutor workspaces ───────────────────────────────── */}
+          {/* Guarded by ADMIN only until COACH/TUTOR roles are added to schema */}
+          <Route path="/coach" element={
+            <ProtectedRoute roles={['ADMIN']}><CoachWorkspace /></ProtectedRoute>
+          } />
+          <Route path="/tutor" element={
+            <ProtectedRoute roles={['ADMIN']}><TutorWorkspace /></ProtectedRoute>
+          } />
 
           {/* ── Assessor / Admin ────────────────────────────────────────── */}
           <Route path="/assessor" element={
