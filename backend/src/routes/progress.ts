@@ -63,9 +63,10 @@ router.get('/course/:courseId', authenticate, async (req: AuthRequest, res: Resp
     const { courseId } = req.params;
     const userId = req.userId!;
 
+    // Only count published lessons — unpublished lessons must not inflate or deflate progress
     const modules = await prisma.module.findMany({
-      where: { courseId },
-      include: { lessons: { select: { id: true } } },
+      where: { courseId, isPublished: true },
+      include: { lessons: { where: { isPublished: true }, select: { id: true } } },
     });
 
     const lessonIds = modules.flatMap(m => m.lessons.map(l => l.id));

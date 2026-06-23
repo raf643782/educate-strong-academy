@@ -55,6 +55,11 @@ import CourseEditor from './pages/admin/CourseEditor';
 import DocumentManager from './pages/admin/DocumentManager';
 import AssessmentManager from './pages/admin/AssessmentManager';
 import BeStrongManager from './pages/admin/BeStrongManager';
+import UserManager from './pages/admin/UserManager';
+import EnrolmentManager from './pages/admin/EnrolmentManager';
+import CertificateManager from './pages/admin/CertificateManager';
+import CohortManager from './pages/admin/CohortManager';
+import RegisterInterestManager from './pages/admin/RegisterInterestManager';
 
 export default function App() {
   return (
@@ -149,6 +154,21 @@ export default function App() {
           } />
           <Route path="/admin/eatstrong" element={
             <ProtectedRoute roles={['ADMIN']}><BeStrongManager /></ProtectedRoute>
+          } />
+          <Route path="/admin/users" element={
+            <ProtectedRoute roles={['ADMIN']}><UserManager /></ProtectedRoute>
+          } />
+          <Route path="/admin/enrolments" element={
+            <ProtectedRoute roles={['ADMIN']}><EnrolmentManager /></ProtectedRoute>
+          } />
+          <Route path="/admin/certificates" element={
+            <ProtectedRoute roles={['ADMIN']}><CertificateManager /></ProtectedRoute>
+          } />
+          <Route path="/admin/cohorts" element={
+            <ProtectedRoute roles={['ADMIN']}><CohortManager /></ProtectedRoute>
+          } />
+          <Route path="/admin/register-interest" element={
+            <ProtectedRoute roles={['ADMIN']}><RegisterInterestManager /></ProtectedRoute>
           } />
         </Routes>
       </BrowserRouter>

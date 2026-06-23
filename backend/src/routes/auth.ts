@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 import { authenticate, AuthRequest } from '../middleware/auth';
+import { sendPasswordResetEmail } from '../services/emailService';
 
 function hashToken(raw: string): string {
   return crypto.createHash('sha256').update(raw).digest('hex');
@@ -24,9 +25,14 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    if (!isStrongPassword(password)) {
+      res.status(400).json({ error: 'Password must be at least 8 characters, include an uppercase letter and a number.' });
+      return;
+    }
+
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
-      res.status(409).json({ error: 'Email already registered' });
+      res.status(409).json({ error: 'An account with that email already exists.' });
       return;
     }
 
@@ -128,12 +134,14 @@ router.post('/forgot-password', async (req: Request, res: Response): Promise<voi
       data: { userId: user.id, tokenHash, expiresAt },
     });
 
-    // In production: send this link via email (do not expose token in response)
-    // In dev: return the link for testing convenience
-    if (process.env.NODE_ENV !== 'production') {
-      const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5174';
-      console.log(`[DEV] Password reset link: ${baseUrl}/reset-password/${rawToken}`);
-      res.json({ ...NEUTRAL, _devResetLink: `${baseUrl}/reset-password/${rawToken}` });
+    const emailResult = await sendPasswordResetEmail({
+      toEmail: user.email,
+      toName: user.firstName,
+      resetToken: rawToken,
+    });
+
+    if (emailResult._devResetLink) {
+      res.json({ ...NEUTRAL, _devResetLink: emailResult._devResetLink });
     } else {
       res.json(NEUTRAL);
     }

@@ -98,6 +98,22 @@ router.get('/:slug', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
+// GET /api/courses/:slug/enrolled — check if current user is enrolled
+router.get('/:slug/enrolled', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const course = await prisma.course.findUnique({ where: { slug: req.params.slug }, select: { id: true } });
+    if (!course) { res.status(404).json({ error: 'Course not found' }); return; }
+    const enrolment = await prisma.enrolment.findUnique({
+      where: { userId_courseId: { userId: req.userId!, courseId: course.id } },
+      select: { id: true },
+    });
+    res.json({ enrolled: !!enrolment });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to check enrolment' });
+  }
+});
+
 // POST /api/courses/enrol/:courseId
 router.post('/enrol/:courseId', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {

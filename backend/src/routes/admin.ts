@@ -1,5 +1,5 @@
 import { Router, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, InterestStatus } from '@prisma/client';
 import { authenticate, requireRole, AuthRequest } from '../middleware/auth';
 
 const router = Router();
@@ -625,6 +625,397 @@ router.delete('/documents/:id', authenticate, requireRole('ADMIN'), async (req: 
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to delete document' });
+  }
+});
+
+// ── Users (Stage 3) ───────────────────────────────────────────────────────────
+
+// GET /api/admin/users?role=&search=&page=&limit=
+router.get('/users', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { role, search, page = '1', limit = '50' } = req.query as Record<string, string>;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const where: Record<string, unknown> = {};
+    if (role) where.role = role;
+    if (search) {
+      where.OR = [
+        { firstName: { contains: search, mode: 'insensitive' } },
+        { lastName: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        where,
+        skip,
+        take: parseInt(limit),
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true, email: true, firstName: true, lastName: true,
+          role: true, avatarUrl: true, createdAt: true,
+          _count: { select: { enrolments: true, certificates: true } },
+        },
+      }),
+      prisma.user.count({ where }),
+    ]);
+
+    res.json({ users, total, page: parseInt(page), limit: parseInt(limit) });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
+
+// GET /api/admin/users/:id
+router.get('/users/:id', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.params.id },
+      select: {
+        id: true, email: true, firstName: true, lastName: true,
+        role: true, avatarUrl: true, bio: true, location: true, createdAt: true,
+        enrolments: {
+          include: { course: { select: { id: true, title: true, slug: true, pathway: true } } },
+          orderBy: { enrolledAt: 'desc' },
+        },
+        certificates: {
+          include: { course: { select: { id: true, title: true } } },
+          orderBy: { issuedAt: 'desc' },
+        },
+        _count: { select: { lessonProgress: true, assessmentSubmissions: true } },
+      },
+    });
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+    res.json(user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch user' });
+  }
+});
+
+// PUT /api/admin/users/:id  — update firstName, lastName, role only
+router.put('/users/:id', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const adminId = req.userId!;
+    const targetId = req.params.id;
+    const { firstName, lastName, role } = req.body;
+
+    // Prevent admin from removing their own admin role
+    if (role && role !== 'ADMIN' && adminId === targetId) {
+      res.status(400).json({ error: 'You cannot change your own role.' });
+      return;
+    }
+
+    const validRoles = ['LEARNER', 'COACH', 'TUTOR', 'ASSESSOR', 'ADMIN'];
+    if (role && !validRoles.includes(role)) {
+      res.status(400).json({ error: `Invalid role. Allowed: ${validRoles.join(', ')}` });
+      return;
+    }
+
+    const data: Record<string, unknown> = {};
+    if (firstName !== undefined) data.firstName = firstName;
+    if (lastName !== undefined) data.lastName = lastName;
+    if (role !== undefined) data.role = role;
+
+    const user = await prisma.user.update({
+      where: { id: targetId },
+      data,
+      select: {
+        id: true, email: true, firstName: true, lastName: true, role: true, createdAt: true,
+      },
+    });
+    res.json(user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update user' });
+  }
+});
+
+// ── Enrolments (Stage 4) ──────────────────────────────────────────────────────
+
+// GET /api/admin/enrolments
+router.get('/enrolments', authenticate, requireRole('ADMIN'), async (_req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const enrolments = await prisma.enrolment.findMany({
+      orderBy: { enrolledAt: 'desc' },
+      include: {
+        user: { select: { id: true, firstName: true, lastName: true, email: true } },
+        course: { select: { id: true, title: true, slug: true, pathway: true } },
+      },
+    });
+    res.json(enrolments);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch enrolments' });
+  }
+});
+
+// POST /api/admin/enrolments — enrol a learner onto a course
+router.post('/enrolments', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { userId, courseId } = req.body;
+    if (!userId || !courseId) {
+      res.status(400).json({ error: 'userId and courseId are required.' });
+      return;
+    }
+
+    const [user, course] = await Promise.all([
+      prisma.user.findUnique({ where: { id: userId }, select: { id: true, firstName: true, lastName: true } }),
+      prisma.course.findUnique({ where: { id: courseId }, select: { id: true, title: true } }),
+    ]);
+    if (!user) { res.status(404).json({ error: 'User not found.' }); return; }
+    if (!course) { res.status(404).json({ error: 'Course not found.' }); return; }
+
+    const existing = await prisma.enrolment.findUnique({
+      where: { userId_courseId: { userId, courseId } },
+    });
+    if (existing) {
+      res.status(409).json({ error: 'Learner is already enrolled in this course.' });
+      return;
+    }
+
+    const enrolment = await prisma.enrolment.create({
+      data: { userId, courseId },
+      include: {
+        user: { select: { id: true, firstName: true, lastName: true, email: true } },
+        course: { select: { id: true, title: true, slug: true } },
+      },
+    });
+    res.status(201).json(enrolment);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to enrol learner' });
+  }
+});
+
+// DELETE /api/admin/enrolments/:id — remove enrolment (blocked if progress exists)
+router.delete('/enrolments/:id', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const enrolment = await prisma.enrolment.findUnique({
+      where: { id: req.params.id },
+      include: { course: { include: { modules: { include: { lessons: { select: { id: true } } } } } } },
+    });
+    if (!enrolment) { res.status(404).json({ error: 'Enrolment not found.' }); return; }
+
+    const lessonIds = enrolment.course.modules.flatMap(m => m.lessons.map(l => l.id));
+    if (lessonIds.length > 0) {
+      const progressCount = await prisma.lessonProgress.count({
+        where: { userId: enrolment.userId, lessonId: { in: lessonIds } },
+      });
+      if (progressCount > 0) {
+        res.status(409).json({
+          error: `Cannot remove: learner has recorded progress on this course (${progressCount} lesson${progressCount !== 1 ? 's' : ''} started or completed).`,
+        });
+        return;
+      }
+    }
+
+    await prisma.enrolment.delete({ where: { id: req.params.id } });
+    res.json({ message: 'Enrolment removed.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to remove enrolment' });
+  }
+});
+
+// ── Certificates (Stage 6) ────────────────────────────────────────────────────
+
+// GET /api/admin/certificates
+router.get('/certificates', authenticate, requireRole('ADMIN'), async (_req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const certs = await prisma.certificate.findMany({
+      orderBy: { issuedAt: 'desc' },
+      include: {
+        user: { select: { id: true, firstName: true, lastName: true, email: true } },
+        course: { select: { id: true, title: true, pathway: true } },
+      },
+    });
+    res.json(certs);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch certificates' });
+  }
+});
+
+// POST /api/admin/certificates — manually issue a certificate
+router.post('/certificates', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { userId, courseId } = req.body;
+    if (!userId || !courseId) {
+      res.status(400).json({ error: 'userId and courseId are required.' });
+      return;
+    }
+
+    const [user, course] = await Promise.all([
+      prisma.user.findUnique({ where: { id: userId }, select: { id: true } }),
+      prisma.course.findUnique({ where: { id: courseId }, select: { id: true, title: true } }),
+    ]);
+    if (!user) { res.status(404).json({ error: 'User not found.' }); return; }
+    if (!course) { res.status(404).json({ error: 'Course not found.' }); return; }
+
+    const existing = await prisma.certificate.findFirst({ where: { userId, courseId } });
+    if (existing) {
+      res.status(409).json({ error: 'A certificate for this learner and course already exists.' });
+      return;
+    }
+
+    const { v4: uuidv4 } = await import('uuid');
+    const code = `ES-${courseId.slice(0, 4).toUpperCase()}-${uuidv4().slice(0, 8).toUpperCase()}`;
+
+    const cert = await prisma.certificate.create({
+      data: { userId, courseId, certificateCode: code, issuedAt: new Date() },
+      include: {
+        user: { select: { id: true, firstName: true, lastName: true, email: true } },
+        course: { select: { id: true, title: true, pathway: true } },
+      },
+    });
+    res.status(201).json(cert);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to issue certificate' });
+  }
+});
+
+// DELETE /api/admin/certificates/:id — revoke a certificate
+router.delete('/certificates/:id', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const cert = await prisma.certificate.findUnique({ where: { id: req.params.id } });
+    if (!cert) { res.status(404).json({ error: 'Certificate not found.' }); return; }
+    await prisma.certificate.delete({ where: { id: req.params.id } });
+    res.json({ message: 'Certificate revoked.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to revoke certificate' });
+  }
+});
+
+// ── Register Interest (Stage 7) ───────────────────────────────────────────────
+
+// GET /api/admin/register-interest
+router.get('/register-interest', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { status } = req.query as Record<string, string>;
+    const validStatuses = ['NEW', 'CONTACTED', 'CONVERTED', 'ARCHIVED'];
+    const where = status && validStatuses.includes(status) ? { status: status as InterestStatus } : {};
+    const submissions = await prisma.registerInterest.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json(submissions);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch register interest submissions' });
+  }
+});
+
+// PUT /api/admin/register-interest/:id
+router.put('/register-interest/:id', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { status } = req.body;
+    const validStatuses = ['NEW', 'CONTACTED', 'CONVERTED', 'ARCHIVED'];
+    if (!validStatuses.includes(status)) {
+      res.status(400).json({ error: `Invalid status. Allowed: ${validStatuses.join(', ')}` });
+      return;
+    }
+    const submission = await prisma.registerInterest.update({
+      where: { id: req.params.id },
+      data: { status },
+    });
+    res.json(submission);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update submission' });
+  }
+});
+
+// ── Cohorts (Stage 7) ─────────────────────────────────────────────────────────
+
+// GET /api/admin/cohorts
+router.get('/cohorts', authenticate, requireRole('ADMIN'), async (_req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const cohorts = await prisma.cohort.findMany({
+      orderBy: [{ sortOrder: 'asc' }, { date: 'asc' }],
+      include: { course: { select: { id: true, title: true, slug: true, pathway: true } } },
+    });
+    res.json(cohorts);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch cohorts' });
+  }
+});
+
+// POST /api/admin/cohorts
+router.post('/cohorts', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { courseId, title, status, city, venue, date, capacity, bookingUrl, isConfirmed, sortOrder } = req.body;
+    if (!title || !title.trim()) {
+      res.status(400).json({ error: 'Title is required.' });
+      return;
+    }
+    const maxSort = await prisma.cohort.aggregate({ _max: { sortOrder: true } });
+    const cohort = await prisma.cohort.create({
+      data: {
+        courseId: courseId || null,
+        title: title.trim(),
+        status: status ?? 'UPCOMING',
+        city: city || null,
+        venue: venue || null,
+        date: date ? new Date(date) : null,
+        capacity: capacity ? Number(capacity) : null,
+        bookingUrl: bookingUrl || null,
+        isConfirmed: isConfirmed ?? false,
+        sortOrder: sortOrder ?? (maxSort._max.sortOrder ?? 0) + 10,
+      },
+      include: { course: { select: { id: true, title: true, slug: true } } },
+    });
+    res.status(201).json(cohort);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to create cohort' });
+  }
+});
+
+// PUT /api/admin/cohorts/:id
+router.put('/cohorts/:id', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { courseId, title, status, city, venue, date, capacity, bookingUrl, isConfirmed, sortOrder } = req.body;
+    const data: Record<string, unknown> = {};
+    if (courseId !== undefined) data.courseId = courseId || null;
+    if (title !== undefined) data.title = title;
+    if (status !== undefined) data.status = status;
+    if (city !== undefined) data.city = city || null;
+    if (venue !== undefined) data.venue = venue || null;
+    if (date !== undefined) data.date = date ? new Date(date) : null;
+    if (capacity !== undefined) data.capacity = capacity ? Number(capacity) : null;
+    if (bookingUrl !== undefined) data.bookingUrl = bookingUrl || null;
+    if (isConfirmed !== undefined) data.isConfirmed = isConfirmed;
+    if (sortOrder !== undefined) data.sortOrder = sortOrder;
+
+    const cohort = await prisma.cohort.update({
+      where: { id: req.params.id },
+      data,
+      include: { course: { select: { id: true, title: true, slug: true } } },
+    });
+    res.json(cohort);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update cohort' });
+  }
+});
+
+// DELETE /api/admin/cohorts/:id
+router.delete('/cohorts/:id', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    await prisma.cohort.delete({ where: { id: req.params.id } });
+    res.json({ message: 'Cohort deleted.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to delete cohort' });
   }
 });
 

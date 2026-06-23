@@ -159,6 +159,7 @@ model Course {
   certificates Certificate[]
   assessments  Assessment[]
   documents    CourseDocument[]
+  cohorts      Cohort[]
 }
 
 model Module {
@@ -470,4 +471,55 @@ model CourseDocument {
   updatedAt   DateTime       @updatedAt
 
   course Course? @relation(fields: [courseId], references: [id])
+}
+
+// ── Cohorts ───────────────────────────────────────────────────────────────────
+
+enum CohortStatus {
+  UPCOMING
+  CONFIRMED
+  FULL
+  COMPLETED
+  CANCELLED
+}
+
+model Cohort {
+  id          String       @id @default(uuid())
+  courseId    String?
+  title       String
+  status      CohortStatus @default(UPCOMING)
+  city        String?
+  venue       String?
+  date        DateTime?
+  capacity    Int?
+  bookingUrl  String?
+  isConfirmed Boolean      @default(false)
+  sortOrder   Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  course Course? @relation(fields: [courseId], references: [id])
+}
+
+// ── Register Interest ─────────────────────────────────────────────────────────
+
+enum InterestStatus {
+  NEW
+  CONTACTED
+  CONVERTED
+  ARCHIVED
+}
+
+model RegisterInterest {
+  id               String         @id @default(uuid())
+  firstName        String
+  lastName         String
+  email            String
+  phone            String?
+  courseInterest   String?
+  locationInterest String?
+  message          String?
+  sourcePage       String?
+  status           InterestStatus @default(NEW)
+  createdAt        DateTime       @default(now())
 }

@@ -13,12 +13,14 @@ interface Stats {
 
 const QUICK_LINKS = [
   { label: 'Manage Courses', href: '/admin/courses', desc: 'View, edit, and publish courses' },
+  { label: 'Users', href: '/admin/users', desc: 'View and manage user accounts and roles' },
+  { label: 'Enrolments', href: '/admin/enrolments', desc: 'Manage course enrolments' },
+  { label: 'Certificates', href: '/admin/certificates', desc: 'Issue and revoke certificates', highlight: true },
+  { label: 'Cohorts', href: '/admin/cohorts', desc: 'Manage course dates and event cohorts' },
+  { label: 'Register Interest', href: '/admin/register-interest', desc: 'View and action incoming interest enquiries' },
   { label: 'Documents', href: '/admin/documents', desc: 'Manage course documents and resources' },
   { label: 'Assessments', href: '/admin/assessments', desc: 'Manage assessment records' },
-  { label: 'EatStrong Content', href: '/admin/eatstrong', desc: 'Manage nutrition articles and downloads', highlight: true },
-  { label: 'Knowledge Hub', href: '/knowledge', desc: 'Browse the knowledge library' },
-  { label: 'Exercise Library', href: '/exercises', desc: 'View exercise reference library' },
-  { label: 'Event Library', href: '/events', desc: 'View competition event library' },
+  { label: 'EatStrong Content', href: '/admin/eatstrong', desc: 'Manage nutrition articles and downloads' },
   { label: 'Assessor Portal', href: '/assessor', desc: 'Review learner submissions' },
   { label: 'Course Catalogue', href: '/courses', desc: 'View the public course catalogue' },
 ];

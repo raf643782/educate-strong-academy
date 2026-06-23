@@ -79,6 +79,7 @@ export default function CoursePlayer() {
   const navigate = useNavigate();
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [loading, setLoading] = useState(true);
+  const [enrolled, setEnrolled] = useState<boolean | null>(null);
   const [completing, setCompleting] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [progress, setProgress] = useState<ProgressRecord[]>([]);
@@ -108,9 +109,12 @@ export default function CoursePlayer() {
     fetchLesson();
   }, [fetchLesson]);
 
-  // Fetch full course structure, progress, and documents
+  // Fetch full course structure, progress, documents, and enrolment check
   useEffect(() => {
     if (!courseSlug) return;
+    api.get(`/courses/${courseSlug}/enrolled`)
+      .then(res => setEnrolled(res.data.enrolled))
+      .catch(() => setEnrolled(false));
     api.get(`/courses/${courseSlug}`).then(res => {
       setAllModules(res.data.modules || []);
       const courseId = res.data.id;
@@ -172,6 +176,28 @@ export default function CoursePlayer() {
   const nextLesson = currentIdx < allLessons.length - 1 ? allLessons[currentIdx + 1] : null;
 
   const isLessonCompleted = (id: string) => progress.some(p => p.lessonId === id && p.completed);
+
+  if (enrolled === false) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#0D0D0D', color: '#fff', display: 'flex', flexDirection: 'column' }}>
+        <Navbar />
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
+          <div style={{ textAlign: 'center', maxWidth: '420px' }}>
+            <p style={{ fontWeight: 800, fontSize: '20px', marginBottom: '10px' }}>Not enrolled</p>
+            <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '14px', lineHeight: 1.6, marginBottom: '28px' }}>
+              You are not enrolled in this course. Enrol first to access lesson content.
+            </p>
+            <Link
+              to={`/courses/${courseSlug}`}
+              style={{ display: 'inline-block', background: 'linear-gradient(135deg,#A41C64,#C0246E)', color: '#fff', borderRadius: '8px', padding: '12px 24px', fontWeight: 700, fontSize: '14px', textDecoration: 'none' }}
+            >
+              Go to course page
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
