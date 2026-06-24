@@ -69,17 +69,17 @@ const NODES: SkillNode[] = [
   { id: 'cpd-programming', x: 620, y: 145, icon: 'clipboard', type: 'cpd', status: 'cpd-locked', title: 'Programming Essentials', description: 'Periodisation and block programming for Strongman training cycles.', duration: '4h 15m', lessonCount: 15 },
   { id: 'cpd-analysis', x: 810, y: 145, icon: 'barchart', type: 'cpd', status: 'cpd-locked', title: 'Event Analysis', description: 'Video analysis methodology for Strongman events.', duration: '2h 45m', lessonCount: 10 },
 
-  { id: 'foundation', x: 620, y: 255, icon: 'foundation', type: 'foundation', status: 'locked', title: 'Foundation', description: "Core principles of Strongman coaching. Sport history, culture, and the coach's role in athlete development.", duration: '2h 10m', lessonCount: 8, lessonLink: '/learn/level-1-coaching-strongman/lessons/1' },
-  { id: 'intro', x: 620, y: 335, icon: 'coach', type: 'lesson', status: 'locked', title: 'Introduction to Strongman Coaching', description: 'Coaching communication frameworks, athlete relationships, and professional standards.', duration: '3h 05m', lessonCount: 11, lessonLink: '/learn/level-1-coaching-strongman/lessons/9' },
-  { id: 'screening', x: 620, y: 415, icon: 'shield', type: 'lesson', status: 'locked', title: 'Athlete Screening and Safety', description: 'PAR-Q, injury history, movement screening, and safe load progression protocols.', duration: '2h 40m', lessonCount: 9, lessonLink: '/learn/level-1-coaching-strongman/lessons/20' },
-  { id: 'session', x: 620, y: 505, icon: 'whistle', type: 'lesson', status: 'locked', title: 'Session Structure', description: 'Building effective Strongman training sessions. Warm-up protocols, exercise sequencing, and coaching flow.', duration: '3h 50m', lessonCount: 14, lessonLink: '/learn/level-1-coaching-strongman/lessons/30' },
+  { id: 'foundation', x: 620, y: 255, icon: 'foundation', type: 'foundation', status: 'locked', title: 'Foundation', description: "Core principles of Strongman coaching. Sport history, culture, and the coach's role in athlete development.", duration: '2h 10m', lessonCount: 8 },
+  { id: 'intro', x: 620, y: 335, icon: 'coach', type: 'lesson', status: 'locked', title: 'Introduction to Strongman Coaching', description: 'Coaching communication frameworks, athlete relationships, and professional standards.', duration: '3h 05m', lessonCount: 11 },
+  { id: 'screening', x: 620, y: 415, icon: 'shield', type: 'lesson', status: 'locked', title: 'Athlete Screening and Safety', description: 'PAR-Q, injury history, movement screening, and safe load progression protocols.', duration: '2h 40m', lessonCount: 9 },
+  { id: 'session', x: 620, y: 505, icon: 'whistle', type: 'lesson', status: 'locked', title: 'Session Structure', description: 'Building effective Strongman training sessions. Warm-up protocols, exercise sequencing, and coaching flow.', duration: '3h 50m', lessonCount: 14 },
 
-  { id: 'log-press', x: 210, y: 585, icon: 'log', type: 'skill', status: 'locked', title: 'Log Press', subtitle: 'Fundamentals', description: 'Log clean mechanics, overhead lockout, and loading progressions.', duration: '1h 20m', lessonCount: 5, lessonLink: '/learn/level-1-coaching-strongman/lessons/44' },
-  { id: 'axle-press', x: 360, y: 585, icon: 'axle', type: 'skill', status: 'locked', title: 'Axle Press', subtitle: 'Fundamentals', description: 'Axle bar grip mechanics, continental clean technique, and push press cues.', duration: '55m', lessonCount: 4, lessonLink: '/learn/level-1-coaching-strongman/lessons/49' },
-  { id: 'deadlift', x: 510, y: 585, icon: 'deadlift', type: 'skill', status: 'locked', title: 'Deadlift', subtitle: 'Fundamentals', description: 'Silver dollar, car deadlift, and frame variations. Technique and rules.', duration: '1h 10m', lessonCount: 4, lessonLink: '/learn/level-1-coaching-strongman/lessons/53' },
-  { id: 'farmers-walk', x: 660, y: 585, icon: 'farmers', type: 'skill', status: 'locked', title: "Farmer's Walk", subtitle: 'Fundamentals', description: 'Grip loading, turn mechanics, and pacing strategies for performance.', duration: '50m', lessonCount: 3, lessonLink: '/learn/level-1-coaching-strongman/lessons/57' },
-  { id: 'yoke', x: 810, y: 585, icon: 'yoke', type: 'skill', status: 'locked', title: 'Yoke', subtitle: 'Fundamentals', description: 'Load placement, leg drive mechanics, and visual cuing strategies.', duration: '55m', lessonCount: 3, lessonLink: '/learn/level-1-coaching-strongman/lessons/60' },
-  { id: 'atlas-stones', x: 960, y: 585, icon: 'stone', type: 'skill', status: 'locked', title: 'Atlas Stones', subtitle: 'Fundamentals', description: 'Tacky application, lap mechanics, and safe loading progressions.', duration: '1h 15m', lessonCount: 5, lessonLink: '/learn/level-1-coaching-strongman/lessons/63' },
+  { id: 'log-press', x: 210, y: 585, icon: 'log', type: 'skill', status: 'locked', title: 'Log Press', subtitle: 'Fundamentals', description: 'Log clean mechanics, overhead lockout, and loading progressions.', duration: '1h 20m', lessonCount: 5 },
+  { id: 'axle-press', x: 360, y: 585, icon: 'axle', type: 'skill', status: 'locked', title: 'Axle Press', subtitle: 'Fundamentals', description: 'Axle bar grip mechanics, continental clean technique, and push press cues.', duration: '55m', lessonCount: 4 },
+  { id: 'deadlift', x: 510, y: 585, icon: 'deadlift', type: 'skill', status: 'locked', title: 'Deadlift', subtitle: 'Fundamentals', description: 'Silver dollar, car deadlift, and frame variations. Technique and rules.', duration: '1h 10m', lessonCount: 4 },
+  { id: 'farmers-walk', x: 660, y: 585, icon: 'farmers', type: 'skill', status: 'locked', title: "Farmer's Walk", subtitle: 'Fundamentals', description: 'Grip loading, turn mechanics, and pacing strategies for performance.', duration: '50m', lessonCount: 3 },
+  { id: 'yoke', x: 810, y: 585, icon: 'yoke', type: 'skill', status: 'locked', title: 'Yoke', subtitle: 'Fundamentals', description: 'Load placement, leg drive mechanics, and visual cuing strategies.', duration: '55m', lessonCount: 3 },
+  { id: 'atlas-stones', x: 960, y: 585, icon: 'stone', type: 'skill', status: 'locked', title: 'Atlas Stones', subtitle: 'Fundamentals', description: 'Tacky application, lap mechanics, and safe loading progressions.', duration: '1h 15m', lessonCount: 5 },
 
   { id: 'practical', x: 620, y: 675, icon: 'users', type: 'assessment', status: 'locked', title: 'Practical Coaching Skills', description: 'Practical session delivery, communication under pressure, and real-time athlete feedback.', duration: '4h 30m', lessonCount: 16 },
   { id: 'assessment', x: 620, y: 755, icon: 'medal', type: 'assessment', status: 'locked', title: 'Assessment Preparation', description: 'Preparing for the Level 1 certificate assessment. Theory test and practical walkthrough.', duration: '2h 00m', lessonCount: 7 },
@@ -719,8 +719,10 @@ function NodeDetailPanel({ node, onClose }: { node: SkillNode; onClose: () => vo
           {node.duration && <em>{node.duration} | {node.lessonCount} lessons</em>}
         </div>
         <p>{node.description}</p>
-        {node.lessonLink && node.status !== 'locked' && node.status !== 'cpd-locked' && (
-          <Link to={node.lessonLink} className={node.status === 'in-progress' ? 'sk-detail-action amber' : 'sk-detail-action'}>{node.status === 'in-progress' ? 'Continue' : 'Review Lessons'}</Link>
+        {node.status !== 'locked' && node.status !== 'cpd-locked' ? (
+          <Link to={`/learn/${node.id}`} className={node.status === 'in-progress' ? 'sk-detail-action amber' : 'sk-detail-action'}>{node.status === 'in-progress' ? 'Continue' : 'Review Lessons'}</Link>
+        ) : (
+          <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)', margin: '10px 0 0', fontStyle: 'italic' }}>Lesson links will appear when course content is published.</p>
         )}
       </div>
       <button onClick={onClose} aria-label="Close details">

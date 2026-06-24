@@ -180,16 +180,21 @@ export default function CourseManager() {
   const navigate = useNavigate();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
   const [toggleError, setToggleError] = useState<{ id: string; msg: string } | null>(null);
   const [showNewModal, setShowNewModal] = useState(false);
 
-  useEffect(() => {
+  const loadCourses = () => {
+    setLoading(true);
+    setError(null);
     api.get<Course[]>('/admin/courses')
       .then(res => setCourses(res.data))
-      .catch(() => {})
+      .catch(() => setError('Unable to load courses.'))
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { loadCourses(); }, []);
 
   const togglePublish = async (course: Course) => {
     setUpdating(course.id);
@@ -229,7 +234,12 @@ export default function CourseManager() {
       </div>
 
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 24px' }}>
-        {loading ? (
+        {error ? (
+          <div style={{ background: '#1A1A1A', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '12px', padding: '40px 24px', textAlign: 'center' }}>
+            <p style={{ color: 'rgba(239,68,68,0.8)', fontWeight: 700, fontSize: '14px', marginBottom: '8px' }}>{error}</p>
+            <button style={S.btnPrimary} onClick={loadCourses}>Retry</button>
+          </div>
+        ) : loading ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {[...Array(4)].map((_, i) => (
               <div key={i} style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', padding: '20px', animation: 'pulse 1.5s infinite' }}>

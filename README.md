@@ -122,6 +122,25 @@ The Docker Compose file uses port **5433** externally (to avoid conflicts with a
 
 ---
 
+## Production Deployment (Render)
+
+Build command: `cd backend && npm install && npx prisma generate && npx prisma migrate deploy && npm run build`
+
+**SMTP — set these manually in the Render dashboard (never commit real values):**
+
+```env
+SMTP_HOST=smtp.your-provider.com
+SMTP_PORT=587
+SMTP_USER=your-smtp-username
+SMTP_PASS=your-smtp-password
+EMAIL_FROM="EducateStrong Academy <no-reply@educatestrong.com>"
+FRONTEND_URL=https://your-frontend-domain.com
+```
+
+If SMTP vars are missing in production the app will still start and operate normally — only password reset emails will silently fail (no crash).
+
+---
+
 ## Database Schema — Models
 
 | Model | Purpose |
