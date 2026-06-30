@@ -4,6 +4,7 @@
  */
 import { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import Logo from '../ui/Logo';
 import { useAuth } from '../../context/AuthContext';
 
 /* ── Nav data ──────────────────────────────────────────────────────── */
@@ -144,35 +145,13 @@ export default function Navbar() {
       <div className="es-container">
         <div className={`flex items-center justify-between ${navH} transition-all duration-300`}>
 
-          {/* ── Brand: owl icon + wordmark ───────────────────────────── */}
+          {/* ── Brand: Logo component ───────────────────────────────── */}
           <Link
             to="/"
-            aria-label="Educate.Strong — Home"
-            className="flex-shrink-0 group flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A41C64] rounded-xl px-1"
+            aria-label="EducateStrong Academy — Home"
+            className="flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C2186A] rounded-xl px-1"
           >
-            <div className="relative">
-              {/* Glow ring on hover */}
-              <div
-                className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-md"
-                style={{ background: 'rgba(164,28,100,0.35)', transform: 'scale(1.4)' }}
-                aria-hidden="true"
-              />
-              <img
-                src="/assets/logo_owl.svg"
-                alt=""
-                className={`relative w-auto transition-all duration-300 ${scrolled ? 'h-7' : 'h-8'}`}
-                style={{ filter: 'brightness(0) saturate(100%) invert(14%) sepia(91%) saturate(2500%) hue-rotate(310deg) brightness(85%) contrast(105%)' }}
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
-            </div>
-            <span
-              className={`font-black tracking-tight leading-none select-none transition-all duration-300 ${scrolled ? 'text-base' : 'text-lg'}`}
-              style={{ color: '#C2186A', letterSpacing: '-0.03em' }}
-            >
-              Educate<span style={{ color: 'rgba(255,255,255,0.85)' }}>.</span>Strong
-            </span>
+            <Logo variant="full" size={scrolled ? 'sm' : 'md'} />
           </Link>
 
           {/* ── Desktop nav ───────────────────────────────────────────── */}

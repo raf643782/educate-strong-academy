@@ -5,31 +5,50 @@ export default {
     extend: {
       colors: {
         es: {
-          // ── Black family — primary backgrounds ───────────────────────
+          // ── D1 official design tokens ─────────────────────────────────
+          // Surfaces / backgrounds
+          'bg-page':        '#050506',
+          'bg-black':       '#08080A',
+          panel:            '#151519',
+          'panel-elevated': '#1B1B20',
+          'panel-soft':     '#202026',
+
+          // Text
+          'text-primary':   '#F5F5F7',
+          'text-secondary': '#B8B8BE',
+          'text-muted':     '#75757D',
+          'text-disabled':  '#5A5A62',
+
+          // Brand magenta
+          magenta:          '#C2186A',
+          'magenta-bright': '#F02C93',
+          'magenta-deep':   '#A41C64',
+          'magenta-accent': '#C0246E',
+
+          // Supporting
+          'grey-premium':      '#888899',
+          'amber-strongkidz':  '#E19A47',
+          success:             '#22C55E',
+          warning:             '#F59E0B',
+          danger:              '#EF4444',
+
+          // ── Legacy aliases (kept for backward compat) ─────────────────
           black:         '#050505',
           dark:          '#0D0D0D',
           charcoal:      '#141414',
           card:          '#1C1C1C',
           'card-mid':    '#2A2A2A',
-
-          // ── Grey — brand mid-tone (heavily used per screenshots) ─────
           grey:          '#3C3C3C',
           'grey-light':  '#4A4A4A',
           'grey-dark':   '#2C2C2C',
-
-          // ── Magenta — brand secondary accent #A41C64 ─────────────────
           accent:        '#A41C64',
           'accent-dark': '#7A1349',
           'accent-mid':  '#C0246E',
           'accent-muted':'#5A1038',
-
-          // ── Amber — brand tertiary accent #E19A47 ────────────────────
           amber:         '#E19A47',
           'amber-dark':  '#B87932',
           'amber-light': '#EFB060',
           'amber-muted': '#7A5020',
-
-          // ── Text ─────────────────────────────────────────────────────
           white:         '#FFFFFF',
           'off-white':   '#EDEDED',
           muted:         '#888888',

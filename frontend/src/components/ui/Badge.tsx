@@ -1,42 +1,37 @@
-type Variant = 'coaching' | 'refereeing' | 'strongkidz' | 'level1' | 'level2' | 'level3' | 'gray' | 'amber' | 'green' | 'blue' | 'red';
+export type BadgeVariant = 'magenta' | 'amber' | 'grey' | 'success' | 'warning' | 'danger';
 
 interface BadgeProps {
-  variant?: Variant;
+  variant?: BadgeVariant;
   children: React.ReactNode;
   className?: string;
 }
 
-const variants: Record<Variant, string> = {
-  coaching: 'bg-amber-100 text-amber-800 border border-amber-200',
-  refereeing: 'bg-blue-100 text-blue-800 border border-blue-200',
-  strongkidz: 'bg-green-100 text-green-800 border border-green-200',
-  level1: 'bg-gray-100 text-gray-700 border border-gray-200',
-  level2: 'bg-amber-100 text-amber-700 border border-amber-200',
-  level3: 'bg-gray-900 text-white border border-gray-700',
-  gray: 'bg-gray-100 text-gray-700 border border-gray-200',
-  amber: 'bg-amber-100 text-amber-800 border border-amber-200',
-  green: 'bg-green-100 text-green-800 border border-green-200',
-  blue: 'bg-blue-100 text-blue-800 border border-blue-200',
-  red: 'bg-red-100 text-red-800 border border-red-200',
+const variants: Record<BadgeVariant, string> = {
+  magenta: 'text-[#C0246E] bg-[rgba(194,24,106,0.10)] border border-[rgba(194,24,106,0.25)]',
+  amber:   'text-[#E19A47] bg-[rgba(225,154,71,0.08)] border border-[rgba(225,154,71,0.2)]',
+  grey:    'text-[#888899] bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.10)]',
+  success: 'text-[#22C55E] bg-[rgba(34,197,94,0.10)] border border-[rgba(34,197,94,0.25)]',
+  warning: 'text-[#F59E0B] bg-[rgba(245,158,11,0.10)] border border-[rgba(245,158,11,0.25)]',
+  danger:  'text-[#EF4444] bg-[rgba(239,68,68,0.10)] border border-[rgba(239,68,68,0.25)]',
 };
 
-export function pathwayVariant(pathway: string): Variant {
-  if (pathway === 'COACHING') return 'coaching';
-  if (pathway === 'REFEREEING') return 'refereeing';
-  if (pathway === 'STRONGKIDZ') return 'strongkidz';
-  return 'gray';
+export function pathwayVariant(pathway: string): BadgeVariant {
+  if (pathway === 'COACHING')   return 'magenta';
+  if (pathway === 'REFEREEING') return 'grey';
+  if (pathway === 'STRONGKIDZ') return 'amber';
+  return 'grey';
 }
 
-export function levelVariant(level: number): Variant {
-  if (level === 1) return 'level1';
-  if (level === 2) return 'level2';
-  if (level >= 3) return 'level3';
-  return 'gray';
+export function levelVariant(level: number): BadgeVariant {
+  if (level >= 2) return 'magenta';
+  return 'grey';
 }
 
-export default function Badge({ variant = 'gray', children, className = '' }: BadgeProps) {
+export default function Badge({ variant = 'grey', children, className = '' }: BadgeProps) {
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${variants[variant]} ${className}`}>
+    <span
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide ${variants[variant]} ${className}`}
+    >
       {children}
     </span>
   );
