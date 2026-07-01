@@ -57,15 +57,15 @@ function ReviewModal({ sub, onClose, onGraded }: {
     <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-16 overflow-y-auto"
       style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="w-full max-w-2xl rounded-xl overflow-hidden mb-8" style={{ background: '#1A1A1A', border: '1px solid #3C3C3C', boxShadow: '0 20px 80px rgba(0,0,0,0.8)' }}>
+      <div className="w-full max-w-2xl rounded-xl overflow-hidden mb-8" style={{ background: '#1B1B20', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 80px rgba(0,0,0,0.8)' }}>
         {/* Header */}
-        <div className="flex items-start justify-between p-6" style={{ borderBottom: '1px solid #2C2C2C', background: 'linear-gradient(135deg, rgba(164,28,100,0.12), transparent)' }}>
+        <div className="flex items-start justify-between p-6" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', background: 'linear-gradient(135deg, rgba(164,28,100,0.12), transparent)' }}>
           <div>
             <p className="es-label mb-1">{sub.assessment.course?.title || 'Assessment'}</p>
             <h2 className="text-xl font-black text-white">{sub.assessment.title}</h2>
             <p className="text-sm text-es-muted mt-1">{sub.user.firstName} {sub.user.lastName} · {sub.user.email}</p>
           </div>
-          <button onClick={onClose} className="p-2 rounded text-es-muted hover:text-white transition-colors" style={{ background: '#2A2A2A' }}>
+          <button onClick={onClose} className="p-2 rounded text-es-muted hover:text-white transition-colors" style={{ background: 'rgba(255,255,255,0.06)' }}>
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -77,13 +77,13 @@ function ReviewModal({ sub, onClose, onGraded }: {
           {sub.content && (
             <div>
               <p className="text-xs font-bold uppercase tracking-wide text-es-muted mb-2">Learner's Submission</p>
-              <div className="rounded-lg p-4 text-sm text-es-muted leading-relaxed" style={{ background: '#141414', border: '1px solid #2C2C2C', maxHeight: '220px', overflowY: 'auto' }}>
+              <div className="rounded-lg p-4 text-sm text-es-muted leading-relaxed" style={{ background: '#111116', border: '1px solid rgba(255,255,255,0.07)', maxHeight: '220px', overflowY: 'auto' }}>
                 {sub.content}
               </div>
             </div>
           )}
           {!sub.content && (
-            <div className="rounded-lg p-4" style={{ background: '#141414', border: '1px solid #2C2C2C' }}>
+            <div className="rounded-lg p-4" style={{ background: '#111116', border: '1px solid rgba(255,255,255,0.07)' }}>
               <p className="text-sm text-es-subtle">No written content — this assessment may be a knowledge exam or practical observation.</p>
             </div>
           )}
@@ -107,7 +107,7 @@ function ReviewModal({ sub, onClose, onGraded }: {
             <p className="text-xs font-bold uppercase tracking-wide text-es-muted mb-2">Score (optional) %</p>
             <input type="number" min="0" max="100" value={score} onChange={e => setScore(e.target.value)}
               placeholder="0 – 100" className="w-32 px-3 py-2 rounded text-sm text-white focus:outline-none"
-              style={{ background: '#1C1C1C', border: '1px solid #3C3C3C' }} />
+              style={{ background: '#151519', border: '1px solid rgba(255,255,255,0.10)' }} />
           </div>
 
           {/* Feedback */}
@@ -116,12 +116,12 @@ function ReviewModal({ sub, onClose, onGraded }: {
             <textarea value={feedback} onChange={e => setFeedback(e.target.value)} rows={6}
               placeholder="Write detailed feedback explaining your decision. This will be visible to the learner."
               className="w-full text-sm text-white placeholder-es-subtle rounded-lg p-4 resize-y focus:outline-none"
-              style={{ background: '#1C1C1C', border: '1px solid #3C3C3C' }} />
+              style={{ background: '#151519', border: '1px solid rgba(255,255,255,0.10)' }} />
           </div>
 
           {err && <p className="text-xs text-red-400">{err}</p>}
 
-          <div className="flex gap-3 pt-2" style={{ borderTop: '1px solid #2C2C2C' }}>
+          <div className="flex gap-3 pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
             <button onClick={handleSave} disabled={saving} className="btn-primary text-sm disabled:opacity-50">
               {saving ? 'Saving...' : 'Save Decision'}
             </button>
@@ -171,9 +171,9 @@ export default function AssessorPortal() {
   const totalPending = (stats['PENDING'] || 0) + (stats['IN_REVIEW'] || 0);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
       <Navbar />
-      <div className="pt-navbar" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C' }}>
+      <div className="pt-navbar" style={{ background: 'radial-gradient(ellipse 100% 70% at 50% -20%, rgba(164,28,100,0.16) 0%, transparent 52%), #050506', borderBottom: '1px solid rgba(194,24,106,0.08)' }}>
         <div className="es-container py-8">
           <p className="es-label mb-2">Staff Area</p>
           <h1 className="text-3xl font-black text-white">Assessor Portal</h1>
@@ -198,7 +198,7 @@ export default function AssessorPortal() {
         </div>
 
         {/* Filter tabs */}
-        <div className="flex gap-1 mb-6 p-1 rounded-lg w-fit" style={{ background: '#1C1C1C', border: '1px solid #2C2C2C' }}>
+        <div className="flex gap-1 mb-6 p-1 rounded-lg w-fit" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
           {FILTER_TABS.map(t => (
             <button key={t} onClick={() => setFilter(t)}
               className={`px-4 py-2 rounded text-sm font-semibold transition-all ${filter === t ? 'text-white' : 'text-es-muted hover:text-white'}`}
@@ -210,13 +210,13 @@ export default function AssessorPortal() {
 
         {/* Queue */}
         <div className="es-card overflow-hidden">
-          <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid #2C2C2C' }}>
+          <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
             <h2 className="font-black text-white">Submission Queue</h2>
             <span className="badge-grey">{filtered.length} {filter === 'All' ? 'total' : filter.toLowerCase()}</span>
           </div>
 
           {loading ? (
-            <div className="p-6 space-y-3">{[1,2,3].map(i => <div key={i} className="h-16 rounded animate-pulse" style={{ background: '#2A2A2A' }} />)}</div>
+            <div className="p-6 space-y-3">{[1,2,3].map(i => <div key={i} className="h-16 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.06)' }} />)}</div>
           ) : filtered.length === 0 ? (
             <div className="p-12 text-center">
               <p className="text-es-muted font-medium mb-1">
@@ -225,11 +225,11 @@ export default function AssessorPortal() {
               <p className="text-es-subtle text-sm">Submissions will appear here when learners submit their coursework.</p>
             </div>
           ) : (
-            <div className="divide-y" style={{ borderColor: '#2C2C2C' }}>
+            <div>
               {filtered.map(sub => {
                 const sc = STATUS_CONFIG[sub.status];
                 return (
-                  <div key={sub.id} className="px-6 py-4 flex items-center justify-between gap-4 hover:bg-es-card transition-colors">
+                  <div key={sub.id} className="px-6 py-4 flex items-center justify-between gap-4 hover:bg-es-card transition-colors" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2 mb-1">
                         <span className={sc.cls}>{sc.label}</span>
