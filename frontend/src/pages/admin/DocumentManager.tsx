@@ -299,6 +299,7 @@ export default function DocumentManager() {
 
   const [confirmDelete, setConfirmDelete] = useState<AdminDocument | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -364,10 +365,11 @@ export default function DocumentManager() {
   };
 
   const togglePublish = async (doc: AdminDocument) => {
+    setActionError(null);
     try {
       const res = await api.put<AdminDocument>(`/admin/documents/${doc.id}`, { isPublished: !doc.isPublished });
       setDocs(prev => prev.map(d => d.id === doc.id ? res.data : d));
-    } catch { /* silent */ }
+    } catch { setActionError('Unable to save changes. Please try again.'); }
   };
 
   return (
@@ -396,6 +398,13 @@ export default function DocumentManager() {
         {deleteError && (
           <div style={{ marginBottom: '20px', padding: '12px 16px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px', color: 'rgba(239,68,68,0.9)', fontSize: '13px' }}>
             {deleteError}
+          </div>
+        )}
+
+        {actionError && (
+          <div style={{ marginBottom: '20px', padding: '12px 16px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px', color: '#f87171', fontSize: '13px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>{actionError}</span>
+            <button onClick={() => setActionError(null)} style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '16px', lineHeight: 1 }}>×</button>
           </div>
         )}
 

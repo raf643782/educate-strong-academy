@@ -719,8 +719,8 @@ function NodeDetailPanel({ node, onClose }: { node: SkillNode; onClose: () => vo
           {node.duration && <em>{node.duration} | {node.lessonCount} lessons</em>}
         </div>
         <p>{node.description}</p>
-        {node.status !== 'locked' && node.status !== 'cpd-locked' ? (
-          <Link to={`/learn/${node.id}`} className={node.status === 'in-progress' ? 'sk-detail-action amber' : 'sk-detail-action'}>{node.status === 'in-progress' ? 'Continue' : 'Review Lessons'}</Link>
+        {node.status !== 'locked' && node.status !== 'cpd-locked' && node.lessonLink ? (
+          <Link to={node.lessonLink} className={node.status === 'in-progress' ? 'sk-detail-action amber' : 'sk-detail-action'}>{node.status === 'in-progress' ? 'Continue' : 'Review Lessons'}</Link>
         ) : (
           <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)', margin: '10px 0 0', fontStyle: 'italic' }}>Lesson links will appear when course content is published.</p>
         )}
@@ -1275,6 +1275,7 @@ export default function SkillTree() {
             <div className="sk-title-block">
               <h1>Coaching Pathway Level 1</h1>
               <p>Build the knowledge and practical skills to coach Strongman safely and effectively.</p>
+              <p style={{ marginTop: '8px', fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(194,24,106,0.7)', background: 'rgba(194,24,106,0.08)', display: 'inline-block', padding: '3px 8px', borderRadius: '4px', border: '1px solid rgba(194,24,106,0.2)' }}>Pathway Preview</p>
             </div>
             <div className="sk-stage-scroll">
               <div className="sk-svg-stage">

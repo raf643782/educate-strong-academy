@@ -51,6 +51,8 @@ export default function BeStrongManager() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<'articles' | 'downloads'>('articles');
   const [updating, setUpdating] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -61,23 +63,25 @@ export default function BeStrongManager() {
       setArticles(artRes.data);
       setDownloads(dlRes.data);
       setStats(statsRes.data);
-    }).catch(() => {}).finally(() => setLoading(false));
+    }).catch(() => setLoadError(true)).finally(() => setLoading(false));
   }, []);
 
   const togglePublish = async (id: string, current: boolean) => {
     setUpdating(id);
+    setActionError(null);
     try {
       await api.put(`/be-strong/admin/articles/${id}`, { isPublished: !current });
       setArticles(prev => prev.map(a => a.id === id ? { ...a, isPublished: !current } : a));
-    } catch { /* ignore */ } finally { setUpdating(null); }
+    } catch { setActionError('Unable to save changes. Please try again.'); } finally { setUpdating(null); }
   };
 
   const toggleFeatured = async (id: string, current: boolean) => {
     setUpdating(id);
+    setActionError(null);
     try {
       await api.put(`/be-strong/admin/articles/${id}`, { isFeatured: !current });
       setArticles(prev => prev.map(a => a.id === id ? { ...a, isFeatured: !current } : a));
-    } catch { /* ignore */ } finally { setUpdating(null); }
+    } catch { setActionError('Unable to save changes. Please try again.'); } finally { setUpdating(null); }
   };
 
   return (
@@ -106,6 +110,19 @@ export default function BeStrongManager() {
       </div>
 
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '28px 24px' }}>
+
+        {loadError && (
+          <div style={{ marginBottom: '20px', padding: '14px 18px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '10px', color: '#f87171', fontSize: '13px' }}>
+            Failed to load content. Please refresh and try again.
+          </div>
+        )}
+
+        {actionError && (
+          <div style={{ marginBottom: '20px', padding: '14px 18px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '10px', color: '#f87171', fontSize: '13px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>{actionError}</span>
+            <button onClick={() => setActionError(null)} style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '16px', lineHeight: 1 }}>×</button>
+          </div>
+        )}
 
         {/* Stats */}
         {stats && (
@@ -150,7 +167,7 @@ export default function BeStrongManager() {
               <button
                 disabled
                 style={{ fontSize: '12px', background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.3)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '6px 12px', cursor: 'not-allowed' }}
-                title="Article editor coming in Stage 2"
+                title="Article editor coming soon"
               >
                 + Add Article
               </button>
@@ -286,7 +303,7 @@ export default function BeStrongManager() {
         )}
 
         <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.25)', textAlign: 'center', marginTop: '20px' }}>
-          Full article and download editing available in Stage 2. Use the toggles to publish/feature articles.
+          Full article and download editing is in development. Use the toggles above to publish or feature articles.
         </p>
       </div>
     </div>

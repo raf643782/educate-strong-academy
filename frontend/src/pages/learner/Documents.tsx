@@ -57,7 +57,7 @@ export default function Documents() {
       setDownloadMsg(
         `"${doc.title}" — File hosting not yet configured. ` +
         'Request this document by emailing educate.strongltd@gmail.com. ' +
-        'File storage (S3) will be integrated in Phase 3.'
+        'File hosting is in development.'
       );
       setTimeout(() => setDownloadMsg(null), 8000);
       return;

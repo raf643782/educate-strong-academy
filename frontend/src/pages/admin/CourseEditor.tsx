@@ -384,6 +384,9 @@ export default function CourseEditor() {
   const [confirmDelete, setConfirmDelete] = useState<{ type: 'course' | 'module' | 'lesson'; id: string; label: string } | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
+  // Inline action errors (toggle publish, reorder)
+  const [actionError, setActionError] = useState<string | null>(null);
+
   const load = useCallback(async () => {
     if (!id) return;
     setLoading(true);
@@ -478,13 +481,14 @@ export default function CourseEditor() {
   };
 
   const toggleModulePublish = async (mod: Module, val: boolean) => {
+    setActionError(null);
     try {
       const res = await api.put(`/admin/modules/${mod.id}`, { isPublished: val });
       setCourse(prev => prev ? {
         ...prev,
         modules: prev.modules.map(m => m.id === mod.id ? { ...m, isPublished: res.data.isPublished } : m),
       } : prev);
-    } catch { /* silent */ }
+    } catch { setActionError('Unable to save changes. Please try again.'); }
   };
 
   const moveModule = async (mod: Module, direction: 'up' | 'down') => {
@@ -508,7 +512,7 @@ export default function CourseEditor() {
           return m;
         }),
       } : prev);
-    } catch { /* silent */ }
+    } catch { setActionError('Unable to save changes. Please try again.'); }
   };
 
   // ── Lesson actions ──────────────────────────────────────────────────────────
@@ -551,6 +555,7 @@ export default function CourseEditor() {
   };
 
   const toggleLessonPublish = async (lesson: Lesson, val: boolean) => {
+    setActionError(null);
     try {
       const res = await api.put(`/admin/lessons/${lesson.id}`, { isPublished: val });
       setCourse(prev => prev ? {
@@ -560,7 +565,7 @@ export default function CourseEditor() {
           lessons: m.lessons.map(l => l.id === lesson.id ? { ...l, isPublished: res.data.isPublished } : l),
         })),
       } : prev);
-    } catch { /* silent */ }
+    } catch { setActionError('Unable to save changes. Please try again.'); }
   };
 
   const moveLesson = async (moduleId: string, lesson: Lesson, direction: 'up' | 'down') => {
@@ -589,7 +594,7 @@ export default function CourseEditor() {
           }),
         }),
       } : prev);
-    } catch { /* silent */ }
+    } catch { setActionError('Unable to save changes. Please try again.'); }
   };
 
   // ── Delete actions ──────────────────────────────────────────────────────────
@@ -689,6 +694,13 @@ export default function CourseEditor() {
       </div>
 
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '32px 24px' }}>
+
+        {actionError && (
+          <div style={{ marginBottom: '20px', padding: '12px 16px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px', color: '#f87171', fontSize: '13px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>{actionError}</span>
+            <button onClick={() => setActionError(null)} style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '16px', lineHeight: 1 }}>×</button>
+          </div>
+        )}
 
         {/* Course metadata */}
         <div style={{ ...S.card, marginBottom: '32px' }}>

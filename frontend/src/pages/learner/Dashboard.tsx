@@ -31,9 +31,11 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [enrolments, setEnrolments] = useState<Enrolment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [certCount, setCertCount] = useState<number | null>(null);
 
   useEffect(() => {
     api.get('/courses/my').then(r => setEnrolments(r.data)).catch(() => {}).finally(() => setLoading(false));
+    api.get('/certificates/my').then(r => setCertCount(Array.isArray(r.data) ? r.data.length : (r.data?.count ?? 0))).catch(() => setCertCount(0));
   }, []);
 
   const continueUrl = (e: Enrolment) => {
@@ -191,17 +193,16 @@ export default function Dashboard() {
               {/* CPD */}
               <div className="es-card p-5">
                 <p className="es-label mb-3">CPD Overview</p>
-                <p className="text-3xl font-black text-white mb-1">0</p>
-                <p className="text-xs text-es-muted mb-3">CPD hours logged</p>
-                <div className="h-1.5 bg-es-grey rounded-full mb-2" />
-                <p className="text-xs text-es-subtle mb-3">Complete a certification to start logging CPD</p>
+                <p className="text-xs text-es-muted mb-3">CPD logging will be available after completing your first certification.</p>
                 <Link to="/cpd" className="text-xs text-es-accent hover:text-es-accent-mid font-semibold">View CPD log →</Link>
               </div>
 
               {/* Certificates */}
               <div className="es-card p-5">
                 <p className="es-label mb-3">Certificates</p>
-                <p className="text-3xl font-black text-white mb-1">0</p>
+                <p className="text-3xl font-black text-white mb-1">
+                  {certCount === null ? '—' : certCount}
+                </p>
                 <p className="text-xs text-es-muted mb-3">certificates earned</p>
                 <Link to="/certificates" className="text-xs text-es-accent hover:text-es-accent-mid font-semibold">View certificates →</Link>
               </div>

@@ -84,7 +84,7 @@ function SubmitPanel({ assessment, onSubmitted }: { assessment: Assessment; onSu
       </div>
       <div className="rounded-lg p-4 border-dashed" style={{ border: '1px dashed rgba(255,255,255,0.14)', background: '#111116' }}>
         <p className="text-xs text-es-subtle text-center">
-          File attachments (Phase 3 — file storage not yet configured). For supporting files email{' '}
+          File attachments are not yet supported. For supporting files email{' '}
           <a href="mailto:educate.strongltd@gmail.com" className="underline" style={{ color: '#A41C64' }}>educate.strongltd@gmail.com</a>
         </p>
       </div>

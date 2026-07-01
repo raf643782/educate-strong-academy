@@ -215,7 +215,7 @@ export default function ProfessionalPathway() {
                       </span>
                     ) : (
                       <span className="inline-block text-[10px] font-semibold text-white/20 bg-white/4 px-3 py-1.5 rounded-full">
-                        Future Phase
+                        Coming Soon
                       </span>
                     )}
                   </div>

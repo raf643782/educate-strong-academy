@@ -153,7 +153,7 @@ export default function EventLibrary() {
             {/* Phase 2 teaser */}
             <div className="mt-10 es-card text-center py-8 border-dashed">
               <p className="text-es-muted font-medium mb-1">More events coming soon</p>
-              <p className="text-es-subtle text-sm">Pull Events, Hold Events, Medleys, and Specialty Events will be added in Phase 2.</p>
+              <p className="text-es-subtle text-sm">More event types are in development and will be added soon.</p>
             </div>
           </div>
         </div>
@@ -218,7 +218,7 @@ export default function EventLibrary() {
 
               {!selectedEvent.description && !selectedEvent.coachingNotes && !selectedEvent.judgingCriteria && (
                 <div className="text-center py-8">
-                  <p className="text-es-muted text-sm">Full event details coming in Phase 2.</p>
+                  <p className="text-es-muted text-sm">Full event details are in development.</p>
                   <p className="text-es-subtle text-xs mt-2">Coaching notes, judging criteria, and programming guidance will be added shortly.</p>
                 </div>
               )}

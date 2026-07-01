@@ -82,6 +82,7 @@ export default function CourseDetail() {
   const [enrolling, setEnrolling] = useState(false);
   const [enrolled, setEnrolled] = useState(false);
   const [openModules, setOpenModules] = useState<Set<string>>(new Set());
+  const [enrolError, setEnrolError] = useState<string | null>(null);
 
   // Look up rich static data — determines which view to render
   const richData = slug ? COURSE_PAGE_DATA[slug] : undefined;
@@ -102,11 +103,12 @@ export default function CourseDetail() {
     }
     if (!course) return;
     setEnrolling(true);
+    setEnrolError(null);
     try {
       await api.post(`/courses/enrol/${course.id}`);
       setEnrolled(true);
     } catch {
-      setEnrolled(true);
+      setEnrolError('Unable to complete enrolment. Please try again.');
     } finally {
       setEnrolling(false);
     }
@@ -175,6 +177,12 @@ export default function CourseDetail() {
           onEnrol={isAuthenticated ? handleEnrol : undefined}
           enrolling={enrolling}
         />
+
+        {enrolError && (
+          <div className="py-3 px-4 text-sm text-center" style={{ background: 'rgba(239,68,68,0.08)', borderBottom: '1px solid rgba(239,68,68,0.18)', color: '#f87171' }}>
+            {enrolError}
+          </div>
+        )}
 
         {/* 3: Why this course */}
         <section style={{ background: '#050506', borderBottom: '1px solid rgba(194,24,106,0.08)' }} className="py-14 md:py-18">
@@ -422,9 +430,14 @@ export default function CourseDetail() {
               )}
             </div>
           ) : (
-            <Button onClick={handleEnrol} disabled={enrolling} size="lg">
-              {enrolling ? 'Enrolling...' : 'Enrol Now — Free'}
-            </Button>
+            <>
+              <Button onClick={handleEnrol} disabled={enrolling} size="lg">
+                {enrolling ? 'Enrolling...' : 'Enrol Now — Free'}
+              </Button>
+              {enrolError && (
+                <p className="text-sm mt-3" style={{ color: '#f87171' }}>{enrolError}</p>
+              )}
+            </>
           )}
         </div>
       </div>

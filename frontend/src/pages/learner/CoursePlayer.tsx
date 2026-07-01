@@ -90,16 +90,19 @@ export default function CoursePlayer() {
   const [docsLoading, setDocsLoading] = useState(false);
   const [courseAssessments, setCourseAssessments] = useState<CourseAssessment[]>([]);
   const [assessmentsLoading, setAssessmentsLoading] = useState(false);
+  const [lessonError, setLessonError] = useState(false);
+  const [completeError, setCompleteError] = useState(false);
 
   const fetchLesson = useCallback(async () => {
     if (!lessonId) return;
     setLoading(true);
+    setLessonError(false);
     try {
       const res = await api.get(`/lessons/${lessonId}`);
       setLesson(res.data);
-      await api.post(`/progress/start/${lessonId}`);
+      await api.post(`/progress/start/${lessonId}`).catch(() => {});
     } catch {
-      // ignore
+      setLessonError(true);
     } finally {
       setLoading(false);
     }
@@ -147,6 +150,7 @@ export default function CoursePlayer() {
     try {
       await api.post(`/progress/complete/${lessonId}`);
       setCompleted(true);
+      setCompleteError(false);
       setProgress(prev => {
         const existing = prev.findIndex(p => p.lessonId === lessonId);
         if (existing >= 0) {
@@ -157,7 +161,7 @@ export default function CoursePlayer() {
         return [...prev, { lessonId: lessonId!, completed: true }];
       });
     } catch {
-      // ignore
+      setCompleteError(true);
     } finally {
       setCompleting(false);
     }
@@ -193,6 +197,26 @@ export default function CoursePlayer() {
             >
               Go to course page
             </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (lessonError) {
+    return (
+      <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center max-w-sm px-6">
+            <p className="text-white font-bold text-lg mb-2">Unable to load this lesson</p>
+            <p className="text-sm mb-6" style={{ color: '#75757D' }}>There was a problem fetching lesson content. Please check your connection and try again.</p>
+            <button
+              onClick={fetchLesson}
+              className="btn-primary text-sm"
+            >
+              Try again
+            </button>
           </div>
         </div>
       </div>
@@ -516,13 +540,19 @@ export default function CoursePlayer() {
                   Lesson complete
                 </div>
               ) : (
-                <button
-                  onClick={handleComplete}
-                  disabled={completing}
-                  className="btn-primary text-sm mb-6 disabled:opacity-50"
-                >
-                  {completing ? 'Marking complete...' : 'Mark as Complete'}
-                </button>
+                <>
+                  <button
+                    onClick={handleComplete}
+                    disabled={completing}
+                    className="btn-primary text-sm disabled:opacity-50"
+                  >
+                    {completing ? 'Marking complete...' : 'Mark as Complete'}
+                  </button>
+                  {completeError && (
+                    <p className="text-sm mt-2 mb-4" style={{ color: '#f87171' }}>Unable to save progress. Please try again.</p>
+                  )}
+                  {!completeError && <div className="mb-6" />}
+                </>
               )}
 
               {/* Navigation */}

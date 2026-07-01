@@ -44,7 +44,7 @@ export default function ForgotPassword() {
                   If that email address is registered, you will receive a password reset link shortly.
                   The link expires in 60 minutes.
                 </p>
-                {devLink && (
+                {import.meta.env.DEV && devLink && (
                   <div style={{ marginTop: '20px', padding: '12px', background: '#1A1A1A', borderRadius: '8px', border: '1px solid rgba(164,28,100,0.3)' }}>
                     <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginBottom: '6px' }}>DEV — reset link (not shown in production):</p>
                     <a

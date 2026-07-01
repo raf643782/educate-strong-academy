@@ -275,6 +275,7 @@ export default function AssessmentManager() {
 
   const [confirmDelete, setConfirmDelete] = useState<Assessment | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -324,10 +325,11 @@ export default function AssessmentManager() {
   };
 
   const toggleActive = async (assessment: Assessment) => {
+    setActionError(null);
     try {
       const res = await api.put<Assessment>(`/admin/assessments/${assessment.id}`, { isActive: !assessment.isActive });
       setAssessments(prev => prev.map(a => a.id === assessment.id ? res.data : a));
-    } catch { /* silent */ }
+    } catch { setActionError('Unable to save changes. Please try again.'); }
   };
 
   const handleDelete = async () => {
@@ -374,6 +376,13 @@ export default function AssessmentManager() {
         {deleteError && (
           <div style={{ marginBottom: '20px', padding: '12px 16px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px', color: 'rgba(239,68,68,0.9)', fontSize: '13px' }}>
             {deleteError}
+          </div>
+        )}
+
+        {actionError && (
+          <div style={{ marginBottom: '20px', padding: '12px 16px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px', color: '#f87171', fontSize: '13px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>{actionError}</span>
+            <button onClick={() => setActionError(null)} style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '16px', lineHeight: 1 }}>×</button>
           </div>
         )}
 

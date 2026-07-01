@@ -217,7 +217,7 @@ export default function KnowledgeHub() {
                 className="rounded-lg p-4 text-sm"
                 style={{ background: 'rgba(164,28,100,0.07)', border: '1px solid rgba(164,28,100,0.15)', color: '#A41C64' }}
               >
-                Full article content for this category is launching with Phase 2. More articles in the{' '}
+                Full article content for this category is in development. More articles in the{' '}
                 <strong>{CATEGORIES.find(c => c.id === selectedArticle.category)?.label || selectedArticle.category}</strong>{' '}
                 category are also in development.
               </div>
