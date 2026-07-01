@@ -21,13 +21,13 @@ const COMING_FEATURES = [
 
 export default function CoachWorkspace() {
   return (
-    <div style={{ minHeight: '100vh', background: '#0D0D0D', color: '#fff' }}>
+    <div style={{ minHeight: '100vh', background: '#050506', color: '#fff' }}>
       <Navbar />
 
       {/* Header */}
       <div style={{
-        background: '#141414',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        background: 'radial-gradient(ellipse 100% 70% at 50% -20%, rgba(164,28,100,0.16) 0%, transparent 52%), #050506',
+        borderBottom: '1px solid rgba(194,24,106,0.08)',
         paddingTop: 'calc(var(--navbar-height,72px) + 24px)',
         paddingBottom: '24px',
       }}>
@@ -48,13 +48,13 @@ export default function CoachWorkspace() {
 
         {/* Students panel — honest empty state */}
         <div style={{
-          background: '#1A1A1A',
-          border: '1px solid rgba(255,255,255,0.08)',
+          background: '#151519',
+          border: '1px solid rgba(194,24,106,0.08)',
           borderRadius: '14px',
           overflow: 'hidden',
           marginBottom: '24px',
         }}>
-          <div style={{ padding: '18px 24px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ padding: '18px 24px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span style={{ fontWeight: 700, fontSize: '14px', color: '#fff' }}>Assigned Students</span>
           </div>
           <div style={{ padding: '56px 24px', textAlign: 'center' }}>
@@ -70,8 +70,8 @@ export default function CoachWorkspace() {
 
         {/* Coming soon features */}
         <div style={{
-          background: '#1A1A1A',
-          border: '1px solid rgba(255,255,255,0.08)',
+          background: '#151519',
+          border: '1px solid rgba(194,24,106,0.08)',
           borderRadius: '14px',
           padding: '24px',
           marginBottom: '24px',
