@@ -33,53 +33,64 @@ export default function StrongKidz() {
   const [tab, setTab] = useState<Tab>('parents');
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
       <Navbar />
 
-      {/* Hero */}
+      {/* ── HERO ──────────────────────────────────────────────────────── */}
       <section
         className="pt-navbar relative overflow-hidden"
-        style={{ background: '#141414' }}
+        style={{
+          background: [
+            'radial-gradient(ellipse 100% 70% at 30% -10%, rgba(164,28,100,0.22) 0%, transparent 55%)',
+            'radial-gradient(ellipse 55% 55% at 90% 80%, rgba(194,24,106,0.07) 0%, transparent 52%)',
+            '#050506',
+          ].join(', '),
+        }}
       >
         <div className="es-container py-20 md:py-28">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <p className="es-label mb-4">Youth Strength Programme</p>
-              <h1 className="text-4xl md:text-5xl font-black text-white mb-5" style={{ letterSpacing: '-0.04em' }}>
+              <h1
+                className="text-4xl md:text-5xl font-black text-white mb-5"
+                style={{ letterSpacing: '-0.04em' }}
+              >
                 StrongKidz
               </h1>
-              <p className="text-es-muted text-lg leading-relaxed mb-8 max-w-xl">
+              <p className="mb-8 max-w-xl text-lg leading-relaxed" style={{ color: '#B8B8BE' }}>
                 A weekly functional strength programme for children. Physical confidence, mental
                 resilience, and social development — built safely, with expert coaching.
               </p>
 
               {/* Audience tabs */}
-              <div className="flex gap-2 p-1 rounded-lg mb-8 inline-flex" style={{ background: '#1C1C1C', border: '1px solid #2C2C2C' }}>
-                <button
-                  onClick={() => setTab('parents')}
-                  className={`px-5 py-2.5 rounded text-sm font-semibold transition-all ${
-                    tab === 'parents'
-                      ? 'bg-es-accent text-white'
-                      : 'text-es-muted hover:text-white'
-                  }`}
-                >
-                  For Parents
-                </button>
-                <button
-                  onClick={() => setTab('coaches')}
-                  className={`px-5 py-2.5 rounded text-sm font-semibold transition-all ${
-                    tab === 'coaches'
-                      ? 'bg-es-accent text-white'
-                      : 'text-es-muted hover:text-white'
-                  }`}
-                >
-                  For Coaches
-                </button>
+              <div
+                className="flex gap-1.5 p-1.5 rounded-xl mb-8 inline-flex"
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+              >
+                {(['parents', 'coaches'] as Tab[]).map(t => (
+                  <button
+                    key={t}
+                    onClick={() => setTab(t)}
+                    className="text-sm font-semibold transition-all duration-200"
+                    style={{
+                      padding: '8px 20px',
+                      borderRadius: '8px',
+                      background: tab === t ? 'rgba(164,28,100,0.22)' : 'transparent',
+                      border: `1px solid ${tab === t ? 'rgba(194,24,106,0.40)' : 'transparent'}`,
+                      color: tab === t ? '#C2186A' : 'rgba(255,255,255,0.40)',
+                    }}
+                  >
+                    {t === 'parents' ? 'For Parents' : 'For Coaches'}
+                  </button>
+                ))}
               </div>
             </div>
 
             {/* Image */}
-            <div className="rounded-lg overflow-hidden h-80 lg:h-96" style={{ background: '#3C3C3C' }}>
+            <div
+              className="rounded-2xl overflow-hidden h-80 lg:h-96"
+              style={{ background: '#1B1B20', border: '1px solid rgba(255,255,255,0.07)' }}
+            >
               <img
                 src="/assets/strongkidz.avif"
                 alt="StrongKidz programme"
@@ -90,30 +101,41 @@ export default function StrongKidz() {
         </div>
       </section>
 
-      {/* ── PARENT JOURNEY ─────────────────────────────────────────────── */}
+      {/* ── PARENT JOURNEY ──────────────────────────────────────────────── */}
       {tab === 'parents' && (
         <>
           {/* SAFEGUARDING — must be first */}
           <section
-            className="es-section"
-            style={{ background: '#0D0D0D', borderBottom: '1px solid #2C2C2C' }}
+            style={{
+              background: '#050506',
+              padding: '64px 0',
+              borderTop: '1px solid rgba(194,24,106,0.08)',
+              borderBottom: '1px solid rgba(194,24,106,0.08)',
+            }}
           >
             <div className="es-container">
               <div className="max-w-3xl">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-lg bg-es-accent/10 border border-es-accent/30 flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-es-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div
+                    className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'rgba(164,28,100,0.12)', border: '1px solid rgba(164,28,100,0.28)' }}
+                  >
+                    <svg className="w-5 h-5" style={{ color: '#C2186A' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                         d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
                   </div>
                   <h2 className="text-2xl font-black text-white">Your Child's Safety Is Our Priority</h2>
                 </div>
-                <div className="es-card p-6 mb-5">
+
+                <div
+                  className="rounded-2xl p-6 mb-5"
+                  style={{ background: '#151519', border: '1px solid rgba(255,255,255,0.07)' }}
+                >
                   <ul className="space-y-3">
                     {SAFEGUARDING.map(item => (
-                      <li key={item} className="flex items-start gap-3 text-sm text-es-muted">
-                        <svg className="w-4 h-4 text-es-accent mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <li key={item} className="flex items-start gap-3 text-sm" style={{ color: '#B8B8BE' }}>
+                        <svg className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: '#C2186A' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                         {item}
@@ -121,8 +143,12 @@ export default function StrongKidz() {
                     ))}
                   </ul>
                 </div>
-                <div className="rounded-lg p-4 border border-es-amber/20" style={{ background: 'rgba(225,154,71,0.06)' }}>
-                  <p className="text-sm text-es-amber leading-relaxed">
+
+                <div
+                  className="rounded-xl p-4"
+                  style={{ background: 'rgba(225,154,71,0.07)', border: '1px solid rgba(225,154,71,0.22)' }}
+                >
+                  <p className="text-sm leading-relaxed" style={{ color: '#E19A47' }}>
                     Any concern about safeguarding can be raised directly by contacting{' '}
                     <a href="mailto:educate.strongltd@gmail.com" className="underline">educate.strongltd@gmail.com</a>.
                   </p>
@@ -132,19 +158,39 @@ export default function StrongKidz() {
           </section>
 
           {/* Benefits */}
-          <section className="es-section" style={{ background: '#111111', borderBottom: '1px solid #2C2C2C' }}>
+          <section
+            style={{
+              background: [
+                'radial-gradient(ellipse 90% 55% at 50% 0%, rgba(164,28,100,0.14) 0%, transparent 52%)',
+                '#050506',
+              ].join(', '),
+              padding: '64px 0',
+              borderBottom: '1px solid rgba(194,24,106,0.08)',
+            }}
+          >
             <div className="es-container">
               <div className="mb-10">
                 <p className="es-label mb-3">What Your Child Develops</p>
-                <h2 className="text-3xl font-black text-white" style={{ letterSpacing: '-0.03em' }}>
+                <h2
+                  className="text-3xl font-black text-white"
+                  style={{ letterSpacing: '-0.03em' }}
+                >
                   More Than Physical Strength
                 </h2>
               </div>
               <div className="grid sm:grid-cols-3 gap-5">
                 {BENEFITS.map(b => (
-                  <div key={b.title} className="es-card p-6" style={{ borderTop: '2px solid #A41C64' }}>
+                  <div
+                    key={b.title}
+                    className="rounded-2xl p-6"
+                    style={{
+                      background: '#151519',
+                      border: '1px solid rgba(255,255,255,0.07)',
+                      borderTop: '2px solid #B37A20',
+                    }}
+                  >
                     <h3 className="font-bold text-white mb-3">{b.title}</h3>
-                    <p className="text-sm text-es-muted leading-relaxed">{b.desc}</p>
+                    <p className="text-sm leading-relaxed" style={{ color: '#75757D' }}>{b.desc}</p>
                   </div>
                 ))}
               </div>
@@ -152,22 +198,39 @@ export default function StrongKidz() {
           </section>
 
           {/* How sessions work */}
-          <section className="es-section" style={{ background: '#0D0D0D', borderBottom: '1px solid #2C2C2C' }}>
+          <section
+            style={{
+              background: '#050506',
+              padding: '64px 0',
+              borderBottom: '1px solid rgba(194,24,106,0.08)',
+            }}
+          >
             <div className="es-container">
               <div className="max-w-2xl">
                 <p className="es-label mb-3">Sessions</p>
-                <h2 className="text-3xl font-black text-white mb-5" style={{ letterSpacing: '-0.03em' }}>
+                <h2
+                  className="text-3xl font-black text-white mb-5"
+                  style={{ letterSpacing: '-0.03em' }}
+                >
                   What a StrongKidz Session Looks Like
                 </h2>
-                <div className="es-card-grey p-6 mb-4">
-                  <p className="text-xs text-es-subtle uppercase tracking-widest font-semibold mb-2">Session Structure</p>
-                  <p className="text-sm text-es-muted leading-relaxed">
+                <div
+                  className="rounded-2xl p-6 mb-4"
+                  style={{ background: '#111116', border: '1px solid rgba(255,255,255,0.06)' }}
+                >
+                  <p
+                    className="text-xs uppercase tracking-widest font-semibold mb-2"
+                    style={{ color: '#55555E' }}
+                  >
+                    Session Structure
+                  </p>
+                  <p className="text-sm leading-relaxed" style={{ color: '#75757D' }}>
                     Specific session structure, duration, group size, and activity details to be confirmed by
                     Educate.Strong. This section will be updated with exact session information before the
                     public launch.
                   </p>
                 </div>
-                <p className="text-sm text-es-subtle">
+                <p className="text-sm" style={{ color: '#55555E' }}>
                   Sessions are currently based in Sheffield. Contact Educate.Strong for details on availability and location.
                 </p>
               </div>
@@ -175,30 +238,56 @@ export default function StrongKidz() {
           </section>
 
           {/* Coaches */}
-          <section className="es-section" style={{ background: '#111111', borderBottom: '1px solid #2C2C2C' }}>
+          <section
+            style={{
+              background: [
+                'radial-gradient(ellipse 80% 55% at 88% 30%, rgba(164,28,100,0.10) 0%, transparent 52%)',
+                '#050506',
+              ].join(', '),
+              padding: '64px 0',
+              borderBottom: '1px solid rgba(194,24,106,0.08)',
+            }}
+          >
             <div className="es-container">
               <div className="mb-8">
                 <p className="es-label mb-3">The Coaches</p>
-                <h2 className="text-3xl font-black text-white" style={{ letterSpacing: '-0.03em' }}>
+                <h2
+                  className="text-3xl font-black text-white"
+                  style={{ letterSpacing: '-0.03em' }}
+                >
                   Expert, Qualified, Safeguarding-Trained
                 </h2>
               </div>
               <div className="grid sm:grid-cols-2 gap-6 max-w-2xl">
                 {[
-                  { name: 'Laura Hollywood', role: 'StrongKidz Coach & Co-founder', img: '/assets/laura-hollywood.avif', creds: ["Britain's Strongest Woman u73", "Europe's Strongest Woman u73", 'Youth strength development specialist'] },
-                  { name: 'Victoria Wilson', role: 'StrongKidz Coach', img: '/assets/victoria-wilson.avif', creds: ['Strength and Conditioning Coach', 'Youth sport specialist', 'Sheffield Steel Juniors Strength Coach'] },
+                  {
+                    name: 'Laura Hollywood',
+                    role: 'StrongKidz Coach & Co-founder',
+                    img: '/assets/laura-hollywood.avif',
+                    creds: ["Britain's Strongest Woman u73", "Europe's Strongest Woman u73", 'Youth strength development specialist'],
+                  },
+                  {
+                    name: 'Victoria Wilson',
+                    role: 'StrongKidz Coach',
+                    img: '/assets/victoria-wilson.avif',
+                    creds: ['Strength and Conditioning Coach', 'Youth sport specialist', 'Sheffield Steel Juniors Strength Coach'],
+                  },
                 ].map(coach => (
-                  <div key={coach.name} className="es-card overflow-hidden">
-                    <div className="h-48" style={{ background: '#3C3C3C' }}>
+                  <div
+                    key={coach.name}
+                    className="rounded-2xl overflow-hidden"
+                    style={{ background: '#151519', border: '1px solid rgba(255,255,255,0.07)' }}
+                  >
+                    <div className="h-48" style={{ background: '#1B1B20' }}>
                       <img src={coach.img} alt={coach.name} className="w-full h-full object-cover object-top" />
                     </div>
                     <div className="p-5">
                       <p className="font-bold text-white mb-0.5">{coach.name}</p>
-                      <p className="text-es-accent text-xs font-semibold mb-3">{coach.role}</p>
+                      <p className="text-xs font-semibold mb-3" style={{ color: '#C2186A' }}>{coach.role}</p>
                       <ul className="space-y-1">
                         {coach.creds.map(c => (
-                          <li key={c} className="text-xs text-es-muted flex items-center gap-2">
-                            <span className="w-1 h-1 rounded-full bg-es-accent flex-shrink-0" />
+                          <li key={c} className="text-xs flex items-center gap-2" style={{ color: '#75757D' }}>
+                            <span className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: '#C2186A' }} />
                             {c}
                           </li>
                         ))}
@@ -211,13 +300,24 @@ export default function StrongKidz() {
           </section>
 
           {/* Register */}
-          <section className="es-section" style={{ background: '#0D0D0D' }}>
+          <section
+            style={{
+              background: [
+                'radial-gradient(ellipse 100% 70% at 50% 50%, rgba(164,28,100,0.18) 0%, transparent 60%)',
+                '#050506',
+              ].join(', '),
+              padding: '80px 0',
+            }}
+          >
             <div className="es-container max-w-2xl">
               <p className="es-label mb-3">Get Involved</p>
-              <h2 className="text-3xl font-black text-white mb-4" style={{ letterSpacing: '-0.03em' }}>
+              <h2
+                className="text-3xl font-black text-white mb-4"
+                style={{ letterSpacing: '-0.03em' }}
+              >
                 Interested in StrongKidz for Your Child?
               </h2>
-              <p className="text-es-muted mb-8">
+              <p className="mb-8" style={{ color: '#B8B8BE' }}>
                 Sessions are Sheffield-based. Spaces are limited. Register your interest and
                 Educate.Strong will be in touch with availability and session details.
               </p>
@@ -232,7 +332,7 @@ export default function StrongKidz() {
                   Contact Educate.Strong
                 </a>
               </div>
-              <p className="text-xs text-es-subtle mt-4">No payment required at this stage.</p>
+              <p className="text-xs mt-4" style={{ color: '#55555E' }}>No payment required at this stage.</p>
             </div>
           </section>
         </>
@@ -241,14 +341,27 @@ export default function StrongKidz() {
       {/* ── COACH JOURNEY ──────────────────────────────────────────────── */}
       {tab === 'coaches' && (
         <>
-          <section className="es-section" style={{ background: '#0D0D0D', borderBottom: '1px solid #2C2C2C' }}>
+          <section
+            style={{
+              background: [
+                'radial-gradient(ellipse 90% 60% at 20% 10%, rgba(164,28,100,0.16) 0%, transparent 52%)',
+                '#050506',
+              ].join(', '),
+              padding: '64px 0',
+              borderTop: '1px solid rgba(194,24,106,0.08)',
+              borderBottom: '1px solid rgba(194,24,106,0.08)',
+            }}
+          >
             <div className="es-container">
               <div className="max-w-3xl">
                 <p className="es-label mb-3">Deliver StrongKidz</p>
-                <h2 className="text-3xl font-black text-white mb-5" style={{ letterSpacing: '-0.03em' }}>
+                <h2
+                  className="text-3xl font-black text-white mb-5"
+                  style={{ letterSpacing: '-0.03em' }}
+                >
                   Earn the Qualification. Run the Programme.
                 </h2>
-                <p className="text-es-muted leading-relaxed mb-8">
+                <p className="leading-relaxed mb-8" style={{ color: '#B8B8BE' }}>
                   StrongKidz Coach Education is a professional certification for adults who want to deliver
                   the StrongKidz programme safely and effectively. Covers safeguarding, youth development,
                   age-appropriate movement, session planning, and parent communication.
@@ -262,8 +375,19 @@ export default function StrongKidz() {
                     'Community sport leaders',
                     'Anyone with a passion for youth development',
                   ].map(item => (
-                    <div key={item} className="flex items-center gap-2.5 text-sm text-es-muted es-card p-3">
-                      <span className="w-1.5 h-1.5 rounded-full bg-es-amber flex-shrink-0" />
+                    <div
+                      key={item}
+                      className="flex items-center gap-2.5 text-sm rounded-xl p-3"
+                      style={{
+                        background: '#151519',
+                        border: '1px solid rgba(255,255,255,0.07)',
+                        color: '#B8B8BE',
+                      }}
+                    >
+                      <span
+                        className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                        style={{ background: '#B37A20' }}
+                      />
                       {item}
                     </div>
                   ))}
@@ -272,7 +396,10 @@ export default function StrongKidz() {
                   <Link to="/courses/strongkidz-coach-education" className="btn-primary">
                     Explore Certification
                   </Link>
-                  <a href="mailto:educate.strongltd@gmail.com?subject=StrongKidz%20Coach%20Education%20Enquiry" className="btn-secondary">
+                  <a
+                    href="mailto:educate.strongltd@gmail.com?subject=StrongKidz%20Coach%20Education%20Enquiry"
+                    className="btn-secondary"
+                  >
                     Ask a Question
                   </a>
                 </div>

@@ -86,11 +86,11 @@ export default function EatStrongHub() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
       <Navbar />
 
       {/* Hero */}
-      <section className="es-grit" style={{ background: 'radial-gradient(ellipse 80% 50% at 50% -5%, rgba(164,28,100,0.2) 0%, transparent 65%), #141414', borderBottom: '1px solid #2C2C2C', position: 'relative', paddingTop: '64px', paddingBottom: '64px' }}>
+      <section className="es-grit" style={{ background: 'radial-gradient(ellipse 100% 70% at 50% -10%, rgba(164,28,100,0.24) 0%, transparent 55%), radial-gradient(ellipse 55% 55% at 4% 80%, rgba(194,24,106,0.08) 0%, transparent 52%), #050506', borderBottom: '1px solid rgba(194,24,106,0.08)', position: 'relative', paddingTop: '64px', paddingBottom: '64px' }}>
         <div className="es-container py-12 md:py-16">
           <p className="es-label mb-4">Educate.Strong</p>
           <h1 className="text-4xl md:text-5xl font-black text-white mb-4 leading-tight" style={{ letterSpacing: '-0.04em' }}>
@@ -116,7 +116,7 @@ export default function EatStrongHub() {
         </div>
       </div>
 
-      <main className="flex-1" style={{ background: '#0D0D0D' }}>
+      <main className="flex-1" style={{ background: '#050506' }}>
         <div className="es-container py-12">
 
           {/* Featured articles */}
@@ -147,7 +147,7 @@ export default function EatStrongHub() {
                         {article.summary}
                       </p>
                     )}
-                    <div className="flex items-center justify-between mt-auto pt-3" style={{ borderTop: '1px solid #2C2C2C' }}>
+                    <div className="flex items-center justify-between mt-auto pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
                       {article.readMinutes && (
                         <span className="text-xs text-es-subtle">{article.readMinutes} min read</span>
                       )}
@@ -211,7 +211,7 @@ export default function EatStrongHub() {
 
           {/* Course connection */}
           <section>
-            <div className="rounded-xl p-8 flex flex-col md:flex-row items-start md:items-center gap-6" style={{ background: '#1A1A1A', border: '1px solid #2C2C2C', borderLeft: '3px solid #A41C64' }}>
+            <div className="rounded-xl p-8 flex flex-col md:flex-row items-start md:items-center gap-6" style={{ background: '#151519', border: '1px solid rgba(255,255,255,0.07)', borderLeft: '3px solid #A41C64' }}>
               <div className="flex-1">
                 <h3 className="text-lg font-black text-white mb-2">
                   EatStrong connects to your coaching qualifications

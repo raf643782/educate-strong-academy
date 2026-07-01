@@ -7,8 +7,8 @@ interface CourseLearningOutcomesProps {
 export default function CourseLearningOutcomes({ heading, intro, outcomes }: CourseLearningOutcomesProps) {
   return (
     <section className="es-grit" style={{
-      background: 'radial-gradient(ellipse 80% 60% at 50% 50%, rgba(164,28,100,0.12) 0%, transparent 70%), #0A0A0A',
-      borderBottom: '1px solid #2C2C2C',
+      background: 'radial-gradient(ellipse 80% 60% at 50% 50%, rgba(164,28,100,0.16) 0%, transparent 65%), #050506',
+      borderBottom: '1px solid rgba(194,24,106,0.08)',
       position: 'relative',
     }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-18">

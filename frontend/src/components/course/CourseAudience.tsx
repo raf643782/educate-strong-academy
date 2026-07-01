@@ -7,13 +7,13 @@ interface CourseAudienceProps {
 
 export default function CourseAudience({ cards, prerequisiteStatement }: CourseAudienceProps) {
   return (
-    <section style={{ background: '#0D0D0D', borderBottom: '1px solid #2C2C2C' }} className="py-14 md:py-18">
+    <section style={{ background: '#050506', borderBottom: '1px solid rgba(194,24,106,0.08)' }} className="py-14 md:py-18">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <p className="es-label mb-3">Who Should Attend</p>
         <h2 className="text-2xl md:text-3xl font-black text-white mb-8" style={{ letterSpacing: '-0.03em' }}>Who This Is For</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-6">
           {cards.map(card => (
-            <div key={card.heading} className="es-card p-5" style={{ borderTop: '2px solid #2C2C2C' }}>
+            <div key={card.heading} className="es-card p-5" style={{ borderTop: '2px solid rgba(255,255,255,0.08)' }}>
               <h3 className="font-bold text-white text-sm mb-2 uppercase tracking-wide">{card.heading}</h3>
               <p className="text-es-muted text-sm leading-relaxed">{card.copy}</p>
             </div>

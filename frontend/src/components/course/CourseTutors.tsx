@@ -8,7 +8,7 @@ interface CourseTutorsProps {
 
 export default function CourseTutors({ heading = 'Taught by Coaches With the Record to Back It', intro, tutors }: CourseTutorsProps) {
   return (
-    <section style={{ background: '#111111', borderBottom: '1px solid #2C2C2C' }} className="py-14 md:py-18">
+    <section style={{ background: '#050506', borderBottom: '1px solid rgba(194,24,106,0.08)' }} className="py-14 md:py-18">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h2 className="text-2xl md:text-3xl font-black text-white mb-2" style={{ letterSpacing: '-0.03em' }}>{heading}</h2>
@@ -18,7 +18,7 @@ export default function CourseTutors({ heading = 'Taught by Coaches With the Rec
           {tutors.map(tutor => (
             <div key={tutor.name} className="es-card overflow-hidden flex flex-col">
               {/* Photo */}
-              <div className="h-52" style={{ background: '#3C3C3C' }}>
+              <div className="h-52" style={{ background: '#1B1B20' }}>
                 {tutor.photoAlt ? (
                   <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center">
                     <div className="w-16 h-16 rounded-full bg-es-grey-dark mb-3 flex items-center justify-center">

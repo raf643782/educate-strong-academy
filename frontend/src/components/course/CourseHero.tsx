@@ -23,8 +23,8 @@ export default function CourseHero({
     <section
       className="es-grit"
       style={{
-        background: 'radial-gradient(ellipse 80% 50% at 50% -5%, rgba(164,28,100,0.28) 0%, transparent 65%), #141414',
-        borderBottom: '1px solid #2C2C2C',
+        background: 'radial-gradient(ellipse 110% 75% at 50% -10%, rgba(164,28,100,0.28) 0%, transparent 56%), radial-gradient(ellipse 55% 55% at 4% 80%, rgba(194,24,106,0.08) 0%, transparent 52%), #050506',
+        borderBottom: '1px solid rgba(194,24,106,0.08)',
         position: 'relative',
         paddingTop: '64px',
       }}
@@ -76,7 +76,7 @@ export default function CourseHero({
 
       {/* Bottom fade */}
       <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
-        style={{ background: 'linear-gradient(transparent, #0D0D0D)' }} />
+        style={{ background: 'linear-gradient(transparent, #050506)' }} />
     </section>
   );
 }

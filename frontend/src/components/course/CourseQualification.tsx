@@ -6,7 +6,7 @@ interface CourseQualificationProps {
 
 export default function CourseQualification({ heading, copy, detail }: CourseQualificationProps) {
   return (
-    <section style={{ background: '#0D0D0D', borderBottom: '1px solid #2C2C2C' }} className="py-14 md:py-18">
+    <section style={{ background: '#050506', borderBottom: '1px solid rgba(194,24,106,0.08)' }} className="py-14 md:py-18">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl">
           {/* Accreditation badge */}

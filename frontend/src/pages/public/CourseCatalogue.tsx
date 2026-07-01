@@ -11,12 +11,51 @@ interface Course {
   _count?: { modules: number; enrolments: number };
 }
 
-const PATHWAY_META: Record<string, { label: string; badge: string }> = {
-  COACHING:   { label: 'Coaching',   badge: 'badge-accent' },
-  REFEREEING: { label: 'Refereeing', badge: 'badge-grey' },
-  STRONGKIDZ: { label: 'StrongKidz', badge: 'badge-amber' },
+const PATHWAY_META: Record<string, { label: string; badge: string; accentColor: string }> = {
+  COACHING:   { label: 'Coaching',   badge: 'badge-accent', accentColor: '#A41C64' },
+  REFEREEING: { label: 'Refereeing', badge: 'badge-grey',   accentColor: '#3D3D44' },
+  STRONGKIDZ: { label: 'StrongKidz', badge: 'badge-amber',  accentColor: '#B37A20' },
 };
 const FILTERS = ['All', 'Coaching', 'Refereeing', 'StrongKidz'];
+
+function CourseCard({ course }: { course: Course }) {
+  const [hovered, setHovered] = useState(false);
+  const meta = PATHWAY_META[course.pathway] || { label: course.pathway, badge: 'badge-grey', accentColor: '#3D3D44' };
+
+  return (
+    <div
+      className="flex flex-col overflow-hidden rounded-2xl"
+      style={{
+        background: '#151519',
+        border: `1px solid ${hovered ? 'rgba(194,24,106,0.35)' : 'rgba(255,255,255,0.07)'}`,
+        boxShadow: hovered ? '0 8px 40px rgba(164,28,100,0.18)' : 'none',
+        transition: 'border-color 0.25s, box-shadow 0.25s',
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {/* Pathway accent strip */}
+      <div style={{ height: '3px', background: meta.accentColor, flexShrink: 0 }} />
+
+      <div className="p-6 flex flex-col flex-1">
+        <div className="flex gap-2 mb-4">
+          <span className={meta.badge}>{meta.label}</span>
+          <span className="badge-grey">Level {course.level}</span>
+        </div>
+        <h3 className="font-bold text-white text-base mb-2 leading-snug flex-1">{course.title}</h3>
+        <p className="text-es-muted text-sm leading-relaxed mb-5">
+          {(course.summary || course.description).slice(0, 110)}...
+        </p>
+        {course.durationHours && (
+          <p className="text-xs text-es-subtle mb-4">{course.durationHours}h content</p>
+        )}
+        <Link to={`/courses/${course.slug}`} className="btn-secondary text-sm text-center">
+          View Course
+        </Link>
+      </div>
+    </div>
+  );
+}
 
 export default function CourseCatalogue() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -32,64 +71,101 @@ export default function CourseCatalogue() {
     : courses.filter(c => PATHWAY_META[c.pathway]?.label === filter);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ background: '#050506' }}
+    >
       <Navbar />
-      <section className="pt-navbar" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C' }}>
-        <div className="es-container py-16">
-          <p className="es-label mb-3">Academy</p>
-          <h1 className="text-4xl font-black text-white mb-3" style={{ letterSpacing: '-0.04em' }}>All Courses</h1>
-          <p className="text-es-muted max-w-xl">Accredited qualifications across coaching, refereeing, and youth development.</p>
+
+      {/* Page header */}
+      <section
+        className="pt-navbar"
+        style={{
+          background: [
+            'radial-gradient(ellipse 100% 80% at 50% -10%, rgba(164,28,100,0.22) 0%, transparent 55%)',
+            'radial-gradient(ellipse 55% 60% at 4% 80%, rgba(194,24,106,0.08) 0%, transparent 52%)',
+            '#050506',
+          ].join(', '),
+          borderBottom: '1px solid rgba(194,24,106,0.08)',
+          padding: '80px 0 56px',
+        }}
+      >
+        <div className="es-container">
+          <p className="es-label mb-4">Academy</p>
+          <h1
+            className="font-black text-white mb-4"
+            style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', letterSpacing: '-0.045em', lineHeight: '1.02' }}
+          >
+            All Courses
+          </h1>
+          <p className="text-[#B8B8BE] max-w-xl">
+            Accredited qualifications across coaching, refereeing, and youth development.
+          </p>
         </div>
       </section>
-      <div style={{ background: '#111111', borderBottom: '1px solid #2C2C2C' }}>
+
+      {/* Filter bar */}
+      <div
+        style={{
+          background: '#0A0A0D',
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
+        }}
+      >
         <div className="es-container py-4 flex flex-wrap gap-2">
           {FILTERS.map(f => (
-            <button key={f} onClick={() => setFilter(f)}
-              className={`px-4 py-2 rounded text-sm font-semibold transition-all ${
-                filter === f ? 'bg-es-accent text-white' : 'text-es-muted hover:text-white border border-es-grey-dark hover:border-es-accent'
-              }`}
-            >{f}</button>
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className="text-sm font-semibold transition-all duration-200"
+              style={{
+                padding: '8px 18px',
+                borderRadius: '9999px',
+                background: filter === f ? 'rgba(164,28,100,0.20)' : 'rgba(255,255,255,0.04)',
+                border: `1px solid ${filter === f ? 'rgba(194,24,106,0.45)' : 'rgba(255,255,255,0.08)'}`,
+                color: filter === f ? '#C2186A' : 'rgba(255,255,255,0.45)',
+              }}
+            >
+              {f}
+            </button>
           ))}
         </div>
       </div>
-      <div className="es-section flex-1">
+
+      {/* Course grid */}
+      <div
+        className="flex-1"
+        style={{
+          background: [
+            'radial-gradient(ellipse 80% 50% at 88% 20%, rgba(164,28,100,0.08) 0%, transparent 52%)',
+            'radial-gradient(ellipse 60% 50% at 8% 75%, rgba(194,24,106,0.06) 0%, transparent 52%)',
+            '#050506',
+          ].join(', '),
+          padding: '64px 0 96px',
+        }}
+      >
         <div className="es-container">
           {loading ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {[1,2,3].map(i => <div key={i} className="es-card h-64 animate-pulse" />)}
+              {[1,2,3].map(i => (
+                <div
+                  key={i}
+                  className="h-64 rounded-2xl animate-pulse"
+                  style={{ background: '#151519', border: '1px solid rgba(255,255,255,0.06)' }}
+                />
+              ))}
             </div>
           ) : filtered.length === 0 ? (
-            <p className="text-center text-es-muted py-20">No courses found.</p>
+            <p className="text-center py-20" style={{ color: '#75757D' }}>No courses found.</p>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filtered.map(course => {
-                const meta = PATHWAY_META[course.pathway] || { label: course.pathway, badge: 'badge-grey' };
-                return (
-                  <div key={course.id} className="es-card-hover flex flex-col overflow-hidden">
-                    <div className={`h-1 ${meta.label === 'Coaching' ? 'bg-es-accent' : meta.label === 'StrongKidz' ? 'bg-es-amber' : 'bg-es-grey'}`} />
-                    <div className="p-6 flex flex-col flex-1">
-                      <div className="flex gap-2 mb-4">
-                        <span className={meta.badge}>{meta.label}</span>
-                        <span className="badge-grey">Level {course.level}</span>
-                      </div>
-                      <h3 className="font-bold text-white text-base mb-2 leading-snug flex-1">{course.title}</h3>
-                      <p className="text-es-muted text-sm leading-relaxed mb-5">
-                        {(course.summary || course.description).slice(0, 110)}...
-                      </p>
-                      {course.durationHours && (
-                        <p className="text-xs text-es-subtle mb-4">{course.durationHours}h content</p>
-                      )}
-                      <Link to={`/courses/${course.slug}`} className="btn-secondary text-sm text-center">
-                        View Course
-                      </Link>
-                    </div>
-                  </div>
-                );
-              })}
+              {filtered.map(course => (
+                <CourseCard key={course.id} course={course} />
+              ))}
             </div>
           )}
         </div>
       </div>
+
       <Footer />
     </div>
   );

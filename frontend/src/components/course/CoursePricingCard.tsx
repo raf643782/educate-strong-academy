@@ -10,17 +10,17 @@ export default function CoursePricingCard({ pricing, contactEmail }: CoursePrici
   const armedForcesHref = `mailto:${contactEmail}?subject=Armed%20Forces%20Discount%20Enquiry`;
 
   return (
-    <section className="es-grit" style={{ background: '#0A0A0A', borderBottom: '1px solid #2C2C2C', position: 'relative' }}>
+    <section className="es-grit" style={{ background: '#050506', borderBottom: '1px solid rgba(194,24,106,0.08)', position: 'relative' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-18">
         <div className="max-w-2xl">
           <p className="es-label mb-3">Investment</p>
           <h2 className="text-2xl md:text-3xl font-black text-white mb-8" style={{ letterSpacing: '-0.03em' }}>Course Fee</h2>
 
-          <div className="rounded-xl overflow-hidden" style={{ border: '1px solid #3C3C3C' }}>
+          <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.10)' }}>
             {/* Header */}
             <div className="px-6 py-5" style={{
-              background: 'linear-gradient(135deg, #1A1A1A, #141414)',
-              borderBottom: '1px solid #2C2C2C',
+              background: 'linear-gradient(135deg, #1B1B20, #151519)',
+              borderBottom: '1px solid rgba(255,255,255,0.07)',
             }}>
               <p className="text-xs text-es-muted mb-1">{pricing.title}</p>
               <div className="flex items-baseline gap-2">
@@ -30,7 +30,7 @@ export default function CoursePricingCard({ pricing, contactEmail }: CoursePrici
             </div>
 
             {/* Deposit */}
-            <div className="px-6 py-4" style={{ borderBottom: '1px solid #2C2C2C', background: '#1C1C1C' }}>
+            <div className="px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', background: '#1B1B20' }}>
               <div className="flex items-center justify-between py-1.5">
                 <span className="text-sm text-es-muted">Deposit to secure your place</span>
                 <span className="text-sm font-bold text-white">£{pricing.deposit}</span>
@@ -43,7 +43,7 @@ export default function CoursePricingCard({ pricing, contactEmail }: CoursePrici
             </div>
 
             {/* Included */}
-            <div className="px-6 py-4" style={{ borderBottom: '1px solid #2C2C2C', background: '#1A1A1A' }}>
+            <div className="px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', background: '#151519' }}>
               <p className="text-xs font-bold uppercase tracking-widest text-es-muted mb-3">What is included</p>
               <ul className="space-y-2">
                 {pricing.included.map(item => (
@@ -65,7 +65,7 @@ export default function CoursePricingCard({ pricing, contactEmail }: CoursePrici
             )}
 
             {/* CTAs */}
-            <div className="px-6 py-5" style={{ background: '#1C1C1C' }}>
+            <div className="px-6 py-5" style={{ background: '#1B1B20' }}>
               <a href={securePlaceHref} className="btn-primary w-full text-center block text-sm mb-3">
                 Secure Your Place
               </a>

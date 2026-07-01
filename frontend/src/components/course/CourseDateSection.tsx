@@ -9,7 +9,7 @@ interface CourseDateSectionProps {
 export default function CourseDateSection({ heading, copy, subCopy, contactEmail, courseTitle = 'this course' }: CourseDateSectionProps) {
   const registerHref = `mailto:${contactEmail}?subject=Register%20Interest%20—%20${encodeURIComponent(courseTitle)}`;
   return (
-    <section style={{ background: '#111111', borderBottom: '1px solid #2C2C2C' }} className="py-14">
+    <section style={{ background: '#050506', borderBottom: '1px solid rgba(194,24,106,0.08)' }} className="py-14">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl">
           <p className="es-label mb-3">Dates</p>

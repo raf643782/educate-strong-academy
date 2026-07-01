@@ -126,7 +126,7 @@ export default function CourseDetail() {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">
+        <div className="flex-1 flex items-center justify-center text-sm" style={{ color: '#75757D', background: '#050506' }}>
           Loading...
         </div>
         <Footer />
@@ -140,9 +140,9 @@ export default function CourseDetail() {
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Course not found</h2>
-            <Link to="/courses" className="text-amber-600 hover:text-amber-700 text-sm">
+          <div className="text-center" style={{ background: '#050506', padding: '80px 0' }}>
+            <h2 className="text-2xl font-bold text-white mb-2">Course not found</h2>
+            <Link to="/courses" className="text-sm hover:opacity-80 transition-opacity" style={{ color: '#C2186A' }}>
               Back to catalogue
             </Link>
           </div>
@@ -160,7 +160,7 @@ export default function CourseDetail() {
   // ── RICH MARKETING PAGE (courses with static data) ────────────────────────
   if (richData) {
     return (
-      <div className="min-h-screen flex flex-col" id="course-details">
+      <div className="min-h-screen flex flex-col" id="course-details" style={{ background: '#050506' }}>
         <Navbar />
 
         {/* 1 — 2: Trust badges + Hero */}
@@ -177,7 +177,7 @@ export default function CourseDetail() {
         />
 
         {/* 3: Why this course */}
-        <section style={{ background: '#0D0D0D', borderBottom: '1px solid #2C2C2C' }} className="py-14 md:py-18">
+        <section style={{ background: '#050506', borderBottom: '1px solid rgba(194,24,106,0.08)' }} className="py-14 md:py-18">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl">
               <p className="es-label mb-3">Overview</p>
@@ -267,7 +267,7 @@ export default function CourseDetail() {
 
         {/* LMS module accordion */}
         {course.modules.length > 0 && (
-          <section style={{ background: '#0A0A0A', borderTop: '1px solid #2C2C2C' }} className="py-14">
+          <section style={{ background: '#0A0A0D', borderTop: '1px solid rgba(194,24,106,0.08)' }} className="py-14">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="max-w-3xl">
                 <div className="flex items-start justify-between gap-4 mb-6">
@@ -375,34 +375,47 @@ export default function CourseDetail() {
   // ── FALLBACK: Simple API-driven view for courses without rich data ─────────
   // (Level 2, Level 3, StrongKidz etc. until static data is added)
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
       <Navbar />
 
       {/* Simple hero */}
-      <div className="pt-navbar py-16">
+      <div
+        className="pt-navbar py-16"
+        style={{
+          background: [
+            'radial-gradient(ellipse 90% 70% at 30% -10%, rgba(164,28,100,0.22) 0%, transparent 55%)',
+            '#050506',
+          ].join(', '),
+          borderBottom: '1px solid rgba(194,24,106,0.08)',
+        }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-4 flex gap-2 flex-wrap">
             <Badge variant={pathwayVariant(course.pathway)}>{pathwayLabel(course.pathway)}</Badge>
             <Badge variant={levelVariant(course.level)}>Level {course.level}</Badge>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-5 max-w-3xl leading-tight">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-5 max-w-3xl leading-tight">
             {course.title}
           </h1>
-          <p className="text-gray-300 text-lg max-w-2xl leading-relaxed mb-8">{course.description}</p>
-          <div className="flex items-center gap-6 text-sm text-gray-400 mb-8">
+          <p className="text-lg max-w-2xl leading-relaxed mb-8" style={{ color: '#B8B8BE' }}>{course.description}</p>
+          <div className="flex items-center gap-6 text-sm mb-8" style={{ color: '#75757D' }}>
             {course.durationHours && <span>{course.durationHours} hours</span>}
             <span>{course.modules.length} modules</span>
           </div>
 
           {enrolled ? (
             <div className="flex gap-3 flex-wrap">
-              <span className="bg-green-600 text-white font-semibold px-6 py-3 rounded-lg text-sm">
+              <span
+                className="font-semibold px-6 py-3 rounded-full text-sm text-white"
+                style={{ background: 'rgba(164,28,100,0.20)', border: '1px solid rgba(194,24,106,0.40)', color: '#C2186A' }}
+              >
                 Enrolled
               </span>
               {firstLessonUrl && (
                 <Link
                   to={firstLessonUrl}
-                  className="bg-amber-600 hover:bg-amber-500 text-white font-semibold px-6 py-3 rounded-lg transition-colors text-sm"
+                  className="font-semibold px-6 py-3 rounded-full text-sm text-white transition-all duration-200 hover:scale-105"
+                  style={{ background: 'linear-gradient(135deg, #A41C64, #C0246E)', boxShadow: '0 4px 18px rgba(164,28,100,0.35)' }}
                 >
                   Go to First Lesson
                 </Link>
@@ -417,13 +430,13 @@ export default function CourseDetail() {
       </div>
 
       {/* Coming soon notice for un-detailed courses */}
-      <div className="border-b">
+      <div style={{ background: 'rgba(225,154,71,0.06)', borderBottom: '1px solid rgba(225,154,71,0.18)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <p className="text-sm text-es-amber">
+          <p className="text-sm" style={{ color: '#E19A47' }}>
             Full course details for this qualification are being prepared. Contact{' '}
             <a
               href="mailto:educate.strongltd@gmail.com"
-              className="underline hover:text-amber-900"
+              className="underline"
             >
               educate.strongltd@gmail.com
             </a>{' '}

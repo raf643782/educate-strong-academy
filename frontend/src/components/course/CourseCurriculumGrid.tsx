@@ -8,7 +8,7 @@ interface CourseCurriculumGridProps {
 
 export default function CourseCurriculumGrid({ heading, intro, items }: CourseCurriculumGridProps) {
   return (
-    <section className="es-grit" style={{ background: '#111111', borderBottom: '1px solid #2C2C2C', position: 'relative' }}
+    <section className="es-grit" style={{ background: '#050506', borderBottom: '1px solid rgba(194,24,106,0.08)', position: 'relative' }}
       id="course-details">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-18">
         <div className="mb-10 max-w-2xl">

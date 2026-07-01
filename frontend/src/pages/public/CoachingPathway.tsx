@@ -9,6 +9,7 @@
  *  – Enrol CTA
  */
 
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
@@ -143,10 +144,10 @@ function StepCard({ step }: { step: typeof STEPS[number] }) {
     <div
       className="flex flex-col rounded-2xl p-6 h-full"
       style={{
-        background: isAvailable ? '#14121A' : '#0F0F14',
-        border: '1px solid rgba(255,255,255,0.06)',
-        borderTop: `3px solid ${isAvailable ? step.colour : step.status === 'coming' ? step.colour + '55' : 'rgba(255,255,255,0.07)'}`,
-        opacity: isFuture ? 0.65 : 1,
+        background: isAvailable ? '#1B1B20' : '#111116',
+        border: '1px solid rgba(255,255,255,0.07)',
+        borderTop: `3px solid ${isAvailable ? step.colour : step.status === 'coming' ? step.colour + '55' : 'rgba(255,255,255,0.08)'}`,
+        opacity: isFuture ? 0.60 : 1,
       }}
     >
       {/* Level + badge */}
@@ -160,12 +161,12 @@ function StepCard({ step }: { step: typeof STEPS[number] }) {
 
       {/* Title */}
       <h3 className="font-extrabold text-white leading-tight mb-1 text-base">{step.title}</h3>
-      <p className="text-xs mb-5 leading-snug" style={{ color: '#555' }}>{step.subtitle}</p>
+      <p className="text-xs mb-5 leading-snug" style={{ color: '#55555E' }}>{step.subtitle}</p>
 
       {/* Outcomes */}
       <ul className="flex flex-col gap-2 mb-5 flex-1">
         {step.outcomes.map(o => (
-          <li key={o} className="flex items-start gap-2 text-xs" style={{ color: '#777' }}>
+          <li key={o} className="flex items-start gap-2 text-xs" style={{ color: '#75757D' }}>
             <span className="mt-0.5 shrink-0" style={{ color: step.colour }}>✓</span>
             {o}
           </li>
@@ -186,7 +187,7 @@ function StepCard({ step }: { step: typeof STEPS[number] }) {
           {step.cta.label}
         </Link>
       ) : 'note' in step && step.note ? (
-        <p className="text-[11px] flex items-center gap-1.5" style={{ color: '#555' }}>
+        <p className="text-[11px] flex items-center gap-1.5" style={{ color: '#55555E' }}>
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
             strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="11" width="18" height="11" rx="2" />
@@ -201,13 +202,19 @@ function StepCard({ step }: { step: typeof STEPS[number] }) {
 
 /* ── Event card ─────────────────────────────────────────────────── */
 function EventCard({ event }: { event: typeof EVENTS[number] }) {
+  const [hovered, setHovered] = useState(false);
+
   return (
     <div
       className="rounded-xl overflow-hidden flex flex-col"
       style={{
-        background: '#101014',
-        border: '1px solid rgba(255,255,255,0.06)',
+        background: '#151519',
+        border: `1px solid ${hovered ? 'rgba(194,24,106,0.30)' : 'rgba(255,255,255,0.07)'}`,
+        boxShadow: hovered ? '0 6px 32px rgba(164,28,100,0.14)' : 'none',
+        transition: 'border-color 0.25s, box-shadow 0.25s',
       }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       {/* Image / placeholder */}
       <div className="relative overflow-hidden" style={{ aspectRatio: '16/9', background: '#0D0D12' }}>
@@ -225,7 +232,7 @@ function EventCard({ event }: { event: typeof EVENTS[number] }) {
         </div>
         {/* Bottom gradient */}
         <div className="absolute bottom-0 left-0 right-0 h-10 pointer-events-none"
-          style={{ background: 'linear-gradient(to top, rgba(13,13,18,0.8), transparent)' }} />
+          style={{ background: 'linear-gradient(to top, rgba(21,21,25,0.85), transparent)' }} />
       </div>
 
       {/* Content */}
@@ -234,7 +241,7 @@ function EventCard({ event }: { event: typeof EVENTS[number] }) {
           <span className="text-base">{event.icon}</span>
           <h4 className="font-bold text-white text-sm">{event.name}</h4>
         </div>
-        <p className="text-xs leading-relaxed" style={{ color: '#555' }}>{event.description}</p>
+        <p className="text-xs leading-relaxed" style={{ color: '#75757D' }}>{event.description}</p>
       </div>
     </div>
   );
@@ -243,25 +250,25 @@ function EventCard({ event }: { event: typeof EVENTS[number] }) {
 /* ── Page ───────────────────────────────────────────────────────── */
 export default function CoachingPathway() {
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#090909' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
       <Navbar />
 
       {/* ── 1. HERO ──────────────────────────────────────────────── */}
       <section
         className="relative overflow-hidden"
         style={{
-          background: '#090909',
+          background: [
+            'radial-gradient(ellipse 100% 80% at 20% -15%, rgba(164,28,100,0.24) 0%, transparent 55%)',
+            'radial-gradient(ellipse 55% 60% at 90% 80%, rgba(194,24,106,0.07) 0%, transparent 52%)',
+            '#050506',
+          ].join(', '),
           paddingTop: 'calc(64px + 72px)',
           paddingBottom: '72px',
         }}
         aria-labelledby="coaching-pathway-heading"
       >
-        {/* Radial glow */}
-        <div className="absolute inset-0 pointer-events-none" aria-hidden="true"
-          style={{
-            background: 'radial-gradient(ellipse 80% 60% at 20% -10%, rgba(164,28,100,0.18) 0%, transparent 55%)',
-          }}
-        />
+        {/* Radial glow already in background */}
+        <div className="absolute inset-0 pointer-events-none" aria-hidden="true" style={{ display: 'none' }} />
         {/* Chalk scratches */}
         <div className="absolute inset-0 pointer-events-none" aria-hidden="true"
           style={{
@@ -312,9 +319,13 @@ export default function CoachingPathway() {
       {/* ── 2. PATHWAY STEPS ─────────────────────────────────────── */}
       <section
         style={{
-          background: '#0A0A0D',
+          background: [
+            'radial-gradient(ellipse 90% 55% at 88% 30%, rgba(164,28,100,0.10) 0%, transparent 52%)',
+            'radial-gradient(ellipse 60% 50% at 5% 70%, rgba(194,24,106,0.07) 0%, transparent 52%)',
+            '#050506',
+          ].join(', '),
           padding: '80px 0',
-          borderTop: '1px solid rgba(255,255,255,0.04)',
+          borderTop: '1px solid rgba(194,24,106,0.08)',
         }}
         aria-labelledby="steps-heading"
       >
@@ -360,9 +371,13 @@ export default function CoachingPathway() {
       {/* ── 3. SIX CORE EVENTS ───────────────────────────────────── */}
       <section
         style={{
-          background: '#090909',
+          background: [
+            'radial-gradient(ellipse 110% 60% at 50% 0%, rgba(164,28,100,0.14) 0%, transparent 50%)',
+            'radial-gradient(ellipse 50% 50% at 92% 80%, rgba(194,24,106,0.07) 0%, transparent 52%)',
+            '#050506',
+          ].join(', '),
           padding: '80px 0',
-          borderTop: '1px solid rgba(255,255,255,0.04)',
+          borderTop: '1px solid rgba(194,24,106,0.08)',
         }}
         aria-labelledby="events-heading"
       >
@@ -390,7 +405,7 @@ export default function CoachingPathway() {
           </div>
 
           {/* Note */}
-          <p className="mt-8 text-xs text-white/22 text-center">
+          <p className="mt-8 text-xs text-center" style={{ color: 'rgba(255,255,255,0.22)' }}>
             All six events are covered within the Level 1 qualification. A practical coaching
             assessment is required for completion.
           </p>
@@ -402,8 +417,8 @@ export default function CoachingPathway() {
         style={{
           background: '#0A0A0D',
           padding: '48px 0',
-          borderTop: '1px solid rgba(255,255,255,0.04)',
-          borderBottom: '1px solid rgba(255,255,255,0.04)',
+          borderTop: '1px solid rgba(194,24,106,0.08)',
+          borderBottom: '1px solid rgba(194,24,106,0.08)',
         }}
       >
         <div className="es-container">
@@ -436,8 +451,10 @@ export default function CoachingPathway() {
         className="relative overflow-hidden"
         style={{
           background: [
-            'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(164,28,100,0.12) 0%, transparent 65%)',
-            '#090909',
+            'radial-gradient(ellipse 110% 80% at 50% 50%, rgba(164,28,100,0.22) 0%, transparent 60%)',
+            'radial-gradient(ellipse 55% 50% at 10% 15%, rgba(194,24,106,0.10) 0%, transparent 52%)',
+            'radial-gradient(ellipse 45% 55% at 90% 85%, rgba(164,28,100,0.08) 0%, transparent 52%)',
+            '#050506',
           ].join(', '),
           padding: '96px 0',
         }}

@@ -9,7 +9,7 @@ export default function CourseFinalCTA({ courseTitle, contactEmail, pricing }: C
   const contactHref = `mailto:${contactEmail}?subject=Course%20Enquiry%20—%20${encodeURIComponent(courseTitle)}`;
   return (
     <section className="es-grit" style={{
-      background: 'radial-gradient(ellipse 70% 60% at 50% 50%, rgba(164,28,100,0.18) 0%, transparent 70%), #0A0A0A',
+      background: 'radial-gradient(ellipse 70% 60% at 50% 50%, rgba(164,28,100,0.22) 0%, transparent 65%), #050506',
       position: 'relative',
     }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
