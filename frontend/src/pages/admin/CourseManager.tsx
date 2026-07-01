@@ -319,7 +319,7 @@ export default function CourseManager() {
 
               {courses.length === 0 && (
                 <div style={{
-                  background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.06)',
+                  background: '#151519', border: '1px solid rgba(194,24,106,0.08)',
                   borderRadius: '12px', padding: '64px 24px', textAlign: 'center',
                 }}>
                   <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '14px', marginBottom: '20px' }}>

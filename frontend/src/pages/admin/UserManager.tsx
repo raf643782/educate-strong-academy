@@ -206,7 +206,7 @@ function UserDrawer({ userId, currentUserId, onClose, onRoleChanged }: DrawerPro
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {user.certificates.map(c => (
-                      <div key={c.id} style={{ background: '#0D0D0D', borderRadius: '8px', padding: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                      <div key={c.id} style={{ background: '#111116', borderRadius: '8px', padding: '12px', border: '1px solid rgba(255,255,255,0.07)' }}>
                         <div style={{ fontSize: '13px', color: '#fff', fontWeight: 600, marginBottom: '4px' }}>{c.course.title}</div>
                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                           {pathwayPill(c.course.pathway)}

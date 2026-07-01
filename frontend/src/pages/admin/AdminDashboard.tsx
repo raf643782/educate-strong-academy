@@ -63,8 +63,8 @@ export default function AdminDashboard() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="es-card p-5 animate-pulse">
-                  <div className="h-8 w-12 rounded mb-2" style={{ background: '#2A2A2A' }} />
-                  <div className="h-4 w-24 rounded" style={{ background: '#2A2A2A' }} />
+                  <div className="h-8 w-12 rounded mb-2" style={{ background: 'rgba(255,255,255,0.06)' }} />
+                  <div className="h-4 w-24 rounded" style={{ background: 'rgba(255,255,255,0.06)' }} />
                 </div>
               ))}
             </div>
