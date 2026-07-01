@@ -60,9 +60,14 @@ export default function TutorCredibilityStrip() {
   return (
     <section
       style={{
-        background: '#0D0D0F',
-        borderTop: '1px solid rgba(255,255,255,0.04)',
-        borderBottom: '1px solid rgba(255,255,255,0.04)',
+        background: [
+          'radial-gradient(ellipse 90% 55% at 50% -5%, rgba(164,28,100,0.16) 0%, transparent 52%)',
+          'radial-gradient(ellipse 55% 65% at 4% 80%, rgba(194,24,106,0.09) 0%, transparent 52%)',
+          'radial-gradient(ellipse 45% 55% at 96% 55%, rgba(164,28,100,0.08) 0%, transparent 50%)',
+          '#050506',
+        ].join(', '),
+        borderTop: '1px solid rgba(194,24,106,0.08)',
+        borderBottom: '1px solid rgba(194,24,106,0.08)',
         padding: '96px 0',
       }}
     >

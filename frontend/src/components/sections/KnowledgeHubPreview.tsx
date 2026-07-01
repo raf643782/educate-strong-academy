@@ -39,12 +39,17 @@ function ArticleCard({ article }: { article: Article }) {
       style={{
         background: '#151519',
         border: '1px solid rgba(255,255,255,0.07)',
+        transition: 'border-color 0.25s, box-shadow 0.25s',
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(194,24,106,0.30)';
+        const el = e.currentTarget as HTMLDivElement;
+        el.style.borderColor = 'rgba(194,24,106,0.35)';
+        el.style.boxShadow = '0 8px 40px rgba(164,28,100,0.16)';
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,255,255,0.07)';
+        const el = e.currentTarget as HTMLDivElement;
+        el.style.borderColor = 'rgba(255,255,255,0.07)';
+        el.style.boxShadow = '';
       }}
     >
       {/* Magenta top accent */}
@@ -88,9 +93,14 @@ export default function KnowledgeHubPreview() {
   return (
     <section
       style={{
-        background: 'var(--es-bg-page)',
+        background: [
+          'radial-gradient(ellipse 110% 60% at 50% 0%, rgba(164,28,100,0.20) 0%, transparent 50%)',
+          'radial-gradient(ellipse 65% 55% at 88% 100%, rgba(194,24,106,0.10) 0%, transparent 52%)',
+          'radial-gradient(ellipse 45% 45% at 5% 60%, rgba(164,28,100,0.08) 0%, transparent 50%)',
+          'var(--es-bg-page)',
+        ].join(', '),
         padding: '96px 0',
-        borderTop: '1px solid rgba(255,255,255,0.04)',
+        borderTop: '1px solid rgba(194,24,106,0.08)',
       }}
     >
       <div className="es-container">

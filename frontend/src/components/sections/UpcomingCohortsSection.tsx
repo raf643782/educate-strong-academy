@@ -184,6 +184,17 @@ function CourseCard({ slot }: { slot: CourseSlot }) {
       style={{
         background: '#151519',
         border: '1px solid rgba(255,255,255,0.08)',
+        transition: 'border-color 0.25s, box-shadow 0.25s',
+      }}
+      onMouseEnter={(e) => {
+        const el = e.currentTarget as HTMLDivElement;
+        el.style.borderColor = 'rgba(194,24,106,0.38)';
+        el.style.boxShadow = '0 8px 48px rgba(164,28,100,0.20)';
+      }}
+      onMouseLeave={(e) => {
+        const el = e.currentTarget as HTMLDivElement;
+        el.style.borderColor = 'rgba(255,255,255,0.08)';
+        el.style.boxShadow = '';
       }}
     >
       {/* Image area */}
@@ -315,10 +326,15 @@ export default function UpcomingCohortsSection() {
     <section
       aria-labelledby="cohorts-heading"
       style={{
-        background: '#0A0A0B',
+        background: [
+          'radial-gradient(ellipse 100% 65% at 12% 35%, rgba(164,28,100,0.16) 0%, transparent 55%)',
+          'radial-gradient(ellipse 70% 55% at 88% 72%, rgba(194,24,106,0.09) 0%, transparent 50%)',
+          'radial-gradient(ellipse 50% 40% at 50% 100%, rgba(164,28,100,0.08) 0%, transparent 60%)',
+          '#050506',
+        ].join(', '),
         padding: '96px 0',
-        borderTop: '1px solid rgba(255,255,255,0.04)',
-        borderBottom: '1px solid rgba(255,255,255,0.04)',
+        borderTop: '1px solid rgba(194,24,106,0.08)',
+        borderBottom: '1px solid rgba(194,24,106,0.08)',
       }}
     >
       <div className="es-container">

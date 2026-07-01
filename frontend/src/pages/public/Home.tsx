@@ -31,7 +31,7 @@ import UpcomingCohortsSection from '../../components/sections/UpcomingCohortsSec
 /* ═══════════════════════════════════════════════════════════════════ */
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#090909' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
       <Navbar />
 
       {/* ─────────────────────────────────────────────────────────── */}
@@ -40,7 +40,7 @@ export default function Home() {
       <section
         className="relative overflow-hidden"
         style={{
-          background: '#090909',
+          background: '#050506',
           minHeight: '100svh',
           display: 'flex',
           alignItems: 'center',
@@ -214,7 +214,7 @@ export default function Home() {
         <div
           className="absolute bottom-0 left-0 right-0 h-36 pointer-events-none"
           aria-hidden="true"
-          style={{ background: 'linear-gradient(transparent, #090909)' }}
+          style={{ background: 'linear-gradient(transparent, #050506)' }}
         />
       </section>
 
@@ -249,8 +249,10 @@ export default function Home() {
         className="relative overflow-hidden"
         style={{
           background: [
-            'radial-gradient(ellipse 90% 80% at 50% 50%, rgba(164,28,100,0.14) 0%, transparent 70%)',
-            '#090909',
+            'radial-gradient(ellipse 120% 80% at 50% 50%, rgba(164,28,100,0.24) 0%, transparent 58%)',
+            'radial-gradient(ellipse 60% 50% at 12% 15%, rgba(194,24,106,0.14) 0%, transparent 52%)',
+            'radial-gradient(ellipse 50% 60% at 88% 85%, rgba(164,28,100,0.10) 0%, transparent 52%)',
+            '#050506',
           ].join(', '),
           padding: '112px 0',
           borderTop: '1px solid rgba(255,255,255,0.04)',
