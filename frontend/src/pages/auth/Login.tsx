@@ -11,12 +11,30 @@ function roleHome(role: string): string {
   return '/dashboard';
 }
 
-const WORKSPACE_ROWS = [
-  ['Learners', 'courses, progress, resources, assessments, and certificates'],
-  ['Coaches', 'assigned students, course progress, check-ins, and coach tools'],
-  ['Tutors & Assessors', 'teaching, assessment, and learner review tools when enabled'],
-  ['Admins', 'course management, documents, assessments, users, and platform settings'],
+const WORKSPACES = [
+  {
+    key: 'learner',
+    label: 'Learner',
+    desc: 'Access your courses, progress, resources, submissions and certificates.',
+  },
+  {
+    key: 'coach',
+    label: 'Coach',
+    desc: 'Access coach tools, CPD and future certified coach workspace features when enabled.',
+  },
+  {
+    key: 'tutor',
+    label: 'Tutor & Assessor',
+    desc: 'Access learner submissions, feedback tools, assessment review and course support where assigned.',
+  },
+  {
+    key: 'admin',
+    label: 'Admin',
+    desc: 'Manage courses, users, enrolments, cohorts, certificates, documents and platform settings.',
+  },
 ] as const;
+
+type WorkspaceKey = typeof WORKSPACES[number]['key'];
 
 export default function Login() {
   const { login } = useAuth();
@@ -25,6 +43,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [activeWs, setActiveWs] = useState<WorkspaceKey>('learner');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,56 +61,75 @@ export default function Login() {
 
   const inputStyle: React.CSSProperties = {
     width: '100%',
-    background: '#111',
-    border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: '8px',
-    padding: '11px 14px',
-    color: '#fff',
-    fontSize: '14px',
+    background: '#0D0D10',
+    border: '1px solid rgba(255,255,255,0.10)',
+    borderRadius: '10px',
+    padding: '13px 16px',
+    color: '#F5F5F7',
+    fontSize: '15px',
     outline: 'none',
     boxSizing: 'border-box',
+    transition: 'border-color 0.15s',
   };
 
   const labelStyle: React.CSSProperties = {
     display: 'block',
     fontSize: '11px',
     fontWeight: 700,
-    color: 'rgba(255,255,255,0.4)',
+    color: 'rgba(255,255,255,0.45)',
     textTransform: 'uppercase',
     letterSpacing: '0.08em',
-    marginBottom: '6px',
+    marginBottom: '7px',
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0D0D0D', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', background: '#050506', display: 'flex', flexDirection: 'column' }}>
       <Navbar />
 
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 16px 48px' }}>
-        <div style={{ width: '100%', maxWidth: '400px' }}>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '88px 20px 56px' }}>
+        <div style={{ width: '100%', maxWidth: '520px' }}>
 
           {/* Header */}
-          <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-            <img src="/assets/es-logo.png" alt="EducateStrong Academy" style={{ height: '40px', width: 'auto', margin: '0 auto 18px' }} />
-            <h1 style={{ fontSize: 'clamp(1.25rem, 5vw, 1.5rem)', fontWeight: 800, color: '#fff', margin: '0 0 8px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+            <img
+              src="/assets/es-logo.png"
+              alt="EducateStrong Academy"
+              style={{ height: '52px', width: 'auto', margin: '0 auto 20px' }}
+            />
+            <h1 style={{ fontSize: 'clamp(1.5rem, 5vw, 1.875rem)', fontWeight: 900, color: '#F5F5F7', margin: '0 0 10px', letterSpacing: '-0.01em', lineHeight: 1.2 }}>
               Sign in to EducateStrong Academy
             </h1>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', lineHeight: 1.6, margin: 0 }}>
-              Access your courses, certificates, coaching tools, or admin workspace.
-              Your dashboard will open based on your account type.
+            <p style={{ color: '#75757D', fontSize: '14px', lineHeight: 1.6, margin: 0, maxWidth: '380px', marginLeft: 'auto', marginRight: 'auto' }}>
+              Your dashboard opens automatically based on your account role.
             </p>
           </div>
 
           {/* Form card */}
-          <div style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '24px' }}>
+          <div style={{
+            background: '#151519',
+            border: '1px solid rgba(194,24,106,0.12)',
+            borderRadius: '16px',
+            padding: '28px',
+            boxShadow: '0 0 0 1px rgba(0,0,0,0.2), 0 20px 60px rgba(0,0,0,0.4)',
+          }}>
             {error && (
-              <div style={{ marginBottom: '16px', padding: '10px 14px', background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px', color: 'rgba(239,68,68,0.9)', fontSize: '13px' }}>
+              <div style={{
+                marginBottom: '20px',
+                padding: '12px 16px',
+                background: 'rgba(239,68,68,0.08)',
+                border: '1px solid rgba(239,68,68,0.22)',
+                borderRadius: '10px',
+                color: 'rgba(239,68,68,0.95)',
+                fontSize: '14px',
+                lineHeight: 1.5,
+              }}>
                 {error}
               </div>
             )}
 
             <form onSubmit={handleSubmit}>
-              <div style={{ marginBottom: '14px' }}>
-                <label style={labelStyle}>Email</label>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={labelStyle}>Email address</label>
                 <input
                   type="email"
                   value={email}
@@ -99,13 +137,17 @@ export default function Login() {
                   required
                   placeholder="you@example.com"
                   style={inputStyle}
+                  autoComplete="email"
                 />
               </div>
 
-              <div style={{ marginBottom: '20px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+              <div style={{ marginBottom: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '7px' }}>
                   <label style={{ ...labelStyle, marginBottom: 0 }}>Password</label>
-                  <Link to="/forgot-password" style={{ fontSize: '12px', color: '#A41C64', fontWeight: 600, textDecoration: 'none' }}>
+                  <Link
+                    to="/forgot-password"
+                    style={{ fontSize: '13px', color: '#C2186A', fontWeight: 600, textDecoration: 'none' }}
+                  >
                     Forgot password?
                   </Link>
                 </div>
@@ -116,6 +158,7 @@ export default function Login() {
                   required
                   placeholder="••••••••"
                   style={inputStyle}
+                  autoComplete="current-password"
                 />
               </div>
 
@@ -124,15 +167,17 @@ export default function Login() {
                 disabled={loading}
                 style={{
                   width: '100%',
-                  padding: '12px',
-                  background: loading ? 'rgba(164,28,100,0.5)' : 'linear-gradient(135deg,#A41C64,#C0246E)',
+                  padding: '14px',
+                  background: loading ? 'rgba(164,28,100,0.45)' : 'linear-gradient(135deg,#A41C64,#C0246E)',
                   color: '#fff',
                   border: 'none',
-                  borderRadius: '8px',
+                  borderRadius: '10px',
                   fontWeight: 800,
-                  fontSize: '14px',
+                  fontSize: '15px',
                   cursor: loading ? 'not-allowed' : 'pointer',
-                  letterSpacing: '0.02em',
+                  letterSpacing: '0.01em',
+                  boxShadow: loading ? 'none' : '0 4px 20px rgba(164,28,100,0.35)',
+                  transition: 'all 0.15s',
                 }}
               >
                 {loading ? 'Signing in...' : 'Sign In'}
@@ -141,35 +186,75 @@ export default function Login() {
           </div>
 
           {/* Create account */}
-          <p style={{ textAlign: 'center', fontSize: '13px', color: 'rgba(255,255,255,0.4)', marginTop: '18px' }}>
+          <p style={{ textAlign: 'center', fontSize: '14px', color: '#75757D', marginTop: '20px' }}>
             New to EducateStrong?{' '}
-            <Link to="/register" style={{ color: '#A41C64', fontWeight: 700, textDecoration: 'none' }}>
+            <Link to="/register" style={{ color: '#C2186A', fontWeight: 700, textDecoration: 'none' }}>
               Create a learner account
             </Link>
           </p>
 
           {/* Certificate verification */}
-          <p style={{ textAlign: 'center', fontSize: '12px', color: 'rgba(255,255,255,0.22)', marginTop: '6px' }}>
+          <p style={{ textAlign: 'center', fontSize: '13px', color: 'rgba(255,255,255,0.25)', marginTop: '8px' }}>
             Verifying a certificate?{' '}
-            <Link to="/verify" style={{ color: 'rgba(255,255,255,0.38)', fontWeight: 600, textDecoration: 'none' }}>
+            <Link to="/verify" style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 600, textDecoration: 'none' }}>
               Check a certificate
             </Link>
             {' '}— no account needed.
           </p>
 
-          {/* Workspace helper */}
-          <div style={{ marginTop: '24px', padding: '16px 18px', background: '#141414', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '10px' }}>
-            <p style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 12px' }}>
-              Which workspace will I see?
-            </p>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              {WORKSPACE_ROWS.map(([role, desc]) => (
-                <li key={role} style={{ fontSize: '12px', lineHeight: 1.5 }}>
-                  <span style={{ color: 'rgba(164,28,100,0.9)', fontWeight: 700 }}>{role}</span>
-                  <span style={{ color: 'rgba(255,255,255,0.3)' }}> — {desc}</span>
-                </li>
-              ))}
-            </ul>
+          {/* Workspace selector */}
+          <div style={{
+            marginTop: '28px',
+            background: '#151519',
+            border: '1px solid rgba(194,24,106,0.08)',
+            borderRadius: '14px',
+            overflow: 'hidden',
+          }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+              <p style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 12px' }}>
+                Signing in as
+              </p>
+              {/* Tab bar */}
+              <div style={{
+                display: 'flex',
+                gap: '3px',
+                padding: '4px',
+                borderRadius: '10px',
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.08)',
+              }}>
+                {WORKSPACES.map(ws => (
+                  <button
+                    key={ws.key}
+                    type="button"
+                    onClick={() => setActiveWs(ws.key)}
+                    style={{
+                      flex: 1,
+                      padding: '7px 6px',
+                      borderRadius: '7px',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      background: activeWs === ws.key ? '#A41C64' : 'transparent',
+                      color: activeWs === ws.key ? '#fff' : 'rgba(255,255,255,0.4)',
+                      border: 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {ws.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div style={{ padding: '14px 20px' }}>
+              <p style={{ fontSize: '13px', color: '#B8B8BE', lineHeight: 1.65, margin: '0 0 10px' }}>
+                {WORKSPACES.find(w => w.key === activeWs)?.desc}
+              </p>
+              <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.22)', margin: 0, lineHeight: 1.5 }}>
+                Your account role controls which workspace opens after sign in.
+              </p>
+            </div>
           </div>
 
         </div>

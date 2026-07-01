@@ -2,7 +2,7 @@
  * Navbar — pill-shaped nav items, glass-blur on scroll, icon-only brand.
  * Responsive: desktop dropdowns, mobile slide-panel.
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import Logo from '../ui/Logo';
 import { useAuth } from '../../context/AuthContext';
@@ -52,11 +52,24 @@ function NavDropdown({
 }: {
   label: string; open: boolean; onOpen: () => void; onClose: () => void; children: React.ReactNode;
 }) {
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleMouseEnter = () => {
+    if (closeTimer.current) { clearTimeout(closeTimer.current); closeTimer.current = null; }
+    onOpen();
+  };
+
+  const handleMouseLeave = () => {
+    closeTimer.current = setTimeout(onClose, 160);
+  };
+
   return (
-    <div className="relative" onMouseEnter={onOpen} onMouseLeave={onClose}>
+    <div className="relative" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
       <button
         aria-expanded={open}
         aria-haspopup="true"
+        onClick={() => open ? onClose() : onOpen()}
+        onKeyDown={e => { if (e.key === 'Escape') onClose(); }}
         className={`
           flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium
           transition-all duration-200 select-none
@@ -74,6 +87,9 @@ function NavDropdown({
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
+
+      {/* Transparent bridge — covers the mt-2 gap so mousing into the panel doesn't close the menu */}
+      {open && <div className="absolute top-full left-0 right-0" style={{ height: '10px' }} aria-hidden="true" />}
 
       {/* Dropdown panel */}
       {open && (
