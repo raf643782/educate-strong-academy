@@ -167,7 +167,7 @@ function DocModal({
     >
       <div style={{
         width: '100%', maxWidth: '560px',
-        background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.1)',
+        background: '#1B1B20', border: '1px solid rgba(255,255,255,0.1)',
         borderRadius: '14px', overflow: 'hidden', marginBottom: '2rem',
       }}>
         <div style={{ padding: '18px 24px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -271,7 +271,7 @@ function DocModal({
 function ConfirmDelete({ title, onConfirm, onCancel }: { title: string; onConfirm: () => void; onCancel: () => void }) {
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
-      <div style={{ width: '100%', maxWidth: '400px', background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px', padding: '28px 24px' }}>
+      <div style={{ width: '100%', maxWidth: '400px', background: '#1B1B20', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px', padding: '28px 24px' }}>
         <p style={{ fontWeight: 800, color: '#fff', fontSize: '15px', marginBottom: '10px' }}>Delete document?</p>
         <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', lineHeight: 1.6, marginBottom: '24px' }}>
           "{title}" will be permanently deleted. This cannot be undone.
@@ -371,11 +371,11 @@ export default function DocumentManager() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0D0D0D', color: '#fff' }}>
+    <div style={{ minHeight: '100vh', background: '#050506', color: '#fff' }}>
       <Navbar />
 
       {/* Header */}
-      <div style={{ background: '#141414', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingTop: 'calc(var(--navbar-height,72px) + 24px)', paddingBottom: '24px' }}>
+      <div style={{ background: 'radial-gradient(ellipse 100% 70% at 50% -20%, rgba(164,28,100,0.16) 0%, transparent 52%), #050506', borderBottom: '1px solid rgba(194,24,106,0.08)', paddingTop: 'calc(var(--navbar-height,72px) + 24px)', paddingBottom: '24px' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 24px' }}>
           <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.35)', marginBottom: '6px' }}>
             <Link to="/admin" style={{ color: 'rgba(255,255,255,0.35)', textDecoration: 'none' }}>Admin</Link>
@@ -402,7 +402,7 @@ export default function DocumentManager() {
         {loading ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {[...Array(3)].map((_, i) => (
-              <div key={i} style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', padding: '20px', animation: 'pulse 1.5s infinite' }}>
+              <div key={i} style={{ background: '#151519', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', padding: '20px', animation: 'pulse 1.5s infinite' }}>
                 <div style={{ height: '14px', width: '200px', background: 'rgba(255,255,255,0.06)', borderRadius: '4px', marginBottom: '8px' }} />
                 <div style={{ height: '11px', width: '140px', background: 'rgba(255,255,255,0.04)', borderRadius: '4px' }} />
               </div>
@@ -414,7 +414,7 @@ export default function DocumentManager() {
             <button style={S.btnPrimary} onClick={load}>Retry</button>
           </div>
         ) : docs.length === 0 ? (
-          <div style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '64px 24px', textAlign: 'center' }}>
+          <div style={{ background: '#151519', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '64px 24px', textAlign: 'center' }}>
             <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '14px', marginBottom: '20px' }}>
               No documents yet. Create the first document record to get started.
             </p>
@@ -426,7 +426,7 @@ export default function DocumentManager() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {docs.map(doc => (
               <div key={doc.id} style={{
-                background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px',
+                background: '#151519', border: '1px solid rgba(194,24,106,0.08)', borderRadius: '10px',
                 padding: '16px 20px', display: 'flex', alignItems: 'flex-start', gap: '14px', flexWrap: 'wrap',
               }}>
                 <div style={{ flex: 1, minWidth: '200px' }}>

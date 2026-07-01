@@ -45,10 +45,10 @@ export default function AdminDashboard() {
   ] : [];
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
       <Navbar />
 
-      <div className="pt-navbar" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C' }}>
+      <div className="pt-navbar" style={{ background: 'radial-gradient(ellipse 100% 70% at 50% -20%, rgba(164,28,100,0.16) 0%, transparent 52%), #050506', borderBottom: '1px solid rgba(194,24,106,0.08)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <p className="es-label mb-2">Admin Area</p>
           <h1 className="text-3xl font-black text-white">Platform Overview</h1>
@@ -75,7 +75,7 @@ export default function AdminDashboard() {
                   key={stat.label}
                   className="p-5 rounded-xl cursor-pointer transition-all duration-200 hover:-translate-y-0.5"
                   style={{
-                    background: '#1A1A1A',
+                    background: '#151519',
                     border: '1px solid rgba(255,255,255,0.07)',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
                   }}
@@ -121,7 +121,7 @@ export default function AdminDashboard() {
 
           {/* Recent activity placeholder */}
           <div className="es-card overflow-hidden">
-            <div className="px-6 py-4" style={{ borderBottom: '1px solid #2C2C2C' }}>
+            <div className="px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
               <h2 className="font-black text-white">Recent Enrolments</h2>
             </div>
             <div className="p-10 text-center">

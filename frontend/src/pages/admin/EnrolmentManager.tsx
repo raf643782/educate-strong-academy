@@ -103,7 +103,7 @@ function EnrolModal({ courses, users, onClose, onDone }: EnrolModalProps) {
   return (
     <>
       <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)', zIndex: 100 }} />
-      <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: '480px', maxWidth: '95vw', background: '#1A1A1A', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.1)', zIndex: 101, padding: '28px' }}>
+      <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: '480px', maxWidth: '95vw', background: '#1B1B20', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.1)', zIndex: 101, padding: '28px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
           <span style={{ fontWeight: 700, fontSize: '16px', color: '#fff' }}>Enrol Learner</span>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: '18px', cursor: 'pointer' }}>x</button>
@@ -172,7 +172,7 @@ function ConfirmRemove({ enrolment, onClose, onDone }: ConfirmRemoveProps) {
   return (
     <>
       <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)', zIndex: 100 }} />
-      <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: '420px', maxWidth: '95vw', background: '#1A1A1A', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.1)', zIndex: 101, padding: '28px' }}>
+      <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: '420px', maxWidth: '95vw', background: '#1B1B20', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.1)', zIndex: 101, padding: '28px' }}>
         <div style={{ fontWeight: 700, fontSize: '16px', color: '#fff', marginBottom: '12px' }}>Remove Enrolment</div>
         <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', marginBottom: '20px' }}>
           Remove <strong style={{ color: '#fff' }}>{enrolment.user.firstName} {enrolment.user.lastName}</strong> from <strong style={{ color: '#fff' }}>{enrolment.course.title}</strong>? This cannot be undone.
@@ -227,7 +227,7 @@ export default function EnrolmentManager() {
   });
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0D0D0D', color: '#fff' }}>
+    <div style={{ minHeight: '100vh', background: '#050506', color: '#fff' }}>
       <Navbar />
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 24px' }}>
         {/* Breadcrumb */}
@@ -254,7 +254,7 @@ export default function EnrolmentManager() {
         </div>
 
         {/* Table */}
-        <div style={{ background: '#1A1A1A', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+        <div style={{ background: '#151519', borderRadius: '12px', border: '1px solid rgba(194,24,106,0.08)', overflow: 'hidden' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 110px 130px 80px', padding: '12px 20px', borderBottom: '1px solid rgba(255,255,255,0.08)', fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
             <span>Learner</span>
             <span>Course</span>

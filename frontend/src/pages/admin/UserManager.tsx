@@ -128,7 +128,7 @@ function UserDrawer({ userId, currentUserId, onClose, onRoleChanged }: DrawerPro
   return (
     <>
       <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 100 }} />
-      <div style={{ position: 'fixed', top: 0, right: 0, width: '480px', maxWidth: '95vw', height: '100vh', background: '#1A1A1A', borderLeft: '1px solid rgba(255,255,255,0.08)', zIndex: 101, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ position: 'fixed', top: 0, right: 0, width: '480px', maxWidth: '95vw', height: '100vh', background: '#1B1B20', borderLeft: '1px solid rgba(194,24,106,0.12)', zIndex: 101, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '24px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontWeight: 700, fontSize: '16px', color: '#fff' }}>User Detail</span>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: '20px', cursor: 'pointer', lineHeight: 1 }}>x</button>
@@ -183,7 +183,7 @@ function UserDrawer({ userId, currentUserId, onClose, onRoleChanged }: DrawerPro
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {user.enrolments.map(e => (
-                      <div key={e.id} style={{ background: '#0D0D0D', borderRadius: '8px', padding: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                      <div key={e.id} style={{ background: '#111116', borderRadius: '8px', padding: '12px', border: '1px solid rgba(255,255,255,0.07)' }}>
                         <div style={{ fontSize: '13px', color: '#fff', fontWeight: 600, marginBottom: '4px' }}>{e.course.title}</div>
                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                           {pathwayPill(e.course.pathway)}
@@ -263,7 +263,7 @@ export default function UserManager() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0D0D0D', color: '#fff' }}>
+    <div style={{ minHeight: '100vh', background: '#050506', color: '#fff' }}>
       <Navbar />
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 24px' }}>
         {/* Breadcrumb */}
@@ -302,7 +302,7 @@ export default function UserManager() {
         </div>
 
         {/* Table */}
-        <div style={{ background: '#1A1A1A', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+        <div style={{ background: '#151519', borderRadius: '12px', border: '1px solid rgba(194,24,106,0.08)', overflow: 'hidden' }}>
           {/* Header row */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 200px 100px 90px 90px 110px', padding: '12px 20px', borderBottom: '1px solid rgba(255,255,255,0.08)', fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
             <span>Name / Email</span>

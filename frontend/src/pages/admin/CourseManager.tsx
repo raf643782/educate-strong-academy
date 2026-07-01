@@ -120,7 +120,7 @@ function NewCourseModal({ onClose, onCreated }: { onClose: () => void; onCreated
     >
       <div style={{
         width: '100%', maxWidth: '480px',
-        background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.1)',
+        background: '#1B1B20', border: '1px solid rgba(255,255,255,0.1)',
         borderRadius: '14px', overflow: 'hidden',
       }}>
         <div style={{
@@ -213,11 +213,11 @@ export default function CourseManager() {
   const totalLessons = (course: Course) => course.modules.reduce((sum, m) => sum + (m._count?.lessons || 0), 0);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0D0D0D', color: '#fff' }}>
+    <div style={{ minHeight: '100vh', background: '#050506', color: '#fff' }}>
       <Navbar />
 
       {/* Header */}
-      <div style={{ background: '#141414', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingTop: 'calc(var(--navbar-height,72px) + 24px)', paddingBottom: '24px' }}>
+      <div style={{ background: 'radial-gradient(ellipse 100% 70% at 50% -20%, rgba(164,28,100,0.16) 0%, transparent 52%), #050506', borderBottom: '1px solid rgba(194,24,106,0.08)', paddingTop: 'calc(var(--navbar-height,72px) + 24px)', paddingBottom: '24px' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 24px' }}>
           <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.35)', marginBottom: '6px' }}>
             <Link to="/admin" style={{ color: 'rgba(255,255,255,0.35)', textDecoration: 'none' }}>Admin</Link>
@@ -235,14 +235,14 @@ export default function CourseManager() {
 
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 24px' }}>
         {error ? (
-          <div style={{ background: '#1A1A1A', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '12px', padding: '40px 24px', textAlign: 'center' }}>
+          <div style={{ background: '#151519', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '12px', padding: '40px 24px', textAlign: 'center' }}>
             <p style={{ color: 'rgba(239,68,68,0.8)', fontWeight: 700, fontSize: '14px', marginBottom: '8px' }}>{error}</p>
             <button style={S.btnPrimary} onClick={loadCourses}>Retry</button>
           </div>
         ) : loading ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {[...Array(4)].map((_, i) => (
-              <div key={i} style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', padding: '20px', animation: 'pulse 1.5s infinite' }}>
+              <div key={i} style={{ background: '#151519', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', padding: '20px', animation: 'pulse 1.5s infinite' }}>
                 <div style={{ height: '16px', width: '240px', background: 'rgba(255,255,255,0.06)', borderRadius: '4px', marginBottom: '8px' }} />
                 <div style={{ height: '12px', width: '140px', background: 'rgba(255,255,255,0.04)', borderRadius: '4px' }} />
               </div>
@@ -253,7 +253,7 @@ export default function CourseManager() {
             {/* Mobile cards (< md) */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {courses.map(course => (
-                <div key={course.id} style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '18px 20px' }}>
+                <div key={course.id} style={{ background: '#151519', border: '1px solid rgba(194,24,106,0.08)', borderRadius: '12px', padding: '18px 20px' }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>

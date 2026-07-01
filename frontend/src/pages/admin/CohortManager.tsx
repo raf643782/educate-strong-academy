@@ -60,7 +60,7 @@ function CohortModal({ initial, courses, onSave, onClose, saving, error }:
   return (
     <div style={{ position:'fixed', inset:0, zIndex:50, background:'rgba(0,0,0,0.8)', backdropFilter:'blur(6px)', display:'flex', alignItems:'flex-start', justifyContent:'center', padding:'48px 16px', overflowY:'auto' }}
       onClick={e => { if (e.target===e.currentTarget) onClose(); }}>
-      <div style={{ width:'100%', maxWidth:'520px', background:'#1A1A1A', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'14px', overflow:'hidden', marginBottom:'2rem' }}>
+      <div style={{ width:'100%', maxWidth:'520px', background:'#1B1B20', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'14px', overflow:'hidden', marginBottom:'2rem' }}>
         <div style={{ padding:'16px 24px', borderBottom:'1px solid rgba(255,255,255,0.07)', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
           <span style={{ fontWeight:800, fontSize:'15px' }}>{initial.title ? 'Edit Cohort' : 'New Cohort'}</span>
           <button onClick={onClose} style={{ background:'none', border:'none', color:'rgba(255,255,255,0.4)', cursor:'pointer', fontSize:'20px' }}>×</button>
@@ -110,7 +110,7 @@ function CohortModal({ initial, courses, onSave, onClose, saving, error }:
 function ConfirmDelete({ title, onConfirm, onCancel }: { title: string; onConfirm: () => void; onCancel: () => void }) {
   return (
     <div style={{ position:'fixed', inset:0, zIndex:50, background:'rgba(0,0,0,0.8)', backdropFilter:'blur(6px)', display:'flex', alignItems:'center', justifyContent:'center', padding:'16px' }}>
-      <div style={{ width:'100%', maxWidth:'380px', background:'#1A1A1A', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'14px', padding:'28px 24px' }}>
+      <div style={{ width:'100%', maxWidth:'380px', background:'#1B1B20', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'14px', padding:'28px 24px' }}>
         <p style={{ fontWeight:800, color:'#fff', fontSize:'15px', marginBottom:'10px' }}>Delete cohort?</p>
         <p style={{ color:'rgba(255,255,255,0.45)', fontSize:'13px', lineHeight:1.6, marginBottom:'24px' }}>"{title}" will be permanently deleted.</p>
         <div style={{ display:'flex', gap:'10px', justifyContent:'flex-end' }}>
@@ -178,9 +178,9 @@ export default function CohortManager() {
   };
 
   return (
-    <div style={{ minHeight:'100vh', background:'#0D0D0D', color:'#fff' }}>
+    <div style={{ minHeight:'100vh', background:'#050506', color:'#fff' }}>
       <Navbar />
-      <div style={{ background:'#141414', borderBottom:'1px solid rgba(255,255,255,0.06)', paddingTop:'calc(var(--navbar-height,72px) + 24px)', paddingBottom:'24px' }}>
+      <div style={{ background:'radial-gradient(ellipse 100% 70% at 50% -20%, rgba(164,28,100,0.16) 0%, transparent 52%), #050506', borderBottom:'1px solid rgba(194,24,106,0.08)', paddingTop:'calc(var(--navbar-height,72px) + 24px)', paddingBottom:'24px' }}>
         <div style={{ maxWidth:'1100px', margin:'0 auto', padding:'0 24px' }}>
           <p style={{ fontSize:'12px', color:'rgba(255,255,255,0.35)', marginBottom:'6px' }}>
             <Link to="/admin" style={{ color:'rgba(255,255,255,0.35)', textDecoration:'none' }}>Admin</Link> › Cohorts
@@ -199,19 +199,19 @@ export default function CohortManager() {
         {deleteError && <div style={{ marginBottom:'16px', padding:'12px', background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.2)', borderRadius:'8px', color:'rgba(239,68,68,0.9)', fontSize:'13px' }}>{deleteError}</div>}
         {loading ? (
           <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
-            {[...Array(3)].map((_,i) => <div key={i} style={{ background:'#1A1A1A', border:'1px solid rgba(255,255,255,0.06)', borderRadius:'10px', padding:'20px', height:'64px' }} />)}
+            {[...Array(3)].map((_,i) => <div key={i} style={{ background:'#151519', border:'1px solid rgba(255,255,255,0.06)', borderRadius:'10px', padding:'20px', height:'64px' }} />)}
           </div>
         ) : error ? (
           <div style={{ textAlign:'center', padding:'64px' }}><p style={{ color:'rgba(255,255,255,0.35)', marginBottom:'16px' }}>{error}</p><button style={S.btnPrimary} onClick={load}>Retry</button></div>
         ) : cohorts.length === 0 ? (
-          <div style={{ background:'#1A1A1A', border:'1px solid rgba(255,255,255,0.06)', borderRadius:'12px', padding:'64px 24px', textAlign:'center' }}>
+          <div style={{ background:'#151519', border:'1px solid rgba(255,255,255,0.06)', borderRadius:'12px', padding:'64px 24px', textAlign:'center' }}>
             <p style={{ color:'rgba(255,255,255,0.3)', fontSize:'14px', marginBottom:'20px' }}>No cohorts yet. Add a cohort to start managing course dates.</p>
             <button style={S.btnPrimary} onClick={() => { setSaveError(null); setModal({ open:true, editing:null }); }}>+ New Cohort</button>
           </div>
         ) : (
           <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
             {cohorts.map(c => (
-              <div key={c.id} style={{ background:'#1A1A1A', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'10px', padding:'16px 20px', display:'flex', alignItems:'flex-start', gap:'14px', flexWrap:'wrap' }}>
+              <div key={c.id} style={{ background:'#151519', border:'1px solid rgba(194,24,106,0.08)', borderRadius:'10px', padding:'16px 20px', display:'flex', alignItems:'flex-start', gap:'14px', flexWrap:'wrap' }}>
                 <div style={{ flex:1, minWidth:'200px' }}>
                   <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', marginBottom:'4px', alignItems:'center' }}>
                     <span style={statusPill(c.status)}>{c.status}</span>

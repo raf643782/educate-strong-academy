@@ -33,7 +33,7 @@ function DetailPanel({ item, onClose, onStatusChange, saving }:
   return (
     <div style={{ position:'fixed', inset:0, zIndex:50, background:'rgba(0,0,0,0.7)', backdropFilter:'blur(6px)', display:'flex', alignItems:'flex-start', justifyContent:'flex-end' }}
       onClick={e => { if (e.target===e.currentTarget) onClose(); }}>
-      <div style={{ width:'100%', maxWidth:'440px', height:'100vh', background:'#1A1A1A', borderLeft:'1px solid rgba(255,255,255,0.1)', overflowY:'auto', padding:'28px 24px', display:'flex', flexDirection:'column', gap:'18px' }}>
+      <div style={{ width:'100%', maxWidth:'440px', height:'100vh', background:'#1B1B20', borderLeft:'1px solid rgba(194,24,106,0.12)', overflowY:'auto', padding:'28px 24px', display:'flex', flexDirection:'column', gap:'18px' }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
           <span style={{ fontWeight:800, fontSize:'15px' }}>Interest Record</span>
           <button onClick={onClose} style={{ background:'none', border:'none', color:'rgba(255,255,255,0.4)', cursor:'pointer', fontSize:'20px' }}>×</button>
@@ -113,9 +113,9 @@ export default function RegisterInterestManager() {
   const counts = STATUSES.reduce<Record<string, number>>((acc, s) => ({ ...acc, [s]: items.filter(i => i.status===s).length }), {});
 
   return (
-    <div style={{ minHeight:'100vh', background:'#0D0D0D', color:'#fff' }}>
+    <div style={{ minHeight:'100vh', background:'#050506', color:'#fff' }}>
       <Navbar />
-      <div style={{ background:'#141414', borderBottom:'1px solid rgba(255,255,255,0.06)', paddingTop:'calc(var(--navbar-height,72px) + 24px)', paddingBottom:'24px' }}>
+      <div style={{ background:'radial-gradient(ellipse 100% 70% at 50% -20%, rgba(164,28,100,0.16) 0%, transparent 52%), #050506', borderBottom:'1px solid rgba(194,24,106,0.08)', paddingTop:'calc(var(--navbar-height,72px) + 24px)', paddingBottom:'24px' }}>
         <div style={{ maxWidth:'1100px', margin:'0 auto', padding:'0 24px' }}>
           <p style={{ fontSize:'12px', color:'rgba(255,255,255,0.35)', marginBottom:'6px' }}>
             <Link to="/admin" style={{ color:'rgba(255,255,255,0.35)', textDecoration:'none' }}>Admin</Link> › Register Interest
@@ -130,7 +130,7 @@ export default function RegisterInterestManager() {
         <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', marginBottom:'24px' }}>
           {STATUSES.map(s => (
             <button key={s} onClick={() => setFilterStatus(f => f===s ? '' : s)}
-              style={{ background: filterStatus===s ? 'rgba(164,28,100,0.18)' : '#1A1A1A', border: filterStatus===s ? '1px solid rgba(164,28,100,0.4)' : '1px solid rgba(255,255,255,0.07)', borderRadius:'8px', padding:'8px 14px', cursor:'pointer', textAlign:'left' }}>
+              style={{ background: filterStatus===s ? 'rgba(164,28,100,0.18)' : '#151519', border: filterStatus===s ? '1px solid rgba(164,28,100,0.4)' : '1px solid rgba(255,255,255,0.07)', borderRadius:'8px', padding:'8px 14px', cursor:'pointer', textAlign:'left' }}>
               <span style={{ display:'block', fontSize:'16px', fontWeight:800, color:'#fff' }}>{counts[s]||0}</span>
               <span style={{ fontSize:'10px', fontWeight:700, color:'rgba(255,255,255,0.35)', textTransform:'uppercase', letterSpacing:'0.08em' }}>{s}</span>
             </button>
@@ -150,19 +150,19 @@ export default function RegisterInterestManager() {
         {/* List */}
         {loading ? (
           <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
-            {[...Array(4)].map((_,i) => <div key={i} style={{ background:'#1A1A1A', border:'1px solid rgba(255,255,255,0.06)', borderRadius:'10px', height:'62px' }} />)}
+            {[...Array(4)].map((_,i) => <div key={i} style={{ background:'#151519', border:'1px solid rgba(255,255,255,0.06)', borderRadius:'10px', height:'62px' }} />)}
           </div>
         ) : error ? (
           <div style={{ textAlign:'center', padding:'64px' }}><p style={{ color:'rgba(255,255,255,0.35)', marginBottom:'16px' }}>{error}</p><button style={S.btnPrimary} onClick={load}>Retry</button></div>
         ) : filtered.length === 0 ? (
-          <div style={{ background:'#1A1A1A', border:'1px solid rgba(255,255,255,0.06)', borderRadius:'12px', padding:'64px 24px', textAlign:'center' }}>
+          <div style={{ background:'#151519', border:'1px solid rgba(255,255,255,0.06)', borderRadius:'12px', padding:'64px 24px', textAlign:'center' }}>
             <p style={{ color:'rgba(255,255,255,0.3)', fontSize:'14px' }}>{items.length===0 ? 'No interest records yet.' : 'No records match your filter.'}</p>
           </div>
         ) : (
           <div style={{ display:'flex', flexDirection:'column', gap:'6px' }}>
             {filtered.map(i => (
               <button key={i.id} onClick={() => setSelected(i)}
-                style={{ background:'#1A1A1A', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'10px', padding:'14px 18px', display:'flex', alignItems:'center', gap:'14px', cursor:'pointer', textAlign:'left', width:'100%' }}>
+                style={{ background:'#151519', border:'1px solid rgba(194,24,106,0.08)', borderRadius:'10px', padding:'14px 18px', display:'flex', alignItems:'center', gap:'14px', cursor:'pointer', textAlign:'left', width:'100%' }}>
                 <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ display:'flex', gap:'8px', alignItems:'center', marginBottom:'2px', flexWrap:'wrap' }}>
                     <span style={{ fontWeight:700, fontSize:'14px', color:'#fff' }}>{i.firstName} {i.lastName}</span>

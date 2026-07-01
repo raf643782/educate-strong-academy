@@ -57,8 +57,8 @@ const LESSON_TYPE_LABELS: Record<string, string> = {
 
 const S = {
   card: {
-    background: '#1A1A1A',
-    border: '1px solid rgba(255,255,255,0.08)',
+    background: '#151519',
+    border: '1px solid rgba(194,24,106,0.08)',
     borderRadius: '12px',
     padding: '24px',
   } as React.CSSProperties,
@@ -168,7 +168,7 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
     >
       <div style={{
         width: '100%', maxWidth: '560px',
-        background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.1)',
+        background: '#1B1B20', border: '1px solid rgba(255,255,255,0.1)',
         borderRadius: '14px', overflow: 'hidden', marginBottom: '2rem',
       }}>
         <div style={{
@@ -625,7 +625,7 @@ export default function CourseEditor() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: '#0D0D0D' }}>
+      <div style={{ minHeight: '100vh', background: '#050506' }}>
         <Navbar />
         <div style={{ paddingTop: '100px', textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: '14px' }}>
           Loading course…
@@ -636,7 +636,7 @@ export default function CourseEditor() {
 
   if (error || !course) {
     return (
-      <div style={{ minHeight: '100vh', background: '#0D0D0D' }}>
+      <div style={{ minHeight: '100vh', background: '#050506' }}>
         <Navbar />
         <div style={{ paddingTop: '100px', textAlign: 'center' }}>
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px', marginBottom: '16px' }}>{error ?? 'Course not found'}</p>
@@ -649,11 +649,11 @@ export default function CourseEditor() {
   const sortedModules = [...course.modules].sort((a, b) => a.sortOrder - b.sortOrder);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0D0D0D', color: '#fff' }}>
+    <div style={{ minHeight: '100vh', background: '#050506', color: '#fff' }}>
       <Navbar />
 
       {/* Page header */}
-      <div style={{ background: '#141414', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingTop: 'calc(var(--navbar-height,72px) + 24px)', paddingBottom: '24px' }}>
+      <div style={{ background: 'radial-gradient(ellipse 100% 70% at 50% -20%, rgba(164,28,100,0.16) 0%, transparent 52%), #050506', borderBottom: '1px solid rgba(194,24,106,0.08)', paddingTop: 'calc(var(--navbar-height,72px) + 24px)', paddingBottom: '24px' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 24px' }}>
           <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.35)', marginBottom: '6px' }}>
             <Link to="/admin" style={{ color: 'rgba(255,255,255,0.35)', textDecoration: 'none' }}>Admin</Link>
@@ -782,8 +782,8 @@ export default function CourseEditor() {
             <div key={mod.id} style={{ marginBottom: '10px' }}>
               {/* Module row */}
               <div style={{
-                background: '#1A1A1A',
-                border: '1px solid rgba(255,255,255,0.08)',
+                background: '#151519',
+                border: '1px solid rgba(194,24,106,0.08)',
                 borderRadius: isOpen ? '12px 12px 0 0' : '12px',
                 padding: '14px 18px',
                 display: 'flex', alignItems: 'center', gap: '12px',
@@ -840,8 +840,8 @@ export default function CourseEditor() {
               {/* Lessons panel */}
               {isOpen && (
                 <div style={{
-                  background: '#111',
-                  border: '1px solid rgba(255,255,255,0.06)',
+                  background: '#0D0D10',
+                  border: '1px solid rgba(194,24,106,0.08)',
                   borderTop: 'none',
                   borderRadius: '0 0 12px 12px',
                   padding: '12px 18px 16px',
