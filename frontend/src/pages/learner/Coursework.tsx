@@ -79,10 +79,10 @@ function SubmitPanel({ assessment, onSubmitted }: { assessment: Assessment; onSu
         <textarea value={content} onChange={e => setContent(e.target.value)} rows={10}
           placeholder="Write your full response here..."
           className="w-full text-sm text-white placeholder-es-subtle rounded-lg p-4 resize-y focus:outline-none"
-          style={{ background: '#1C1C1C', border: '1px solid #3C3C3C' }} />
+          style={{ background: '#151519', border: '1px solid rgba(255,255,255,0.10)' }} />
         <p className="text-xs text-es-subtle mt-1">{content.split(/\s+/).filter(Boolean).length} words</p>
       </div>
-      <div className="rounded-lg p-4 border-dashed" style={{ border: '1px dashed #3C3C3C', background: '#141414' }}>
+      <div className="rounded-lg p-4 border-dashed" style={{ border: '1px dashed rgba(255,255,255,0.14)', background: '#111116' }}>
         <p className="text-xs text-es-subtle text-center">
           File attachments (Phase 3 — file storage not yet configured). For supporting files email{' '}
           <a href="mailto:educate.strongltd@gmail.com" className="underline" style={{ color: '#A41C64' }}>educate.strongltd@gmail.com</a>
@@ -125,9 +125,9 @@ export default function Coursework() {
   });
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
       <Navbar />
-      <div className="pt-navbar" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C' }}>
+      <div className="pt-navbar" style={{ background: 'radial-gradient(ellipse 100% 70% at 50% -20%, rgba(164,28,100,0.16) 0%, transparent 52%), #050506', borderBottom: '1px solid rgba(194,24,106,0.08)' }}>
         <div className="es-container py-8">
           <p className="es-label mb-2">Learner Area</p>
           <h1 className="text-3xl font-black text-white">Coursework &amp; Assessments</h1>
@@ -135,7 +135,7 @@ export default function Coursework() {
         </div>
       </div>
       <div className="es-container py-8 flex-1">
-        <div className="flex gap-1 mb-6 p-1 rounded-lg w-fit" style={{ background: '#1C1C1C', border: '1px solid #2C2C2C' }}>
+        <div className="flex gap-1 mb-6 p-1 rounded-lg w-fit" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
           {TABS.map(t => (
             <button key={t} onClick={() => setTab(t)}
               className={`px-4 py-2 rounded text-sm font-semibold transition-all ${tab === t ? 'text-white' : 'text-es-muted hover:text-white'}`}
@@ -175,7 +175,7 @@ export default function Coursework() {
                 <div key={a.id} className="es-card overflow-hidden">
                   <button onClick={() => setExpanded(isOpen ? null : a.id)}
                     className="w-full flex items-start justify-between gap-4 p-5 text-left transition-colors"
-                    style={{ background: isOpen ? '#1C1C1C' : undefined }}>
+                    style={{ background: isOpen ? '#151519' : undefined }}>
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2 mb-2">
                         <span className={sd.cls} style={sd.color ? { color: sd.color } : {}}>{sd.label}</span>
@@ -196,7 +196,7 @@ export default function Coursework() {
                     </svg>
                   </button>
                   {isOpen && (
-                    <div className="px-5 pb-5" style={{ borderTop: '1px solid #2C2C2C' }}>
+                    <div className="px-5 pb-5" style={{ borderTop: '1px solid rgba(194,24,106,0.08)' }}>
                       <div className="pt-4 grid sm:grid-cols-3 gap-2 mb-4 text-xs text-es-muted">
                         <span>Pass mark: {a.passMark}%</span>
                         <span>Max attempts: {a.maxAttempts}</span>

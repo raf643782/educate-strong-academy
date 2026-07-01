@@ -37,10 +37,10 @@ export default function CPD() {
   const percentToTarget = summary ? Math.min(100, Math.round((summary.approvedHours / annualTarget) * 100)) : 0;
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
       <Navbar />
 
-      <div className="pt-navbar" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C' }}>
+      <div className="pt-navbar" style={{ background: 'radial-gradient(ellipse 100% 70% at 50% -20%, rgba(164,28,100,0.16) 0%, transparent 52%), #050506', borderBottom: '1px solid rgba(194,24,106,0.08)' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <p className="es-label mb-2">Learner Area</p>
           <h1 className="text-3xl font-black text-white">CPD Log</h1>
@@ -69,7 +69,7 @@ export default function CPD() {
               <h2 className="text-lg font-black text-white mb-4">CPD Activity Types</h2>
               <div className="space-y-3">
                 {Object.entries(activityLabels).map(([key, label]) => (
-                  <div key={key} className="flex items-center justify-between py-2" style={{ borderBottom: '1px solid #2C2C2C' }}>
+                  <div key={key} className="flex items-center justify-between py-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
                     <span className="text-sm text-es-muted">{label}</span>
                     <span className="badge-grey text-xs">
                       {summary?.byActivity[key] ? `${summary.byActivity[key]}h logged` : '0h'}
@@ -92,7 +92,7 @@ export default function CPD() {
                     <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 36 36">
                       <path
                         d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none" stroke="#2C2C2C" strokeWidth="3"
+                        fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="3"
                       />
                       <path
                         d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"

@@ -67,9 +67,9 @@ export default function Documents() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
       <Navbar />
-      <div className="pt-navbar" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C' }}>
+      <div className="pt-navbar" style={{ background: 'radial-gradient(ellipse 100% 70% at 50% -20%, rgba(164,28,100,0.16) 0%, transparent 52%), #050506', borderBottom: '1px solid rgba(194,24,106,0.08)' }}>
         <div className="es-container py-8">
           <p className="es-label mb-2">Learner Area</p>
           <h1 className="text-3xl font-black text-white">Resources &amp; Documents</h1>
@@ -85,7 +85,7 @@ export default function Documents() {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-6 p-1 rounded-lg w-fit hide-scrollbar overflow-x-auto" style={{ background: '#1C1C1C', border: '1px solid #2C2C2C' }}>
+        <div className="flex gap-1 mb-6 p-1 rounded-lg w-fit hide-scrollbar overflow-x-auto" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
           {TABS.map(t => (
             <button key={t} onClick={() => setTab(t)}
               className={`px-4 py-2 rounded text-sm font-semibold transition-all flex-shrink-0 ${tab === t ? 'text-white' : 'text-es-muted hover:text-white'}`}

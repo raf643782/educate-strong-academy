@@ -42,10 +42,10 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
       <Navbar />
       {/* Header */}
-      <div className="pt-navbar" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C' }}>
+      <div className="pt-navbar" style={{ background: 'radial-gradient(ellipse 100% 80% at 50% -20%, rgba(164,28,100,0.18) 0%, transparent 52%), #050506', borderBottom: '1px solid rgba(194,24,106,0.08)' }}>
         <div className="es-container py-8">
           <p className="es-label mb-1">Dashboard</p>
           <h1 className="text-2xl font-black text-white">Welcome back, {user?.firstName}</h1>

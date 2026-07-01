@@ -25,10 +25,10 @@ export default function Certificates() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
       <Navbar />
 
-      <div className="pt-navbar" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C' }}>
+      <div className="pt-navbar" style={{ background: 'radial-gradient(ellipse 100% 70% at 50% -20%, rgba(164,28,100,0.16) 0%, transparent 52%), #050506', borderBottom: '1px solid rgba(194,24,106,0.08)' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <p className="es-label mb-2">Learner Area</p>
           <h1 className="text-3xl font-black text-white">Your Certificates</h1>
@@ -69,7 +69,7 @@ export default function Certificates() {
                     <p className="text-xs text-es-subtle mb-3">
                       Issued {new Date(cert.issuedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
                     </p>
-                    <p className="text-xs font-mono text-es-muted px-2 py-1 rounded" style={{ background: '#2A2A2A' }}>{cert.certificateCode}</p>
+                    <p className="text-xs font-mono text-es-muted px-2 py-1 rounded" style={{ background: '#1B1B20', border: '1px solid rgba(255,255,255,0.07)' }}>{cert.certificateCode}</p>
                   </div>
                   <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(164,28,100,0.1)', border: '1px solid rgba(164,28,100,0.2)' }}>
                     <svg className="w-6 h-6" style={{ color: '#A41C64' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
