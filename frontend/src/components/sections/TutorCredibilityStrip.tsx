@@ -18,36 +18,36 @@ const TUTORS: Tutor[] = [
 
 function TutorCard({ tutor }: { tutor: Tutor }) {
   return (
-    <div className="flex flex-col items-center text-center gap-3 group">
-      {/* Photo */}
+    <div className="flex flex-col group">
+      {/* Portrait photo */}
       <div
-        className="w-16 h-16 rounded-full overflow-hidden shrink-0 flex items-center justify-center font-bold text-white text-sm"
-        style={{ background: '#2C2C2C', border: '2px solid #3C3C3C' }}
+        className="w-full overflow-hidden rounded-xl mb-4 flex items-center justify-center font-bold text-white/40 text-sm select-none"
+        style={{ aspectRatio: '3/4', background: '#1B1B20', flexShrink: 0 }}
       >
         <img
           src={tutor.img}
           alt={tutor.name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           onError={(e) => {
             const el = e.currentTarget as HTMLImageElement;
             el.style.display = 'none';
             const parent = el.parentElement;
-            if (parent) {
-              parent.textContent = tutor.initials;
-            }
+            if (parent) parent.textContent = tutor.initials;
           }}
         />
       </div>
 
       {/* Info */}
       <div>
-        <p className="font-bold text-white text-sm group-hover:underline decoration-[#A41C64] underline-offset-2 transition-all">
-          {tutor.name}
-        </p>
-        <p className="text-xs mb-2" style={{ color: '#888' }}>{tutor.role}</p>
+        <p className="font-bold text-[#F5F5F7] text-sm mb-0.5">{tutor.name}</p>
+        <p className="text-xs text-[#75757D] mb-2.5">{tutor.role}</p>
         <span
-          className="inline-block text-xs font-semibold px-2.5 py-1 rounded-full"
-          style={{ background: 'rgba(164,28,100,0.1)', color: '#A41C64' }}
+          className="inline-block text-[10px] font-bold uppercase tracking-[0.08em] px-2.5 py-1 rounded-full leading-none"
+          style={{
+            background: 'rgba(164,28,100,0.12)',
+            color: '#C2186A',
+            border: '1px solid rgba(194,24,106,0.20)',
+          }}
         >
           {tutor.credential}
         </span>
@@ -60,32 +60,40 @@ export default function TutorCredibilityStrip() {
   return (
     <section
       style={{
-        background: '#111111',
-        borderTop: '1px solid #2C2C2C',
-        borderBottom: '1px solid #2C2C2C',
+        background: '#0D0D0F',
+        borderTop: '1px solid rgba(255,255,255,0.04)',
+        borderBottom: '1px solid rgba(255,255,255,0.04)',
+        padding: '96px 0',
       }}
-      className="py-12"
     >
       <div className="es-container">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12">
           <div>
-            <p className="es-label mb-2">Delivered By</p>
-            <h2 className="text-2xl lg:text-3xl font-extrabold text-white leading-tight">
-              Taught by Athletes Who Have Done It
+            <p className="es-label mb-3">Tutor Credibility</p>
+            <h2
+              className="font-black text-[#F5F5F7] leading-tight"
+              style={{
+                fontSize: 'clamp(1.75rem, 4vw, 2.75rem)',
+                letterSpacing: '-0.035em',
+              }}
+            >
+              Taught by Coaches
+              <br />
+              Who Compete
             </h2>
           </div>
           <Link
             to="/about"
-            className="text-sm font-semibold whitespace-nowrap"
-            style={{ color: '#888' }}
+            className="text-sm font-semibold whitespace-nowrap transition-colors duration-200 hover:text-[#C2186A]"
+            style={{ color: '#75757D' }}
           >
             Meet the Full Team →
           </Link>
         </div>
 
-        {/* Tutor grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8">
+        {/* Tutor grid — portrait cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5 lg:gap-6">
           {TUTORS.map((tutor) => (
             <TutorCard key={tutor.name} tutor={tutor} />
           ))}

@@ -6,80 +6,79 @@ interface Article {
   title: string;
   excerpt: string;
   readTime: string;
-  colour: string;
 }
 
 const ARTICLES: Article[] = [
   {
     slug: 'coaching-the-log-press',
-    category: 'Coaching',
+    category: 'Event Technique',
     title: 'Coaching the Log Press: Technique Cues That Work',
     excerpt: 'The log press is the most technical overhead movement in Strongman. These are the cues that make the difference between a grind and a clean rep.',
     readTime: '5 min read',
-    colour: '#A41C64',
   },
   {
     slug: 'athlete-screening-strongman',
-    category: 'Safety',
+    category: 'Safe Practice',
     title: 'Why Athlete Screening Matters Before Your First Session',
     excerpt: "Screening isn't box-ticking. It's the single most important thing you can do before putting a new athlete under load in a Strongman context.",
     readTime: '4 min read',
-    colour: '#C0246E',
   },
   {
     slug: 'yoke-fundamentals',
-    category: 'Events',
+    category: 'Event Technique',
     title: 'Yoke Fundamentals: What Coaches Often Miss',
     excerpt: 'Most coaches focus on leg drive. The coaches who get the best results out of yoke focus on something else entirely.',
     readTime: '6 min read',
-    colour: '#E19A47',
   },
 ];
 
 function ArticleCard({ article }: { article: Article }) {
   return (
     <div
-      className="rounded-xl p-5 flex flex-col transition-transform motion-safe:hover:-translate-y-0.5"
+      className="rounded-2xl overflow-hidden flex flex-col transition-all duration-200 hover:-translate-y-0.5"
       style={{
-        background: '#131313',
-        border: '1px solid rgba(255,255,255,0.06)',
-        transition: 'border-color 0.2s, transform 0.2s',
+        background: '#151519',
+        border: '1px solid rgba(255,255,255,0.07)',
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLDivElement).style.borderColor = `${article.colour}44`;
+        (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(194,24,106,0.30)';
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,255,255,0.06)';
+        (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,255,255,0.07)';
       }}
     >
-      {/* Category pill */}
-      <span
-        className="inline-block self-start text-xs font-bold px-2.5 py-1 rounded-full mb-3"
-        style={{ background: `${article.colour}22`, color: article.colour }}
-      >
-        {article.category}
-      </span>
+      {/* Magenta top accent */}
+      <div style={{ height: '3px', background: 'linear-gradient(90deg, #A41C64, #C2186A)', flexShrink: 0 }} />
 
-      {/* Title */}
-      <h3 className="font-bold text-white text-sm leading-snug mb-2 flex-1">
-        {article.title}
-      </h3>
-
-      {/* Excerpt */}
-      <p className="text-xs leading-relaxed mb-4" style={{ color: 'rgba(255,255,255,0.45)' }}>
-        {article.excerpt}
-      </p>
-
-      {/* Footer */}
-      <div className="flex items-center justify-between mt-auto">
-        <span className="text-xs" style={{ color: '#555' }}>{article.readTime}</span>
-        <Link
-          to="/knowledge"
-          className="text-xs font-semibold transition-colors"
-          style={{ color: article.colour }}
+      <div className="p-6 flex flex-col flex-1">
+        {/* Category pill */}
+        <span
+          className="self-start text-[10px] font-bold uppercase tracking-[0.10em] px-2.5 py-1 rounded-full mb-4"
+          style={{ background: 'rgba(194,24,106,0.12)', color: '#C2186A' }}
         >
-          Read Article →
-        </Link>
+          {article.category}
+        </span>
+
+        {/* Title */}
+        <h3 className="font-bold text-[#F5F5F7] text-base leading-snug mb-3 flex-1">
+          {article.title}
+        </h3>
+
+        {/* Excerpt */}
+        <p className="text-sm text-[#75757D] leading-relaxed mb-5">
+          {article.excerpt}
+        </p>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between mt-auto">
+          <span className="text-xs text-[#5A5A62]">{article.readTime}</span>
+          <Link
+            to="/knowledge"
+            className="text-xs font-semibold text-[#C2186A] transition-colors duration-150 hover:text-[#A41C64]"
+          >
+            Read Article →
+          </Link>
+        </div>
       </div>
     </div>
   );
@@ -87,21 +86,33 @@ function ArticleCard({ article }: { article: Article }) {
 
 export default function KnowledgeHubPreview() {
   return (
-    <section style={{ background: '#0A0A0A', padding: '96px 0' }}>
+    <section
+      style={{
+        background: 'var(--es-bg-page)',
+        padding: '96px 0',
+        borderTop: '1px solid rgba(255,255,255,0.04)',
+      }}
+    >
       <div className="es-container">
         {/* Header */}
         <div className="mb-12 max-w-2xl">
           <p className="es-label mb-3">Knowledge Hub</p>
-          <h2 className="text-3xl lg:text-4xl font-extrabold text-white leading-tight mb-4">
-            Coaching Insights from the Field
+          <h2
+            className="font-black text-[#F5F5F7] leading-tight mb-4"
+            style={{
+              fontSize: 'clamp(1.75rem, 4vw, 2.75rem)',
+              letterSpacing: '-0.035em',
+            }}
+          >
+            Learn Between Sessions
           </h2>
-          <p style={{ color: '#888' }}>
-            Free coaching articles, technique breakdowns, and programming insights for Strongman coaches.
+          <p className="text-[#B8B8BE]">
+            A growing library of event technique, safe practice and programming articles.
           </p>
         </div>
 
         {/* Article grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-10">
           {ARTICLES.map((article) => (
             <ArticleCard key={article.slug} article={article} />
           ))}

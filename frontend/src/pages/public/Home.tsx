@@ -48,6 +48,26 @@ export default function Home() {
         }}
         aria-label="Hero — Educate.Strong Academy"
       >
+        {/* Hero video background */}
+        <video
+          className="absolute inset-0 w-full h-full object-cover"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="none"
+          poster="/assets/coaching-l1-cover.webp"
+          aria-hidden="true"
+        >
+          <source src="/assets/hero-strongman-video.mp4" type="video/mp4" />
+        </video>
+        {/* Dark scrim for text legibility over video */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          aria-hidden="true"
+          style={{ background: 'rgba(5,5,6,0.72)' }}
+        />
+
         {/* Premium dark gradient — layered radials */}
         <div
           className="absolute inset-0 pointer-events-none"
