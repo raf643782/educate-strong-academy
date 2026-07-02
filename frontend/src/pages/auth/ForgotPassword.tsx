@@ -38,7 +38,6 @@ export default function ForgotPassword() {
           <div className="es-card p-7">
             {status === 'sent' ? (
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '40px', marginBottom: '12px' }}>✉️</div>
                 <p style={{ color: '#fff', fontWeight: 700, marginBottom: '10px' }}>Check your inbox</p>
                 <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', lineHeight: 1.6 }}>
                   If that email address is registered, you will receive a password reset link shortly.

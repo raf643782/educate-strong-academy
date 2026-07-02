@@ -12,37 +12,127 @@ function roleHome(role: string): string {
 }
 
 const WORKSPACES = [
-  {
-    key: 'learner',
-    label: 'Learner',
-    desc: 'Access your courses, progress, resources, submissions and certificates.',
-  },
-  {
-    key: 'coach',
-    label: 'Coach',
-    desc: 'Access coach tools, CPD and future certified coach workspace features when enabled.',
-  },
-  {
-    key: 'tutor',
-    label: 'Tutor & Assessor',
-    desc: 'Access learner submissions, feedback tools, assessment review and course support where assigned.',
-  },
-  {
-    key: 'admin',
-    label: 'Admin',
-    desc: 'Manage courses, users, enrolments, cohorts, certificates, documents and platform settings.',
-  },
+  { key: 'learner', label: 'Learner' },
+  { key: 'coach',   label: 'Coach' },
+  { key: 'tutor',   label: 'Tutor & Assessor' },
+  { key: 'admin',   label: 'Admin' },
 ] as const;
 
 type WorkspaceKey = typeof WORKSPACES[number]['key'];
 
+const WS_CONTEXT: Record<WorkspaceKey, string> = {
+  learner: 'Learner dashboard — courses, progress, and certificates.',
+  coach:   'Coach workspace — tools and CPD for certified coaches.',
+  tutor:   'Tutor and assessor review — submissions, feedback, and assessment.',
+  admin:   'Platform admin — courses, users, enrolments, and settings.',
+};
+
+/* ── Shared styles ─────────────────────────────────────────────────── */
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  background: '#0D0D10',
+  border: '1px solid rgba(255,255,255,0.10)',
+  borderRadius: '10px',
+  padding: '13px 16px',
+  color: '#F5F5F7',
+  fontSize: '15px',
+  outline: 'none',
+  boxSizing: 'border-box',
+  transition: 'border-color 0.15s',
+};
+
+const labelStyle: React.CSSProperties = {
+  display: 'block',
+  fontSize: '11px',
+  fontWeight: 700,
+  color: 'rgba(255,255,255,0.45)',
+  textTransform: 'uppercase',
+  letterSpacing: '0.08em',
+  marginBottom: '7px',
+};
+
+const requestBtnStyle: React.CSSProperties = {
+  display: 'inline-block',
+  padding: '10px 18px',
+  borderRadius: '8px',
+  fontSize: '13px',
+  fontWeight: 700,
+  color: 'rgba(255,255,255,0.85)',
+  background: 'rgba(164,28,100,0.14)',
+  border: '1px solid rgba(164,28,100,0.28)',
+  textDecoration: 'none',
+};
+
+/* ── Role-specific bottom CTA ──────────────────────────────────────── */
+
+function WorkspaceCTA({ ws }: { ws: WorkspaceKey }) {
+  if (ws === 'learner') {
+    return (
+      <p style={{ margin: 0, fontSize: '14px', color: 'rgba(255,255,255,0.38)' }}>
+        New to EducateStrong?{' '}
+        <Link to="/register" style={{ color: '#C2186A', fontWeight: 700, textDecoration: 'none' }}>
+          Create a learner account
+        </Link>
+      </p>
+    );
+  }
+
+  if (ws === 'coach') {
+    return (
+      <div>
+        <p style={{ margin: '0 0 12px', fontSize: '13px', color: 'rgba(255,255,255,0.32)', lineHeight: 1.6 }}>
+          Coach accounts are approved by EducateStrong. Request access and the team will confirm your workspace.
+        </p>
+        <a
+          href="mailto:educate.strongltd@gmail.com?subject=Coach%20Account%20Access%20Request"
+          style={requestBtnStyle}
+        >
+          Request coach access
+        </a>
+      </div>
+    );
+  }
+
+  if (ws === 'tutor') {
+    return (
+      <div>
+        <p style={{ margin: '0 0 12px', fontSize: '13px', color: 'rgba(255,255,255,0.32)', lineHeight: 1.6 }}>
+          Tutor and assessor accounts are issued or approved by EducateStrong.
+        </p>
+        <a
+          href="mailto:educate.strongltd@gmail.com?subject=Tutor%20or%20Assessor%20Access%20Request"
+          style={requestBtnStyle}
+        >
+          Request access
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <p style={{ margin: 0, fontSize: '13px', color: 'rgba(255,255,255,0.28)', lineHeight: 1.6 }}>
+      Admin accounts are created by the platform owner.{' '}
+      <a
+        href="mailto:educate.strongltd@gmail.com?subject=Admin%20Account%20Enquiry"
+        style={{ color: 'rgba(255,255,255,0.42)', fontWeight: 600, textDecoration: 'none' }}
+      >
+        Contact administrator
+      </a>
+    </p>
+  );
+}
+
+/* ── Page ──────────────────────────────────────────────────────────── */
+
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+
+  const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [error, setError]       = useState('');
+  const [loading, setLoading]   = useState(false);
   const [activeWs, setActiveWs] = useState<WorkspaceKey>('learner');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,27 +149,9 @@ export default function Login() {
     }
   };
 
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    background: '#0D0D10',
-    border: '1px solid rgba(255,255,255,0.10)',
-    borderRadius: '10px',
-    padding: '13px 16px',
-    color: '#F5F5F7',
-    fontSize: '15px',
-    outline: 'none',
-    boxSizing: 'border-box',
-    transition: 'border-color 0.15s',
-  };
-
-  const labelStyle: React.CSSProperties = {
-    display: 'block',
-    fontSize: '11px',
-    fontWeight: 700,
-    color: 'rgba(255,255,255,0.45)',
-    textTransform: 'uppercase',
-    letterSpacing: '0.08em',
-    marginBottom: '7px',
+  const selectWs = (key: WorkspaceKey) => {
+    setActiveWs(key);
+    setError('');
   };
 
   return (
@@ -89,29 +161,86 @@ export default function Login() {
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '88px 20px 56px' }}>
         <div style={{ width: '100%', maxWidth: '520px' }}>
 
-          {/* Header */}
-          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          {/* Logo */}
+          <div style={{ textAlign: 'center', marginBottom: '24px' }}>
             <img
               src="/assets/es-logo.png"
               alt="EducateStrong Academy"
-              style={{ height: '52px', width: 'auto', margin: '0 auto 20px' }}
+              style={{ height: '52px', width: 'auto', margin: '0 auto' }}
             />
-            <h1 style={{ fontSize: 'clamp(1.5rem, 5vw, 1.875rem)', fontWeight: 900, color: '#F5F5F7', margin: '0 0 10px', letterSpacing: '-0.01em', lineHeight: 1.2 }}>
-              Sign in to EducateStrong Academy
-            </h1>
-            <p style={{ color: '#75757D', fontSize: '14px', lineHeight: 1.6, margin: 0, maxWidth: '380px', marginLeft: 'auto', marginRight: 'auto' }}>
-              Your dashboard opens automatically based on your account role.
-            </p>
           </div>
 
-          {/* Form card */}
+          {/* ── Unified auth card ─────────────────────────────────── */}
           <div style={{
             background: '#151519',
             border: '1px solid rgba(194,24,106,0.12)',
             borderRadius: '16px',
-            padding: '28px',
-            boxShadow: '0 0 0 1px rgba(0,0,0,0.2), 0 20px 60px rgba(0,0,0,0.4)',
+            padding: '32px 28px',
+            boxShadow: '0 0 0 1px rgba(0,0,0,0.2), 0 20px 60px rgba(0,0,0,0.4), 0 0 80px rgba(164,28,100,0.06)',
           }}>
+
+            {/* Heading */}
+            <div style={{ marginBottom: '24px' }}>
+              <h1 style={{
+                fontSize: 'clamp(1.25rem, 4vw, 1.6rem)',
+                fontWeight: 900,
+                color: '#F5F5F7',
+                margin: '0 0 8px',
+                letterSpacing: '-0.01em',
+                lineHeight: 1.2,
+              }}>
+                Sign in to EducateStrong Academy
+              </h1>
+              <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '14px', lineHeight: 1.5, margin: 0 }}>
+                Choose your workspace, then sign in with your account.
+              </p>
+            </div>
+
+            {/* Portal selector */}
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{
+                display: 'flex',
+                gap: '3px',
+                padding: '4px',
+                borderRadius: '10px',
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                overflowX: 'auto',
+              }}>
+                {WORKSPACES.map(ws => (
+                  <button
+                    key={ws.key}
+                    type="button"
+                    onClick={() => selectWs(ws.key)}
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      padding: '8px 6px',
+                      borderRadius: '7px',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      letterSpacing: '0.01em',
+                      background: activeWs === ws.key ? '#A41C64' : 'transparent',
+                      color: activeWs === ws.key ? '#fff' : 'rgba(255,255,255,0.38)',
+                      border: 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {ws.label}
+                  </button>
+                ))}
+              </div>
+              <p style={{ marginTop: '10px', fontSize: '12px', color: 'rgba(255,255,255,0.28)', lineHeight: 1.5 }}>
+                {WS_CONTEXT[activeWs]}
+              </p>
+            </div>
+
+            {/* Divider */}
+            <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', marginBottom: '20px' }} />
+
+            {/* Error banner */}
             {error && (
               <div style={{
                 marginBottom: '20px',
@@ -127,6 +256,7 @@ export default function Login() {
               </div>
             )}
 
+            {/* Form */}
             <form onSubmit={handleSubmit}>
               <div style={{ marginBottom: '16px' }}>
                 <label style={labelStyle}>Email address</label>
@@ -183,79 +313,26 @@ export default function Login() {
                 {loading ? 'Signing in...' : 'Sign In'}
               </button>
             </form>
+
+            {/* Divider */}
+            <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', margin: '24px 0' }} />
+
+            {/* Role-specific create / request access CTA */}
+            <WorkspaceCTA ws={activeWs} />
+
           </div>
 
-          {/* Create account */}
-          <p style={{ textAlign: 'center', fontSize: '14px', color: '#75757D', marginTop: '20px' }}>
-            New to EducateStrong?{' '}
-            <Link to="/register" style={{ color: '#C2186A', fontWeight: 700, textDecoration: 'none' }}>
-              Create a learner account
-            </Link>
-          </p>
-
-          {/* Certificate verification */}
-          <p style={{ textAlign: 'center', fontSize: '13px', color: 'rgba(255,255,255,0.25)', marginTop: '8px' }}>
+          {/* Certificate verification — below card */}
+          <p style={{ textAlign: 'center', fontSize: '13px', color: 'rgba(255,255,255,0.22)', marginTop: '16px' }}>
             Verifying a certificate?{' '}
-            <Link to="/verify" style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 600, textDecoration: 'none' }}>
+            <Link
+              to="/verify"
+              style={{ color: 'rgba(255,255,255,0.38)', fontWeight: 600, textDecoration: 'none' }}
+            >
               Check a certificate
             </Link>
             {' '}— no account needed.
           </p>
-
-          {/* Workspace selector */}
-          <div style={{
-            marginTop: '28px',
-            background: '#151519',
-            border: '1px solid rgba(194,24,106,0.08)',
-            borderRadius: '14px',
-            overflow: 'hidden',
-          }}>
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-              <p style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 12px' }}>
-                Signing in as
-              </p>
-              {/* Tab bar */}
-              <div style={{
-                display: 'flex',
-                gap: '3px',
-                padding: '4px',
-                borderRadius: '10px',
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.08)',
-              }}>
-                {WORKSPACES.map(ws => (
-                  <button
-                    key={ws.key}
-                    type="button"
-                    onClick={() => setActiveWs(ws.key)}
-                    style={{
-                      flex: 1,
-                      padding: '7px 6px',
-                      borderRadius: '7px',
-                      fontSize: '12px',
-                      fontWeight: 700,
-                      background: activeWs === ws.key ? '#A41C64' : 'transparent',
-                      color: activeWs === ws.key ? '#fff' : 'rgba(255,255,255,0.4)',
-                      border: 'none',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {ws.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div style={{ padding: '14px 20px' }}>
-              <p style={{ fontSize: '13px', color: '#B8B8BE', lineHeight: 1.65, margin: '0 0 10px' }}>
-                {WORKSPACES.find(w => w.key === activeWs)?.desc}
-              </p>
-              <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.22)', margin: 0, lineHeight: 1.5 }}>
-                Your account role controls which workspace opens after sign in.
-              </p>
-            </div>
-          </div>
 
         </div>
       </div>
