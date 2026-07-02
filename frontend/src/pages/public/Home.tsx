@@ -243,6 +243,119 @@ export default function Home() {
       {/* ── 10. KNOWLEDGE HUB PREVIEW ──────────────────────────────── */}
       <KnowledgeHubPreview />
 
+      {/* ── 10b. SHOP REFERENCE ────────────────────────────────────── */}
+      <section
+        style={{
+          background: '#050506',
+          padding: '80px 0',
+          borderTop: '1px solid rgba(255,255,255,0.04)',
+          borderBottom: '1px solid rgba(255,255,255,0.04)',
+        }}
+      >
+        <div className="es-container">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+            {/* Text side */}
+            <div style={{ maxWidth: '480px' }}>
+              <p className="es-label mb-4">The Store</p>
+              <h2
+                className="font-black text-white mb-4"
+                style={{ fontSize: 'clamp(1.75rem, 4vw, 3rem)', letterSpacing: '-0.045em', lineHeight: '1.05' }}
+              >
+                Training Kit &amp;
+                <br />
+                <span style={{ color: '#A41C64' }}>Academy Apparel</span>
+              </h2>
+              <p className="text-white/45 leading-relaxed text-sm" style={{ maxWidth: '360px' }}>
+                Monster Dumbbells, coaching apparel, and Strongman equipment built for the culture we teach.
+                Products are being finalised — register your interest now.
+              </p>
+            </div>
+
+            {/* Category cards */}
+            <div className="flex flex-col sm:flex-row gap-4 flex-shrink-0">
+              {/* Dumbbells card */}
+              <Link
+                to="/shop"
+                className="group flex flex-col rounded-2xl overflow-hidden transition-all duration-200 hover:scale-[1.02]"
+                style={{
+                  background: '#151519',
+                  border: '1px solid rgba(255,255,255,0.07)',
+                  width: 'clamp(180px, 22vw, 220px)',
+                }}
+              >
+                <div
+                  className="flex items-center justify-center"
+                  style={{ background: '#1B1B20', height: '120px', padding: '16px' }}
+                  aria-hidden="true"
+                >
+                  <svg viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '140px', height: '72px', opacity: 0.8 }}>
+                    <rect x="10" y="44" width="28" height="32" rx="4" fill="rgba(194,24,106,0.25)" stroke="rgba(194,24,106,0.4)" strokeWidth="1.5"/>
+                    <rect x="38" y="52" width="18" height="16" rx="2" fill="rgba(194,24,106,0.18)" stroke="rgba(194,24,106,0.3)" strokeWidth="1.5"/>
+                    <rect x="56" y="56" width="88" height="8" rx="4" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.18)" strokeWidth="1.5"/>
+                    <rect x="144" y="52" width="18" height="16" rx="2" fill="rgba(194,24,106,0.18)" stroke="rgba(194,24,106,0.3)" strokeWidth="1.5"/>
+                    <rect x="162" y="44" width="28" height="32" rx="4" fill="rgba(194,24,106,0.25)" stroke="rgba(194,24,106,0.4)" strokeWidth="1.5"/>
+                  </svg>
+                </div>
+                <div className="p-4">
+                  <p className="text-sm font-semibold text-white mb-0.5">Monster Dumbbells</p>
+                  <p className="text-[11px] text-white/35">Strongman Equipment</p>
+                </div>
+              </Link>
+
+              {/* Apparel card */}
+              <Link
+                to="/shop"
+                className="group flex flex-col rounded-2xl overflow-hidden transition-all duration-200 hover:scale-[1.02]"
+                style={{
+                  background: '#151519',
+                  border: '1px solid rgba(255,255,255,0.07)',
+                  width: 'clamp(180px, 22vw, 220px)',
+                }}
+              >
+                <div
+                  className="flex items-center justify-center"
+                  style={{ background: '#1B1B20', height: '120px', padding: '16px' }}
+                  aria-hidden="true"
+                >
+                  <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '100px', height: '80px', opacity: 0.8 }}>
+                    <path
+                      d="M60 20 L30 50 L55 65 L55 140 L145 140 L145 65 L170 50 L140 20 Q120 32 100 32 Q80 32 60 20Z"
+                      fill="rgba(194,24,106,0.15)"
+                      stroke="rgba(194,24,106,0.35)"
+                      strokeWidth="1.5"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M60 20 Q80 38 100 38 Q120 38 140 20"
+                      fill="none"
+                      stroke="rgba(255,255,255,0.15)"
+                      strokeWidth="1.5"
+                    />
+                  </svg>
+                </div>
+                <div className="p-4">
+                  <p className="text-sm font-semibold text-white mb-0.5">Academy Apparel</p>
+                  <p className="text-[11px] text-white/35">Coaches &amp; Athletes</p>
+                </div>
+              </Link>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="mt-8">
+            <Link
+              to="/shop"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all duration-200 hover:opacity-85"
+              style={{ background: 'rgba(164,28,100,0.18)', border: '1px solid rgba(164,28,100,0.35)', color: 'rgba(255,255,255,0.85)' }}
+            >
+              Browse the Shop
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* ── 11. FINAL CTA ──────────────────────────────────────────── */}
       <section

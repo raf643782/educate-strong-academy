@@ -39,6 +39,7 @@ const NAV_COLS = [
       { to: '/exercises', label: 'Exercise Library' },
       { to: '/events', label: 'Event Library' },
       { to: '/about', label: 'About' },
+      { to: '/shop', label: 'Shop' },
     ],
   },
   {

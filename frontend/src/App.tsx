@@ -13,6 +13,7 @@ import CoachDirectory from './pages/public/CoachDirectory';
 import CoachProfile from './pages/public/CoachProfile';
 import CoachingPathway from './pages/public/CoachingPathway';
 import CertificateVerify from './pages/public/CertificateVerify';
+import Shop from './pages/public/Shop';
 
 // Auth pages
 import Login from './pages/auth/Login';
@@ -84,6 +85,7 @@ export default function App() {
           <Route path="/coaches/:slug" element={<CoachProfile />} />
           <Route path="/verify/:code" element={<CertificateVerify />} />
           <Route path="/verify" element={<CertificateVerify />} />
+          <Route path="/shop" element={<Shop />} />
           <Route path="/knowledge" element={<KnowledgeHub />} />
           <Route path="/exercises" element={<ExerciseLibrary />} />
           <Route path="/events" element={<EventLibrary />} />

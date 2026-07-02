@@ -259,6 +259,18 @@ export default function Navbar() {
             >
               About
             </NavLink>
+
+            <NavLink
+              to="/shop"
+              className={({ isActive }) => `
+                px-4 py-2 rounded-full text-sm font-medium transition-all duration-200
+                ${isActive
+                  ? 'bg-white/10 text-white ring-1 ring-white/20'
+                  : 'text-white/70 hover:text-white hover:bg-white/8'}
+              `}
+            >
+              Shop
+            </NavLink>
           </div>
 
           {/* ── Auth actions ───────────────────────────────────────────── */}
@@ -398,6 +410,9 @@ export default function Navbar() {
             </Link>
             <Link to="/about" onClick={close} className="block px-3 py-2.5 rounded-xl text-sm text-white/70 hover:text-white hover:bg-white/6 transition-colors">
               About
+            </Link>
+            <Link to="/shop" onClick={close} className="block px-3 py-2.5 rounded-xl text-sm text-white/70 hover:text-white hover:bg-white/6 transition-colors">
+              Shop
             </Link>
 
             <div className="my-3" style={{ height: '1px', background: 'rgba(255,255,255,0.07)' }} />
