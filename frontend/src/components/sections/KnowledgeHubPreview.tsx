@@ -10,25 +10,25 @@ interface Article {
 
 const ARTICLES: Article[] = [
   {
-    slug: 'coaching-the-log-press',
-    category: 'Event Technique',
-    title: 'Coaching the Log Press: Technique Cues That Work',
-    excerpt: 'The log press is the most technical overhead movement in Strongman. These are the cues that make the difference between a grind and a clean rep.',
-    readTime: '5 min read',
-  },
-  {
-    slug: 'athlete-screening-strongman',
-    category: 'Safe Practice',
-    title: 'Why Athlete Screening Matters Before Your First Session',
-    excerpt: "Screening isn't box-ticking. It's the single most important thing you can do before putting a new athlete under load in a Strongman context.",
-    readTime: '4 min read',
-  },
-  {
-    slug: 'yoke-fundamentals',
-    category: 'Event Technique',
-    title: 'Yoke Fundamentals: What Coaches Often Miss',
-    excerpt: 'Most coaches focus on leg drive. The coaches who get the best results out of yoke focus on something else entirely.',
+    slug: 'how-to-read-a-strongman-event-sheet',
+    category: 'Competition Preparation',
+    title: 'How to Read a Strongman Event Sheet Without Missing the Important Bits',
+    excerpt: 'Event sheets contain everything that determines your competition day. Rules vary by federation, promoter, and competition — here is how to read them properly.',
     readTime: '6 min read',
+  },
+  {
+    slug: 'atlas-stone-technique',
+    category: 'Event Technique',
+    title: 'Atlas Stone Technique: The Stone-to-Lap Phase',
+    excerpt: 'The stone-to-lap phase is where most technical errors in atlas stone lifting occur. A detailed coaching breakdown of the most common fault patterns.',
+    readTime: '8 min read',
+  },
+  {
+    slug: 'start-strongman-safely',
+    category: 'Safe Practice',
+    title: "Start Strongman Safely: A Guide for New Athletes",
+    excerpt: 'What new athletes need to know before their first session — implement progression, supervision, and the coaching priorities that reduce injury risk.',
+    readTime: '7 min read',
   },
 ];
 
