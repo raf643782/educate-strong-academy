@@ -17,7 +17,7 @@ export default function CourseHero({
   badges, headline, subHeadline, keyFacts, contactEmail,
   isEnrolled, firstLessonUrl, onEnrol, enrolling,
 }: CourseHeroProps) {
-  const securePlaceHref = `mailto:${contactEmail}?subject=Secure%20My%20Place%20on%20the%20Educate.Strong%20Course`;
+  const registerInterestHref = `/register-interest?interest=${encodeURIComponent(headline)}`;
 
   return (
     <section
@@ -59,7 +59,7 @@ export default function CourseHero({
             ) : isEnrolled ? (
               <span className="btn-primary text-sm opacity-70">Enrolled in Online Materials</span>
             ) : (
-              <a href={securePlaceHref} className="btn-primary text-sm">Secure Your Place</a>
+              <Link to={registerInterestHref} className="btn-primary text-sm">Secure Your Place</Link>
             )}
             {onEnrol && !isEnrolled && (
               <button onClick={onEnrol} disabled={enrolling}

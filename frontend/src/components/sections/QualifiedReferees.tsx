@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { CONTACT_EMAIL } from '../../lib/contact';
 
 /**
  * QualifiedReferees — showcases the referee cohort with a group photo.
@@ -115,12 +114,12 @@ export default function QualifiedReferees() {
               <Link to="/courses/level-1-strongman-refereeing" className="btn-primary text-sm">
                 View Refereeing Course
               </Link>
-              <a
-                href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Register Interest — Refereeing')}`}
+              <Link
+                to="/register-interest?interest=Refereeing"
                 className="btn-secondary text-sm"
               >
                 Register Interest
-              </a>
+              </Link>
             </div>
           </div>
         </div>

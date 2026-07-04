@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { CONTACT_EMAIL } from '../../lib/contact';
 
 const FILTERS = ['All Levels', 'Coaching', 'Refereeing', 'StrongKidz'];
 
@@ -126,12 +125,12 @@ export default function CertifiedCoachesSection() {
             Complete a Level 1 qualification to be among the first listed.
           </p>
           <div className="flex flex-wrap gap-3 justify-center mt-6">
-            <a
-              href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Certified Coach Directory - Register Interest')}`}
+            <Link
+              to="/register-interest?interest=Certified%20Coach%20Directory"
               className="btn-primary"
             >
               Register Interest
-            </a>
+            </Link>
             <Link to="/coaches" className="btn-secondary">
               View Full Directory
             </Link>

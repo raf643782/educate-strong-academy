@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import type { PricingData } from '../../data/coursePageData';
 
 interface CoursePricingCardProps {
@@ -6,7 +7,7 @@ interface CoursePricingCardProps {
 }
 
 export default function CoursePricingCard({ pricing, contactEmail }: CoursePricingCardProps) {
-  const securePlaceHref = `mailto:${contactEmail}?subject=Secure%20My%20Place%20—%20${encodeURIComponent(pricing.title)}`;
+  const registerInterestHref = `/register-interest?interest=${encodeURIComponent(pricing.title)}`;
   const armedForcesHref = `mailto:${contactEmail}?subject=Armed%20Forces%20Discount%20Enquiry`;
 
   return (
@@ -66,9 +67,9 @@ export default function CoursePricingCard({ pricing, contactEmail }: CoursePrici
 
             {/* CTAs */}
             <div className="px-6 py-5" style={{ background: '#1B1B20' }}>
-              <a href={securePlaceHref} className="btn-primary w-full text-center block text-sm mb-3">
+              <Link to={registerInterestHref} className="btn-primary w-full text-center block text-sm mb-3">
                 Secure Your Place
-              </a>
+              </Link>
               <p className="text-xs text-es-subtle text-center mb-4">
                 Secure your place by contacting Educate.Strong directly. Booking details confirmed on reply.
               </p>

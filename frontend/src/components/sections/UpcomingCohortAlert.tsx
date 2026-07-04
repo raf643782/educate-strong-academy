@@ -11,7 +11,6 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CONTACT_EMAIL } from '../../lib/contact';
 
 /* ── Cohort configuration ──────────────────────────────────────────── */
 const COHORT = {
@@ -186,13 +185,13 @@ export default function UpcomingCohortAlert() {
               )}
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
-              <a
-                href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Register Interest — Level 1 Coaching')}`}
+              <Link
+                to="/register-interest?interest=Level%201%20Coaching"
                 className="text-xs font-semibold px-4 py-2 rounded-full transition-all duration-200"
                 style={{ background: 'rgba(164,28,100,0.2)', border: '1px solid rgba(164,28,100,0.35)', color: '#A41C64' }}
               >
                 Register Interest
-              </a>
+              </Link>
               <Link
                 to={COHORT.bookingUrl}
                 className="text-xs font-semibold px-4 py-2 rounded-full text-white transition-all duration-200 hover:scale-105"
@@ -260,8 +259,8 @@ export default function UpcomingCohortAlert() {
               Find Location
               <ChevronIcon open={finderOpen} />
             </button>
-            <a
-              href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Register Interest — Level 1 Coaching')}`}
+            <Link
+              to="/register-interest?interest=Level%201%20Coaching"
               className="text-xs font-semibold px-4 py-2 rounded-full transition-all duration-200 hover:opacity-90"
               style={{
                 background: 'rgba(164,28,100,0.18)',
@@ -270,7 +269,7 @@ export default function UpcomingCohortAlert() {
               }}
             >
               Register Interest
-            </a>
+            </Link>
             <Link
               to={COHORT.bookingUrl}
               className="text-xs font-semibold px-4 py-2 rounded-full text-white transition-all duration-200 hover:scale-105 active:scale-100"

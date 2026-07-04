@@ -23,7 +23,6 @@ import PartnerLogosMarquee from '../../components/sections/PartnerLogosMarquee';
 import TestimonialsSection from '../../components/sections/TestimonialsSection';
 import WhyEducateStrong from '../../components/sections/WhyEducateStrong';
 import AllPathwaysOverview from '../../components/sections/AllPathwaysOverview';
-import { CONTACT_EMAIL } from '../../lib/contact';
 import CertifiedCoachesSection from '../../components/sections/CertifiedCoachesSection';
 import TutorCredibilityStrip from '../../components/sections/TutorCredibilityStrip';
 import KnowledgeHubPreview from '../../components/sections/KnowledgeHubPreview';
@@ -404,13 +403,13 @@ export default function Home() {
             >
               Explore Courses
             </Link>
-            <a
-              href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Register Interest')}`}
+            <Link
+              to="/register-interest?interest=Educate.Strong"
               className="px-8 py-4 rounded-full font-semibold transition-all duration-200 hover:bg-white/6"
               style={{ border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.7)' }}
             >
               Register Interest
-            </a>
+            </Link>
           </div>
         </div>
       </section>

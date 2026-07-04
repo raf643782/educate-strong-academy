@@ -15,6 +15,7 @@ import CoachingPathway from './pages/public/CoachingPathway';
 import CertificateVerify from './pages/public/CertificateVerify';
 import Shop from './pages/public/Shop';
 import NotFound from './pages/public/NotFound';
+import RegisterInterest from './pages/public/RegisterInterest';
 
 // Auth pages
 import Login from './pages/auth/Login';
@@ -88,6 +89,7 @@ export default function App() {
           <Route path="/verify/:code" element={<CertificateVerify />} />
           <Route path="/verify" element={<CertificateVerify />} />
           <Route path="/shop" element={<Shop />} />
+          <Route path="/register-interest" element={<RegisterInterest />} />
           <Route path="/knowledge" element={<KnowledgeHub />} />
           <Route path="/knowledge/:slug" element={<KnowledgeArticlePage />} />
           <Route path="/exercises" element={<ExerciseLibrary />} />

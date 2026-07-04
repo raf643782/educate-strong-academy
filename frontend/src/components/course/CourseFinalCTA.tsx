@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 interface CourseFinalCTAProps {
   courseTitle: string;
   contactEmail: string;
@@ -5,7 +7,7 @@ interface CourseFinalCTAProps {
 }
 
 export default function CourseFinalCTA({ courseTitle, contactEmail, pricing }: CourseFinalCTAProps) {
-  const securePlaceHref = `mailto:${contactEmail}?subject=Secure%20My%20Place%20—%20${encodeURIComponent(courseTitle)}`;
+  const registerInterestHref = `/register-interest?interest=${encodeURIComponent(courseTitle)}`;
   const contactHref = `mailto:${contactEmail}?subject=Course%20Enquiry%20—%20${encodeURIComponent(courseTitle)}`;
   return (
     <section className="es-grit" style={{
@@ -18,7 +20,7 @@ export default function CourseFinalCTA({ courseTitle, contactEmail, pricing }: C
           <p className="text-es-muted mb-2">Spaces are limited. Contact Educate.Strong to secure your place.</p>
           <p className="text-es-subtle text-sm mb-8">Deposit: £{pricing.deposit} — Total: £{pricing.totalFee}. Booking details confirmed directly.</p>
           <div className="flex flex-wrap gap-4">
-            <a href={securePlaceHref} className="btn-primary">Secure Your Place</a>
+            <Link to={registerInterestHref} className="btn-primary">Secure Your Place</Link>
             <a href={contactHref} className="btn-secondary">Contact Educate.Strong</a>
           </div>
         </div>

@@ -1,16 +1,36 @@
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import rateLimit from 'express-rate-limit';
 
 const router = Router();
 const prisma = new PrismaClient();
 
+const registerInterestLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many submissions from this IP. Please try again later.' },
+});
+
 // POST /api/register-interest — public, no auth required
-router.post('/', async (req: Request, res: Response): Promise<void> => {
+router.post('/', registerInterestLimiter, async (req: Request, res: Response): Promise<void> => {
   try {
     const { firstName, lastName, email, phone, courseInterest, locationInterest, message, sourcePage } = req.body;
 
     if (!firstName || !lastName || !email) {
       res.status(400).json({ error: 'First name, last name, and email are required.' });
+      return;
+    }
+
+    if (
+      String(firstName).length > 100 ||
+      String(lastName).length > 100 ||
+      String(email).length > 200 ||
+      (phone && String(phone).length > 40) ||
+      (message && String(message).length > 2000)
+    ) {
+      res.status(400).json({ error: 'One or more fields exceed the maximum allowed length.' });
       return;
     }
 

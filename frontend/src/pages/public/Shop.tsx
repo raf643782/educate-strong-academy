@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
-import { CONTACT_EMAIL } from '../../lib/contact';
 
 /* ── SVG placeholders ─────────────────────────────────────────────────────── */
 
@@ -69,13 +68,13 @@ function ProductCard({ name, note, SvgComponent, enquirySubject }: ProductCardPr
           {note}
         </p>
         <div className="mt-auto">
-          <a
-            href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(enquirySubject)}`}
+          <Link
+            to={`/register-interest?interest=${encodeURIComponent(enquirySubject)}`}
             className="inline-block w-full py-2.5 rounded-xl text-sm font-semibold text-center transition-all duration-200 hover:opacity-90"
             style={{ background: 'rgba(164,28,100,0.18)', border: '1px solid rgba(164,28,100,0.35)', color: 'rgba(255,255,255,0.85)' }}
           >
             Register Interest
-          </a>
+          </Link>
         </div>
       </div>
     </div>
@@ -267,8 +266,8 @@ export default function Shop() {
             Products and pricing are being finalised. Register your interest and we'll be in touch when stock is confirmed.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
-            <a
-              href={`mailto:${CONTACT_EMAIL}?subject=Shop%20Enquiry`}
+            <Link
+              to="/register-interest?interest=Shop"
               className="px-8 py-4 rounded-full font-semibold text-white transition-all duration-200 hover:scale-105"
               style={{
                 background: 'linear-gradient(135deg, #A41C64, #C0246E)',
@@ -276,7 +275,7 @@ export default function Shop() {
               }}
             >
               Register Interest
-            </a>
+            </Link>
             <Link
               to="/courses"
               className="px-8 py-4 rounded-full font-semibold transition-all duration-200 hover:bg-white/6"

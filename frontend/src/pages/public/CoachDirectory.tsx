@@ -202,8 +202,8 @@ export default function CoachDirectory() {
           </p>
 
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <a
-              href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Certified Coach Directory - Register Interest')}`}
+            <Link
+              to="/register-interest?interest=Certified%20Coach%20Directory"
               style={{
                 display: 'inline-block',
                 background: 'linear-gradient(135deg, #A41C64, #C0246E)',
@@ -216,7 +216,7 @@ export default function CoachDirectory() {
               }}
             >
               Register Interest
-            </a>
+            </Link>
             <Link
               to="/coaching"
               style={{

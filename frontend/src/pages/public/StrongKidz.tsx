@@ -323,12 +323,12 @@ export default function StrongKidz() {
                 Educate.Strong will be in touch with availability and session details.
               </p>
               <div className="flex flex-wrap gap-4">
-                <a
-                  href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('StrongKidz — Register Interest (Parent)')}`}
+                <Link
+                  to="/register-interest?interest=StrongKidz%20(Parent)"
                   className="btn-primary"
                 >
                   Register Interest
-                </a>
+                </Link>
                 <a href={`mailto:${CONTACT_EMAIL}`} className="btn-secondary">
                   Contact Educate.Strong
                 </a>
@@ -397,12 +397,12 @@ export default function StrongKidz() {
                   <Link to="/courses/strongkidz-coach-education" className="btn-primary">
                     Explore Certification
                   </Link>
-                  <a
-                    href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('StrongKidz Coach Education Enquiry')}`}
+                  <Link
+                    to="/register-interest?interest=StrongKidz%20Coach%20Education"
                     className="btn-secondary"
                   >
                     Ask a Question
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
