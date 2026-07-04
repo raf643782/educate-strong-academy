@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import api from '../../lib/api';
+import { CONTACT_EMAIL } from '../../lib/contact';
 
 interface CourseDocument {
   id: string;
@@ -56,7 +57,7 @@ export default function Documents() {
     if (doc.status === 'COMING_SOON' || !doc.fileUrl) {
       setDownloadMsg(
         `"${doc.title}" — File hosting not yet configured. ` +
-        'Request this document by emailing educate.strongltd@gmail.com. ' +
+        `Request this document by emailing ${CONTACT_EMAIL}. ` +
         'File hosting is in development.'
       );
       setTimeout(() => setDownloadMsg(null), 8000);

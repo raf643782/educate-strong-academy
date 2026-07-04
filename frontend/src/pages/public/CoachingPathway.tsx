@@ -13,6 +13,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
+import { CONTACT_EMAIL } from '../../lib/contact';
 
 /* ── Pathway Steps ──────────────────────────────────────────────── */
 const STEPS = [
@@ -483,7 +484,7 @@ export default function CoachingPathway() {
               Enrol in Level 1
             </Link>
             <a
-              href="mailto:educate.strongltd@gmail.com?subject=Register%20Interest%20—%20Coaching%20Pathway"
+              href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Register Interest — Coaching Pathway')}`}
               className="px-8 py-4 rounded-full font-semibold text-sm transition-all duration-200 hover:bg-white/6"
               style={{ border: '1px solid rgba(255,255,255,0.14)', color: 'rgba(255,255,255,0.65)' }}
             >

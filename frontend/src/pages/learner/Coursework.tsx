@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import api from '../../lib/api';
+import { CONTACT_EMAIL } from '../../lib/contact';
 
 type SubmissionStatus = 'PENDING' | 'IN_REVIEW' | 'PASSED' | 'FAILED' | 'REFERRED' | 'NEEDS_CHANGES';
 interface Submission { id: string; status: SubmissionStatus; content?: string; feedback?: string; score?: number; submittedAt: string; gradedAt?: string; }
@@ -85,7 +86,7 @@ function SubmitPanel({ assessment, onSubmitted }: { assessment: Assessment; onSu
       <div className="rounded-lg p-4 border-dashed" style={{ border: '1px dashed rgba(255,255,255,0.14)', background: '#111116' }}>
         <p className="text-xs text-es-subtle text-center">
           File attachments are not yet supported. For supporting files email{' '}
-          <a href="mailto:educate.strongltd@gmail.com" className="underline" style={{ color: '#A41C64' }}>educate.strongltd@gmail.com</a>
+          <a href={`mailto:${CONTACT_EMAIL}`} className="underline" style={{ color: '#A41C64' }}>{CONTACT_EMAIL}</a>
         </p>
       </div>
       {err && <p className="text-xs text-red-400">{err}</p>}

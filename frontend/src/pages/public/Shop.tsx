@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
+import { CONTACT_EMAIL } from '../../lib/contact';
 
 /* ── SVG placeholders ─────────────────────────────────────────────────────── */
 
@@ -69,7 +70,7 @@ function ProductCard({ name, note, SvgComponent, enquirySubject }: ProductCardPr
         </p>
         <div className="mt-auto">
           <a
-            href={`mailto:educate.strongltd@gmail.com?subject=${encodeURIComponent(enquirySubject)}`}
+            href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(enquirySubject)}`}
             className="inline-block w-full py-2.5 rounded-xl text-sm font-semibold text-center transition-all duration-200 hover:opacity-90"
             style={{ background: 'rgba(164,28,100,0.18)', border: '1px solid rgba(164,28,100,0.35)', color: 'rgba(255,255,255,0.85)' }}
           >
@@ -85,17 +86,17 @@ function ProductCard({ name, note, SvgComponent, enquirySubject }: ProductCardPr
 const DUMBBELL_PRODUCTS: Omit<ProductCardProps, 'SvgComponent'>[] = [
   {
     name: 'Monster Dumbbell — 40kg',
-    note: 'Coming soon — placeholder',
+    note: 'Coming soon — register your interest',
     enquirySubject: 'Shop Enquiry — Monster Dumbbell 40kg',
   },
   {
     name: 'Monster Dumbbell — 60kg',
-    note: 'Coming soon — placeholder',
+    note: 'Coming soon — register your interest',
     enquirySubject: 'Shop Enquiry — Monster Dumbbell 60kg',
   },
   {
     name: 'Monster Dumbbell — 80kg',
-    note: 'Coming soon — placeholder',
+    note: 'Coming soon — register your interest',
     enquirySubject: 'Shop Enquiry — Monster Dumbbell 80kg',
   },
 ];
@@ -104,17 +105,17 @@ const DUMBBELL_PRODUCTS: Omit<ProductCardProps, 'SvgComponent'>[] = [
 const APPAREL_PRODUCTS: Omit<ProductCardProps, 'SvgComponent'>[] = [
   {
     name: 'Academy T-Shirt',
-    note: 'Coming soon — placeholder',
+    note: 'Coming soon — register your interest',
     enquirySubject: 'Shop Enquiry — Academy T-Shirt',
   },
   {
     name: 'Coaches Hoodie',
-    note: 'Coming soon — placeholder',
+    note: 'Coming soon — register your interest',
     enquirySubject: 'Shop Enquiry — Coaches Hoodie',
   },
   {
     name: 'EducateStrong Cap',
-    note: 'Coming soon — placeholder',
+    note: 'Coming soon — register your interest',
     enquirySubject: 'Shop Enquiry — EducateStrong Cap',
   },
 ];
@@ -267,7 +268,7 @@ export default function Shop() {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <a
-              href="mailto:educate.strongltd@gmail.com?subject=Shop%20Enquiry"
+              href={`mailto:${CONTACT_EMAIL}?subject=Shop%20Enquiry`}
               className="px-8 py-4 rounded-full font-semibold text-white transition-all duration-200 hover:scale-105"
               style={{
                 background: 'linear-gradient(135deg, #A41C64, #C0246E)',

@@ -11,6 +11,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import api from '../../lib/api';
+import { CONTACT_EMAIL } from '../../lib/contact';
 
 interface VerifiedCertificate {
   id: string;
@@ -233,7 +234,7 @@ export default function CertificateVerify() {
               </p>
               <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: '12px' }}>
                 If you believe this is an error, contact{' '}
-                <a href="mailto:info@educate-strong.com" style={{ color: '#A41C64' }}>info@educate-strong.com</a>
+                <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: '#A41C64' }}>{CONTACT_EMAIL}</a>
               </p>
             </div>
           )}

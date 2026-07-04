@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { CONTACT_EMAIL } from '../../lib/contact';
 
 const COURSE_DETAILS = [
   { label: 'Location', value: 'To be confirmed' },
@@ -50,7 +51,7 @@ export default function NextCourseSection() {
 
             <div className="flex flex-wrap gap-4">
               <a
-                href="mailto:educate.strongltd@gmail.com?subject=Register%20Interest%20%E2%80%94%20Level%201%20Coaching"
+                href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Register Interest — Level 1 Coaching')}`}
                 className="btn-primary"
               >
                 Register Interest

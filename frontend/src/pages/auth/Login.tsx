@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Navbar from '../../components/layout/Navbar';
+import { CONTACT_EMAIL } from '../../lib/contact';
 
 function roleHome(role: string): string {
   if (role === 'ADMIN') return '/admin';
@@ -85,7 +86,7 @@ function WorkspaceCTA({ ws }: { ws: WorkspaceKey }) {
           Coach accounts are approved by EducateStrong. Request access and the team will confirm your workspace.
         </p>
         <a
-          href="mailto:educate.strongltd@gmail.com?subject=Coach%20Account%20Access%20Request"
+          href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Coach Account Access Request')}`}
           style={requestBtnStyle}
         >
           Request coach access
@@ -101,7 +102,7 @@ function WorkspaceCTA({ ws }: { ws: WorkspaceKey }) {
           Tutor and assessor accounts are issued or approved by EducateStrong.
         </p>
         <a
-          href="mailto:educate.strongltd@gmail.com?subject=Tutor%20or%20Assessor%20Access%20Request"
+          href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Tutor or Assessor Access Request')}`}
           style={requestBtnStyle}
         >
           Request access
@@ -114,7 +115,7 @@ function WorkspaceCTA({ ws }: { ws: WorkspaceKey }) {
     <p style={{ margin: 0, fontSize: '13px', color: 'rgba(255,255,255,0.28)', lineHeight: 1.6 }}>
       Admin accounts are created by the platform owner.{' '}
       <a
-        href="mailto:educate.strongltd@gmail.com?subject=Admin%20Account%20Enquiry"
+        href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Admin Account Enquiry')}`}
         style={{ color: 'rgba(255,255,255,0.42)', fontWeight: 600, textDecoration: 'none' }}
       >
         Contact administrator

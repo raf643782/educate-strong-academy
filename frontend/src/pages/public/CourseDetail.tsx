@@ -18,6 +18,8 @@ import Badge, { pathwayVariant, levelVariant } from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../lib/api';
+import { CONTACT_EMAIL } from '../../lib/contact';
+import { UNLAUNCHED_COURSE_SLUGS } from '../../data/courseLaunchStatus';
 
 // Rich course page components
 import CourseHero from '../../components/course/CourseHero';
@@ -79,6 +81,8 @@ export default function CourseDetail() {
 
   const [course, setCourse] = useState<CourseAPI | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [slowLoad, setSlowLoad] = useState(false);
   const [enrolling, setEnrolling] = useState(false);
   const [enrolled, setEnrolled] = useState(false);
   const [openModules, setOpenModules] = useState<Set<string>>(new Set());
@@ -87,14 +91,28 @@ export default function CourseDetail() {
   // Look up rich static data — determines which view to render
   const richData = slug ? COURSE_PAGE_DATA[slug] : undefined;
 
-  useEffect(() => {
+  const loadCourse = () => {
     if (!slug) return;
+    setLoading(true);
+    setLoadError(false);
+    setSlowLoad(false);
     api
       .get(`/courses/${slug}`)
       .then((res) => setCourse(res.data))
-      .catch(() => {})
+      .catch((err) => {
+        if (err?.response?.status === 404) setCourse(null);
+        else setLoadError(true);
+      })
       .finally(() => setLoading(false));
-  }, [slug]);
+  };
+
+  useEffect(() => { loadCourse(); }, [slug]);
+
+  useEffect(() => {
+    if (!loading) return;
+    const timer = setTimeout(() => setSlowLoad(true), 4000);
+    return () => clearTimeout(timer);
+  }, [loading]);
 
   const handleEnrol = async () => {
     if (!isAuthenticated) {
@@ -128,8 +146,26 @@ export default function CourseDetail() {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <div className="flex-1 flex items-center justify-center text-sm" style={{ color: '#75757D', background: '#050506' }}>
-          Loading...
+        <div className="flex-1 flex flex-col items-center justify-center text-sm gap-2" style={{ color: '#75757D', background: '#050506' }}>
+          <div className="animate-pulse" style={{ width: '220px', height: '16px', background: '#151519', borderRadius: '8px' }} />
+          <p>{slowLoad ? 'Waking the server, this can take a few seconds on first load.' : 'Loading course...'}</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Load error (distinct from not-found)
+  if (loadError) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center" style={{ background: '#050506', padding: '80px 0' }}>
+            <h2 className="text-2xl font-bold text-white mb-2">Couldn't load this course</h2>
+            <p className="text-sm mb-4" style={{ color: '#75757D' }}>Something went wrong. Please try again.</p>
+            <button onClick={loadCourse} className="btn-primary">Retry</button>
+          </div>
         </div>
         <Footer />
       </div>
@@ -158,6 +194,7 @@ export default function CourseDetail() {
   const firstLessonUrl = firstLessonId
     ? `/learn/${course.slug}/lessons/${firstLessonId}`
     : undefined;
+  const comingSoon = UNLAUNCHED_COURSE_SLUGS.has(course.slug);
 
   // ── RICH MARKETING PAGE (courses with static data) ────────────────────────
   if (richData) {
@@ -401,6 +438,7 @@ export default function CourseDetail() {
           <div className="mb-4 flex gap-2 flex-wrap">
             <Badge variant={pathwayVariant(course.pathway)}>{pathwayLabel(course.pathway)}</Badge>
             <Badge variant={levelVariant(course.level)}>Level {course.level}</Badge>
+            {comingSoon && <span className="badge-amber">Coming Soon</span>}
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-5 max-w-3xl leading-tight">
             {course.title}
@@ -411,7 +449,14 @@ export default function CourseDetail() {
             <span>{course.modules.length} modules</span>
           </div>
 
-          {enrolled ? (
+          {comingSoon ? (
+            <span
+              className="inline-block font-semibold px-6 py-3 rounded-full text-sm"
+              style={{ background: 'rgba(225,154,71,0.12)', border: '1px solid rgba(225,154,71,0.3)', color: '#E19A47' }}
+            >
+              Coming Soon — Not Yet Open for Enrolment
+            </span>
+          ) : enrolled ? (
             <div className="flex gap-3 flex-wrap">
               <span
                 className="font-semibold px-6 py-3 rounded-full text-sm text-white"
@@ -448,10 +493,10 @@ export default function CourseDetail() {
           <p className="text-sm" style={{ color: '#E19A47' }}>
             Full course details for this qualification are being prepared. Contact{' '}
             <a
-              href="mailto:educate.strongltd@gmail.com"
+              href={`mailto:${CONTACT_EMAIL}`}
               className="underline"
             >
-              educate.strongltd@gmail.com
+              {CONTACT_EMAIL}
             </a>{' '}
             for more information.
           </p>

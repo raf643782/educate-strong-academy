@@ -9,6 +9,7 @@
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
+import { CONTACT_EMAIL } from '../../lib/contact';
 
 const FILTERS = ['All', 'Level 1 Coaching', 'Level 1 Refereeing', 'StrongKidz'];
 
@@ -202,7 +203,7 @@ export default function CoachDirectory() {
 
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <a
-              href="mailto:info@educate-strong.com?subject=Certified Coach Directory - Register Interest"
+              href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Certified Coach Directory - Register Interest')}`}
               style={{
                 display: 'inline-block',
                 background: 'linear-gradient(135deg, #A41C64, #C0246E)',
@@ -233,7 +234,7 @@ export default function CoachDirectory() {
               View Coaching Pathway
             </Link>
             <a
-              href="mailto:info@educate-strong.com"
+              href={`mailto:${CONTACT_EMAIL}`}
               style={{
                 display: 'inline-block',
                 background: 'transparent',

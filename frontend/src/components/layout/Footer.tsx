@@ -4,6 +4,7 @@
  */
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { CONTACT_EMAIL } from '../../lib/contact';
 
 /* ── Partner logo data ─────────────────────────────────────────────── */
 interface Partner {
@@ -242,10 +243,10 @@ export default function Footer() {
               <span className="font-semibold text-white/25">VIRES</span>
             </span>
             <a
-              href="mailto:educate.strongltd@gmail.com"
+              href={`mailto:${CONTACT_EMAIL}`}
               className="text-[11px] text-white/20 hover:text-white/45 transition-colors"
             >
-              educate.strongltd@gmail.com
+              {CONTACT_EMAIL}
             </a>
           </div>
         </div>

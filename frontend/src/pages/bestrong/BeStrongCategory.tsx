@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import api from '../../lib/api';
+import { CONTACT_EMAIL } from '../../lib/contact';
 
 interface Article {
   id: string;
@@ -217,7 +218,7 @@ export default function EatStrongCategory() {
                                 style={{ background: 'rgba(225,154,71,0.08)', border: '1px solid rgba(225,154,71,0.2)', color: '#E19A47' }}
                               >
                                 Download files will be available once document hosting is configured. In the meantime, contact{' '}
-                                <a href="mailto:educate.strongltd@gmail.com" className="underline">educate.strongltd@gmail.com</a>
+                                <a href={`mailto:${CONTACT_EMAIL}`} className="underline">{CONTACT_EMAIL}</a>
                                 {' '}to request this resource.
                               </div>
                             )}

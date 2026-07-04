@@ -14,6 +14,8 @@
  * without changing the page component or Prisma schema.
  */
 
+import { CONTACT_EMAIL } from '../lib/contact';
+
 export interface TutorData {
   name: string;
   role: string;
@@ -326,7 +328,7 @@ export const COURSE_PAGE_DATA: Record<string, CoursePageData> = {
       },
     ],
 
-    contactEmail: 'educate.strongltd@gmail.com',
+    contactEmail: CONTACT_EMAIL,
   },
 
   // ── Level 1 Strongman Refereeing Certification ───────────────────────────
@@ -488,6 +490,6 @@ export const COURSE_PAGE_DATA: Record<string, CoursePageData> = {
       },
     ],
 
-    contactEmail: 'educate.strongltd@gmail.com',
+    contactEmail: CONTACT_EMAIL,
   },
 };

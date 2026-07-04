@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
+import { CONTACT_EMAIL } from '../../lib/contact';
 
 const TEAM = [
   {
@@ -272,7 +273,7 @@ export default function About() {
             </p>
             <div className="flex flex-wrap gap-4">
               <Link to="/courses" className="btn-primary">Explore Courses</Link>
-              <a href="mailto:educate.strongltd@gmail.com" className="btn-secondary">Contact Us</a>
+              <a href={`mailto:${CONTACT_EMAIL}`} className="btn-secondary">Contact Us</a>
             </div>
           </div>
         </div>

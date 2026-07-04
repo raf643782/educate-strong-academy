@@ -11,6 +11,7 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { CONTACT_EMAIL } from '../../lib/contact';
 
 /* ── Cohort configuration ──────────────────────────────────────────── */
 const COHORT = {
@@ -186,7 +187,7 @@ export default function UpcomingCohortAlert() {
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               <a
-                href="mailto:educate.strongltd@gmail.com?subject=Register%20Interest%20—%20Level%201%20Coaching"
+                href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Register Interest — Level 1 Coaching')}`}
                 className="text-xs font-semibold px-4 py-2 rounded-full transition-all duration-200"
                 style={{ background: 'rgba(164,28,100,0.2)', border: '1px solid rgba(164,28,100,0.35)', color: '#A41C64' }}
               >
@@ -260,7 +261,7 @@ export default function UpcomingCohortAlert() {
               <ChevronIcon open={finderOpen} />
             </button>
             <a
-              href="mailto:educate.strongltd@gmail.com?subject=Register%20Interest%20—%20Level%201%20Coaching"
+              href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Register Interest — Level 1 Coaching')}`}
               className="text-xs font-semibold px-4 py-2 rounded-full transition-all duration-200 hover:opacity-90"
               style={{
                 background: 'rgba(164,28,100,0.18)',

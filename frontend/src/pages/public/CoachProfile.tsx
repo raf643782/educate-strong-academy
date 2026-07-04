@@ -9,6 +9,7 @@
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
+import { CONTACT_EMAIL } from '../../lib/contact';
 
 /* ── Not Found ──────────────────────────────────────────────────────── */
 function CoachNotFound() {
@@ -55,7 +56,7 @@ function CoachNotFound() {
               ← Back to Coach Directory
             </Link>
             <a
-              href="mailto:info@educate-strong.com?subject=Certified Coach Directory - Register Interest"
+              href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Certified Coach Directory - Register Interest')}`}
               style={{
                 display: 'inline-block',
                 background: 'transparent',

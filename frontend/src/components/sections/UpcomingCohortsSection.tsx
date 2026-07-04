@@ -6,6 +6,7 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { CONTACT_EMAIL } from '../../lib/contact';
 
 /* ── Types ──────────────────────────────────────────────────── */
 interface CourseSlot {
@@ -275,7 +276,7 @@ function CourseCard({ slot }: { slot: CourseSlot }) {
         {/* CTAs */}
         <div className="flex flex-wrap gap-2 mt-auto">
           <a
-            href={`mailto:educate.strongltd@gmail.com?subject=Register%20Interest%20—%20${encodeURIComponent(slot.courseName)}`}
+            href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(`Register Interest — ${slot.courseName}`)}`}
             className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-full transition-all duration-200 hover:opacity-90"
             style={{
               background: 'rgba(164,28,100,0.15)',

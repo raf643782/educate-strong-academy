@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
+import { CONTACT_EMAIL } from '../../lib/contact';
 
 type Tab = 'parents' | 'coaches';
 
@@ -150,7 +151,7 @@ export default function StrongKidz() {
                 >
                   <p className="text-sm leading-relaxed" style={{ color: '#E19A47' }}>
                     Any concern about safeguarding can be raised directly by contacting{' '}
-                    <a href="mailto:educate.strongltd@gmail.com" className="underline">educate.strongltd@gmail.com</a>.
+                    <a href={`mailto:${CONTACT_EMAIL}`} className="underline">{CONTACT_EMAIL}</a>.
                   </p>
                 </div>
               </div>
@@ -323,12 +324,12 @@ export default function StrongKidz() {
               </p>
               <div className="flex flex-wrap gap-4">
                 <a
-                  href="mailto:educate.strongltd@gmail.com?subject=StrongKidz%20—%20Register%20Interest%20(Parent)"
+                  href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('StrongKidz — Register Interest (Parent)')}`}
                   className="btn-primary"
                 >
                   Register Interest
                 </a>
-                <a href="mailto:educate.strongltd@gmail.com" className="btn-secondary">
+                <a href={`mailto:${CONTACT_EMAIL}`} className="btn-secondary">
                   Contact Educate.Strong
                 </a>
               </div>
@@ -397,7 +398,7 @@ export default function StrongKidz() {
                     Explore Certification
                   </Link>
                   <a
-                    href="mailto:educate.strongltd@gmail.com?subject=StrongKidz%20Coach%20Education%20Enquiry"
+                    href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('StrongKidz Coach Education Enquiry')}`}
                     className="btn-secondary"
                   >
                     Ask a Question

@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import api from '../../lib/api';
+import { UNLAUNCHED_COURSE_SLUGS } from '../../data/courseLaunchStatus';
 
 interface Course {
   id: string; title: string; slug: string;
@@ -21,6 +22,7 @@ const FILTERS = ['All', 'Coaching', 'Refereeing', 'StrongKidz'];
 function CourseCard({ course }: { course: Course }) {
   const [hovered, setHovered] = useState(false);
   const meta = PATHWAY_META[course.pathway] || { label: course.pathway, badge: 'badge-grey', accentColor: '#3D3D44' };
+  const comingSoon = UNLAUNCHED_COURSE_SLUGS.has(course.slug);
 
   return (
     <div
@@ -30,6 +32,7 @@ function CourseCard({ course }: { course: Course }) {
         border: `1px solid ${hovered ? 'rgba(194,24,106,0.35)' : 'rgba(255,255,255,0.07)'}`,
         boxShadow: hovered ? '0 8px 40px rgba(164,28,100,0.18)' : 'none',
         transition: 'border-color 0.25s, box-shadow 0.25s',
+        opacity: comingSoon ? 0.75 : 1,
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -38,9 +41,10 @@ function CourseCard({ course }: { course: Course }) {
       <div style={{ height: '3px', background: meta.accentColor, flexShrink: 0 }} />
 
       <div className="p-6 flex flex-col flex-1">
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-2 mb-4 flex-wrap">
           <span className={meta.badge}>{meta.label}</span>
           <span className="badge-grey">Level {course.level}</span>
+          {comingSoon && <span className="badge-amber">Coming Soon</span>}
         </div>
         <h3 className="font-bold text-white text-base mb-2 leading-snug flex-1">{course.title}</h3>
         <p className="text-es-muted text-sm leading-relaxed mb-5">
@@ -50,7 +54,7 @@ function CourseCard({ course }: { course: Course }) {
           <p className="text-xs text-es-subtle mb-4">{course.durationHours}h content</p>
         )}
         <Link to={`/courses/${course.slug}`} className="btn-secondary text-sm text-center">
-          View Course
+          {comingSoon ? 'Learn More' : 'View Course'}
         </Link>
       </div>
     </div>
@@ -61,10 +65,23 @@ export default function CourseCatalogue() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [filter, setFilter] = useState('All');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [slowLoad, setSlowLoad] = useState(false);
+
+  const loadCourses = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    setSlowLoad(false);
+    api.get('/courses').then(r => setCourses(r.data)).catch(() => setError('Failed to load courses. Please try again.')).finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => { loadCourses(); }, [loadCourses]);
 
   useEffect(() => {
-    api.get('/courses').then(r => setCourses(r.data)).catch(() => {}).finally(() => setLoading(false));
-  }, []);
+    if (!loading) return;
+    const timer = setTimeout(() => setSlowLoad(true), 4000);
+    return () => clearTimeout(timer);
+  }, [loading]);
 
   const filtered = filter === 'All'
     ? courses
@@ -145,14 +162,24 @@ export default function CourseCatalogue() {
       >
         <div className="es-container">
           {loading ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {[1,2,3].map(i => (
-                <div
-                  key={i}
-                  className="h-64 rounded-2xl animate-pulse"
-                  style={{ background: '#151519', border: '1px solid rgba(255,255,255,0.06)' }}
-                />
-              ))}
+            <>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {[1,2,3].map(i => (
+                  <div
+                    key={i}
+                    className="h-64 rounded-2xl animate-pulse"
+                    style={{ background: '#151519', border: '1px solid rgba(255,255,255,0.06)' }}
+                  />
+                ))}
+              </div>
+              <p className="text-center text-sm mt-8" style={{ color: '#75757D' }}>
+                {slowLoad ? 'Waking the server, this can take a few seconds on first load.' : 'Loading courses...'}
+              </p>
+            </>
+          ) : error ? (
+            <div className="text-center py-20">
+              <p className="mb-4" style={{ color: '#75757D' }}>{error}</p>
+              <button onClick={loadCourses} className="btn-primary">Retry</button>
             </div>
           ) : filtered.length === 0 ? (
             <p className="text-center py-20" style={{ color: '#75757D' }}>No courses found.</p>
