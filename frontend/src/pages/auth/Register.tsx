@@ -12,31 +12,44 @@ function checkStrength(pw: string) {
   };
 }
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+type FieldErrors = { firstName?: string; lastName?: string; email?: string; password?: string; confirm?: string };
+
 export default function Register() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '', confirm: '' });
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [loading, setLoading] = useState(false);
 
-  const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
+  const set = (field: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm(f => ({ ...f, [field]: e.target.value }));
+    if (fieldErrors[field]) setFieldErrors(f => ({ ...f, [field]: undefined }));
+  };
 
   const strength = checkStrength(form.password);
   const passwordValid = strength.length && strength.upper && strength.number;
 
+  const validate = (): FieldErrors => {
+    const errors: FieldErrors = {};
+    if (!form.firstName.trim()) errors.firstName = 'First name is required.';
+    if (!form.lastName.trim()) errors.lastName = 'Last name is required.';
+    if (!form.email.trim()) errors.email = 'Email address is required.';
+    else if (!emailRegex.test(form.email.trim())) errors.email = 'Enter a valid email address.';
+    if (!passwordValid) errors.password = 'Password must be at least 8 characters, include an uppercase letter and a number.';
+    if (form.confirm !== form.password) errors.confirm = 'Passwords do not match.';
+    return errors;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!passwordValid) {
-      setError('Password must be at least 8 characters, include an uppercase letter and a number.');
-      return;
-    }
-    if (form.password !== form.confirm) {
-      setError('Passwords do not match.');
-      return;
-    }
-    setLoading(true);
     setError('');
+    const errors = validate();
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+    setLoading(true);
     try {
       await api.post('/auth/register', {
         firstName: form.firstName,
@@ -106,24 +119,61 @@ export default function Register() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
                 <div>
                   <label style={labelStyle}>First Name</label>
-                  <input type="text" value={form.firstName} onChange={set('firstName')} required placeholder="Jane" style={inputStyle} />
+                  <input
+                    type="text"
+                    value={form.firstName}
+                    onChange={set('firstName')}
+                    required
+                    placeholder="Jane"
+                    style={{ ...inputStyle, borderColor: fieldErrors.firstName ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.1)' }}
+                  />
+                  {fieldErrors.firstName && (
+                    <p style={{ marginTop: '5px', fontSize: '12px', color: 'rgba(239,68,68,0.8)' }}>{fieldErrors.firstName}</p>
+                  )}
                 </div>
                 <div>
                   <label style={labelStyle}>Last Name</label>
-                  <input type="text" value={form.lastName} onChange={set('lastName')} required placeholder="Smith" style={inputStyle} />
+                  <input
+                    type="text"
+                    value={form.lastName}
+                    onChange={set('lastName')}
+                    required
+                    placeholder="Smith"
+                    style={{ ...inputStyle, borderColor: fieldErrors.lastName ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.1)' }}
+                  />
+                  {fieldErrors.lastName && (
+                    <p style={{ marginTop: '5px', fontSize: '12px', color: 'rgba(239,68,68,0.8)' }}>{fieldErrors.lastName}</p>
+                  )}
                 </div>
               </div>
 
               {/* Email */}
               <div style={{ marginBottom: '14px' }}>
                 <label style={labelStyle}>Email</label>
-                <input type="email" value={form.email} onChange={set('email')} required placeholder="you@example.com" style={inputStyle} />
+                <input
+                  type="email"
+                  value={form.email}
+                  onChange={set('email')}
+                  required
+                  placeholder="you@example.com"
+                  style={{ ...inputStyle, borderColor: fieldErrors.email ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.1)' }}
+                />
+                {fieldErrors.email && (
+                  <p style={{ marginTop: '5px', fontSize: '12px', color: 'rgba(239,68,68,0.8)' }}>{fieldErrors.email}</p>
+                )}
               </div>
 
               {/* Password */}
               <div style={{ marginBottom: '8px' }}>
                 <label style={labelStyle}>Password</label>
-                <input type="password" value={form.password} onChange={set('password')} required placeholder="••••••••" style={inputStyle} />
+                <input
+                  type="password"
+                  value={form.password}
+                  onChange={set('password')}
+                  required
+                  placeholder="••••••••"
+                  style={{ ...inputStyle, borderColor: fieldErrors.password ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.1)' }}
+                />
               </div>
 
               {/* Strength rules */}

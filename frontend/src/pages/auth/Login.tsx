@@ -126,6 +126,8 @@ function WorkspaceCTA({ ws }: { ws: WorkspaceKey }) {
 
 /* ── Page ──────────────────────────────────────────────────────────── */
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -133,18 +135,29 @@ export default function Login() {
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [error, setError]       = useState('');
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
   const [loading, setLoading]   = useState(false);
   const [activeWs, setActiveWs] = useState<WorkspaceKey>('learner');
 
+  const validate = () => {
+    const errors: { email?: string; password?: string } = {};
+    if (!email.trim()) errors.email = 'Email address is required.';
+    else if (!emailRegex.test(email.trim())) errors.email = 'Enter a valid email address.';
+    if (!password) errors.password = 'Password is required.';
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
+    if (!validate()) return;
+    setLoading(true);
     try {
       const user = await login(email, password);
       navigate(roleHome(user.role));
-    } catch {
-      setError('Invalid email or password. Please try again.');
+    } catch (err: any) {
+      setError(err?.response?.data?.error || 'Invalid email or password. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -264,12 +277,15 @@ export default function Login() {
                 <input
                   type="email"
                   value={email}
-                  onChange={e => setEmail(e.target.value)}
+                  onChange={e => { setEmail(e.target.value); if (fieldErrors.email) setFieldErrors(f => ({ ...f, email: undefined })); }}
                   required
                   placeholder="you@example.com"
-                  style={inputStyle}
+                  style={{ ...inputStyle, borderColor: fieldErrors.email ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.10)' }}
                   autoComplete="email"
                 />
+                {fieldErrors.email && (
+                  <p style={{ marginTop: '6px', fontSize: '12px', color: 'rgba(239,68,68,0.85)' }}>{fieldErrors.email}</p>
+                )}
               </div>
 
               <div style={{ marginBottom: '24px' }}>
@@ -285,12 +301,15 @@ export default function Login() {
                 <input
                   type="password"
                   value={password}
-                  onChange={e => setPassword(e.target.value)}
+                  onChange={e => { setPassword(e.target.value); if (fieldErrors.password) setFieldErrors(f => ({ ...f, password: undefined })); }}
                   required
                   placeholder="••••••••"
-                  style={inputStyle}
+                  style={{ ...inputStyle, borderColor: fieldErrors.password ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.10)' }}
                   autoComplete="current-password"
                 />
+                {fieldErrors.password && (
+                  <p style={{ marginTop: '6px', fontSize: '12px', color: 'rgba(239,68,68,0.85)' }}>{fieldErrors.password}</p>
+                )}
               </div>
 
               <button
