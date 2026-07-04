@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { KNOWLEDGE_ARTICLES } from '../../data/knowledgeArticles';
 
 interface Article {
   slug: string;
@@ -8,29 +9,24 @@ interface Article {
   readTime: string;
 }
 
-const ARTICLES: Article[] = [
-  {
-    slug: 'how-to-read-a-strongman-event-sheet',
-    category: 'Competition Preparation',
-    title: 'How to Read a Strongman Event Sheet Without Missing the Important Bits',
-    excerpt: 'Event sheets contain everything that determines your competition day. Rules vary by federation, promoter, and competition — here is how to read them properly.',
-    readTime: '6 min read',
-  },
-  {
-    slug: 'atlas-stone-technique',
-    category: 'Event Technique',
-    title: 'Atlas Stone Technique: The Stone-to-Lap Phase',
-    excerpt: 'The stone-to-lap phase is where most technical errors in atlas stone lifting occur. A detailed coaching breakdown of the most common fault patterns.',
-    readTime: '8 min read',
-  },
-  {
-    slug: 'start-strongman-safely',
-    category: 'Safe Practice',
-    title: "Start Strongman Safely: A Guide for New Athletes",
-    excerpt: 'What new athletes need to know before their first session — implement progression, supervision, and the coaching priorities that reduce injury risk.',
-    readTime: '7 min read',
-  },
-];
+const CATEGORY_LABELS: Record<string, string> = {
+  competition: 'Competition Preparation',
+  coaching:    'Event Technique',
+  athlete:     'Safe Practice',
+};
+
+const PREVIEW_SLUGS = ['how-to-read-a-strongman-event-sheet', 'atlas-stone-technique', 'start-strongman-safely'];
+
+const ARTICLES: Article[] = PREVIEW_SLUGS.map(slug => {
+  const article = KNOWLEDGE_ARTICLES.find(a => a.slug === slug)!;
+  return {
+    slug: article.slug,
+    category: CATEGORY_LABELS[article.category] || article.category,
+    title: article.title,
+    excerpt: article.summary,
+    readTime: `${article.readTime} read`,
+  };
+});
 
 function ArticleCard({ article }: { article: Article }) {
   return (
@@ -78,7 +74,7 @@ function ArticleCard({ article }: { article: Article }) {
         <div className="flex items-center justify-between mt-auto">
           <span className="text-xs text-[#5A5A62]">{article.readTime}</span>
           <Link
-            to="/knowledge"
+            to={`/knowledge/${article.slug}`}
             className="text-xs font-semibold text-[#C2186A] transition-colors duration-150 hover:text-[#A41C64]"
           >
             Read Article →

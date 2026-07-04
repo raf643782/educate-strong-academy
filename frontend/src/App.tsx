@@ -14,6 +14,7 @@ import CoachProfile from './pages/public/CoachProfile';
 import CoachingPathway from './pages/public/CoachingPathway';
 import CertificateVerify from './pages/public/CertificateVerify';
 import Shop from './pages/public/Shop';
+import NotFound from './pages/public/NotFound';
 
 // Auth pages
 import Login from './pages/auth/Login';
@@ -32,6 +33,7 @@ import SkillTree from './pages/learner/SkillTree';
 
 // Library pages — all public
 import KnowledgeHub from './pages/knowledge/KnowledgeHub';
+import KnowledgeArticlePage from './pages/knowledge/KnowledgeArticlePage';
 import ExerciseLibrary from './pages/exercises/ExerciseLibrary';
 import EventLibrary from './pages/events/EventLibrary';
 
@@ -87,6 +89,7 @@ export default function App() {
           <Route path="/verify" element={<CertificateVerify />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/knowledge" element={<KnowledgeHub />} />
+          <Route path="/knowledge/:slug" element={<KnowledgeArticlePage />} />
           <Route path="/exercises" element={<ExerciseLibrary />} />
           <Route path="/events" element={<EventLibrary />} />
 
@@ -172,6 +175,9 @@ export default function App() {
           <Route path="/admin/register-interest" element={
             <ProtectedRoute roles={['ADMIN']}><RegisterInterestManager /></ProtectedRoute>
           } />
+
+          {/* ── 404 ──────────────────────────────────────────────────────── */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
