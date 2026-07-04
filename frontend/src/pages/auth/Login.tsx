@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Navbar from '../../components/layout/Navbar';
@@ -159,6 +159,7 @@ export default function Login() {
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
   const [loading, setLoading]   = useState(false);
   const [activeWs, setActiveWs] = useState<WorkspaceKey>('learner');
+  const submittingRef = useRef(false);
 
   const validate = () => {
     const errors: { email?: string; password?: string } = {};
@@ -171,9 +172,11 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submittingRef.current) return;
     setError('');
     setNotice('');
     if (!validate()) return;
+    submittingRef.current = true;
     setLoading(true);
     try {
       const user = await login(email, password);
@@ -191,6 +194,7 @@ export default function Login() {
       setError(err?.response?.data?.error || 'Invalid email or password. Please try again.');
     } finally {
       setLoading(false);
+      submittingRef.current = false;
     }
   };
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Navbar from '../../components/layout/Navbar';
@@ -26,6 +26,7 @@ export default function Register() {
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [loading, setLoading] = useState(false);
+  const submittingRef = useRef(false);
 
   const set = (field: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm(f => ({ ...f, [field]: e.target.value }));
@@ -48,10 +49,12 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submittingRef.current) return;
     setError('');
     const errors = validate();
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) return;
+    submittingRef.current = true;
     setLoading(true);
     try {
       await api.post('/auth/register', {
@@ -66,6 +69,7 @@ export default function Register() {
       setError(err?.response?.data?.error || 'Could not create account. Please try again.');
     } finally {
       setLoading(false);
+      submittingRef.current = false;
     }
   };
 

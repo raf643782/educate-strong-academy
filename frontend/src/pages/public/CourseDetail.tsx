@@ -11,7 +11,7 @@
  * as a secondary action alongside the primary in-person booking flow.
  */
 import { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import Badge, { pathwayVariant, levelVariant } from '../../components/ui/Badge';
@@ -80,6 +80,7 @@ export default function CourseDetail() {
   const { slug } = useParams<{ slug: string }>();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [course, setCourse] = useState<CourseAPI | null>(null);
   const [loading, setLoading] = useState(true);
@@ -123,7 +124,7 @@ export default function CourseDetail() {
 
   const handleEnrol = async () => {
     if (!isAuthenticated) {
-      navigate('/login');
+      navigate('/login', { state: { from: location } });
       return;
     }
     if (!course) return;
@@ -335,7 +336,7 @@ export default function CourseDetail() {
                   </div>
                   {!enrolled && (
                     <button
-                      onClick={isAuthenticated ? handleEnrol : () => navigate('/login')}
+                      onClick={isAuthenticated ? handleEnrol : () => navigate('/login', { state: { from: location } })}
                       disabled={enrolling}
                       className="btn-secondary text-xs py-2 px-4 flex-shrink-0 disabled:opacity-50"
                     >
