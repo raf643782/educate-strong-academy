@@ -1,10 +1,10 @@
 /**
  * Footer — partner logos, newsletter subscription, Instagram embed, copyright.
- * Full responsive layout. Placeholders marked clearly.
  */
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CONTACT_EMAIL } from '../../lib/contact';
+import api from '../../lib/api';
 
 /* ── Partner logo data ─────────────────────────────────────────────── */
 interface Partner {
@@ -59,21 +59,19 @@ const NAV_COLS = [
 function NewsletterForm() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
     setStatus('sending');
+    setErrorMsg('');
     try {
-      /*
-       * PLACEHOLDER: Connect to your email service here.
-       * Options: Mailchimp API, ConvertKit, or POST to /api/newsletter
-       * Example: await api.post('/newsletter/subscribe', { email })
-       */
-      await new Promise(r => setTimeout(r, 1000)); // Simulated delay
+      await api.post('/newsletter', { email: email.trim() });
       setStatus('sent');
       setEmail('');
-    } catch {
+    } catch (err: any) {
+      setErrorMsg(err?.response?.data?.error || 'Something went wrong. Please try again.');
       setStatus('error');
     }
   };
@@ -88,7 +86,7 @@ function NewsletterForm() {
       {status === 'sent' ? (
         <div
           className="rounded-xl px-4 py-3 text-sm text-center"
-          style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)', color: '#22C55E' }}
+          style={{ background: 'rgba(164,28,100,0.12)', border: '1px solid rgba(164,28,100,0.3)', color: '#C2186A' }}
         >
           You're subscribed — welcome to the academy.
         </div>
@@ -120,7 +118,7 @@ function NewsletterForm() {
       )}
 
       {status === 'error' && (
-        <p className="text-red-400 text-xs mt-2">Something went wrong. Please try again.</p>
+        <p className="text-red-400 text-xs mt-2">{errorMsg}</p>
       )}
     </div>
   );
