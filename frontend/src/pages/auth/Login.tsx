@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Navbar from '../../components/layout/Navbar';
 import { CONTACT_EMAIL } from '../../lib/contact';
@@ -20,6 +20,21 @@ const WORKSPACES = [
 ] as const;
 
 type WorkspaceKey = typeof WORKSPACES[number]['key'];
+
+const WS_EXPECTED_ROLES: Record<WorkspaceKey, string[]> = {
+  learner: ['LEARNER'],
+  coach:   ['COACH'],
+  tutor:   ['TUTOR', 'ASSESSOR'],
+  admin:   ['ADMIN'],
+};
+
+const ROLE_LABEL: Record<string, string> = {
+  LEARNER:  'Learner',
+  COACH:    'Coach',
+  TUTOR:    'Tutor',
+  ASSESSOR: 'Assessor',
+  ADMIN:    'Admin',
+};
 
 const WS_CONTEXT: Record<WorkspaceKey, string> = {
   learner: 'Learner dashboard — courses, progress, and certificates.',
@@ -131,10 +146,13 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as { from?: { pathname: string } } | null)?.from?.pathname;
 
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [error, setError]       = useState('');
+  const [notice, setNotice]     = useState('');
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
   const [loading, setLoading]   = useState(false);
   const [activeWs, setActiveWs] = useState<WorkspaceKey>('learner');
@@ -151,11 +169,21 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setNotice('');
     if (!validate()) return;
     setLoading(true);
     try {
       const user = await login(email, password);
-      navigate(roleHome(user.role));
+      const destination = from || roleHome(user.role);
+
+      if (!WS_EXPECTED_ROLES[activeWs].includes(user.role)) {
+        setNotice(`This is a ${ROLE_LABEL[user.role] || user.role} account — redirecting you to the right workspace.`);
+        setLoading(false);
+        setTimeout(() => navigate(destination), 1400);
+        return;
+      }
+
+      navigate(destination);
     } catch (err: any) {
       setError(err?.response?.data?.error || 'Invalid email or password. Please try again.');
     } finally {
@@ -267,6 +295,22 @@ export default function Login() {
                 lineHeight: 1.5,
               }}>
                 {error}
+              </div>
+            )}
+
+            {/* Redirect notice banner */}
+            {notice && (
+              <div style={{
+                marginBottom: '20px',
+                padding: '12px 16px',
+                background: 'rgba(164,28,100,0.1)',
+                border: '1px solid rgba(164,28,100,0.28)',
+                borderRadius: '10px',
+                color: '#C2186A',
+                fontSize: '14px',
+                lineHeight: 1.5,
+              }}>
+                {notice}
               </div>
             )}
 

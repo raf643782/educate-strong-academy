@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { ReactNode } from 'react';
 
@@ -17,6 +17,7 @@ function roleHome(role: string): string {
 
 export default function ProtectedRoute({ children, roles }: Props) {
   const { isAuthenticated, isLoading, user } = useAuth();
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -27,7 +28,7 @@ export default function ProtectedRoute({ children, roles }: Props) {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   if (roles && user && !roles.includes(user.role)) {
