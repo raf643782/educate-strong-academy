@@ -50,7 +50,7 @@ export default function NextCourseSection() {
 
             <div className="flex flex-wrap gap-4">
               <Link
-                to="/register-interest?interest=Level%201%20Coaching"
+                to="/register-interest?type=level-1-coaching"
                 className="btn-primary"
               >
                 Register Interest

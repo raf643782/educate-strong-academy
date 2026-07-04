@@ -4,10 +4,11 @@ import type { PricingData } from '../../data/coursePageData';
 interface CoursePricingCardProps {
   pricing: PricingData;
   contactEmail: string;
+  interestType: string;
 }
 
-export default function CoursePricingCard({ pricing, contactEmail }: CoursePricingCardProps) {
-  const registerInterestHref = `/register-interest?interest=${encodeURIComponent(pricing.title)}`;
+export default function CoursePricingCard({ pricing, contactEmail, interestType }: CoursePricingCardProps) {
+  const registerInterestHref = `/register-interest?type=${encodeURIComponent(interestType)}`;
   const armedForcesHref = `mailto:${contactEmail}?subject=Armed%20Forces%20Discount%20Enquiry`;
 
   return (

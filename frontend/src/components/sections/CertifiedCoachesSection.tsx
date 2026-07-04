@@ -126,7 +126,7 @@ export default function CertifiedCoachesSection() {
           </p>
           <div className="flex flex-wrap gap-3 justify-center mt-6">
             <Link
-              to="/register-interest?interest=Certified%20Coach%20Directory"
+              to="/register-interest?type=coach-access"
               className="btn-primary"
             >
               Register Interest

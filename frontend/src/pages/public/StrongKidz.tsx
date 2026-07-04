@@ -330,7 +330,7 @@ export default function StrongKidz() {
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link
-                  to="/register-interest?interest=StrongKidz%20(Parent)"
+                  to="/register-interest?type=strongkidz"
                   className="btn-primary"
                 >
                   Register Interest
@@ -404,7 +404,7 @@ export default function StrongKidz() {
                     Explore Certification
                   </Link>
                   <Link
-                    to="/register-interest?interest=StrongKidz%20Coach%20Education"
+                    to="/register-interest?type=strongkidz"
                     className="btn-secondary"
                   >
                     Ask a Question

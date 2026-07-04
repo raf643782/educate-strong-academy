@@ -55,7 +55,7 @@ function CoachNotFound() {
               ← Back to Coach Directory
             </Link>
             <Link
-              to="/register-interest?interest=Certified%20Coach%20Directory"
+              to="/register-interest?type=coach-access"
               style={{
                 display: 'inline-block',
                 background: 'transparent',

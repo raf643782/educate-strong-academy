@@ -18,7 +18,6 @@ import certificatesRouter from './routes/certificates';
 import cpdRouter from './routes/cpd';
 import bestrongRouter from './routes/bestrong';
 import interestRouter from './routes/interest';
-import newsletterRouter from './routes/newsletter';
 
 dotenv.config();
 
@@ -64,7 +63,6 @@ app.use('/api/certificates', certificatesRouter);
 app.use('/api/cpd', cpdRouter);
 app.use('/api/be-strong', bestrongRouter);
 app.use('/api/register-interest', interestRouter);
-app.use('/api/newsletter', newsletterRouter);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', service: 'Educate.Strong API', timestamp: new Date().toISOString() });

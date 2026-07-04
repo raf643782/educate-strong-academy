@@ -6,10 +6,11 @@ interface CourseDateSectionProps {
   subCopy: string;
   contactEmail: string;
   courseTitle?: string;
+  interestType: string;
 }
 
-export default function CourseDateSection({ heading, copy, subCopy, courseTitle = 'this course' }: CourseDateSectionProps) {
-  const registerHref = `/register-interest?interest=${encodeURIComponent(courseTitle)}`;
+export default function CourseDateSection({ heading, copy, subCopy, interestType }: CourseDateSectionProps) {
+  const registerHref = `/register-interest?type=${encodeURIComponent(interestType)}`;
   return (
     <section style={{ background: '#050506', borderBottom: '1px solid rgba(194,24,106,0.08)' }} className="py-14">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

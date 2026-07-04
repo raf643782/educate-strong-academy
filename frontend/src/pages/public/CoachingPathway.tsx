@@ -489,7 +489,7 @@ export default function CoachingPathway() {
               Enrol in Level 1
             </Link>
             <Link
-              to="/register-interest?interest=Coaching%20Pathway"
+              to="/register-interest?type=level-1-coaching"
               className="px-8 py-4 rounded-full font-semibold text-sm transition-all duration-200 hover:bg-white/6"
               style={{ border: '1px solid rgba(255,255,255,0.14)', color: 'rgba(255,255,255,0.65)' }}
             >

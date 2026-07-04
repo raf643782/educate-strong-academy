@@ -15,6 +15,7 @@ interface CourseSlot {
   courseName: string;
   image: string;
   courseUrl: string;
+  interestType: string;
   isConfirmed: boolean;
   date?: string;
   venue?: string;
@@ -31,6 +32,7 @@ const COURSE_SLOTS: CourseSlot[] = [
     courseName: 'Level 1 Coaching Strongman',
     image: '/assets/coaching-l1-cover.webp',
     courseUrl: '/courses/level-1-coaching-strongman',
+    interestType: 'level-1-coaching',
     isConfirmed: false,
     city: 'Sheffield',
     showLocationFinder: true,
@@ -42,6 +44,7 @@ const COURSE_SLOTS: CourseSlot[] = [
     courseName: 'Level 1 Strongman Refereeing',
     image: '/assets/refereeing-l1-content.webp',
     courseUrl: '/courses/level-1-strongman-refereeing',
+    interestType: 'refereeing',
     isConfirmed: false,
   },
   {
@@ -51,6 +54,7 @@ const COURSE_SLOTS: CourseSlot[] = [
     courseName: 'StrongKidz Coach Education',
     image: '/assets/strongkidz.avif',
     courseUrl: '/courses',
+    interestType: 'strongkidz',
     isConfirmed: false,
   },
 ];
@@ -275,7 +279,7 @@ function CourseCard({ slot }: { slot: CourseSlot }) {
         {/* CTAs */}
         <div className="flex flex-wrap gap-2 mt-auto">
           <Link
-            to={`/register-interest?interest=${encodeURIComponent(slot.courseName)}`}
+            to={`/register-interest?type=${encodeURIComponent(slot.interestType)}`}
             className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-full transition-all duration-200 hover:opacity-90"
             style={{
               background: 'rgba(164,28,100,0.15)',

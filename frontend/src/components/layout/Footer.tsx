@@ -1,10 +1,12 @@
 /**
  * Footer — partner logos, newsletter subscription, Instagram embed, copyright.
  */
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CONTACT_EMAIL } from '../../lib/contact';
 import api from '../../lib/api';
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /* ── Partner logo data ─────────────────────────────────────────────── */
 interface Partner {
@@ -60,19 +62,42 @@ function NewsletterForm() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [errorMsg, setErrorMsg] = useState('');
+  const submittingRef = useRef(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
-    setStatus('sending');
+    if (submittingRef.current) return;
     setErrorMsg('');
+
+    const trimmed = email.trim();
+    if (!trimmed) {
+      setErrorMsg('Email address is required.');
+      setStatus('error');
+      return;
+    }
+    if (!emailRegex.test(trimmed)) {
+      setErrorMsg('Enter a valid email address.');
+      setStatus('error');
+      return;
+    }
+
+    submittingRef.current = true;
+    setStatus('sending');
     try {
-      await api.post('/newsletter', { email: email.trim() });
+      await api.post('/register-interest', {
+        firstName: '',
+        lastName: '',
+        email: trimmed,
+        courseInterest: 'newsletter',
+        sourcePage: window.location.pathname,
+      });
       setStatus('sent');
       setEmail('');
     } catch (err: any) {
       setErrorMsg(err?.response?.data?.error || 'Something went wrong. Please try again.');
       setStatus('error');
+    } finally {
+      submittingRef.current = false;
     }
   };
 
@@ -91,7 +116,7 @@ function NewsletterForm() {
           You're subscribed — welcome to the academy.
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="flex gap-2">
+        <form onSubmit={handleSubmit} noValidate className="flex gap-2">
           <input
             type="email"
             value={email}

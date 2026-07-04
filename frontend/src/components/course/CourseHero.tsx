@@ -7,6 +7,7 @@ interface CourseHeroProps {
   subHeadline: string;
   keyFacts: string[];
   contactEmail: string;
+  interestType: string;
   isEnrolled?: boolean;
   firstLessonUrl?: string;
   onEnrol?: () => void;
@@ -14,10 +15,10 @@ interface CourseHeroProps {
 }
 
 export default function CourseHero({
-  badges, headline, subHeadline, keyFacts, contactEmail,
+  badges, headline, subHeadline, keyFacts, contactEmail, interestType,
   isEnrolled, firstLessonUrl, onEnrol, enrolling,
 }: CourseHeroProps) {
-  const registerInterestHref = `/register-interest?interest=${encodeURIComponent(headline)}`;
+  const registerInterestHref = `/register-interest?type=${encodeURIComponent(interestType)}`;
 
   return (
     <section

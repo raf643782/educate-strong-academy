@@ -101,12 +101,12 @@ function WorkspaceCTA({ ws }: { ws: WorkspaceKey }) {
         <p style={{ margin: '0 0 12px', fontSize: '13px', color: 'rgba(255,255,255,0.32)', lineHeight: 1.6 }}>
           Coach accounts are approved by EducateStrong. Request access and the team will confirm your workspace.
         </p>
-        <a
-          href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Coach Account Access Request')}`}
+        <Link
+          to="/register-interest?type=coach-access"
           style={requestBtnStyle}
         >
           Request coach access
-        </a>
+        </Link>
       </div>
     );
   }
@@ -117,12 +117,12 @@ function WorkspaceCTA({ ws }: { ws: WorkspaceKey }) {
         <p style={{ margin: '0 0 12px', fontSize: '13px', color: 'rgba(255,255,255,0.32)', lineHeight: 1.6 }}>
           Tutor and assessor accounts are issued or approved by EducateStrong.
         </p>
-        <a
-          href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Tutor or Assessor Access Request')}`}
+        <Link
+          to="/register-interest?type=tutor-assessor-access"
           style={requestBtnStyle}
         >
           Request access
-        </a>
+        </Link>
       </div>
     );
   }
@@ -318,7 +318,7 @@ export default function Login() {
             )}
 
             {/* Form */}
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate>
               <div style={{ marginBottom: '16px' }}>
                 <label style={labelStyle}>Email address</label>
                 <input

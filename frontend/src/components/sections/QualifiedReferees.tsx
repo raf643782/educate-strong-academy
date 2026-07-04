@@ -115,7 +115,7 @@ export default function QualifiedReferees() {
                 View Refereeing Course
               </Link>
               <Link
-                to="/register-interest?interest=Refereeing"
+                to="/register-interest?type=refereeing"
                 className="btn-secondary text-sm"
               >
                 Register Interest

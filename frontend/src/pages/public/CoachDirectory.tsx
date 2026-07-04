@@ -209,7 +209,7 @@ export default function CoachDirectory() {
 
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link
-              to="/register-interest?interest=Certified%20Coach%20Directory"
+              to="/register-interest?type=coach-access"
               style={{
                 display: 'inline-block',
                 background: 'linear-gradient(135deg, #A41C64, #C0246E)',

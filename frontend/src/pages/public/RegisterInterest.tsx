@@ -1,35 +1,58 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import api from '../../lib/api';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
+import { interestTypeLabel } from '../../data/registerInterestTypes';
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function RegisterInterest() {
   const [searchParams] = useSearchParams();
-  const interest = searchParams.get('interest') || 'Educate.Strong';
+  const type = searchParams.get('type') || 'general';
+  const item = searchParams.get('item');
+  const label = item ? `${interestTypeLabel(type)} — ${item}` : interestTypeLabel(type);
 
-  useDocumentHead({ title: `Register Interest — ${interest}` });
+  useDocumentHead({ title: `Register Interest — ${label}` });
 
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  const [postcode, setPostcode] = useState('');
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'sent' | 'error'>('idle');
   const [errorMsg, setErrorMsg] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<{ name?: string; email?: string }>({});
+  const submittingRef = useRef(false);
+
+  function validate() {
+    const errors: { name?: string; email?: string } = {};
+    if (!name.trim()) errors.name = 'Name is required.';
+    if (!email.trim()) errors.email = 'Email address is required.';
+    else if (!emailRegex.test(email.trim())) errors.email = 'Enter a valid email address.';
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setStatus('loading');
+    if (submittingRef.current) return;
     setErrorMsg('');
+    if (!validate()) return;
+
+    const trimmedName = name.trim();
+    const [firstName, ...rest] = trimmedName.split(/\s+/);
+    const lastName = rest.join(' ') || firstName;
+
+    submittingRef.current = true;
+    setStatus('loading');
     try {
       await api.post('/register-interest', {
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
+        firstName,
+        lastName,
         email: email.trim().toLowerCase(),
-        phone: phone.trim() || undefined,
-        courseInterest: interest,
+        courseInterest: item ? `${type} — ${item}` : type,
+        locationInterest: postcode.trim() || undefined,
         message: message.trim() || undefined,
         sourcePage: window.location.pathname + window.location.search,
       });
@@ -37,6 +60,8 @@ export default function RegisterInterest() {
     } catch (err: any) {
       setErrorMsg(err?.response?.data?.error || 'Something went wrong. Please try again.');
       setStatus('error');
+    } finally {
+      submittingRef.current = false;
     }
   }
 
@@ -47,7 +72,7 @@ export default function RegisterInterest() {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <p className="es-label mb-3">Register Interest</p>
-            <h1 className="text-2xl font-black text-white mb-2">{interest}</h1>
+            <h1 className="text-2xl font-black text-white mb-2">{label}</h1>
             <p className="text-es-muted text-sm">
               Leave your details and Educate.Strong will be in touch.
             </p>
@@ -58,63 +83,53 @@ export default function RegisterInterest() {
               <div style={{ textAlign: 'center' }}>
                 <p style={{ color: '#fff', fontWeight: 700, marginBottom: '10px' }}>Thanks — you're on the list</p>
                 <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', lineHeight: 1.6, marginBottom: '20px' }}>
-                  We've received your interest in {interest}. Someone from Educate.Strong will be in touch soon.
+                  We've received your interest in {label}. Someone from Educate.Strong will be in touch soon.
                 </p>
                 <Link to="/" className="btn-secondary text-sm">Back to Home</Link>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} noValidate className="space-y-4">
                 {status === 'error' && (
                   <div className="mb-2 p-3 rounded text-sm text-red-400 border border-red-900/40" style={{ background: 'rgba(239,68,68,0.06)' }}>
                     {errorMsg}
                   </div>
                 )}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-es-muted mb-1.5 uppercase tracking-wide">First name</label>
-                    <input
-                      type="text"
-                      value={firstName}
-                      onChange={e => setFirstName(e.target.value)}
-                      required
-                      maxLength={100}
-                      className="w-full px-4 py-3 rounded-es text-sm text-white placeholder-es-subtle border border-es-grey-dark focus:border-es-accent focus:outline-none transition-colors"
-                      style={{ background: '#1C1C1C' }}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-es-muted mb-1.5 uppercase tracking-wide">Last name</label>
-                    <input
-                      type="text"
-                      value={lastName}
-                      onChange={e => setLastName(e.target.value)}
-                      required
-                      maxLength={100}
-                      className="w-full px-4 py-3 rounded-es text-sm text-white placeholder-es-subtle border border-es-grey-dark focus:border-es-accent focus:outline-none transition-colors"
-                      style={{ background: '#1C1C1C' }}
-                    />
-                  </div>
+                <div>
+                  <label className="block text-xs font-semibold text-es-muted mb-1.5 uppercase tracking-wide">Name</label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={e => { setName(e.target.value); if (fieldErrors.name) setFieldErrors(f => ({ ...f, name: undefined })); }}
+                    maxLength={150}
+                    className="w-full px-4 py-3 rounded-es text-sm text-white placeholder-es-subtle border border-es-grey-dark focus:border-es-accent focus:outline-none transition-colors"
+                    style={{ background: '#1C1C1C', borderColor: fieldErrors.name ? 'rgba(239,68,68,0.5)' : undefined }}
+                  />
+                  {fieldErrors.name && (
+                    <p className="text-xs mt-1.5" style={{ color: 'rgba(239,68,68,0.85)' }}>{fieldErrors.name}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-es-muted mb-1.5 uppercase tracking-wide">Email address</label>
                   <input
                     type="email"
                     value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    required
+                    onChange={e => { setEmail(e.target.value); if (fieldErrors.email) setFieldErrors(f => ({ ...f, email: undefined })); }}
                     maxLength={200}
                     className="w-full px-4 py-3 rounded-es text-sm text-white placeholder-es-subtle border border-es-grey-dark focus:border-es-accent focus:outline-none transition-colors"
-                    style={{ background: '#1C1C1C' }}
+                    style={{ background: '#1C1C1C', borderColor: fieldErrors.email ? 'rgba(239,68,68,0.5)' : undefined }}
                     placeholder="you@example.com"
                   />
+                  {fieldErrors.email && (
+                    <p className="text-xs mt-1.5" style={{ color: 'rgba(239,68,68,0.85)' }}>{fieldErrors.email}</p>
+                  )}
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-es-muted mb-1.5 uppercase tracking-wide">Phone (optional)</label>
+                  <label className="block text-xs font-semibold text-es-muted mb-1.5 uppercase tracking-wide">Postcode (optional)</label>
                   <input
-                    type="tel"
-                    value={phone}
-                    onChange={e => setPhone(e.target.value)}
-                    maxLength={40}
+                    type="text"
+                    value={postcode}
+                    onChange={e => setPostcode(e.target.value)}
+                    maxLength={20}
                     className="w-full px-4 py-3 rounded-es text-sm text-white placeholder-es-subtle border border-es-grey-dark focus:border-es-accent focus:outline-none transition-colors"
                     style={{ background: '#1C1C1C' }}
                   />

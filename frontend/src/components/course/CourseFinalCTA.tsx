@@ -3,11 +3,12 @@ import { Link } from 'react-router-dom';
 interface CourseFinalCTAProps {
   courseTitle: string;
   contactEmail: string;
+  interestType: string;
   pricing: { totalFee: number; deposit: number };
 }
 
-export default function CourseFinalCTA({ courseTitle, contactEmail, pricing }: CourseFinalCTAProps) {
-  const registerInterestHref = `/register-interest?interest=${encodeURIComponent(courseTitle)}`;
+export default function CourseFinalCTA({ courseTitle, contactEmail, interestType, pricing }: CourseFinalCTAProps) {
+  const registerInterestHref = `/register-interest?type=${encodeURIComponent(interestType)}`;
   const contactHref = `mailto:${contactEmail}?subject=Course%20Enquiry%20—%20${encodeURIComponent(courseTitle)}`;
   return (
     <section className="es-grit" style={{

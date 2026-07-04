@@ -186,7 +186,7 @@ export default function UpcomingCohortAlert() {
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               <Link
-                to="/register-interest?interest=Level%201%20Coaching"
+                to="/register-interest?type=level-1-coaching"
                 className="text-xs font-semibold px-4 py-2 rounded-full transition-all duration-200"
                 style={{ background: 'rgba(164,28,100,0.2)', border: '1px solid rgba(164,28,100,0.35)', color: '#A41C64' }}
               >
@@ -260,7 +260,7 @@ export default function UpcomingCohortAlert() {
               <ChevronIcon open={finderOpen} />
             </button>
             <Link
-              to="/register-interest?interest=Level%201%20Coaching"
+              to="/register-interest?type=level-1-coaching"
               className="text-xs font-semibold px-4 py-2 rounded-full transition-all duration-200 hover:opacity-90"
               style={{
                 background: 'rgba(164,28,100,0.18)',

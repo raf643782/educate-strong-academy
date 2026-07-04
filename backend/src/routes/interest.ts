@@ -17,15 +17,16 @@ const registerInterestLimiter = rateLimit({
 router.post('/', registerInterestLimiter, async (req: Request, res: Response): Promise<void> => {
   try {
     const { firstName, lastName, email, phone, courseInterest, locationInterest, message, sourcePage } = req.body;
+    const isNewsletter = courseInterest === 'newsletter';
 
-    if (!firstName || !lastName || !email) {
-      res.status(400).json({ error: 'First name, last name, and email are required.' });
+    if (!email || (!isNewsletter && (!firstName || !lastName))) {
+      res.status(400).json({ error: isNewsletter ? 'Email is required.' : 'First name, last name, and email are required.' });
       return;
     }
 
     if (
-      String(firstName).length > 100 ||
-      String(lastName).length > 100 ||
+      (firstName && String(firstName).length > 100) ||
+      (lastName && String(lastName).length > 100) ||
       String(email).length > 200 ||
       (phone && String(phone).length > 40) ||
       (message && String(message).length > 2000)
@@ -42,8 +43,8 @@ router.post('/', registerInterestLimiter, async (req: Request, res: Response): P
 
     await prisma.registerInterest.create({
       data: {
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
+        firstName: firstName?.trim() || '',
+        lastName: lastName?.trim() || '',
         email: email.trim().toLowerCase(),
         phone: phone?.trim() || null,
         courseInterest: courseInterest?.trim() || null,

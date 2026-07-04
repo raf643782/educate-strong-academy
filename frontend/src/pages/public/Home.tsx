@@ -410,7 +410,7 @@ export default function Home() {
               Explore Courses
             </Link>
             <Link
-              to="/register-interest?interest=Educate.Strong"
+              to="/register-interest?type=general"
               className="px-8 py-4 rounded-full font-semibold transition-all duration-200 hover:bg-white/6"
               style={{ border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.7)' }}
             >

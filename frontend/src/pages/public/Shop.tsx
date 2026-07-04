@@ -70,7 +70,7 @@ function ProductCard({ name, note, SvgComponent, enquirySubject }: ProductCardPr
         </p>
         <div className="mt-auto">
           <Link
-            to={`/register-interest?interest=${encodeURIComponent(enquirySubject)}`}
+            to={`/register-interest?type=shop&item=${encodeURIComponent(name)}`}
             className="inline-block w-full py-2.5 rounded-xl text-sm font-semibold text-center transition-all duration-200 hover:opacity-90"
             style={{ background: 'rgba(164,28,100,0.18)', border: '1px solid rgba(164,28,100,0.35)', color: 'rgba(255,255,255,0.85)' }}
           >
@@ -273,7 +273,7 @@ export default function Shop() {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link
-              to="/register-interest?interest=Shop"
+              to="/register-interest?type=shop"
               className="px-8 py-4 rounded-full font-semibold text-white transition-all duration-200 hover:scale-105"
               style={{
                 background: 'linear-gradient(135deg, #A41C64, #C0246E)',

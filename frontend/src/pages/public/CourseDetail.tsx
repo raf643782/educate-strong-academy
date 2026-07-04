@@ -20,6 +20,7 @@ import { useAuth } from '../../context/AuthContext';
 import api from '../../lib/api';
 import { CONTACT_EMAIL } from '../../lib/contact';
 import { UNLAUNCHED_COURSE_SLUGS } from '../../data/courseLaunchStatus';
+import { COURSE_SLUG_TO_INTEREST_TYPE } from '../../data/registerInterestTypes';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 // Rich course page components
@@ -201,6 +202,7 @@ export default function CourseDetail() {
     ? `/learn/${course.slug}/lessons/${firstLessonId}`
     : undefined;
   const comingSoon = UNLAUNCHED_COURSE_SLUGS.has(course.slug);
+  const interestType = COURSE_SLUG_TO_INTEREST_TYPE[course.slug] || 'general';
 
   // ── RICH MARKETING PAGE (courses with static data) ────────────────────────
   if (richData) {
@@ -215,6 +217,7 @@ export default function CourseDetail() {
           subHeadline={richData.subHeadline}
           keyFacts={richData.keyFacts}
           contactEmail={richData.contactEmail}
+          interestType={interestType}
           isEnrolled={enrolled}
           firstLessonUrl={firstLessonUrl}
           onEnrol={isAuthenticated ? handleEnrol : undefined}
@@ -289,6 +292,7 @@ export default function CourseDetail() {
         <CoursePricingCard
           pricing={richData.pricing}
           contactEmail={richData.contactEmail}
+          interestType={interestType}
         />
 
         {/* 11: Dates + Register Interest */}
@@ -298,6 +302,7 @@ export default function CourseDetail() {
           subCopy={richData.dateSubCopy}
           contactEmail={richData.contactEmail}
           courseTitle={richData.pricing.title}
+          interestType={interestType}
         />
 
         {/* 12: Learning journey */}
@@ -310,6 +315,7 @@ export default function CourseDetail() {
         <CourseFinalCTA
           courseTitle={richData.pricing.title}
           contactEmail={richData.contactEmail}
+          interestType={interestType}
           pricing={{
             totalFee: richData.pricing.totalFee,
             deposit: richData.pricing.deposit,
