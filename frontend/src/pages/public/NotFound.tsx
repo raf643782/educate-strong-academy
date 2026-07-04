@@ -1,8 +1,11 @@
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
+import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 export default function NotFound() {
+  useDocumentHead({ title: 'Page Not Found' });
+
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
       <Navbar />

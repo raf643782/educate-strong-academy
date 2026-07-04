@@ -4,6 +4,7 @@ import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import api from '../../lib/api';
 import { CONTACT_EMAIL } from '../../lib/contact';
+import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 interface Article {
   id: string;
@@ -76,6 +77,11 @@ export default function EatStrongCategory() {
   }, [categoryKey]);
 
   const categoryLabel = categoryMeta?.label || categoryKey.replace(/_/g, ' ');
+
+  useDocumentHead({
+    title: `${categoryLabel} — EatStrong`,
+    description: categoryMeta?.description,
+  });
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>

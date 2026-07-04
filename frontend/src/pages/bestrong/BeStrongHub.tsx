@@ -15,6 +15,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import api from '../../lib/api';
+import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 interface Category {
   key: string;
@@ -68,6 +69,11 @@ const SCOPE_DISCLAIMER =
   'Coaches should refer athletes to a registered dietitian or registered nutritionist for individualised nutrition support.';
 
 export default function EatStrongHub() {
+  useDocumentHead({
+    title: 'EatStrong',
+    description: 'Performance nutrition for Strongman athletes and coaches.',
+  });
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [featured, setFeatured] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);

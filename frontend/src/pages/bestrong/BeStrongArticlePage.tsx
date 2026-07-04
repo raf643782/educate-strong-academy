@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import api from '../../lib/api';
+import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 interface Article {
   id: string;
@@ -51,6 +52,11 @@ export default function EatStrongArticlePage() {
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+
+  useDocumentHead({
+    title: article?.title || 'Article Not Found',
+    description: article?.summary,
+  });
 
   useEffect(() => {
     if (!slug) return;

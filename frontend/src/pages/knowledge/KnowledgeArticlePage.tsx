@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import { KNOWLEDGE_ARTICLES, KNOWLEDGE_CATEGORIES } from '../../data/knowledgeArticles';
+import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 const LEVEL_COLOUR: Record<string, string> = {
   Foundation:  'badge-accent',
@@ -15,6 +16,11 @@ const LEVEL_COLOUR: Record<string, string> = {
 export default function KnowledgeArticlePage() {
   const { slug } = useParams<{ slug: string }>();
   const article = KNOWLEDGE_ARTICLES.find(a => a.slug === slug);
+
+  useDocumentHead({
+    title: article?.title || 'Article Not Found',
+    description: article?.summary,
+  });
 
   if (!article) {
     return (

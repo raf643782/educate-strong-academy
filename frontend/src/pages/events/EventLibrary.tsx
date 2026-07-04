@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import api from '../../lib/api';
+import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 interface Event {
   id: string;
@@ -41,6 +42,11 @@ const EVENT_TO_EXERCISE_CAT: Record<string, string> = {
 const CORE_SIX = ['Log Press', 'Axle Press', 'Deadlift', "Farmer's Walk", 'Yoke Walk', 'Atlas Stones'];
 
 export default function EventLibrary() {
+  useDocumentHead({
+    title: 'Event Library',
+    description: 'Technical notes, coaching notes, and judging criteria for Strongman competition events.',
+  });
+
   const [events, setEvents]         = useState<Event[]>([]);
   const [filtered, setFiltered]     = useState<Event[]>([]);
   const [category, setCategory]     = useState('All');

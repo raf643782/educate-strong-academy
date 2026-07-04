@@ -2,8 +2,11 @@ import { useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import api from '../../lib/api';
+import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 export default function ResetPassword() {
+  useDocumentHead({ title: 'Set a New Password' });
+
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
 

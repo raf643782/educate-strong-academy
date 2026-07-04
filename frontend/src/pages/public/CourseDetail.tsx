@@ -20,6 +20,7 @@ import { useAuth } from '../../context/AuthContext';
 import api from '../../lib/api';
 import { CONTACT_EMAIL } from '../../lib/contact';
 import { UNLAUNCHED_COURSE_SLUGS } from '../../data/courseLaunchStatus';
+import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 // Rich course page components
 import CourseHero from '../../components/course/CourseHero';
@@ -90,6 +91,11 @@ export default function CourseDetail() {
 
   // Look up rich static data — determines which view to render
   const richData = slug ? COURSE_PAGE_DATA[slug] : undefined;
+
+  useDocumentHead({
+    title: course?.title || richData?.headline || 'Course',
+    description: richData?.subHeadline || course?.summary || course?.description,
+  });
 
   const loadCourse = () => {
     if (!slug) return;

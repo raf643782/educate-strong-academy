@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
+import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 /* ── SVG placeholders ─────────────────────────────────────────────────────── */
 
@@ -121,6 +122,11 @@ const APPAREL_PRODUCTS: Omit<ProductCardProps, 'SvgComponent'>[] = [
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function Shop() {
+  useDocumentHead({
+    title: 'Shop',
+    description: 'Training kit, academy apparel, and Strongman equipment built for the culture we teach.',
+  });
+
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
       <Navbar />

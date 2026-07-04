@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Navbar from '../../components/layout/Navbar';
 import { CONTACT_EMAIL } from '../../lib/contact';
+import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 function roleHome(role: string): string {
   if (role === 'ADMIN') return '/admin';
@@ -144,6 +145,8 @@ function WorkspaceCTA({ ws }: { ws: WorkspaceKey }) {
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function Login() {
+  useDocumentHead({ title: 'Sign In' });
+
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();

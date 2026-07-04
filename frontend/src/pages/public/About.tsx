@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import { CONTACT_EMAIL } from '../../lib/contact';
+import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 const TEAM = [
   {
@@ -98,6 +99,11 @@ const ACCREDITATIONS = [
 ];
 
 export default function About() {
+  useDocumentHead({
+    title: 'About',
+    description: 'Meet the team behind Educate.Strong Academy — champions and coaches building the standard for Strongman education.',
+  });
+
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
       <Navbar />

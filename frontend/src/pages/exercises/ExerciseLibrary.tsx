@@ -8,6 +8,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import api from '../../lib/api';
+import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 interface Exercise {
   id: string;
@@ -183,6 +184,11 @@ function ExercisePlaceholder({ category, compact = false }: { category: string; 
 // ── Page component ────────────────────────────────────────────────────────────
 
 export default function ExerciseLibrary() {
+  useDocumentHead({
+    title: 'Exercise Library',
+    description: 'Coaching cues, technique breakdowns, common mistakes, and progression pathways for Strongman events and accessory work.',
+  });
+
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

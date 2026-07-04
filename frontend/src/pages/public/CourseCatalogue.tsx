@@ -4,6 +4,7 @@ import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import api from '../../lib/api';
 import { UNLAUNCHED_COURSE_SLUGS } from '../../data/courseLaunchStatus';
+import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 interface Course {
   id: string; title: string; slug: string;
@@ -62,6 +63,11 @@ function CourseCard({ course }: { course: Course }) {
 }
 
 export default function CourseCatalogue() {
+  useDocumentHead({
+    title: 'All Courses',
+    description: 'Accredited qualifications across Strongman coaching, refereeing, and youth development.',
+  });
+
   const [courses, setCourses] = useState<Course[]>([]);
   const [filter, setFilter] = useState('All');
   const [loading, setLoading] = useState(true);

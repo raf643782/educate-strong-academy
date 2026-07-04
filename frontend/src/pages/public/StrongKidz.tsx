@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import { CONTACT_EMAIL } from '../../lib/contact';
+import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 type Tab = 'parents' | 'coaches';
 
@@ -31,6 +32,11 @@ const SAFEGUARDING = [
 ];
 
 export default function StrongKidz() {
+  useDocumentHead({
+    title: 'StrongKidz',
+    description: 'Youth strength education — functional movement, coordination, and confidence for young athletes.',
+  });
+
   const [tab, setTab] = useState<Tab>('parents');
 
   return (

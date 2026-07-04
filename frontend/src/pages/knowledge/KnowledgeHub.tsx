@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import { KNOWLEDGE_ARTICLES, KNOWLEDGE_CATEGORIES } from '../../data/knowledgeArticles';
+import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 const CATEGORIES = KNOWLEDGE_CATEGORIES;
 
@@ -16,6 +17,11 @@ const LEVEL_COLOUR: Record<string, string> = {
 };
 
 export default function KnowledgeHub() {
+  useDocumentHead({
+    title: 'Knowledge Hub',
+    description: 'Practical articles, coaching guides, and evidence-based resources for Strongman coaches, referees, and athletes.',
+  });
+
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryParam = searchParams.get('category') || 'all';
   const [activeCategory, setActiveCategory] = useState(

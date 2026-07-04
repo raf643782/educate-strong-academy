@@ -27,9 +27,15 @@ import CertifiedCoachesSection from '../../components/sections/CertifiedCoachesS
 import TutorCredibilityStrip from '../../components/sections/TutorCredibilityStrip';
 import KnowledgeHubPreview from '../../components/sections/KnowledgeHubPreview';
 import UpcomingCohortsSection from '../../components/sections/UpcomingCohortsSection';
+import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 /* ═══════════════════════════════════════════════════════════════════ */
 export default function Home() {
+  useDocumentHead({
+    title: 'Educate.Strong Academy — Strongman Coaching & Refereeing Qualifications',
+    description: 'Accredited Strongman coaching and refereeing qualifications, youth development, and performance nutrition — built by champions, recognised by the sport.',
+  });
+
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
       <Navbar />

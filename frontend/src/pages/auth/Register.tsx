@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Navbar from '../../components/layout/Navbar';
 import api from '../../lib/api';
+import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 function checkStrength(pw: string) {
   return {
@@ -17,6 +18,8 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 type FieldErrors = { firstName?: string; lastName?: string; email?: string; password?: string; confirm?: string };
 
 export default function Register() {
+  useDocumentHead({ title: 'Create an Account' });
+
   const { login } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '', confirm: '' });

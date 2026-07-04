@@ -10,11 +10,17 @@ import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import { CONTACT_EMAIL } from '../../lib/contact';
+import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 const FILTERS = ['All', 'Level 1 Coaching', 'Level 1 Refereeing', 'StrongKidz'];
 
 /* ── Main Page ──────────────────────────────────────────────────────── */
 export default function CoachDirectory() {
+  useDocumentHead({
+    title: 'Certified Coach Directory',
+    description: 'Find a certified Strongman coach, referee, or StrongKidz session leader.',
+  });
+
   return (
     <div style={{ background: '#0D0D0D', minHeight: '100vh', color: '#fff' }}>
       <Navbar />

@@ -13,6 +13,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
+import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 /* ── Pathway Steps ──────────────────────────────────────────────── */
 const STEPS = [
@@ -249,6 +250,11 @@ function EventCard({ event }: { event: typeof EVENTS[number] }) {
 
 /* ── Page ───────────────────────────────────────────────────────── */
 export default function CoachingPathway() {
+  useDocumentHead({
+    title: 'Coaching Pathway',
+    description: 'Level 1 through Level 3 Strongman coaching qualifications and ongoing CPD.',
+  });
+
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
       <Navbar />

@@ -3,10 +3,13 @@ import { Link, useSearchParams } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import api from '../../lib/api';
+import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 export default function RegisterInterest() {
   const [searchParams] = useSearchParams();
   const interest = searchParams.get('interest') || 'Educate.Strong';
+
+  useDocumentHead({ title: `Register Interest — ${interest}` });
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');

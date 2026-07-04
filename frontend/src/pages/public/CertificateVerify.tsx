@@ -12,6 +12,7 @@ import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import api from '../../lib/api';
 import { CONTACT_EMAIL } from '../../lib/contact';
+import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 interface VerifiedCertificate {
   id: string;
@@ -32,6 +33,11 @@ function formatDate(iso: string): string {
 }
 
 export default function CertificateVerify() {
+  useDocumentHead({
+    title: 'Verify a Certificate',
+    description: 'Check the authenticity of an Educate.Strong Academy coaching or refereeing certificate.',
+  });
+
   const { code } = useParams<{ code: string }>();
   const navigate = useNavigate();
 
