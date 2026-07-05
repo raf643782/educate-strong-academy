@@ -1,0 +1,13 @@
+name: Keep Render API Warm
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping health endpoint
+        run: curl -sf https://educate-strong-api.onrender.com/api/health || true

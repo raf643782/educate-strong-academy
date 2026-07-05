@@ -16,6 +16,7 @@
  * 12. Footer
  */
 
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
@@ -28,6 +29,7 @@ import TutorCredibilityStrip from '../../components/sections/TutorCredibilityStr
 import KnowledgeHubPreview from '../../components/sections/KnowledgeHubPreview';
 import UpcomingCohortsSection from '../../components/sections/UpcomingCohortsSection';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
+import api from '../../lib/api';
 
 /* ═══════════════════════════════════════════════════════════════════ */
 export default function Home() {
@@ -35,6 +37,13 @@ export default function Home() {
     title: 'Educate.Strong Academy — Strongman Coaching & Refereeing Qualifications',
     description: 'Accredited Strongman coaching and refereeing qualifications, youth development, and performance nutrition — built by champions, recognised by the sport.',
   });
+
+  // Fire-and-forget: warms the Render free-tier API while the visitor
+  // reads the hero, so it's less likely to be cold by the time they
+  // navigate to a page that needs it. Never surfaced to the user.
+  useEffect(() => {
+    api.get('/health').catch(() => {});
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
