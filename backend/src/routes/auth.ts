@@ -91,6 +91,11 @@ router.post('/login', loginLimiter, async (req: Request, res: Response): Promise
       return;
     }
 
+    if (!user.isActive) {
+      res.status(403).json({ error: 'This account has been disabled. Contact EducateStrong for help.' });
+      return;
+    }
+
     const secret = process.env.JWT_SECRET || 'fallback-secret';
     const token = jwt.sign({ userId: user.id, role: user.role }, secret, { expiresIn: '7d' });
 

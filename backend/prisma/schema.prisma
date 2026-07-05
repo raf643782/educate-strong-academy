@@ -108,6 +108,7 @@ model User {
   firstName           String
   lastName            String
   role                Role      @default(LEARNER)
+  isActive            Boolean   @default(true)
   avatarUrl           String?
   bio                 String?
   location            String?

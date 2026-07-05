@@ -12,6 +12,7 @@ interface UserSummary {
   firstName: string;
   lastName: string;
   role: Role;
+  isActive: boolean;
   createdAt: string;
   _count: { enrolments: number; certificates: number };
 }
@@ -59,6 +60,18 @@ function rolePill(role: Role) {
   );
 }
 
+function statusPill(isActive: boolean) {
+  return isActive ? (
+    <span style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)', borderRadius: '6px', padding: '3px 9px', fontSize: '11px', fontWeight: 700, letterSpacing: '0.06em' }}>
+      Active
+    </span>
+  ) : (
+    <span style={{ background: 'rgba(225,154,71,0.18)', color: '#E19A47', borderRadius: '6px', padding: '3px 9px', fontSize: '11px', fontWeight: 700, letterSpacing: '0.06em' }}>
+      Disabled
+    </span>
+  );
+}
+
 function pathwayPill(pathway: string) {
   return (
     <span style={{ background: 'rgba(225,154,71,0.15)', color: '#E19A47', borderRadius: '6px', padding: '2px 8px', fontSize: '11px', fontWeight: 600 }}>
@@ -95,6 +108,8 @@ function UserDrawer({ userId, currentUserId, onClose, onRoleChanged }: DrawerPro
   const [selectedRole, setSelectedRole] = useState<Role>('LEARNER');
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
+  const [statusSaving, setStatusSaving] = useState(false);
+  const [statusMsg, setStatusMsg] = useState('');
   const isSelf = userId === currentUserId;
 
   useEffect(() => {
@@ -125,6 +140,28 @@ function UserDrawer({ userId, currentUserId, onClose, onRoleChanged }: DrawerPro
     }
   }
 
+  async function toggleStatus() {
+    if (!user) return;
+    const nextActive = !user.isActive;
+    if (!nextActive) {
+      const confirmed = window.confirm(
+        `Disable ${user.firstName} ${user.lastName}? They will be signed out immediately and unable to log in until reactivated.`
+      );
+      if (!confirmed) return;
+    }
+    setStatusSaving(true);
+    setStatusMsg('');
+    try {
+      await api.patch(`/admin/users/${userId}/status`, { isActive: nextActive });
+      setUser(prev => prev ? { ...prev, isActive: nextActive } : prev);
+      onRoleChanged();
+    } catch (err: any) {
+      setStatusMsg(err?.response?.data?.error || 'Failed to update account status.');
+    } finally {
+      setStatusSaving(false);
+    }
+  }
+
   return (
     <>
       <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 100 }} />
@@ -143,10 +180,34 @@ function UserDrawer({ userId, currentUserId, onClose, onRoleChanged }: DrawerPro
                 <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', marginBottom: '12px' }}>{user.email}</div>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   {rolePill(user.role)}
+                  {statusPill(user.isActive)}
                   <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.35)', alignSelf: 'center' }}>
                     Joined {new Date(user.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </span>
                 </div>
+              </div>
+
+              <div style={{ background: '#111', borderRadius: '10px', padding: '16px', marginBottom: '24px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>Account Status</div>
+                {isSelf ? (
+                  <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)' }}>
+                    You cannot disable your own account.
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', flex: 1 }}>
+                      {user.isActive ? 'This account can log in normally.' : 'This account is disabled and cannot log in.'}
+                    </span>
+                    <button
+                      onClick={toggleStatus}
+                      disabled={statusSaving}
+                      style={user.isActive ? S.btnDanger : S.btnPrimary}
+                    >
+                      {statusSaving ? 'Saving...' : user.isActive ? 'Disable User' : 'Reactivate User'}
+                    </button>
+                  </div>
+                )}
+                {statusMsg && <div style={{ marginTop: '8px', fontSize: '12px', color: 'rgba(239,68,68,0.8)' }}>{statusMsg}</div>}
               </div>
 
               <div style={{ background: '#111', borderRadius: '10px', padding: '16px', marginBottom: '24px', border: '1px solid rgba(255,255,255,0.06)' }}>
@@ -427,9 +488,10 @@ export default function UserManager() {
         {/* Table */}
         <div style={{ background: '#151519', borderRadius: '12px', border: '1px solid rgba(194,24,106,0.08)', overflow: 'hidden' }}>
           {/* Header row */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 200px 100px 90px 90px 110px', padding: '12px 20px', borderBottom: '1px solid rgba(255,255,255,0.08)', fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 130px 100px 90px 80px 90px 100px', padding: '12px 20px', borderBottom: '1px solid rgba(255,255,255,0.08)', fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
             <span>Name / Email</span>
             <span>Role</span>
+            <span>Status</span>
             <span>Enrolments</span>
             <span>Certs</span>
             <span style={{ textAlign: 'right' }}>Joined</span>
@@ -455,7 +517,7 @@ export default function UserManager() {
             <div
               key={u.id}
               onClick={() => setSelectedUserId(u.id)}
-              style={{ display: 'grid', gridTemplateColumns: '1fr 200px 100px 90px 90px 110px', padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', alignItems: 'center', transition: 'background 0.15s' }}
+              style={{ display: 'grid', gridTemplateColumns: '1fr 130px 100px 90px 80px 90px 100px', padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', alignItems: 'center', transition: 'background 0.15s' }}
               onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
             >
@@ -464,6 +526,7 @@ export default function UserManager() {
                 <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>{u.email}</div>
               </div>
               <div>{rolePill(u.role)}</div>
+              <div>{statusPill(u.isActive)}</div>
               <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>{u._count.enrolments}</div>
               <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>{u._count.certificates}</div>
               <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.35)', textAlign: 'right' }}>

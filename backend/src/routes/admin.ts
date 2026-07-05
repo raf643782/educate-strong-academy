@@ -662,7 +662,7 @@ router.get('/users', authenticate, requireRole('ADMIN'), async (req: AuthRequest
         orderBy: { createdAt: 'desc' },
         select: {
           id: true, email: true, firstName: true, lastName: true,
-          role: true, avatarUrl: true, createdAt: true,
+          role: true, isActive: true, avatarUrl: true, createdAt: true,
           _count: { select: { enrolments: true, certificates: true } },
         },
       }),
@@ -683,7 +683,7 @@ router.get('/users/:id', authenticate, requireRole('ADMIN'), async (req: AuthReq
       where: { id: req.params.id },
       select: {
         id: true, email: true, firstName: true, lastName: true,
-        role: true, avatarUrl: true, bio: true, location: true, createdAt: true,
+        role: true, isActive: true, avatarUrl: true, bio: true, location: true, createdAt: true,
         enrolments: {
           include: { course: { select: { id: true, title: true, slug: true, pathway: true } } },
           orderBy: { enrolledAt: 'desc' },
@@ -752,7 +752,7 @@ router.post('/users', authenticate, requireRole('ADMIN'), async (req: AuthReques
         role,
       },
       select: {
-        id: true, email: true, firstName: true, lastName: true, role: true, createdAt: true,
+        id: true, email: true, firstName: true, lastName: true, role: true, isActive: true, createdAt: true,
       },
     });
 
@@ -791,13 +791,64 @@ router.put('/users/:id', authenticate, requireRole('ADMIN'), async (req: AuthReq
       where: { id: targetId },
       data,
       select: {
-        id: true, email: true, firstName: true, lastName: true, role: true, createdAt: true,
+        id: true, email: true, firstName: true, lastName: true, role: true, isActive: true, createdAt: true,
       },
     });
     res.json(user);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to update user' });
+  }
+});
+
+// PATCH /api/admin/users/:id/status — enable or disable a user account.
+// Disabled users cannot log in (auth.ts) and lose access mid-session
+// (middleware/auth.ts checks isActive on every authenticated request).
+router.patch('/users/:id/status', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const adminId = req.userId!;
+    const targetId = req.params.id;
+    const { isActive } = req.body;
+
+    if (typeof isActive !== 'boolean') {
+      res.status(400).json({ error: 'isActive must be true or false.' });
+      return;
+    }
+
+    const target = await prisma.user.findUnique({ where: { id: targetId } });
+    if (!target) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    if (!isActive) {
+      if (targetId === adminId) {
+        res.status(400).json({ error: 'You cannot disable your own account.' });
+        return;
+      }
+
+      if (target.role === 'ADMIN') {
+        const otherActiveAdmins = await prisma.user.count({
+          where: { role: 'ADMIN', isActive: true, id: { not: targetId } },
+        });
+        if (otherActiveAdmins === 0) {
+          res.status(400).json({ error: 'Cannot disable the last active admin account.' });
+          return;
+        }
+      }
+    }
+
+    const user = await prisma.user.update({
+      where: { id: targetId },
+      data: { isActive },
+      select: {
+        id: true, email: true, firstName: true, lastName: true, role: true, isActive: true, createdAt: true,
+      },
+    });
+    res.json(user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update user status.' });
   }
 });
 
