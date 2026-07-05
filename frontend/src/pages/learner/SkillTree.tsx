@@ -693,7 +693,7 @@ function LearnerSidebar({ learner }: { learner: typeof LEARNER }) {
           <SidebarIcon type="cert" />
           <div>
             <strong>Not Yet Earned</strong>
-            <span>Complete all lessons and pass the assessment to earn your certificate.</span>
+            <span>Complete all lessons and pass the assessment. Certificate issuing is managed by EducateStrong.</span>
           </div>
         </div>
       </section>

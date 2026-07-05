@@ -115,6 +115,14 @@ router.get('/:slug/enrolled', authenticate, async (req: AuthRequest, res: Respon
 });
 
 // POST /api/courses/enrol/:courseId
+//
+// Public self-enrolment is intentionally disabled. Educate.Strong's
+// courses are paid qualifications — course access must be granted by
+// an admin (see POST /api/admin/enrolments), not created freely by an
+// authenticated visitor. This route stays in place (rather than being
+// removed) so it fails predictably with a clear message instead of a
+// generic 404, and so it can be safely re-enabled later on a
+// per-course basis if a genuinely free course is introduced.
 router.post('/enrol/:courseId', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { courseId } = req.params;
@@ -135,14 +143,12 @@ router.post('/enrol/:courseId', authenticate, async (req: AuthRequest, res: Resp
       return;
     }
 
-    const enrolment = await prisma.enrolment.create({
-      data: { userId, courseId },
+    res.status(403).json({
+      error: 'Course access is granted by Educate.Strong. Please register your interest and the team will confirm your enrolment.',
     });
-
-    res.status(201).json({ message: 'Enrolled successfully', enrolment });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to enrol' });
+    res.status(500).json({ error: 'Failed to check enrolment' });
   }
 });
 

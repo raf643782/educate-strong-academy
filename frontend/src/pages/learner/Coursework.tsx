@@ -206,8 +206,8 @@ export default function Coursework() {
                       {a.description && <p className="text-sm text-es-muted leading-relaxed mb-4">{a.description}</p>}
                       {latest?.feedback && !['NEEDS_CHANGES'].includes(status) && (
                         <div className="rounded-lg p-4 mb-4" style={{
-                          background: status === 'PASSED' ? 'rgba(34,197,94,0.08)' : 'rgba(225,154,71,0.08)',
-                          border: `1px solid ${status === 'PASSED' ? 'rgba(34,197,94,0.3)' : 'rgba(225,154,71,0.2)'}`,
+                          background: status === 'PASSED' ? 'rgba(164,28,100,0.08)' : 'rgba(225,154,71,0.08)',
+                          border: `1px solid ${status === 'PASSED' ? 'rgba(164,28,100,0.3)' : 'rgba(225,154,71,0.2)'}`,
                         }}>
                           <p className="text-xs font-bold uppercase tracking-wide mb-1 text-es-muted">Assessor Feedback</p>
                           <p className="text-sm text-es-off-white">{latest.feedback}</p>
@@ -215,8 +215,8 @@ export default function Coursework() {
                       )}
                       <SubmitPanel assessment={a} onSubmitted={() => setRefreshKey(k => k + 1)} />
                       {status === 'PASSED' && (
-                        <div className="rounded-lg p-3 mt-3" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)' }}>
-                          <p className="text-xs" style={{ color: '#22C55E' }}>Assessment passed. This assessment is complete.</p>
+                        <div className="rounded-lg p-3 mt-3" style={{ background: 'rgba(164,28,100,0.08)', border: '1px solid rgba(164,28,100,0.2)' }}>
+                          <p className="text-xs" style={{ color: '#A41C64' }}>Coursework passed. Certificate issuing is managed by EducateStrong.</p>
                         </div>
                       )}
                       {(status === 'PENDING' || status === 'IN_REVIEW') && (

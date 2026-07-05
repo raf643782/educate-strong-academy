@@ -11,11 +11,10 @@
  * as a secondary action alongside the primary in-person booking flow.
  */
 import { useEffect, useState } from 'react';
-import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import Badge, { pathwayVariant, levelVariant } from '../../components/ui/Badge';
-import Button from '../../components/ui/Button';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../lib/api';
 import { CONTACT_EMAIL } from '../../lib/contact';
@@ -79,17 +78,13 @@ const pathwayLabel = (p: string) =>
 export default function CourseDetail() {
   const { slug } = useParams<{ slug: string }>();
   const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
 
   const [course, setCourse] = useState<CourseAPI | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [slowLoad, setSlowLoad] = useState(false);
-  const [enrolling, setEnrolling] = useState(false);
   const [enrolled, setEnrolled] = useState(false);
   const [openModules, setOpenModules] = useState<Set<string>>(new Set());
-  const [enrolError, setEnrolError] = useState<string | null>(null);
 
   // Look up rich static data — determines which view to render
   const richData = slug ? COURSE_PAGE_DATA[slug] : undefined;
@@ -122,23 +117,16 @@ export default function CourseDetail() {
     return () => clearTimeout(timer);
   }, [loading]);
 
-  const handleEnrol = async () => {
-    if (!isAuthenticated) {
-      navigate('/login', { state: { from: location } });
-      return;
-    }
-    if (!course) return;
-    setEnrolling(true);
-    setEnrolError(null);
-    try {
-      await api.post(`/courses/enrol/${course.id}`);
-      setEnrolled(true);
-    } catch {
-      setEnrolError('Unable to complete enrolment. Please try again.');
-    } finally {
-      setEnrolling(false);
-    }
-  };
+  // Course access is granted by an admin (see Enrolment Manager), not
+  // self-service — this checks real enrolment status so a learner who
+  // has been admin-enrolled sees "Continue Learning" correctly.
+  useEffect(() => {
+    if (!isAuthenticated || !slug) return;
+    api
+      .get<{ enrolled: boolean }>(`/courses/${slug}/enrolled`)
+      .then(res => setEnrolled(res.data.enrolled))
+      .catch(() => {});
+  }, [isAuthenticated, slug]);
 
   const toggleModule = (moduleId: string) => {
     setOpenModules((prev) => {
@@ -221,15 +209,7 @@ export default function CourseDetail() {
           interestType={interestType}
           isEnrolled={enrolled}
           firstLessonUrl={firstLessonUrl}
-          onEnrol={isAuthenticated ? handleEnrol : undefined}
-          enrolling={enrolling}
         />
-
-        {enrolError && (
-          <div className="py-3 px-4 text-sm text-center" style={{ background: 'rgba(239,68,68,0.08)', borderBottom: '1px solid rgba(239,68,68,0.18)', color: '#f87171' }}>
-            {enrolError}
-          </div>
-        )}
 
         {/* 3: Why this course */}
         <section style={{ background: '#050506', borderBottom: '1px solid rgba(194,24,106,0.08)' }} className="py-14 md:py-18">
@@ -335,13 +315,12 @@ export default function CourseDetail() {
                     <p className="text-es-muted text-sm">Pre-course preparation and reference content.</p>
                   </div>
                   {!enrolled && (
-                    <button
-                      onClick={isAuthenticated ? handleEnrol : () => navigate('/login', { state: { from: location } })}
-                      disabled={enrolling}
-                      className="btn-secondary text-xs py-2 px-4 flex-shrink-0 disabled:opacity-50"
+                    <Link
+                      to={`/register-interest?type=${encodeURIComponent(interestType)}`}
+                      className="btn-secondary text-xs py-2 px-4 flex-shrink-0"
                     >
-                      {enrolling ? 'Enrolling...' : 'Enrol Free'}
-                    </button>
+                      Register Interest
+                    </Link>
                   )}
                   {enrolled && firstLessonUrl && (
                     <Link to={firstLessonUrl} className="btn-primary text-xs py-2 px-4 flex-shrink-0">
@@ -488,14 +467,13 @@ export default function CourseDetail() {
               )}
             </div>
           ) : (
-            <>
-              <Button onClick={handleEnrol} disabled={enrolling} size="lg">
-                {enrolling ? 'Enrolling...' : 'Enrol Now — Free'}
-              </Button>
-              {enrolError && (
-                <p className="text-sm mt-3" style={{ color: '#f87171' }}>{enrolError}</p>
-              )}
-            </>
+            <Link
+              to={`/register-interest?type=${encodeURIComponent(interestType)}`}
+              className="font-semibold px-6 py-3 rounded-full text-sm text-white transition-all duration-200 hover:scale-105 inline-block"
+              style={{ background: 'linear-gradient(135deg, #A41C64, #C0246E)', boxShadow: '0 4px 18px rgba(164,28,100,0.35)' }}
+            >
+              Register Interest
+            </Link>
           )}
         </div>
       </div>

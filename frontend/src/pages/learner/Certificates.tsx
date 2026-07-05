@@ -52,10 +52,10 @@ export default function Certificates() {
               </div>
               <h2 className="text-xl font-black text-white mb-3">No certificates yet</h2>
               <p className="text-es-muted text-sm mb-2 max-w-sm mx-auto">
-                Certificates are awarded on completion of qualifications.
+                Certificates will appear here once your course completion has been reviewed and approved by EducateStrong.
               </p>
               <p className="text-es-subtle text-sm mb-6 max-w-sm mx-auto">
-                Complete your first course to earn your certificate. Each certificate includes a unique verification code.
+                Each certificate includes a unique verification code.
               </p>
               <Link to="/courses" className="btn-primary text-sm">
                 Explore Courses

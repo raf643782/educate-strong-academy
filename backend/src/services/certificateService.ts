@@ -17,10 +17,21 @@ import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient();
 
+// Automatic issuance is disabled — certificates are owner-managed: an
+// admin issues them manually via POST /api/admin/certificates after
+// reviewing course completion. The completion-check logic below is
+// left intact and can be safely re-enabled by flipping this flag,
+// once paid enrolment and completion review are trusted end-to-end.
+const AUTO_ISSUE_ENABLED = false;
+
 export async function checkAndIssueCertificate(
   userId: string,
   courseId: string
 ): Promise<{ issued: boolean; certificate: { id: string; certificateCode: string } | null }> {
+  if (!AUTO_ISSUE_ENABLED) {
+    return { issued: false, certificate: null };
+  }
+
   try {
     // ── 1. Verify learner is enrolled ──────────────────────────────────
     const enrolment = await prisma.enrolment.findUnique({

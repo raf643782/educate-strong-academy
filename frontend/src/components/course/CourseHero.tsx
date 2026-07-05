@@ -10,13 +10,11 @@ interface CourseHeroProps {
   interestType: string;
   isEnrolled?: boolean;
   firstLessonUrl?: string;
-  onEnrol?: () => void;
-  enrolling?: boolean;
 }
 
 export default function CourseHero({
   badges, headline, subHeadline, keyFacts, contactEmail, interestType,
-  isEnrolled, firstLessonUrl, onEnrol, enrolling,
+  isEnrolled, firstLessonUrl,
 }: CourseHeroProps) {
   const registerInterestHref = `/register-interest?type=${encodeURIComponent(interestType)}`;
 
@@ -61,12 +59,6 @@ export default function CourseHero({
               <span className="btn-primary text-sm opacity-70">Enrolled in Online Materials</span>
             ) : (
               <Link to={registerInterestHref} className="btn-primary text-sm">Secure Your Place</Link>
-            )}
-            {onEnrol && !isEnrolled && (
-              <button onClick={onEnrol} disabled={enrolling}
-                className="btn-secondary text-sm disabled:opacity-50">
-                {enrolling ? 'Enrolling...' : 'Access Online Materials'}
-              </button>
             )}
             <a href="#course-details" className="text-es-muted hover:text-white text-sm transition-colors">
               View course details
