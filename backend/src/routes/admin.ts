@@ -1,5 +1,6 @@
 import { Router, Response } from 'express';
 import { PrismaClient, InterestStatus } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 import { authenticate, requireRole, AuthRequest } from '../middleware/auth';
 
 const router = Router();
@@ -14,6 +15,13 @@ function slugify(str: string): string {
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-');
+}
+
+const VALID_ROLES = ['LEARNER', 'COACH', 'TUTOR', 'ASSESSOR', 'ADMIN'];
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function isStrongPassword(pw: string): boolean {
+  return pw.length >= 8 && /[A-Z]/.test(pw) && /[0-9]/.test(pw);
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
@@ -695,6 +703,63 @@ router.get('/users/:id', authenticate, requireRole('ADMIN'), async (req: AuthReq
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to fetch user' });
+  }
+});
+
+// POST /api/admin/users — create a user with any role (admin-only)
+//
+// This is the only way a COACH, TUTOR, ASSESSOR, or ADMIN account can be
+// created. Public registration (POST /api/auth/register) always creates
+// LEARNER accounts and never reads a role from the request body.
+router.post('/users', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { firstName, lastName, email, password, role } = req.body;
+
+    if (!firstName || !lastName || !email || !password || !role) {
+      res.status(400).json({ error: 'First name, last name, email, password, and role are all required.' });
+      return;
+    }
+
+    if (!EMAIL_REGEX.test(email)) {
+      res.status(400).json({ error: 'Please provide a valid email address.' });
+      return;
+    }
+
+    if (!VALID_ROLES.includes(role)) {
+      res.status(400).json({ error: `Invalid role. Allowed: ${VALID_ROLES.join(', ')}` });
+      return;
+    }
+
+    if (!isStrongPassword(password)) {
+      res.status(400).json({ error: 'Password must be at least 8 characters, include an uppercase letter and a number.' });
+      return;
+    }
+
+    const existing = await prisma.user.findUnique({ where: { email: email.toLowerCase().trim() } });
+    if (existing) {
+      res.status(409).json({ error: 'An account with that email already exists.' });
+      return;
+    }
+
+    const hashed = await bcrypt.hash(password, 12);
+
+    const user = await prisma.user.create({
+      data: {
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.toLowerCase().trim(),
+        password: hashed,
+        role,
+      },
+      select: {
+        id: true, email: true, firstName: true, lastName: true, role: true, createdAt: true,
+      },
+    });
+
+    res.status(201).json(user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to create user.' });
   }
 });
 

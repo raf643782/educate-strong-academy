@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import api from '../../lib/api';
@@ -226,6 +226,127 @@ function UserDrawer({ userId, currentUserId, onClose, onRoleChanged }: DrawerPro
   );
 }
 
+function Field({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div style={{ marginBottom: '14px' }}>
+      <label style={S.label}>{label}</label>
+      {children}
+    </div>
+  );
+}
+
+interface CreateUserForm {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  role: Role;
+}
+
+const EMPTY_CREATE_FORM: CreateUserForm = { firstName: '', lastName: '', email: '', password: '', role: 'LEARNER' };
+
+function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
+  const [form, setForm] = useState<CreateUserForm>(EMPTY_CREATE_FORM);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [validationError, setValidationError] = useState('');
+
+  const set = <K extends keyof CreateUserForm>(k: K, v: CreateUserForm[K]) => setForm(f => ({ ...f, [k]: v }));
+
+  function validate(): string {
+    if (!form.firstName.trim() || !form.lastName.trim() || !form.email.trim() || !form.password) {
+      return 'First name, last name, email, and password are all required.';
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      return 'Please enter a valid email address.';
+    }
+    if (form.password.length < 8 || !/[A-Z]/.test(form.password) || !/[0-9]/.test(form.password)) {
+      return 'Password must be at least 8 characters and include an uppercase letter and a number.';
+    }
+    return '';
+  }
+
+  async function handleSave() {
+    const v = validate();
+    setValidationError(v);
+    if (v) return;
+    setSaving(true);
+    setError('');
+    try {
+      await api.post('/admin/users', {
+        firstName: form.firstName.trim(),
+        lastName: form.lastName.trim(),
+        email: form.email.trim(),
+        password: form.password,
+        role: form.role,
+      });
+      onCreated();
+      onClose();
+    } catch (err: any) {
+      setError(err?.response?.data?.error || 'Failed to create user.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div
+      style={{ position: 'fixed', inset: 0, zIndex: 150, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '48px 16px', overflowY: 'auto' }}
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div style={{ width: '100%', maxWidth: '480px', background: '#1B1B20', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px', overflow: 'hidden', marginBottom: '2rem' }}>
+        <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontWeight: 700, fontSize: '16px', color: '#fff' }}>Create User</span>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: '20px', cursor: 'pointer', lineHeight: 1 }}>x</button>
+        </div>
+        <div style={{ padding: '24px' }}>
+          <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', marginTop: 0, marginBottom: '20px' }}>
+            Create a user account for an approved learner, coach, tutor, assessor or admin. Share login details securely outside the platform.
+          </p>
+
+          <Field label="First name">
+            <input style={S.input} value={form.firstName} onChange={e => set('firstName', e.target.value)} />
+          </Field>
+          <Field label="Last name">
+            <input style={S.input} value={form.lastName} onChange={e => set('lastName', e.target.value)} />
+          </Field>
+          <Field label="Email">
+            <input style={S.input} type="email" value={form.email} onChange={e => set('email', e.target.value)} />
+          </Field>
+          <Field label="Temporary password">
+            <input style={S.input} value={form.password} onChange={e => set('password', e.target.value)} />
+          </Field>
+          <Field label="Role">
+            <select style={S.input} value={form.role} onChange={e => set('role', e.target.value as Role)}>
+              {(['LEARNER', 'COACH', 'TUTOR', 'ASSESSOR', 'ADMIN'] as Role[]).map(r => (
+                <option key={r} value={r}>{r}</option>
+              ))}
+            </select>
+          </Field>
+
+          {validationError && (
+            <div style={{ fontSize: '13px', color: '#E19A47', background: 'rgba(225,154,71,0.1)', borderRadius: '8px', padding: '10px 14px', border: '1px solid rgba(225,154,71,0.2)', marginBottom: '14px' }}>
+              {validationError}
+            </div>
+          )}
+          {error && (
+            <div style={{ fontSize: '13px', color: 'rgba(239,68,68,0.9)', background: 'rgba(239,68,68,0.1)', borderRadius: '8px', padding: '10px 14px', border: '1px solid rgba(239,68,68,0.2)', marginBottom: '14px' }}>
+              {error}
+            </div>
+          )}
+
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '8px' }}>
+            <button onClick={onClose} style={S.btnGhost}>Cancel</button>
+            <button onClick={handleSave} disabled={saving} style={S.btnPrimary}>
+              {saving ? 'Creating...' : 'Create User'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function UserManager() {
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<UserSummary[]>([]);
@@ -235,6 +356,7 @@ export default function UserManager() {
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchUsers = useCallback((q: string, role: string) => {
@@ -279,6 +401,7 @@ export default function UserManager() {
             <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0, color: '#fff' }}>Users</h1>
             {!loading && <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>{total} {total === 1 ? 'user' : 'users'} total</div>}
           </div>
+          <button onClick={() => setShowCreateModal(true)} style={S.btnPrimary}>+ New User</button>
         </div>
 
         {/* Filters */}
@@ -360,6 +483,13 @@ export default function UserManager() {
           currentUserId={currentUser.id}
           onClose={() => setSelectedUserId(null)}
           onRoleChanged={() => fetchUsers(search, roleFilter)}
+        />
+      )}
+
+      {showCreateModal && (
+        <CreateUserModal
+          onClose={() => setShowCreateModal(false)}
+          onCreated={() => fetchUsers(search, roleFilter)}
         />
       )}
     </div>
