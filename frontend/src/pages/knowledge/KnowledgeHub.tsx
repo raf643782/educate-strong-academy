@@ -70,7 +70,7 @@ export default function KnowledgeHub() {
             <button
               key={cat.id}
               onClick={() => selectCategory(cat.id)}
-              className={`px-4 py-2 rounded text-sm font-semibold transition-all ${
+              className={`px-4 py-3 rounded text-sm font-semibold transition-all ${
                 activeCategory === cat.id
                   ? 'text-white'
                   : 'text-es-muted hover:text-white border border-es-grey-dark hover:border-es-accent'

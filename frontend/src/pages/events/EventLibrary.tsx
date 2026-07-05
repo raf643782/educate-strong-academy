@@ -94,7 +94,7 @@ export default function EventLibrary() {
             <button
               key={cat}
               onClick={() => setCategory(cat)}
-              className={`px-4 py-2 rounded text-sm font-semibold transition-all ${category === cat ? 'text-white' : 'text-es-muted hover:text-white border border-es-grey-dark hover:border-es-accent'}`}
+              className={`px-4 py-3 rounded text-sm font-semibold transition-all ${category === cat ? 'text-white' : 'text-es-muted hover:text-white border border-es-grey-dark hover:border-es-accent'}`}
               style={category === cat ? { background: '#A41C64', border: '1px solid rgba(164,28,100,0.6)' } : {}}
             >
               {cat}

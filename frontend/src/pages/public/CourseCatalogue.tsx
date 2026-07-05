@@ -141,7 +141,7 @@ export default function CourseCatalogue() {
               onClick={() => setFilter(f)}
               className="text-sm font-semibold transition-all duration-200"
               style={{
-                padding: '8px 18px',
+                padding: '12px 18px',
                 borderRadius: '9999px',
                 background: filter === f ? 'rgba(164,28,100,0.20)' : 'rgba(255,255,255,0.04)',
                 border: `1px solid ${filter === f ? 'rgba(194,24,106,0.45)' : 'rgba(255,255,255,0.08)'}`,

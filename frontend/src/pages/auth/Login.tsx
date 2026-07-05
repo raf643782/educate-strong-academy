@@ -262,9 +262,9 @@ export default function Login() {
                     type="button"
                     onClick={() => selectWs(ws.key)}
                     style={{
-                      flex: 1,
-                      minWidth: 0,
-                      padding: '8px 6px',
+                      flexGrow: 1,
+                      flexShrink: 0,
+                      padding: '14px 10px',
                       borderRadius: '7px',
                       fontSize: '12px',
                       fontWeight: 700,

@@ -123,7 +123,7 @@ function NewsletterForm() {
             onChange={e => setEmail(e.target.value)}
             placeholder="your@email.com"
             required
-            className="flex-1 min-w-0 px-4 py-2.5 rounded-xl text-sm text-white placeholder-white/25 focus:outline-none focus:ring-1 transition-all"
+            className="flex-1 min-w-0 px-4 py-3 rounded-xl text-sm text-white placeholder-white/25 focus:outline-none focus:ring-1 transition-all"
             style={{
               background: 'rgba(255,255,255,0.05)',
               border: '1px solid rgba(255,255,255,0.1)',
@@ -134,7 +134,7 @@ function NewsletterForm() {
           <button
             type="submit"
             disabled={status === 'sending'}
-            className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white flex-shrink-0 transition-all duration-200 disabled:opacity-60"
+            className="px-4 py-3 rounded-xl text-sm font-semibold text-white flex-shrink-0 transition-all duration-200 disabled:opacity-60"
             style={{ background: 'linear-gradient(135deg, #A41C64, #C0246E)', boxShadow: '0 4px 12px rgba(164,28,100,0.4)' }}
           >
             {status === 'sending' ? '...' : 'Join'}
