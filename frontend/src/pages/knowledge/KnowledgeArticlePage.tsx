@@ -18,7 +18,7 @@ export default function KnowledgeArticlePage() {
   const article = KNOWLEDGE_ARTICLES.find(a => a.slug === slug);
 
   useDocumentHead({
-    title: article?.title || 'Article Not Found',
+    title: article ? `${article.title} — Knowledge Hub` : 'Article Not Found',
     description: article?.summary,
   });
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import api from '../../lib/api';
+import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 interface Stats {
   users: number;
@@ -26,6 +27,8 @@ const QUICK_LINKS = [
 ];
 
 export default function AdminDashboard() {
+  useDocumentHead({ title: 'Admin' });
+
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
 

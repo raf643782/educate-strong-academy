@@ -4,6 +4,7 @@ import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import Card from '../../components/ui/Card';
 import api from '../../lib/api';
+import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 interface Certificate {
   id: string;
@@ -14,6 +15,8 @@ interface Certificate {
 }
 
 export default function Certificates() {
+  useDocumentHead({ title: 'My Certificates' });
+
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [loading, setLoading] = useState(true);
 

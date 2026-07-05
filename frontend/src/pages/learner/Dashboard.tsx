@@ -4,6 +4,7 @@ import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../lib/api';
+import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 interface Enrolment {
   id: string; enrolledAt: string; completedAt: string | null;
@@ -28,6 +29,8 @@ const QUICK = [
 ];
 
 export default function Dashboard() {
+  useDocumentHead({ title: 'Dashboard' });
+
   const { user } = useAuth();
   const [enrolments, setEnrolments] = useState<Enrolment[]>([]);
   const [loading, setLoading] = useState(true);

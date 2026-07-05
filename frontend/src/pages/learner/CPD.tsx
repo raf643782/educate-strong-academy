@@ -4,6 +4,7 @@ import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import Card from '../../components/ui/Card';
 import api from '../../lib/api';
+import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 interface CPDSummary {
   totalHours: number;
@@ -23,6 +24,8 @@ const activityLabels: Record<string, string> = {
 };
 
 export default function CPD() {
+  useDocumentHead({ title: 'CPD Log' });
+
   const [summary, setSummary] = useState<CPDSummary | null>(null);
   const [loading, setLoading] = useState(true);
 
