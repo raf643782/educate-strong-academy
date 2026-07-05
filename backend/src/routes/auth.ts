@@ -2,9 +2,26 @@ import { Router, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
+import rateLimit from 'express-rate-limit';
 import { PrismaClient } from '@prisma/client';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { sendPasswordResetEmail } from '../services/emailService';
+
+function makeAuthLimiter() {
+  return rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many attempts. Please try again later.' },
+  });
+}
+
+// Separate instances so a burst on one endpoint (e.g. failed logins)
+// doesn't also lock a user out of an unrelated one (e.g. forgot-password).
+const loginLimiter = makeAuthLimiter();
+const registerLimiter = makeAuthLimiter();
+const forgotPasswordLimiter = makeAuthLimiter();
 
 function hashToken(raw: string): string {
   return crypto.createHash('sha256').update(raw).digest('hex');
@@ -17,7 +34,7 @@ function isStrongPassword(pw: string): boolean {
 const router = Router();
 const prisma = new PrismaClient();
 
-router.post('/register', async (req: Request, res: Response): Promise<void> => {
+router.post('/register', registerLimiter, async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password, firstName, lastName } = req.body;
     if (!email || !password || !firstName || !lastName) {
@@ -54,7 +71,7 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-router.post('/login', async (req: Request, res: Response): Promise<void> => {
+router.post('/login', loginLimiter, async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -106,7 +123,7 @@ router.get('/me', authenticate, async (req: AuthRequest, res: Response): Promise
 
 // POST /auth/forgot-password
 // Never reveals whether the email exists.
-router.post('/forgot-password', async (req: Request, res: Response): Promise<void> => {
+router.post('/forgot-password', forgotPasswordLimiter, async (req: Request, res: Response): Promise<void> => {
   const NEUTRAL = { message: 'If that email address is registered, you will receive a password reset link shortly.' };
   try {
     const { email } = req.body;

@@ -256,21 +256,28 @@ export default function Footer() {
 
       {/* ── Bottom bar ───────────────────────────────────────────────── */}
       <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '20px 0' }}>
-        <div className="es-container flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <p className="text-[11px] text-white/20">
-            &copy; {new Date().getFullYear()} Educate.Strong Ltd. All rights reserved.
-          </p>
-          <div className="flex items-center gap-4">
-            <span className="text-[11px] text-white/15 hidden sm:block">
-              Powered by{' '}
-              <span className="font-semibold text-white/25">VIRES</span>
-            </span>
-            <a
-              href={`mailto:${CONTACT_EMAIL}`}
-              className="text-[11px] text-white/20 hover:text-white/45 transition-colors"
-            >
-              {CONTACT_EMAIL}
-            </a>
+        <div className="es-container flex flex-col gap-3">
+          <div className="flex flex-wrap items-center gap-4">
+            <Link to="/terms" className="text-[11px] text-white/20 hover:text-white/45 transition-colors">Terms of Service</Link>
+            <Link to="/privacy" className="text-[11px] text-white/20 hover:text-white/45 transition-colors">Privacy Policy</Link>
+            <Link to="/refund-policy" className="text-[11px] text-white/20 hover:text-white/45 transition-colors">Refund &amp; Cancellation Policy</Link>
+          </div>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <p className="text-[11px] text-white/20">
+              &copy; {new Date().getFullYear()} Educate.Strong Ltd. Company No. [COMPANY NUMBER]. All rights reserved.
+            </p>
+            <div className="flex items-center gap-4">
+              <span className="text-[11px] text-white/15 hidden sm:block">
+                Powered by{' '}
+                <span className="font-semibold text-white/25">VIRES</span>
+              </span>
+              <a
+                href={`mailto:${CONTACT_EMAIL}`}
+                className="text-[11px] text-white/20 hover:text-white/45 transition-colors"
+              >
+                {CONTACT_EMAIL}
+              </a>
+            </div>
           </div>
         </div>
       </div>

@@ -16,6 +16,9 @@ import CertificateVerify from './pages/public/CertificateVerify';
 import Shop from './pages/public/Shop';
 import NotFound from './pages/public/NotFound';
 import RegisterInterest from './pages/public/RegisterInterest';
+import Terms from './pages/public/Terms';
+import Privacy from './pages/public/Privacy';
+import RefundPolicy from './pages/public/RefundPolicy';
 
 // Auth pages
 import Login from './pages/auth/Login';
@@ -90,6 +93,9 @@ export default function App() {
           <Route path="/verify" element={<CertificateVerify />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/register-interest" element={<RegisterInterest />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/refund-policy" element={<RefundPolicy />} />
           <Route path="/knowledge" element={<KnowledgeHub />} />
           <Route path="/knowledge/:slug" element={<KnowledgeArticlePage />} />
           <Route path="/exercises" element={<ExerciseLibrary />} />
