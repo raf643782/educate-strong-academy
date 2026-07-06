@@ -60,6 +60,18 @@ function rolePill(role: Role) {
   );
 }
 
+function isQaDemoEmail(email: string): boolean {
+  return email.toLowerCase().endsWith('@educatestrong.test');
+}
+
+function qaDemoTag() {
+  return (
+    <span style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '6px', padding: '2px 7px', fontSize: '10px', fontWeight: 700, letterSpacing: '0.06em', marginLeft: '6px' }}>
+      QA DEMO
+    </span>
+  );
+}
+
 function statusPill(isActive: boolean) {
   return isActive ? (
     <span style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)', borderRadius: '6px', padding: '3px 9px', fontSize: '11px', fontWeight: 700, letterSpacing: '0.06em' }}>
@@ -177,7 +189,10 @@ function UserDrawer({ userId, currentUserId, onClose, onRoleChanged }: DrawerPro
             <>
               <div style={{ marginBottom: '24px' }}>
                 <div style={{ fontSize: '20px', fontWeight: 700, color: '#fff', marginBottom: '4px' }}>{user.firstName} {user.lastName}</div>
-                <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', marginBottom: '12px' }}>{user.email}</div>
+                <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', marginBottom: '12px' }}>
+                  {user.email}
+                  {isQaDemoEmail(user.email) && qaDemoTag()}
+                </div>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   {rolePill(user.role)}
                   {statusPill(user.isActive)}
@@ -523,7 +538,10 @@ export default function UserManager() {
             >
               <div>
                 <div style={{ fontSize: '14px', fontWeight: 600, color: '#fff' }}>{u.firstName} {u.lastName}</div>
-                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>{u.email}</div>
+                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>
+                  {u.email}
+                  {isQaDemoEmail(u.email) && qaDemoTag()}
+                </div>
               </div>
               <div>{rolePill(u.role)}</div>
               <div>{statusPill(u.isActive)}</div>

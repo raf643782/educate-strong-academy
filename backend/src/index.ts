@@ -18,6 +18,7 @@ import certificatesRouter from './routes/certificates';
 import cpdRouter from './routes/cpd';
 import bestrongRouter from './routes/bestrong';
 import interestRouter from './routes/interest';
+import qaDemoRouter from './routes/qaDemo';
 
 dotenv.config();
 
@@ -63,6 +64,15 @@ app.use('/api/certificates', certificatesRouter);
 app.use('/api/cpd', cpdRouter);
 app.use('/api/be-strong', bestrongRouter);
 app.use('/api/register-interest', interestRouter);
+
+// ── Internal QA demo login — TEMPORARY TOOLING ──────────────────────────────
+// Only mounted when explicitly enabled. MUST be disabled before public
+// launch — unset ENABLE_QA_DEMO_LOGIN (or set to anything but "true") in
+// Render's environment settings. See routes/qaDemo.ts for details.
+if (process.env.ENABLE_QA_DEMO_LOGIN === 'true' && process.env.QA_DEMO_SECRET) {
+  app.use('/api/auth', qaDemoRouter);
+  console.log('[qa-demo] QA demo login is ENABLED — disable before public launch.');
+}
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', service: 'Educate.Strong API', timestamp: new Date().toISOString() });

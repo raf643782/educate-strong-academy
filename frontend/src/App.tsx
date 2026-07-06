@@ -20,6 +20,9 @@ import Terms from './pages/public/Terms';
 import Privacy from './pages/public/Privacy';
 import RefundPolicy from './pages/public/RefundPolicy';
 
+// Internal QA tooling — not linked in any nav, gated by VITE_ENABLE_QA_DEMO_LOGIN
+import QaDemoLogin from './pages/qa/QaDemoLogin';
+
 // Auth pages
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
@@ -79,6 +82,8 @@ export default function App() {
           <Route path="/courses" element={<CourseCatalogue />} />
           <Route path="/courses/:slug" element={<CourseDetail />} />
           <Route path="/login" element={<Login />} />
+          {/* Internal QA tooling — never linked in nav. Renders "not available" unless VITE_ENABLE_QA_DEMO_LOGIN=true. */}
+          <Route path="/qa-demo" element={<QaDemoLogin />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
