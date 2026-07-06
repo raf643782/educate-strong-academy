@@ -42,6 +42,9 @@ export default function QaDemoLogin() {
   const [secret, setSecret] = useState('');
   const [activeRole, setActiveRole] = useState<DemoRole | null>(null);
   const [error, setError] = useState('');
+  const [settingUp, setSettingUp] = useState(false);
+  const [setupResult, setSetupResult] = useState('');
+  const [setupError, setSetupError] = useState('');
 
   if (!enabled) {
     return (
@@ -61,6 +64,23 @@ export default function QaDemoLogin() {
     } catch (err: any) {
       setError(err?.response?.data?.error || 'Demo login failed.');
       setActiveRole(null);
+    }
+  }
+
+  async function handlePrepareData() {
+    setSetupError('');
+    setSetupResult('');
+    setSettingUp(true);
+    try {
+      const res = await api.post('/auth/qa-demo-setup', { secret });
+      setSetupResult(
+        `Ready. Course "${res.data.course.title}" with 1 module, 1 lesson, 1 resource and 1 assessment. ` +
+        `${res.data.learnerEmail} is enrolled with a sample submission (status: ${res.data.submission.status}) in the assessor queue.`
+      );
+    } catch (err: any) {
+      setSetupError(err?.response?.data?.error || 'Failed to prepare QA demo data.');
+    } finally {
+      setSettingUp(false);
     }
   }
 
@@ -98,6 +118,32 @@ export default function QaDemoLogin() {
             {error}
           </div>
         )}
+
+        <div style={{ marginTop: '20px', paddingTop: '18px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+          <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginBottom: '10px' }}>
+            Creates a small labelled [QA DEMO] course, lesson, resource, assessment and
+            sample submission so you can test learner and assessor functionality, not just
+            role access. Safe to click more than once — it repairs missing pieces without
+            creating duplicates or touching an assessor's grading decision.
+          </p>
+          <button
+            disabled={!secret || settingUp}
+            onClick={handlePrepareData}
+            style={{ ...btnStyle, opacity: !secret ? 0.4 : 1, cursor: !secret || settingUp ? 'not-allowed' : 'pointer', marginBottom: 0 }}
+          >
+            {settingUp ? 'Preparing...' : 'Prepare QA demo data'}
+          </button>
+          {setupResult && (
+            <div style={{ marginTop: '10px', fontSize: '13px', color: '#E19A47', background: 'rgba(225,154,71,0.1)', border: '1px solid rgba(225,154,71,0.2)', borderRadius: '8px', padding: '10px 14px' }}>
+              {setupResult}
+            </div>
+          )}
+          {setupError && (
+            <div style={{ marginTop: '10px', fontSize: '13px', color: 'rgba(239,68,68,0.9)', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px', padding: '10px 14px' }}>
+              {setupError}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
