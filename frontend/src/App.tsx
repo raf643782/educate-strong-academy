@@ -23,6 +23,15 @@ import RefundPolicy from './pages/public/RefundPolicy';
 // Internal QA tooling — not linked in any nav, gated by VITE_ENABLE_QA_DEMO_LOGIN
 import QaDemoLogin from './pages/qa/QaDemoLogin';
 
+// Internal portal previews — not linked in any nav. Read-only, no auth,
+// no API calls. See pages/preview/*.
+import PortalPreviewHub from './pages/preview/PortalPreviewHub';
+import LearnerPreview from './pages/preview/LearnerPreview';
+import CoachPreview from './pages/preview/CoachPreview';
+import TutorPreview from './pages/preview/TutorPreview';
+import AssessorPreview from './pages/preview/AssessorPreview';
+import AdminPreview from './pages/preview/AdminPreview';
+
 // Auth pages
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
@@ -84,6 +93,13 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           {/* Internal QA tooling — never linked in nav. Renders "not available" unless VITE_ENABLE_QA_DEMO_LOGIN=true. */}
           <Route path="/qa-demo" element={<QaDemoLogin />} />
+          {/* Internal portal previews — never linked in nav. Read-only, no auth, no API calls. */}
+          <Route path="/portal-preview" element={<PortalPreviewHub />} />
+          <Route path="/portal-preview/learner" element={<LearnerPreview />} />
+          <Route path="/portal-preview/coach" element={<CoachPreview />} />
+          <Route path="/portal-preview/tutor" element={<TutorPreview />} />
+          <Route path="/portal-preview/assessor" element={<AssessorPreview />} />
+          <Route path="/portal-preview/admin" element={<AdminPreview />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
