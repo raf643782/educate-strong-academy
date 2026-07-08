@@ -280,11 +280,21 @@ function CourseCard({ slot }: { slot: CourseSlot }) {
         <div className="flex flex-wrap gap-2 mt-auto">
           <Link
             to={`/register-interest?type=${encodeURIComponent(slot.interestType)}`}
-            className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-full transition-all duration-200 hover:opacity-90"
+            className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-full transition-all duration-200"
             style={{
               background: 'rgba(164,28,100,0.15)',
               border: '1px solid rgba(164,28,100,0.30)',
               color: '#C2186A',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #8E1858 0%, #C0246E 100%)';
+              e.currentTarget.style.borderColor = 'transparent';
+              e.currentTarget.style.color = '#fff';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'rgba(164,28,100,0.15)';
+              e.currentTarget.style.borderColor = 'rgba(164,28,100,0.30)';
+              e.currentTarget.style.color = '#C2186A';
             }}
           >
             Register Interest

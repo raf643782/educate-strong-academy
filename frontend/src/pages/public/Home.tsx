@@ -5,15 +5,22 @@
  *  1. Navbar
  *  2. Hero
  *  3. PartnerLogosMarquee
- *  4. WhyEducateStrong
- *  5. AllPathwaysOverview  (Coaching · Refereeing · StrongKidz · EatStrong)
- *  6. UpcomingCohortsSection  (full section — cohort dates + location finder)
- *  7. CertifiedCoachesSection
- *  8. TutorCredibilityStrip
- *  9. TestimonialsSection
- * 10. KnowledgeHubPreview
- * 11. Final CTA
- * 12. Footer
+ *  4. StatsStrip
+ *  5. UpcomingCohortsSection  (Next Intakes — full section, cohort dates + location finder)
+ *  6. AllPathwaysOverview  (Choose Your Pathway — Coaching · Refereeing · StrongKidz · EatStrong)
+ *  7. TutorCredibilityStrip  (Top Athletes Who Compete)
+ *  8. KnowledgeHubPreview  (Learn Between Sessions)
+ *  9. Inline Shop section  (Training Kit and Apparel)
+ * 10. TestimonialsSection  (Hear From Our Graduates)
+ * 11. CertifiedCoachesSection  (Find a Certified Coach Near You)
+ * 12. Final CTA
+ * 13. Footer
+ *
+ * WhyEducateStrong is intentionally not rendered here for now (see
+ * components/sections/WhyEducateStrong.tsx — kept in the codebase,
+ * just not wired into this page). Its stats row now lives in
+ * StatsStrip; its value-prop cards can be reinstated once there's a
+ * clear place for them.
  */
 
 import { useEffect } from 'react';
@@ -21,8 +28,8 @@ import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import PartnerLogosMarquee from '../../components/sections/PartnerLogosMarquee';
+import StatsStrip from '../../components/sections/StatsStrip';
 import TestimonialsSection from '../../components/sections/TestimonialsSection';
-import WhyEducateStrong from '../../components/sections/WhyEducateStrong';
 import AllPathwaysOverview from '../../components/sections/AllPathwaysOverview';
 import CertifiedCoachesSection from '../../components/sections/CertifiedCoachesSection';
 import TutorCredibilityStrip from '../../components/sections/TutorCredibilityStrip';
@@ -236,29 +243,23 @@ export default function Home() {
       {/* ── 2. PARTNER TICKER ──────────────────────────────────────── */}
       <PartnerLogosMarquee />
 
-      {/* ── 3. WHY EDUCATE.STRONG ──────────────────────────────────── */}
-      <WhyEducateStrong />
+      {/* ── 3. STATS STRIP ──────────────────────────────────────────── */}
+      <StatsStrip />
 
-      {/* ── 4. ALL PATHWAYS OVERVIEW ───────────────────────────────── */}
+      {/* ── 4. NEXT INTAKES (UPCOMING COURSES & COHORTS) ────────────── */}
+      <UpcomingCohortsSection />
+
+      {/* ── 5. CHOOSE YOUR PATHWAY ──────────────────────────────────── */}
       {/* Coaching · Refereeing · StrongKidz · EatStrong — no green */}
       <AllPathwaysOverview />
 
-      {/* ── 5. UPCOMING COURSES & COHORTS ──────────────────────────── */}
-      <UpcomingCohortsSection />
-
-      {/* ── 6. CERTIFIED COACHES PREVIEW ───────────────────────────── */}
-      <CertifiedCoachesSection />
-
-      {/* ── 8. TUTOR CREDIBILITY STRIP ─────────────────────────────── */}
+      {/* ── 6. TOP ATHLETES WHO COMPETE (TUTOR CREDIBILITY STRIP) ───── */}
       <TutorCredibilityStrip />
 
-      {/* ── 9. TESTIMONIALS ────────────────────────────────────────── */}
-      <TestimonialsSection />
-
-      {/* ── 10. KNOWLEDGE HUB PREVIEW ──────────────────────────────── */}
+      {/* ── 7. LEARN BETWEEN SESSIONS (KNOWLEDGE HUB PREVIEW) ───────── */}
       <KnowledgeHubPreview />
 
-      {/* ── 10b. SHOP REFERENCE ────────────────────────────────────── */}
+      {/* ── 8. TRAINING KIT AND APPAREL (SHOP REFERENCE) ────────────── */}
       <section
         style={{
           background: '#050506',
@@ -372,6 +373,12 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── 9. HEAR FROM OUR GRADUATES (TESTIMONIALS) ───────────────── */}
+      <TestimonialsSection />
+
+      {/* ── 10. FIND A CERTIFIED COACH NEAR YOU ─────────────────────── */}
+      <CertifiedCoachesSection />
+
       {/* ── 11. FINAL CTA ──────────────────────────────────────────── */}
       <section
         className="relative overflow-hidden"
@@ -420,8 +427,18 @@ export default function Home() {
             </Link>
             <Link
               to="/register-interest?type=general"
-              className="px-8 py-4 rounded-full font-semibold transition-all duration-200 hover:bg-white/6"
-              style={{ border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.7)' }}
+              className="px-8 py-4 rounded-full font-semibold transition-all duration-200"
+              style={{ border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.7)', background: 'transparent' }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #8E1858 0%, #C0246E 100%)';
+                e.currentTarget.style.borderColor = 'transparent';
+                e.currentTarget.style.color = '#fff';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
+                e.currentTarget.style.color = 'rgba(255,255,255,0.7)';
+              }}
             >
               Register Interest
             </Link>

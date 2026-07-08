@@ -100,6 +100,33 @@ const PATHWAYS: Pathway[] = [
   },
 ];
 
+/*
+ * Premium placeholder for a future real photo. No fake/stock imagery —
+ * just a tasteful gradient + icon so the card feels intentional while
+ * real EducateStrong photography isn't available yet. Swap for a real
+ * <img> later; the aria-label documents exactly what should go here.
+ */
+function PathwayImagePlaceholder({ colour, title }: { colour: string; title: string }) {
+  return (
+    <div
+      role="img"
+      aria-label={`[PHOTO PLACEHOLDER] ${title} — replace with a real EducateStrong photo`}
+      className="rounded-xl mb-5 flex items-center justify-center overflow-hidden"
+      style={{
+        height: '120px',
+        background: `linear-gradient(135deg, ${colour}22 0%, ${colour}08 100%)`,
+        border: `1px solid ${colour}22`,
+      }}
+    >
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={colour} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }} aria-hidden="true">
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <circle cx="8.5" cy="8.5" r="1.5" />
+        <path d="M21 15l-5-5L5 21" />
+      </svg>
+    </div>
+  );
+}
+
 function StatusBadge({ status, label, colour }: { status: string; label: string; colour: string }) {
   if (status === 'available') {
     return (
@@ -142,7 +169,7 @@ function PathwayCard({ pathway }: { pathway: Pathway }) {
         const el = e.currentTarget;
         el.style.background = 'rgba(255,255,255,0.04)';
         el.style.borderColor = `${pathway.colour}40`;
-        el.style.boxShadow = `0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px ${pathway.colour}20`;
+        el.style.boxShadow = `0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px ${pathway.colour}20, 0 0 32px rgba(164,28,100,0.14)`;
       }}
       onMouseLeave={e => {
         const el = e.currentTarget;
@@ -151,6 +178,9 @@ function PathwayCard({ pathway }: { pathway: Pathway }) {
         el.style.boxShadow = '0 4px 24px rgba(0,0,0,0.3)';
       }}
     >
+      {/* Image placeholder — ready for real photography */}
+      <PathwayImagePlaceholder colour={pathway.colour} title={pathway.title} />
+
       {/* Header */}
       <div className="flex items-start justify-between gap-3 mb-5">
         <div>

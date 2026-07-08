@@ -30,7 +30,6 @@ export default function Logo({ variant = 'full', size = 'md', className = '' }: 
         alt=""
         aria-hidden="true"
         className={`flex-shrink-0 w-auto ${owlHeight[size]}`}
-        style={{ filter: 'brightness(0) invert(1)' }}
         onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
       />
       {variant === 'full' && (
