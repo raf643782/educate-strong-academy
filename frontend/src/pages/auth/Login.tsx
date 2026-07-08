@@ -257,30 +257,38 @@ export default function Login() {
                 border: '1px solid rgba(255,255,255,0.08)',
                 overflowX: 'auto',
               }}>
-                {WORKSPACES.map(ws => (
-                  <button
-                    key={ws.key}
-                    type="button"
-                    onClick={() => selectWs(ws.key)}
-                    style={{
-                      flexGrow: 1,
-                      flexShrink: 0,
-                      padding: '11px 8px',
-                      borderRadius: '7px',
-                      fontSize: '12px',
-                      fontWeight: 700,
-                      letterSpacing: '0.01em',
-                      background: activeWs === ws.key ? 'linear-gradient(135deg,#A41C64,#7C3AED)' : 'transparent',
-                      color: activeWs === ws.key ? '#fff' : 'rgba(255,255,255,0.38)',
-                      border: 'none',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {ws.label}
-                  </button>
-                ))}
+                {WORKSPACES.map(ws => {
+                  const isActive = activeWs === ws.key;
+                  return (
+                    <button
+                      key={ws.key}
+                      type="button"
+                      onClick={() => selectWs(ws.key)}
+                      onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'rgba(164,28,100,0.14)'; }}
+                      onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
+                      onFocus={e => { e.currentTarget.style.boxShadow = '0 0 0 2px rgba(192,36,110,0.5)'; }}
+                      onBlur={e => { e.currentTarget.style.boxShadow = 'none'; }}
+                      style={{
+                        flexGrow: 1,
+                        flexShrink: 0,
+                        padding: '11px 8px',
+                        borderRadius: '7px',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        letterSpacing: '0.01em',
+                        background: isActive ? 'linear-gradient(135deg, #8E1858 0%, #C0246E 100%)' : 'transparent',
+                        color: isActive ? '#fff' : 'rgba(255,255,255,0.38)',
+                        border: 'none',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s',
+                        whiteSpace: 'nowrap',
+                        outline: 'none',
+                      }}
+                    >
+                      {ws.label}
+                    </button>
+                  );
+                })}
               </div>
               <p style={{ marginTop: '10px', fontSize: '12px', color: 'rgba(255,255,255,0.28)', lineHeight: 1.5 }}>
                 {WS_CONTEXT[activeWs]}
