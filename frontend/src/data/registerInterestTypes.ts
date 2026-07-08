@@ -6,6 +6,8 @@ export const REGISTER_INTEREST_TYPES: Record<string, string> = {
   'strongkidz':            'StrongKidz',
   'shop':                  'Shop',
   'coach-access':          'Coach Account Access',
+  'tutor-access':          'Tutor Account Access',
+  'assessor-access':       'Assessor Account Access',
   'tutor-assessor-access': 'Tutor & Assessor Account Access',
   'newsletter':            'Newsletter',
   'general':               'Educate.Strong',
