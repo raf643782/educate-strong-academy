@@ -2,17 +2,69 @@
  * CoachDirectory — Public certified coaches directory page.
  * Route: /coaches
  *
- * No real coaches are in the database yet. The directory shows an honest
- * empty state until qualifications and verification records are live.
+ * Real, database-backed directory: GET /api/coaches only ever returns
+ * profiles where isVerified && isPublished && !isArchived — controlled
+ * entirely by admin (see admin/CoachProfileManager.tsx). Shows an
+ * honest empty state when no coaches are published yet.
  */
 
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
+import api from '../../lib/api';
 import { CONTACT_EMAIL } from '../../lib/contact';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
 
-const FILTERS = ['All', 'Level 1 Coaching', 'Level 1 Refereeing', 'StrongKidz'];
+interface Coach {
+  slug: string; displayName: string; bio: string | null; photoUrl: string | null;
+  location: string | null; region: string | null; specialities: string[];
+  qualificationSummary: string | null;
+}
+
+function CoachCard({ coach }: { coach: Coach }) {
+  return (
+    <Link
+      to={`/coaches/${coach.slug}`}
+      style={{
+        display: 'block', background: '#151519', border: '1px solid rgba(194,24,106,0.1)',
+        borderRadius: '14px', padding: '22px', textDecoration: 'none', transition: 'border-color 0.15s',
+      }}
+      onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(164,28,100,0.4)'; }}
+      onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(194,24,106,0.1)'; }}
+    >
+      <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', marginBottom: '14px' }}>
+        <div
+          style={{
+            width: '52px', height: '52px', borderRadius: '50%', flexShrink: 0,
+            background: coach.photoUrl ? undefined : 'rgba(164,28,100,0.15)',
+            border: '1px solid rgba(164,28,100,0.25)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            overflow: 'hidden', fontWeight: 700, color: '#C0246E', fontSize: '16px',
+          }}
+        >
+          {coach.photoUrl
+            ? <img src={coach.photoUrl} alt={coach.displayName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+            : coach.displayName.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()}
+        </div>
+        <div>
+          <p style={{ fontWeight: 700, fontSize: '15px', color: '#fff', margin: '0 0 2px' }}>{coach.displayName}</p>
+          {coach.location && <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: 0 }}>{coach.location}</p>}
+        </div>
+      </div>
+      {coach.qualificationSummary && (
+        <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', margin: '0 0 12px', lineHeight: 1.5 }}>{coach.qualificationSummary}</p>
+      )}
+      {coach.specialities.length > 0 && (
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+          {coach.specialities.map(s => (
+            <span key={s} style={{ fontSize: '11px', fontWeight: 600, color: '#E19A47', background: 'rgba(225,154,71,0.1)', border: '1px solid rgba(225,154,71,0.25)', borderRadius: '999px', padding: '3px 10px' }}>{s}</span>
+          ))}
+        </div>
+      )}
+    </Link>
+  );
+}
 
 /* ── Main Page ──────────────────────────────────────────────────────── */
 export default function CoachDirectory() {
@@ -20,6 +72,23 @@ export default function CoachDirectory() {
     title: 'Certified Coach Directory',
     description: 'Find a certified Strongman coach, referee, or StrongKidz session leader.',
   });
+
+  const [coaches, setCoaches] = useState<Coach[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    const params: Record<string, string> = {};
+    if (search) params.search = search;
+    const t = setTimeout(() => {
+      setLoading(true);
+      api.get<Coach[]>('/coaches', { params })
+        .then(res => setCoaches(res.data))
+        .catch(() => setCoaches([]))
+        .finally(() => setLoading(false));
+    }, search ? 350 : 0);
+    return () => clearTimeout(t);
+  }, [search]);
 
   return (
     <div style={{ background: '#0D0D0D', minHeight: '100vh', color: '#fff' }}>
@@ -75,7 +144,7 @@ export default function CoachDirectory() {
         </div>
       </section>
 
-      {/* ── Filter Bar (decorative — no coaches live yet) ─────────── */}
+      {/* ── Search Bar ─────────────────────────────────────────────── */}
       <div
         style={{
           background: '#0D0D0D',
@@ -86,176 +155,118 @@ export default function CoachDirectory() {
           zIndex: 40,
         }}
       >
-        <div
-          className="es-container"
-          style={{
-            maxWidth: '1200px',
-            margin: '0 auto',
-            padding: '0 24px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            flexWrap: 'wrap',
-          }}
-        >
-          {/* Search input */}
-          <div style={{ position: 'relative', flex: '1', minWidth: '200px', maxWidth: '280px' }}>
-            <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)', fontSize: '14px' }}>
-              🔍
-            </span>
-            <input
-              type="text"
-              placeholder="Search coaches..."
-              style={{
-                width: '100%',
-                background: '#1C1C1C',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '8px',
-                padding: '8px 12px 8px 36px',
-                color: 'rgba(255,255,255,0.6)',
-                fontSize: '13px',
-                outline: 'none',
-                boxSizing: 'border-box',
-              }}
-              readOnly
-            />
-          </div>
-
-          {/* Filter buttons */}
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-            {FILTERS.map((f, i) => (
-              <button
-                key={f}
-                style={{
-                  background: i === 0 ? '#A41C64' : '#1C1C1C',
-                  border: i === 0 ? '1px solid #A41C64' : '1px solid rgba(255,255,255,0.12)',
-                  color: i === 0 ? '#fff' : 'rgba(255,255,255,0.55)',
-                  borderRadius: '6px',
-                  padding: '7px 14px',
-                  fontSize: '12px',
-                  fontWeight: 500,
-                  cursor: 'default',
-                  transition: 'all 0.2s',
-                }}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
-
-          {/* Sort */}
-          <div style={{ marginLeft: 'auto' }}>
-            <select
-              style={{
-                background: '#1C1C1C',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: 'rgba(255,255,255,0.55)',
-                borderRadius: '6px',
-                padding: '7px 28px 7px 12px',
-                fontSize: '12px',
-                outline: 'none',
-                cursor: 'pointer',
-                appearance: 'none',
-                WebkitAppearance: 'none',
-              }}
-            >
-              <option>Recently Certified</option>
-            </select>
-          </div>
+        <div className="es-container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search by name or location…"
+            style={{
+              width: '100%',
+              maxWidth: '360px',
+              background: '#1C1C1C',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: '8px',
+              padding: '10px 14px',
+              color: '#fff',
+              fontSize: '13px',
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
+          />
         </div>
       </div>
 
-      {/* ── Empty State ──────────────────────────────────────────────── */}
-      <section style={{ background: '#0D0D0D', padding: '80px 0 96px' }}>
-        <div
-          className="es-container"
-          style={{ maxWidth: '700px', margin: '0 auto', padding: '0 24px', textAlign: 'center' }}
-        >
-          {/* Icon */}
-          <div
-            style={{
-              width: 80,
-              height: 80,
-              borderRadius: '50%',
-              background: 'rgba(164,28,100,0.1)',
-              border: '1px solid rgba(164,28,100,0.2)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 28px',
-              fontSize: '32px',
-            }}
-          >
-            🎖️
-          </div>
+      {/* ── Results / Empty State ────────────────────────────────────── */}
+      <section style={{ background: '#0D0D0D', padding: '56px 0 96px' }}>
+        <div className="es-container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
+          {loading ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
+              {[1, 2, 3].map(i => <div key={i} style={{ height: '150px', borderRadius: '14px', background: '#151519', border: '1px solid rgba(255,255,255,0.06)' }} />)}
+            </div>
+          ) : coaches.length > 0 ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
+              {coaches.map(c => <CoachCard key={c.slug} coach={c} />)}
+            </div>
+          ) : (
+            <div style={{ maxWidth: '700px', margin: '0 auto', textAlign: 'center' }}>
+              <div
+                style={{
+                  width: 80, height: 80, borderRadius: '50%',
+                  background: 'rgba(164,28,100,0.1)', border: '1px solid rgba(164,28,100,0.2)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  margin: '0 auto 28px', fontSize: '32px',
+                }}
+              >
+                🎖️
+              </div>
 
-          <h2
-            style={{
-              fontSize: 'clamp(1.5rem, 4vw, 2rem)',
-              fontWeight: 800,
-              color: '#fff',
-              marginBottom: '16px',
-            }}
-          >
-            Certified Coach Directory Coming Soon
-          </h2>
+              <h2 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: 800, color: '#fff', marginBottom: '16px' }}>
+                {search ? 'No coaches match your search' : 'Certified Coach Directory Coming Soon'}
+              </h2>
 
-          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '16px', lineHeight: 1.75, marginBottom: '12px' }}>
-            EducateStrong certified coaches will appear here once qualifications and verification records are live.
-          </p>
-          <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '14px', lineHeight: 1.6, marginBottom: '40px' }}>
-            Coaches who complete a Level 1 qualification will be verified by EducateStrong and listed in this directory with their credentials, location, and speciality.
-          </p>
+              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '16px', lineHeight: 1.75, marginBottom: '12px' }}>
+                {search
+                  ? 'Try a different name or location, or clear your search to see all published coaches.'
+                  : 'EducateStrong certified coaches will appear here once qualifications and verification records are live.'}
+              </p>
+              {!search && (
+                <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '14px', lineHeight: 1.6, marginBottom: '40px' }}>
+                  Coaches who complete a Level 1 qualification will be verified by EducateStrong and listed in this directory with their credentials, location, and speciality.
+                </p>
+              )}
 
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link
-              to="/register-interest?type=coach-access"
-              style={{
-                display: 'inline-block',
-                background: 'linear-gradient(135deg, #A41C64, #C0246E)',
-                color: '#fff',
-                padding: '13px 28px',
-                borderRadius: '8px',
-                fontWeight: 700,
-                fontSize: '14px',
-                textDecoration: 'none',
-              }}
-            >
-              Register Interest
-            </Link>
-            <Link
-              to="/coaching"
-              style={{
-                display: 'inline-block',
-                background: 'transparent',
-                border: '1px solid rgba(255,255,255,0.2)',
-                color: 'rgba(255,255,255,0.8)',
-                padding: '13px 28px',
-                borderRadius: '8px',
-                fontWeight: 600,
-                fontSize: '14px',
-                textDecoration: 'none',
-              }}
-            >
-              View Coaching Pathway
-            </Link>
-            <a
-              href={`mailto:${CONTACT_EMAIL}`}
-              style={{
-                display: 'inline-block',
-                background: 'transparent',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: 'rgba(255,255,255,0.5)',
-                padding: '13px 28px',
-                borderRadius: '8px',
-                fontWeight: 600,
-                fontSize: '14px',
-                textDecoration: 'none',
-              }}
-            >
-              Contact EducateStrong
-            </a>
-          </div>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <Link
+                  to="/register-interest?type=coach-access"
+                  style={{
+                    display: 'inline-block',
+                    background: 'linear-gradient(135deg, #A41C64, #C0246E)',
+                    color: '#fff',
+                    padding: '13px 28px',
+                    borderRadius: '8px',
+                    fontWeight: 700,
+                    fontSize: '14px',
+                    textDecoration: 'none',
+                  }}
+                >
+                  Register Interest
+                </Link>
+                <Link
+                  to="/coaching"
+                  style={{
+                    display: 'inline-block',
+                    background: 'transparent',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    color: 'rgba(255,255,255,0.8)',
+                    padding: '13px 28px',
+                    borderRadius: '8px',
+                    fontWeight: 600,
+                    fontSize: '14px',
+                    textDecoration: 'none',
+                  }}
+                >
+                  View Coaching Pathway
+                </Link>
+                <a
+                  href={`mailto:${CONTACT_EMAIL}`}
+                  style={{
+                    display: 'inline-block',
+                    background: 'transparent',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    color: 'rgba(255,255,255,0.5)',
+                    padding: '13px 28px',
+                    borderRadius: '8px',
+                    fontWeight: 600,
+                    fontSize: '14px',
+                    textDecoration: 'none',
+                  }}
+                >
+                  Contact EducateStrong
+                </a>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -320,7 +331,7 @@ export default function CoachDirectory() {
           </div>
 
           <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: '11px', lineHeight: 1.6 }}>
-            Verified coach profiles will connect EducateStrong Academy records with professional coach profiles.
+            Verified coach profiles connect EducateStrong Academy records with professional coach profiles.
           </p>
         </div>
       </section>

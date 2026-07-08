@@ -18,6 +18,7 @@ import certificatesRouter from './routes/certificates';
 import cpdRouter from './routes/cpd';
 import bestrongRouter from './routes/bestrong';
 import interestRouter from './routes/interest';
+import coachesRouter from './routes/coaches';
 import qaDemoRouter from './routes/qaDemo';
 
 dotenv.config();
@@ -64,6 +65,7 @@ app.use('/api/certificates', certificatesRouter);
 app.use('/api/cpd', cpdRouter);
 app.use('/api/be-strong', bestrongRouter);
 app.use('/api/register-interest', interestRouter);
+app.use('/api/coaches', coachesRouter);
 
 // ── Internal QA demo login — TEMPORARY TOOLING ──────────────────────────────
 // Only mounted when explicitly enabled. MUST be disabled before public

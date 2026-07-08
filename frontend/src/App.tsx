@@ -84,6 +84,7 @@ import UserManager from './pages/admin/UserManager';
 import EnrolmentManager from './pages/admin/EnrolmentManager';
 import CertificateManager from './pages/admin/CertificateManager';
 import CohortManager from './pages/admin/CohortManager';
+import CoachProfileManager from './pages/admin/CoachProfileManager';
 import RegisterInterestManager from './pages/admin/RegisterInterestManager';
 
 export default function App() {
@@ -218,6 +219,9 @@ export default function App() {
           } />
           <Route path="/admin/cohorts" element={
             <ProtectedRoute roles={['ADMIN']}><CohortManager /></ProtectedRoute>
+          } />
+          <Route path="/admin/coaches" element={
+            <ProtectedRoute roles={['ADMIN']}><CoachProfileManager /></ProtectedRoute>
           } />
           <Route path="/admin/register-interest" element={
             <ProtectedRoute roles={['ADMIN']}><RegisterInterestManager /></ProtectedRoute>

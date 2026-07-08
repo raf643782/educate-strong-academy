@@ -1135,4 +1135,140 @@ router.delete('/cohorts/:id', authenticate, requireRole('ADMIN'), async (req: Au
   }
 });
 
+// ── Coach Profiles ──────────────────────────────────────────────────────────
+// Public visibility (see routes/coaches.ts) requires isVerified &&
+// isPublished && !isArchived — all three are admin-only toggles here.
+// No public user can ever create, edit, verify, or publish a profile.
+// Prefer archive over hard delete — there is no DELETE route.
+
+// GET /api/admin/coach-profiles
+router.get('/coach-profiles', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { search, status } = req.query as Record<string, string>;
+    const where: Record<string, unknown> = {};
+    if (search) {
+      where.OR = [
+        { displayName: { contains: search, mode: 'insensitive' } },
+        { location: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+    if (status === 'published') where.isPublished = true;
+    if (status === 'unpublished') where.isPublished = false;
+    if (status === 'verified') where.isVerified = true;
+    if (status === 'unverified') where.isVerified = false;
+    // Archived profiles are hidden from the default list unless explicitly requested.
+    where.isArchived = status === 'archived';
+
+    const coaches = await prisma.coachProfile.findMany({
+      where,
+      orderBy: [{ sortOrder: 'asc' }, { displayName: 'asc' }],
+      include: { user: { select: { id: true, email: true, firstName: true, lastName: true, role: true } } },
+    });
+    res.json(coaches);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch coach profiles' });
+  }
+});
+
+// GET /api/admin/coach-profiles/:id
+router.get('/coach-profiles/:id', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const coach = await prisma.coachProfile.findUnique({
+      where: { id: req.params.id },
+      include: { user: { select: { id: true, email: true, firstName: true, lastName: true, role: true } } },
+    });
+    if (!coach) {
+      res.status(404).json({ error: 'Coach profile not found' });
+      return;
+    }
+    res.json(coach);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch coach profile' });
+  }
+});
+
+// POST /api/admin/coach-profiles
+router.post('/coach-profiles', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const {
+      userId, displayName, bio, photoUrl, location, region, specialities,
+      qualificationSummary, contactEmail, contactUrl, sortOrder,
+    } = req.body;
+
+    if (!displayName || !displayName.trim()) {
+      res.status(400).json({ error: 'Display name is required.' });
+      return;
+    }
+
+    const baseSlug = slugify(displayName);
+    let slug = baseSlug;
+    let suffix = 1;
+    while (await prisma.coachProfile.findUnique({ where: { slug } })) {
+      suffix += 1;
+      slug = `${baseSlug}-${suffix}`;
+    }
+
+    const coach = await prisma.coachProfile.create({
+      data: {
+        userId: userId || null,
+        slug,
+        displayName: displayName.trim(),
+        bio: bio || null,
+        photoUrl: photoUrl || null,
+        location: location || null,
+        region: region || null,
+        specialities: Array.isArray(specialities) ? specialities : [],
+        qualificationSummary: qualificationSummary || null,
+        contactEmail: contactEmail || null,
+        contactUrl: contactUrl || null,
+        sortOrder: sortOrder ?? 0,
+      },
+      include: { user: { select: { id: true, email: true, firstName: true, lastName: true, role: true } } },
+    });
+    res.status(201).json(coach);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to create coach profile' });
+  }
+});
+
+// PUT /api/admin/coach-profiles/:id — edit, verify, publish/unpublish, archive, reorder
+router.put('/coach-profiles/:id', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const {
+      userId, displayName, bio, photoUrl, location, region, specialities,
+      qualificationSummary, contactEmail, contactUrl, sortOrder,
+      isVerified, isPublished, isArchived,
+    } = req.body;
+
+    const data: Record<string, unknown> = {};
+    if (userId !== undefined) data.userId = userId || null;
+    if (displayName !== undefined) data.displayName = displayName;
+    if (bio !== undefined) data.bio = bio || null;
+    if (photoUrl !== undefined) data.photoUrl = photoUrl || null;
+    if (location !== undefined) data.location = location || null;
+    if (region !== undefined) data.region = region || null;
+    if (specialities !== undefined) data.specialities = Array.isArray(specialities) ? specialities : [];
+    if (qualificationSummary !== undefined) data.qualificationSummary = qualificationSummary || null;
+    if (contactEmail !== undefined) data.contactEmail = contactEmail || null;
+    if (contactUrl !== undefined) data.contactUrl = contactUrl || null;
+    if (sortOrder !== undefined) data.sortOrder = sortOrder;
+    if (isVerified !== undefined) data.isVerified = isVerified;
+    if (isPublished !== undefined) data.isPublished = isPublished;
+    if (isArchived !== undefined) data.isArchived = isArchived;
+
+    const coach = await prisma.coachProfile.update({
+      where: { id: req.params.id },
+      data,
+      include: { user: { select: { id: true, email: true, firstName: true, lastName: true, role: true } } },
+    });
+    res.json(coach);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update coach profile' });
+  }
+});
+
 export default router;

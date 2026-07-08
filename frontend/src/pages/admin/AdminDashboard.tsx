@@ -18,6 +18,7 @@ const QUICK_LINKS = [
   { label: 'Enrolments', href: '/admin/enrolments', desc: 'Manage course enrolments' },
   { label: 'Certificates', href: '/admin/certificates', desc: 'Issue and revoke certificates', highlight: true },
   { label: 'Cohorts', href: '/admin/cohorts', desc: 'Manage course dates and event cohorts' },
+  { label: 'Coach Profiles', href: '/admin/coaches', desc: 'Manage the public Find a Certified Coach directory' },
   { label: 'Register Interest', href: '/admin/register-interest', desc: 'View and action incoming interest enquiries' },
   { label: 'Documents', href: '/admin/documents', desc: 'Manage course documents and resources' },
   { label: 'Assessments', href: '/admin/assessments', desc: 'Manage assessment records' },
