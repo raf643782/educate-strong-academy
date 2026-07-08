@@ -28,7 +28,10 @@ import QaDemoLogin from './pages/qa/QaDemoLogin';
 import PortalPreviewHub from './pages/preview/PortalPreviewHub';
 import LearnerPreview from './pages/preview/LearnerPreview';
 import CoachPreview from './pages/preview/CoachPreview';
+import CoachProfilePreview from './pages/preview/CoachProfilePreview';
 import TutorPreview from './pages/preview/TutorPreview';
+import TutorCoursesPreview from './pages/preview/TutorCoursesPreview';
+import TutorProfilePreview from './pages/preview/TutorProfilePreview';
 import AssessorPreview from './pages/preview/AssessorPreview';
 import AdminPreview from './pages/preview/AdminPreview';
 
@@ -62,7 +65,10 @@ import BeStrongArticlePage from './pages/bestrong/BeStrongArticlePage';
 
 // Coach & Tutor workspaces (placeholders — COACH/TUTOR roles pending schema update)
 import CoachWorkspace from './pages/coach/CoachWorkspace';
+import CoachProfileWorkspace from './pages/coach/CoachProfile';
 import TutorWorkspace from './pages/tutor/TutorWorkspace';
+import TutorCourses from './pages/tutor/TutorCourses';
+import TutorProfile from './pages/tutor/TutorProfile';
 
 // Assessor
 import AssessorPortal from './pages/assessor/AssessorPortal';
@@ -97,7 +103,10 @@ export default function App() {
           <Route path="/portal-preview" element={<PortalPreviewHub />} />
           <Route path="/portal-preview/learner" element={<LearnerPreview />} />
           <Route path="/portal-preview/coach" element={<CoachPreview />} />
+          <Route path="/portal-preview/coach/profile" element={<CoachProfilePreview />} />
           <Route path="/portal-preview/tutor" element={<TutorPreview />} />
+          <Route path="/portal-preview/tutor/courses" element={<TutorCoursesPreview />} />
+          <Route path="/portal-preview/tutor/profile" element={<TutorProfilePreview />} />
           <Route path="/portal-preview/assessor" element={<AssessorPreview />} />
           <Route path="/portal-preview/admin" element={<AdminPreview />} />
           <Route path="/register" element={<Register />} />
@@ -160,8 +169,17 @@ export default function App() {
           <Route path="/coach" element={
             <ProtectedRoute roles={['COACH', 'ADMIN']}><CoachWorkspace /></ProtectedRoute>
           } />
+          <Route path="/coach/profile" element={
+            <ProtectedRoute roles={['COACH', 'ADMIN']}><CoachProfileWorkspace /></ProtectedRoute>
+          } />
           <Route path="/tutor" element={
             <ProtectedRoute roles={['TUTOR', 'ADMIN']}><TutorWorkspace /></ProtectedRoute>
+          } />
+          <Route path="/tutor/courses" element={
+            <ProtectedRoute roles={['TUTOR', 'ADMIN']}><TutorCourses /></ProtectedRoute>
+          } />
+          <Route path="/tutor/profile" element={
+            <ProtectedRoute roles={['TUTOR', 'ADMIN']}><TutorProfile /></ProtectedRoute>
           } />
 
           {/* ── Assessor / Admin ────────────────────────────────────────── */}

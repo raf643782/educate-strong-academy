@@ -1,17 +1,19 @@
 import PreviewBanner from '../../components/preview/PreviewBanner';
-import TutorWorkspace from '../tutor/TutorWorkspace';
+import TutorWorkspaceBody from '../../components/tutor/TutorWorkspaceBody';
 
 /*
  * Internal QA tooling — /portal-preview/tutor
- * Reuses the real TutorWorkspace component directly — it is already a
- * fully static placeholder (no useAuth(), no API calls), so it is safe
- * to render outside a signed-in session with no changes needed.
+ * Renders the same TutorWorkspaceBody as the real /tutor page, but with
+ * basePath="/portal-preview/tutor" so "Assigned Courses and Groups" and
+ * "Tutor Profile" stay inside the preview experience instead of
+ * sending an unauthenticated visitor into a real protected route and
+ * bouncing them to /login.
  */
 export default function TutorPreview() {
   return (
     <>
       <PreviewBanner />
-      <TutorWorkspace />
+      <TutorWorkspaceBody basePath="/portal-preview/tutor" />
     </>
   );
 }

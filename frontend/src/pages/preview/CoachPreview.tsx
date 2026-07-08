@@ -1,17 +1,19 @@
 import PreviewBanner from '../../components/preview/PreviewBanner';
-import CoachWorkspace from '../coach/CoachWorkspace';
+import CoachWorkspaceBody from '../../components/coach/CoachWorkspaceBody';
 
 /*
  * Internal QA tooling — /portal-preview/coach
- * Reuses the real CoachWorkspace component directly — it is already a
- * fully static placeholder (no useAuth(), no API calls), so it is safe
- * to render outside a signed-in session with no changes needed.
+ * Renders the same CoachWorkspaceBody as the real /coach page, but with
+ * basePath="/portal-preview/coach" so the Coach Profile action stays
+ * inside the preview experience (/portal-preview/coach/profile)
+ * instead of sending an unauthenticated visitor into the real
+ * protected route and bouncing them to /login.
  */
 export default function CoachPreview() {
   return (
     <>
       <PreviewBanner />
-      <CoachWorkspace />
+      <CoachWorkspaceBody basePath="/portal-preview/coach" />
     </>
   );
 }
