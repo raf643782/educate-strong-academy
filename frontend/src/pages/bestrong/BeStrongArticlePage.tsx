@@ -12,7 +12,7 @@ interface Article {
   category: string;
   subcategory?: string;
   summary?: string;
-  content?: string;
+  content?: string | null;
   authorName?: string;
   reviewerName?: string;
   reviewerQualification?: string;
@@ -21,6 +21,7 @@ interface Article {
   accessLevel: string;
   readMinutes?: number;
   tags?: string;
+  locked?: boolean;
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -192,6 +193,22 @@ export default function EatStrongArticlePage() {
                   </p>
                 );
               })
+            ) : article.locked ? (
+              <div
+                className="rounded-xl p-6"
+                style={{ background: 'rgba(164,28,100,0.06)', border: '1px solid rgba(164,28,100,0.2)' }}
+              >
+                <p className="font-bold text-white mb-2">Go deeper inside EatStrong.</p>
+                <p className="text-es-muted text-sm leading-relaxed mb-4">
+                  Full meal planning templates, advanced nutrition guidance and learner resources sit inside the paid pathway.
+                </p>
+                <p className="text-xs text-es-subtle mb-4">
+                  This is a free overview. Full tutor guided learning, templates and assessment support sit inside the learner pathway.
+                </p>
+                <Link to="/register-interest?type=general" className="text-sm font-semibold" style={{ color: '#A41C64' }}>
+                  Register your interest →
+                </Link>
+              </div>
             ) : (
               <p className="text-es-subtle italic text-sm">Content coming soon.</p>
             )}

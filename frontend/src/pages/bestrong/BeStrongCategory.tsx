@@ -18,6 +18,7 @@ interface Article {
   reviewerName?: string;
   reviewerQualification?: string;
   lastReviewedAt?: string;
+  locked?: boolean;
 }
 
 interface Download {
@@ -27,6 +28,7 @@ interface Download {
   description?: string;
   fileType: string;
   accessLevel: string;
+  locked?: boolean;
 }
 
 interface CategoryMeta {
@@ -143,8 +145,8 @@ export default function EatStrongCategory() {
                               {article.accessLevel === 'FREE' && (
                                 <span className="badge-grey text-xs">Free</span>
                               )}
-                              {article.accessLevel === 'ENROLLED' && (
-                                <span className="badge-accent text-xs">Enrolled</span>
+                              {article.accessLevel !== 'FREE' && article.locked && (
+                                <span className="badge-accent text-xs">Learner pathway</span>
                               )}
                               {article.isFeatured && (
                                 <span className="badge-amber text-xs">Featured</span>
@@ -205,6 +207,9 @@ export default function EatStrongCategory() {
                               {dl.accessLevel === 'FREE' && (
                                 <span className="text-xs text-es-muted">Free</span>
                               )}
+                              {dl.locked && (
+                                <span className="text-xs font-semibold" style={{ color: '#E19A47' }}>In the learner pathway</span>
+                              )}
                             </div>
                             <h3 className="font-semibold text-white text-sm leading-snug mb-1">
                               {dl.title}
@@ -212,21 +217,32 @@ export default function EatStrongCategory() {
                             {dl.description && (
                               <p className="text-xs text-es-muted leading-relaxed">{dl.description}</p>
                             )}
-                            <button
-                              className="mt-3 text-xs font-semibold" style={{ color: '#A41C64' }}
-                              onClick={() => setDownloadMsgId(prev => prev === dl.id ? null : dl.id)}
-                            >
-                              Download {dl.fileType}
-                            </button>
-                            {downloadMsgId === dl.id && (
-                              <div
-                                className="mt-2 rounded-lg p-3 text-xs leading-relaxed"
-                                style={{ background: 'rgba(225,154,71,0.08)', border: '1px solid rgba(225,154,71,0.2)', color: '#E19A47' }}
-                              >
-                                Download files will be available once document hosting is configured. In the meantime, contact{' '}
-                                <a href={`mailto:${CONTACT_EMAIL}`} className="underline">{CONTACT_EMAIL}</a>
-                                {' '}to request this resource.
-                              </div>
+                            {dl.locked ? (
+                              <p className="mt-3 text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                                These templates are included inside the full learner pathway.{' '}
+                                <Link to="/register-interest?type=general" className="font-semibold" style={{ color: '#A41C64' }}>
+                                  Register your interest →
+                                </Link>
+                              </p>
+                            ) : (
+                              <>
+                                <button
+                                  className="mt-3 text-xs font-semibold" style={{ color: '#A41C64' }}
+                                  onClick={() => setDownloadMsgId(prev => prev === dl.id ? null : dl.id)}
+                                >
+                                  Download {dl.fileType}
+                                </button>
+                                {downloadMsgId === dl.id && (
+                                  <div
+                                    className="mt-2 rounded-lg p-3 text-xs leading-relaxed"
+                                    style={{ background: 'rgba(225,154,71,0.08)', border: '1px solid rgba(225,154,71,0.2)', color: '#E19A47' }}
+                                  >
+                                    Download files will be available once document hosting is configured. In the meantime, contact{' '}
+                                    <a href={`mailto:${CONTACT_EMAIL}`} className="underline">{CONTACT_EMAIL}</a>
+                                    {' '}to request this resource.
+                                  </div>
+                                )}
+                              </>
                             )}
                           </div>
                         </div>

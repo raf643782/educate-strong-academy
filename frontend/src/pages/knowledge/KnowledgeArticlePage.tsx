@@ -81,6 +81,20 @@ export default function KnowledgeArticlePage() {
             </div>
           </div>
 
+          {/* Soft paywall CTA — free overview, paid depth */}
+          <div
+            className="mt-10 rounded-xl p-6"
+            style={{ background: 'rgba(164,28,100,0.06)', border: '1px solid rgba(164,28,100,0.2)' }}
+          >
+            <p className="font-bold text-white mb-2">Want the full coaching framework?</p>
+            <p className="text-es-muted text-sm leading-relaxed mb-4">
+              This topic is covered in depth inside the Level 1 Coaching Strongman course.
+            </p>
+            <Link to="/courses/level-1-coaching-strongman" className="text-sm font-semibold" style={{ color: '#A41C64' }}>
+              Explore the Level 1 Coaching course →
+            </Link>
+          </div>
+
           {/* Related content */}
           <div className="mt-12 pt-8" style={{ borderTop: '1px solid #2C2C2C' }}>
             <h3 className="font-bold text-es-muted mb-4 text-sm uppercase tracking-wide">
