@@ -36,6 +36,7 @@ import CourseDateSection from '../../components/course/CourseDateSection';
 import CourseLearningJourney from '../../components/course/CourseLearningJourney';
 import CourseFAQ from '../../components/course/CourseFAQ';
 import CourseFinalCTA from '../../components/course/CourseFinalCTA';
+import CourseAccessOverview from '../../components/course/CourseAccessOverview';
 
 // Static marketing data
 import { COURSE_PAGE_DATA } from '../../data/coursePageData';
@@ -268,6 +269,9 @@ export default function CourseDetail() {
         {richData.showEndorsements && richData.endorsements && (
           <CourseEndorsements endorsements={richData.endorsements} />
         )}
+
+        {/* 9.5: How access works — public preview vs. learner pathway */}
+        {!enrolled && <CourseAccessOverview interestType={interestType} />}
 
         {/* 10: Pricing card */}
         <CoursePricingCard
@@ -544,6 +548,8 @@ export default function CourseDetail() {
           </div>
         </div>
       </div>
+
+      {!enrolled && <CourseAccessOverview interestType={interestType} />}
 
       <Footer />
     </div>
