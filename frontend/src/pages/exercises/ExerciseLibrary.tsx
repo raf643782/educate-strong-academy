@@ -529,6 +529,27 @@ export default function ExerciseLibrary() {
                     Detailed content for this exercise will be added by the EducateStrong coaching team.
                   </p>
                 )}
+
+              {/* Non-gated CTA — this reference is free today; deeper coaching
+                  content (session plans, assessment guidance) lives in the course */}
+              <div
+                className="rounded-lg p-4"
+                style={{ background: 'rgba(164,28,100,0.06)', border: '1px solid rgba(164,28,100,0.2)' }}
+              >
+                <p className="text-sm font-bold text-white mb-1">Want the full coaching framework?</p>
+                <p className="text-xs text-es-muted leading-relaxed mb-2">
+                  Session plans, assessment guidance and tutor-supported coaching for this movement are covered
+                  inside the Level 1 Coaching Strongman course.
+                </p>
+                <Link
+                  to="/courses/level-1-coaching-strongman"
+                  className="text-xs font-semibold"
+                  style={{ color: '#A41C64' }}
+                  onClick={() => setSelectedExercise(null)}
+                >
+                  Explore the Level 1 Coaching course →
+                </Link>
+              </div>
             </div>
           </div>
         </div>
