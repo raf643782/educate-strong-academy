@@ -50,7 +50,10 @@ export default function Documents() {
 
   const handleDownload = async (doc: CourseDocument) => {
     if (doc.status === 'LOCKED') {
-      setDownloadMsg(`"${doc.title}" is locked until you complete all course requirements.`);
+      setDownloadMsg(
+        `"${doc.title}" is locked until you complete all course requirements. ` +
+        'These templates and documents are included inside the full learner pathway.'
+      );
       setTimeout(() => setDownloadMsg(null), 5000);
       return;
     }
@@ -110,10 +113,17 @@ export default function Documents() {
           <div className="es-card p-10 text-center">
             <p className="text-es-muted mb-3">
               {docs.length === 0
-                ? 'No documents yet. Enrol in a course to access your course materials here.'
+                ? 'No documents yet. These templates and documents are included inside the full learner pathway.'
                 : `No documents in ${tab}.`}
             </p>
-            {docs.length === 0 && <Link to="/courses" className="btn-primary text-sm inline-block">Explore Courses</Link>}
+            {docs.length === 0 && (
+              <div className="flex flex-wrap gap-3 justify-center">
+                <Link to="/courses" className="btn-primary text-sm inline-block">Explore Courses</Link>
+                <Link to="/register-interest?type=general" className="btn-secondary text-sm inline-block">
+                  Register your interest
+                </Link>
+              </div>
+            )}
           </div>
         )}
 
