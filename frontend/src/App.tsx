@@ -35,6 +35,10 @@ import TutorProfilePreview from './pages/preview/TutorProfilePreview';
 import AssessorPreview from './pages/preview/AssessorPreview';
 import AdminPreview from './pages/preview/AdminPreview';
 
+// Private homepage concept preview — not linked in any nav, noindex,
+// separate from pages/public/Home.tsx. See pages/preview/homepage/.
+import HomepagePreview from './pages/preview/homepage/HomepagePreview';
+
 // Auth pages
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
@@ -110,6 +114,7 @@ export default function App() {
           <Route path="/portal-preview/tutor/profile" element={<TutorProfilePreview />} />
           <Route path="/portal-preview/assessor" element={<AssessorPreview />} />
           <Route path="/portal-preview/admin" element={<AdminPreview />} />
+          <Route path="/homepagepreview" element={<HomepagePreview />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
