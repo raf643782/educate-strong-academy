@@ -4,17 +4,23 @@
  * Section order:
  *  1. Navbar
  *  2. Hero
- *  3. PartnerLogosMarquee
- *  4. StatsStrip
- *  5. UpcomingCohortsSection  (Next Intakes — full section, cohort dates + location finder)
- *  6. AllPathwaysOverview  (Choose Your Pathway — Coaching · Refereeing · StrongKidz · EatStrong)
- *  7. TutorCredibilityStrip  (Top Athletes Who Compete)
- *  8. KnowledgeHubPreview  (Learn Between Sessions)
+ *  3. PartnerLogosMarquee  (carousel, unchanged)
+ *  4. StatsStrip  (unchanged)
+ *  5. UpcomingCohortSpotlight  (real confirmed cohort, renders nothing when none exists)
+ *  6. TutorCredibilityStrip  (Taught by People Who Have Done It)
+ *  7. AllPathwaysOverview  (Explore the Academy — Coaching · Refereeing · StrongKidz · EatStrong)
+ *  8. KnowledgeHubPreview  (Learn Strongman Properly — Knowledge Hub + live Exercise/Event Library)
  *  9. Inline Shop section  (Training Kit and Apparel)
  * 10. TestimonialsSection  (Hear From Our Graduates)
- * 11. CertifiedCoachesSection  (Find a Certified Coach Near You)
- * 12. Final CTA
+ * 11. CertifiedCoachesSection  (Find a Certified Coach Near You, real /coaches data)
+ * 12. Final CTA  (Start Wherever You Are)
  * 13. Footer
+ *
+ * The former UpcomingCohortsSection (hardcoded "Next Intakes" data,
+ * no real Cohort API call) has been replaced in this render order by
+ * UpcomingCohortSpotlight, which is driven entirely by the real
+ * GET /register-interest/cohorts endpoint. UpcomingCohortsSection.tsx
+ * itself has not been deleted.
  *
  * WhyEducateStrong is intentionally not rendered here for now (see
  * components/sections/WhyEducateStrong.tsx — kept in the codebase,
@@ -34,15 +40,18 @@ import AllPathwaysOverview from '../../components/sections/AllPathwaysOverview';
 import CertifiedCoachesSection from '../../components/sections/CertifiedCoachesSection';
 import TutorCredibilityStrip from '../../components/sections/TutorCredibilityStrip';
 import KnowledgeHubPreview from '../../components/sections/KnowledgeHubPreview';
-import UpcomingCohortsSection from '../../components/sections/UpcomingCohortsSection';
+import UpcomingCohortSpotlight from '../../components/sections/UpcomingCohortSpotlight';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
 import api from '../../lib/api';
+
+const ORG_SCHEMA_ID = 'homepage-org-schema';
 
 /* ═══════════════════════════════════════════════════════════════════ */
 export default function Home() {
   useDocumentHead({
-    title: 'Educate.Strong Academy — Strongman Coaching & Refereeing Qualifications',
-    description: 'Accredited Strongman coaching and refereeing qualifications, youth development, and performance nutrition — built by champions, recognised by the sport.',
+    title: 'Educate.Strong Academy: Strongman Coaching, Refereeing and Strength Education',
+    description:
+      'Learn how strength is built through Strongman. Coaching, refereeing, StrongKidz and EatStrong, plus a full Knowledge Hub, Exercise Library and Event Library. Built and taught by people who compete.',
   });
 
   // Fire-and-forget: warms the Render free-tier API while the visitor
@@ -50,6 +59,30 @@ export default function Home() {
   // navigate to a page that needs it. Never surfaced to the user.
   useEffect(() => {
     api.get('/health').catch(() => {});
+  }, []);
+
+  // Organization structured data, scoped and cleaned up on unmount so it
+  // never leaks onto another route.
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = ORG_SCHEMA_ID;
+    script.text = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: 'Educate Strong Academy',
+      alternateName: 'Educate.Strong',
+      url: 'https://educate-strong-academy.vercel.app/',
+      logo: 'https://educate-strong-academy.vercel.app/assets/es-logo.png',
+      description:
+        'Strongman education platform covering coaching, refereeing, StrongKidz youth sessions and EatStrong performance nutrition, alongside a Knowledge Hub, Exercise Library and Event Library.',
+      sameAs: ['https://www.instagram.com/educate.strong/'],
+      knowsAbout: ['Strongman', 'Strongman coaching', 'Strongman refereeing', 'Strength training', 'Youth strength training', 'Performance nutrition'],
+    });
+    document.head.appendChild(script);
+    return () => {
+      document.getElementById(ORG_SCHEMA_ID)?.remove();
+    };
   }, []);
 
   return (
@@ -172,7 +205,7 @@ export default function Home() {
             <div className="flex items-center gap-3 mb-7">
               <span className="es-label">The Academy</span>
               <span className="h-px w-12 opacity-60" style={{ background: '#A41C64' }} aria-hidden="true" />
-              <span className="text-xs text-white/30 font-medium">UK's #1 Strongman Coach Education</span>
+              <span className="text-xs text-white/30 font-medium">Strongman Coaching, Refereeing and Strength Education</span>
             </div>
 
             {/* H1 */}
@@ -180,19 +213,20 @@ export default function Home() {
               className="font-black text-white leading-[0.92] mb-7"
               style={{ fontSize: 'clamp(3rem, 7vw, 6rem)', letterSpacing: '-0.05em' }}
             >
-              Train Coaches.
+              Learn Strongman.
               <br />
-              <span style={{ color: '#A41C64' }}>Build Standards.</span>
+              <span style={{ color: '#A41C64' }}>Build Real Strength.</span>
               <br />
-              Develop the Sport.
+              Pass It On.
             </h1>
 
             <p
               className="text-white/50 leading-relaxed mb-9"
               style={{ fontSize: 'clamp(1rem, 1.5vw, 1.125rem)', maxWidth: '420px' }}
             >
-              The UK's only accredited Strongman coaching qualification. From foundation
-              coaching to advanced leadership — built by champions, recognised by the sport.
+              Strongman tests strength like nothing else, and Educate Strong teaches it properly.
+              Coaching, officiating, youth development and performance nutrition, each one built and
+              taught by people who compete.
             </p>
 
             {/* Accreditation pills */}
@@ -211,22 +245,22 @@ export default function Home() {
 
             {/* CTAs */}
             <div className="flex flex-wrap gap-3">
-              <Link
-                to="/courses"
+              <a
+                href="#pathways-heading"
                 className="px-8 py-4 rounded-full font-semibold text-sm text-white transition-all duration-200 hover:scale-105 active:scale-100"
                 style={{
                   background: 'linear-gradient(135deg, #A41C64, #C0246E)',
                   boxShadow: '0 0 0 1px rgba(164,28,100,0.5), 0 8px 32px rgba(164,28,100,0.5)',
                 }}
               >
-                Explore Pathways
-              </Link>
+                Explore the Academy
+              </a>
               <Link
-                to="/coaches"
+                to="/about"
                 className="px-8 py-4 rounded-full font-semibold text-sm transition-all duration-200 hover:bg-white/8"
                 style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.75)' }}
               >
-                Find a Coach
+                Meet the Tutors
               </Link>
             </div>
           </div>
@@ -246,17 +280,17 @@ export default function Home() {
       {/* ── 3. STATS STRIP ──────────────────────────────────────────── */}
       <StatsStrip />
 
-      {/* ── 4. NEXT INTAKES (UPCOMING COURSES & COHORTS) ────────────── */}
-      <UpcomingCohortsSection />
+      {/* ── 4. CONFIRMED UPCOMING COHORT (REAL DATA, CONDITIONAL) ───── */}
+      <UpcomingCohortSpotlight />
 
-      {/* ── 5. CHOOSE YOUR PATHWAY ──────────────────────────────────── */}
+      {/* ── 5. TAUGHT BY PEOPLE WHO HAVE DONE IT (TUTOR CREDIBILITY) ── */}
+      <TutorCredibilityStrip />
+
+      {/* ── 6. EXPLORE THE ACADEMY ──────────────────────────────────── */}
       {/* Coaching · Refereeing · StrongKidz · EatStrong — no green */}
       <AllPathwaysOverview />
 
-      {/* ── 6. TOP ATHLETES WHO COMPETE (TUTOR CREDIBILITY STRIP) ───── */}
-      <TutorCredibilityStrip />
-
-      {/* ── 7. LEARN BETWEEN SESSIONS (KNOWLEDGE HUB PREVIEW) ───────── */}
+      {/* ── 7. LEARN STRONGMAN PROPERLY (KNOWLEDGE + LIBRARIES) ─────── */}
       <KnowledgeHubPreview />
 
       {/* ── 8. TRAINING KIT AND APPAREL (SHOP REFERENCE) ────────────── */}
@@ -406,25 +440,26 @@ export default function Home() {
             className="font-black text-white mb-5"
             style={{ fontSize: 'clamp(2.25rem, 5.5vw, 4rem)', letterSpacing: '-0.045em', lineHeight: '1.02' }}
           >
-            Ready to Take the
+            Start Wherever
             <br />
-            <span style={{ color: '#A41C64' }}>Next Step?</span>
+            <span style={{ color: '#A41C64' }}>You Are.</span>
           </h2>
           <p className="text-white/45 leading-relaxed mb-10 text-base">
-            Course dates are released throughout the year. Register your interest and be
-            the first to know when the next cohort is confirmed.
+            Whether you are trying to understand Strongman for the first time, coaching your first
+            session, or building toward a full qualification, Educate Strong is built to meet you
+            there. Explore the Academy, or register your interest and we will be in touch.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
-            <Link
-              to="/courses"
+            <a
+              href="#pathways-heading"
               className="px-8 py-4 rounded-full font-semibold text-white transition-all duration-200 hover:scale-105"
               style={{
                 background: 'linear-gradient(135deg, #A41C64, #C0246E)',
                 boxShadow: '0 0 0 1px rgba(164,28,100,0.5), 0 8px 32px rgba(164,28,100,0.45)',
               }}
             >
-              Explore Courses
-            </Link>
+              Explore the Academy
+            </a>
             <Link
               to="/register-interest?type=general"
               className="px-8 py-4 rounded-full font-semibold transition-all duration-200"

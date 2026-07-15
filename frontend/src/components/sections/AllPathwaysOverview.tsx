@@ -19,10 +19,11 @@ interface Pathway {
   status: 'available' | 'coming' | 'live';
   statusLabel: string;
   leads: string;          // "What it leads to"
-  outcomes: string[];
   cta: string;
   to: string;
   anchor?: string;        // optional anchor on same page
+  image?: string;
+  imageAlt?: string;
 }
 
 const PATHWAYS: Pathway[] = [
@@ -30,95 +31,79 @@ const PATHWAYS: Pathway[] = [
     id: 'coaching',
     badge: 'Coaching',
     colour: '#A41C64',
-    title: 'Coaching Pathway',
-    desc: 'For personal trainers, gym owners, and coaches who want a structured, accredited qualification in Strongman coaching.',
+    title: 'Coaching Education',
+    desc: 'Strongman coaching is a specific skill. You are teaching people to lift awkward, heavy and unpredictable objects safely, not simply heavy barbells. This pathway moves through the six core events, athlete screening, session planning and real coaching practice.',
     status: 'available',
     statusLabel: 'Level 1 Available',
-    leads: 'Active IQ accredited qualification — Level 1 through Level 3.',
-    outcomes: [
-      'Six core Strongman events',
-      'Athlete screening & safety',
-      'Session planning & delivery',
-      'Progress to Level 2 & 3',
-    ],
+    leads: 'A Level 1 coaching qualification, with Level 2 and Level 3 to follow.',
     cta: 'Explore Coaching',
     to: '/coaching',
+    image: '/assets/coaching-l1-cover.webp',
+    imageAlt: 'Coaching Education, Level 1 Fundamentals of Coaching Strongman',
   },
   {
     id: 'refereeing',
     badge: 'Refereeing',
     colour: '#C0246E',
-    title: 'Refereeing Pathway',
-    desc: 'For athletes and coaches who want to contribute to the sport by officiating competitions to a consistent, credible standard.',
+    title: 'Refereeing and Competition Standards',
+    desc: 'Every competition depends on confident, consistent officiating. This pathway is for athletes, coaches and organisers who want to understand event rules properly and make calls with authority rather than guesswork.',
     status: 'available',
     statusLabel: 'Level 1 Available',
-    leads: 'WHEA.GB endorsed certification for officiating UK competitions.',
-    outcomes: [
-      'Event rules across all major events',
-      'Live practical judging drills',
-      'Join a network of certified officials',
-      'Armed Forces Strongman endorsed',
-    ],
+    leads: 'A Level 1 refereeing qualification.',
     cta: 'Explore Refereeing',
     to: '/courses/level-1-strongman-refereeing',
+    image: '/assets/refereeing-l1-content.webp',
+    imageAlt: 'Refereeing and Competition Standards, Level 1 Strongman Refereeing',
   },
   {
     id: 'strongkidz',
     badge: 'StrongKidz',
     colour: '#E19A47',
-    title: 'StrongKidz Pathway',
-    desc: 'For coaches and youth programme leaders who want to deliver safe, structured strength sessions for young people.',
+    title: 'StrongKidz',
+    desc: 'Strength training for children looks nothing like strength training for adults. StrongKidz introduces young people to functional movement, confidence and resilience through age appropriate sessions in Sheffield, led by coaches trained specifically to work with young athletes.',
     status: 'available',
     statusLabel: 'Sheffield Sessions',
-    leads: 'Coach education and youth session programme — building confidence in young athletes.',
-    outcomes: [
-      'Age-appropriate movement frameworks',
-      'Safeguarding-first certification',
-      'Session planning & parent communication',
-      'Weekly sessions in Sheffield',
-    ],
+    leads: 'A StrongKidz Coach Education qualification for adults delivering sessions.',
     cta: 'Explore StrongKidz',
     to: '/strongkidz',
+    image: '/assets/strongkidz.avif',
+    imageAlt: 'A StrongKidz youth strength session',
   },
   {
     id: 'eatstrong',
     badge: 'EatStrong',
     colour: '#888899',
-    title: 'EatStrong Pathway',
-    desc: 'Performance nutrition education built specifically for Strongman coaches and athletes. Evidence-based, scope-of-practice aware.',
-    status: 'coming',
-    statusLabel: 'Coming Soon',
-    leads: 'Nutrition education for coaches — Strongman-specific, not generic diet advice.',
-    outcomes: [
-      'Competition and recovery fuelling',
-      'Making weight safely',
-      'Evidence-based supplement guidance',
-      'Scope-of-practice boundaries',
-    ],
+    title: 'EatStrong',
+    desc: 'Strongman athletes eat differently to most gym goers, and coaches are often the first person asked about it. EatStrong gives coaches and athletes nutrition education grounded in evidence, built around competition, recovery and everyday training, without straying into personalised dietary advice.',
+    status: 'live',
+    statusLabel: 'Live Resources',
+    leads: 'Nutrition content built into the coaching pathway, with more to follow.',
     cta: 'Explore EatStrong',
     to: '/eatstrong',
   },
 ];
 
-/*
- * Premium placeholder for a future real photo. No fake/stock imagery —
- * just a tasteful gradient + icon so the card feels intentional while
- * real EducateStrong photography isn't available yet. Swap for a real
- * <img> later; the aria-label documents exactly what should go here.
- */
-function PathwayImagePlaceholder({ colour, title }: { colour: string; title: string }) {
+function PathwayImage({ pathway }: { pathway: Pathway }) {
+  if (pathway.image) {
+    return (
+      <div className="rounded-xl mb-5 overflow-hidden" style={{ height: '120px' }}>
+        <img src={pathway.image} alt={pathway.imageAlt || ''} className="w-full h-full object-cover" loading="lazy" />
+      </div>
+    );
+  }
+  // EatStrong: no suitable existing photo, so a clean placeholder area (image brief in the site audit report) rather than fabricating one.
   return (
     <div
       role="img"
-      aria-label={`[PHOTO PLACEHOLDER] ${title} — replace with a real EducateStrong photo`}
+      aria-label={`Image area reserved for ${pathway.title} photography`}
       className="rounded-xl mb-5 flex items-center justify-center overflow-hidden"
       style={{
         height: '120px',
-        background: `linear-gradient(135deg, ${colour}22 0%, ${colour}08 100%)`,
-        border: `1px solid ${colour}22`,
+        background: `linear-gradient(135deg, ${pathway.colour}22 0%, ${pathway.colour}08 100%)`,
+        border: `1px solid ${pathway.colour}22`,
       }}
     >
-      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={colour} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }} aria-hidden="true">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={pathway.colour} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }} aria-hidden="true">
         <rect x="3" y="3" width="18" height="18" rx="2" />
         <circle cx="8.5" cy="8.5" r="1.5" />
         <path d="M21 15l-5-5L5 21" />
@@ -129,6 +114,17 @@ function PathwayImagePlaceholder({ colour, title }: { colour: string; title: str
 
 function StatusBadge({ status, label, colour }: { status: string; label: string; colour: string }) {
   if (status === 'available') {
+    return (
+      <span
+        className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.1em] px-2.5 py-1 rounded-full"
+        style={{ background: `${colour}18`, color: colour, border: `1px solid ${colour}30` }}
+      >
+        <span className="w-1.5 h-1.5 rounded-full" style={{ background: colour }} aria-hidden="true" />
+        {label}
+      </span>
+    );
+  }
+  if (status === 'live') {
     return (
       <span
         className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.1em] px-2.5 py-1 rounded-full"
@@ -178,8 +174,7 @@ function PathwayCard({ pathway }: { pathway: Pathway }) {
         el.style.boxShadow = '0 4px 24px rgba(0,0,0,0.3)';
       }}
     >
-      {/* Image placeholder — ready for real photography */}
-      <PathwayImagePlaceholder colour={pathway.colour} title={pathway.title} />
+      <PathwayImage pathway={pathway} />
 
       {/* Header */}
       <div className="flex items-start justify-between gap-3 mb-5">
@@ -204,20 +199,6 @@ function PathwayCard({ pathway }: { pathway: Pathway }) {
       <p className="text-white/45 text-sm leading-relaxed mb-5 flex-1">
         {pathway.desc}
       </p>
-
-      {/* Outcomes */}
-      <ul className="space-y-1.5 mb-5">
-        {pathway.outcomes.map(o => (
-          <li key={o} className="flex items-start gap-2 text-xs text-white/35">
-            <span
-              className="mt-1.5 w-1 h-1 rounded-full flex-shrink-0"
-              style={{ background: pathway.colour, minWidth: '4px', minHeight: '4px' }}
-              aria-hidden="true"
-            />
-            {o}
-          </li>
-        ))}
-      </ul>
 
       {/* Leads to */}
       <div
@@ -298,12 +279,12 @@ export default function AllPathwaysOverview() {
               lineHeight: '1.1',
             }}
           >
-            Choose Your Pathway
+            Explore the Academy
           </h2>
           <p className="text-white/45 text-base leading-relaxed max-w-2xl">
-            Educate.Strong covers the full spectrum of Strongman education — from coaching
-            qualifications and officiating certification to youth development and performance
-            nutrition. Find the route that fits your role in the sport.
+            Educate Strong covers the full range of Strongman education, from coaching and
+            officiating to youth development and performance nutrition. Find the part that
+            matches why you are here.
           </p>
         </div>
 

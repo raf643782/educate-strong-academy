@@ -10,23 +10,23 @@ interface Tutor {
 
 const TUTORS: Tutor[] = [
   { name: 'Paul Smith', role: 'Lead Tutor', credential: "3× UK's Strongest Man", img: '/assets/paul-smith.avif', initials: 'PS' },
-  { name: 'Dr Chris Fitzgerald', role: 'Tutor & Programme Lead', credential: 'PhD · Natural WSM Athlete', img: '/assets/chris-fitzgerald.avif', initials: 'CF' },
-  { name: 'Kris Herbert', role: 'Digital & Media', credential: 'Natural WSM 2024 Bronze', img: '/assets/krish-herbert.jpg', initials: 'KH' },
+  { name: 'Dr Chris Fitzgerald', role: 'Tutor and Programme Lead', credential: 'PhD in Health, Natural WSM Athlete', img: '/assets/chris-fitzgerald.avif', initials: 'CF' },
   { name: 'Laura Hollywood', role: 'StrongKidz Coach', credential: "Britain's Strongest Woman u73", img: '/assets/laura-hollywood.avif', initials: 'LH' },
-  { name: 'Victoria Wilson', role: 'StrongKidz Coach', credential: 'S&C Coach · Youth Specialist', img: '/assets/victoria-wilson.avif', initials: 'VW' },
+  { name: 'Victoria Wilson', role: 'StrongKidz Coach', credential: 'Strength and Conditioning Coach', img: '/assets/victoria-wilson.avif', initials: 'VW' },
+  { name: 'Kris Herbert', role: 'Digital and Media', credential: 'Natural WSM 2024 Bronze', img: '/assets/krish-herbert.jpg', initials: 'KH' },
 ];
 
-function TutorCard({ tutor }: { tutor: Tutor }) {
+function TutorCard({ tutor, featured = false }: { tutor: Tutor; featured?: boolean }) {
   return (
     <div className="flex flex-col group">
       {/* Portrait photo */}
       <div
         className="w-full overflow-hidden rounded-xl mb-4 flex items-center justify-center font-bold text-white/40 text-sm select-none"
-        style={{ aspectRatio: '3/4', background: '#1B1B20', flexShrink: 0 }}
+        style={{ aspectRatio: '3/4', background: '#1B1B20', flexShrink: 0, border: featured ? '1px solid rgba(194,24,106,0.35)' : '1px solid transparent' }}
       >
         <img
           src={tutor.img}
-          alt={tutor.name}
+          alt={`${tutor.name}, ${tutor.role}`}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           onError={(e) => {
             const el = e.currentTarget as HTMLImageElement;
@@ -59,6 +59,7 @@ function TutorCard({ tutor }: { tutor: Tutor }) {
 export default function TutorCredibilityStrip() {
   return (
     <section
+      aria-labelledby="tutors-heading"
       style={{
         background: [
           'radial-gradient(ellipse 90% 55% at 50% -5%, rgba(164,28,100,0.16) 0%, transparent 52%)',
@@ -73,20 +74,28 @@ export default function TutorCredibilityStrip() {
     >
       <div className="es-container">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12">
-          <div>
-            <p className="es-label mb-3">Tutor Credibility</p>
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
+          <div style={{ maxWidth: '640px' }}>
+            <p className="es-label mb-3">Taught by People Who Compete</p>
             <h2
-              className="font-black text-[#F5F5F7] leading-tight"
+              id="tutors-heading"
+              className="font-black text-[#F5F5F7] leading-tight mb-4"
               style={{
                 fontSize: 'clamp(1.75rem, 4vw, 2.75rem)',
                 letterSpacing: '-0.035em',
               }}
             >
-              Taught by Coaches
-              <br />
-              Who Compete
+              Taught by People Who Have Done It
             </h2>
+            <p className="text-[#B8B8BE] leading-relaxed" style={{ maxWidth: '580px' }}>
+              Every course at Educate Strong is delivered by people who have competed, coached and
+              officiated at a serious level, not simply studied it. Lead tutor Paul Smith has won
+              UK's Strongest Man three times and has spent years coaching other coaches through the
+              armed forces and charity sector. Dr Chris Fitzgerald pairs a PhD in Health with his own
+              competition record as a natural World's Strongest Man athlete. Laura Hollywood, Victoria
+              Wilson and Kris Herbert lead StrongKidz coaching and the Academy's digital delivery,
+              each with their own competition background.
+            </p>
           </div>
           <Link
             to="/about"
@@ -99,8 +108,8 @@ export default function TutorCredibilityStrip() {
 
         {/* Tutor grid — portrait cards */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5 lg:gap-6">
-          {TUTORS.map((tutor) => (
-            <TutorCard key={tutor.name} tutor={tutor} />
+          {TUTORS.map((tutor, i) => (
+            <TutorCard key={tutor.name} tutor={tutor} featured={i === 0} />
           ))}
         </div>
       </div>
