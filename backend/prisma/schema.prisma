@@ -523,6 +523,27 @@ model Cohort {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
+  // ── Homepage venue map + spotlight ──────────────────────────────────────
+  // `venue` (name), `city`, `date` (start), `status` (booking status),
+  // `bookingUrl`, `isConfirmed` and `sortOrder` (homepage priority) are
+  // reused as-is above rather than duplicated here. All fields below are
+  // optional and default to values that keep every existing cohort exactly
+  // as it behaves today — in particular `featuredOnHomepage` defaults to
+  // false, so no existing row starts appearing on the homepage.
+  addressLine         String?
+  postcode            String?
+  latitude            Float?
+  longitude           Float?
+  directionsUrl       String?
+  featuredOnHomepage  Boolean   @default(false)
+  endDate             DateTime?
+  startTime           String?
+  finishTime          String?
+  price               Float?
+  availableSpaces     Int?
+  registerInterestUrl String?
+  shortDescription    String?
+
   course Course? @relation(fields: [courseId], references: [id])
 }
 

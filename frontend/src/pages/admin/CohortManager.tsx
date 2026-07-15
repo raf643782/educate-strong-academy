@@ -9,6 +9,12 @@ interface Cohort {
   date: string | null; capacity: number | null; bookingUrl: string | null;
   isConfirmed: boolean; sortOrder: number; createdAt: string;
   course: CourseRef | null;
+  addressLine: string | null; postcode: string | null;
+  latitude: number | null; longitude: number | null; directionsUrl: string | null;
+  featuredOnHomepage: boolean; endDate: string | null;
+  startTime: string | null; finishTime: string | null;
+  price: number | null; availableSpaces: number | null;
+  registerInterestUrl: string | null; shortDescription: string | null;
 }
 
 const STATUSES = ['UPCOMING','CONFIRMED','FULL','COMPLETED','CANCELLED'] as const;
@@ -19,6 +25,8 @@ const S = {
   btnPrimary: { background:'linear-gradient(135deg,#A41C64,#C0246E)', color:'#fff', border:'none', borderRadius:'8px', padding:'10px 20px', fontWeight:700, fontSize:'13px', cursor:'pointer' } as React.CSSProperties,
   btnGhost: { background:'transparent', color:'rgba(255,255,255,0.5)', border:'1px solid rgba(255,255,255,0.12)', borderRadius:'8px', padding:'8px 14px', fontWeight:600, fontSize:'12px', cursor:'pointer' } as React.CSSProperties,
   btnDanger: { background:'transparent', color:'rgba(239,68,68,0.8)', border:'1px solid rgba(239,68,68,0.2)', borderRadius:'8px', padding:'6px 12px', fontWeight:600, fontSize:'11px', cursor:'pointer' } as React.CSSProperties,
+  sectionLabel: { fontSize:'11px', fontWeight:800, color:'#A41C64', textTransform:'uppercase', letterSpacing:'0.08em', margin:'22px 0 10px', paddingTop:'14px', borderTop:'1px solid rgba(255,255,255,0.07)' } as React.CSSProperties,
+  help: { fontSize:'11.5px', color:'rgba(255,255,255,0.35)', margin:'4px 0 0', lineHeight:1.5 } as React.CSSProperties,
 };
 
 function statusPill(s: string): React.CSSProperties {
@@ -35,8 +43,16 @@ function statusPill(s: string): React.CSSProperties {
 interface CohortForm {
   courseId: string; title: string; status: string; city: string; venue: string;
   date: string; capacity: string; bookingUrl: string; isConfirmed: boolean; sortOrder: string;
+  addressLine: string; postcode: string; latitude: string; longitude: string; directionsUrl: string;
+  featuredOnHomepage: boolean; endDate: string; startTime: string; finishTime: string;
+  price: string; availableSpaces: string; registerInterestUrl: string; shortDescription: string;
 }
-const BLANK: CohortForm = { courseId:'', title:'', status:'UPCOMING', city:'', venue:'', date:'', capacity:'', bookingUrl:'', isConfirmed:false, sortOrder:'0' };
+const BLANK: CohortForm = {
+  courseId:'', title:'', status:'UPCOMING', city:'', venue:'', date:'', capacity:'', bookingUrl:'', isConfirmed:false, sortOrder:'0',
+  addressLine:'', postcode:'', latitude:'', longitude:'', directionsUrl:'',
+  featuredOnHomepage:false, endDate:'', startTime:'', finishTime:'',
+  price:'', availableSpaces:'', registerInterestUrl:'', shortDescription:'',
+};
 
 function toForm(c: Cohort): CohortForm {
   return {
@@ -46,21 +62,58 @@ function toForm(c: Cohort): CohortForm {
     capacity: c.capacity != null ? String(c.capacity) : '',
     bookingUrl: c.bookingUrl || '', isConfirmed: c.isConfirmed,
     sortOrder: String(c.sortOrder),
+    addressLine: c.addressLine || '', postcode: c.postcode || '',
+    latitude: c.latitude != null ? String(c.latitude) : '',
+    longitude: c.longitude != null ? String(c.longitude) : '',
+    directionsUrl: c.directionsUrl || '',
+    featuredOnHomepage: c.featuredOnHomepage,
+    endDate: c.endDate ? c.endDate.slice(0,10) : '',
+    startTime: c.startTime || '', finishTime: c.finishTime || '',
+    price: c.price != null ? String(c.price) : '',
+    availableSpaces: c.availableSpaces != null ? String(c.availableSpaces) : '',
+    registerInterestUrl: c.registerInterestUrl || '',
+    shortDescription: c.shortDescription || '',
   };
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return <div style={{ marginBottom:'12px' }}><label style={S.label}>{label}</label>{children}</div>;
+// Non-blocking guidance shown in the modal — the server enforces the
+// featuredOnHomepage rule itself, but the admin should see why before saving.
+function computeWarnings(form: CohortForm): string[] {
+  const warnings: string[] = [];
+  const hasLat = form.latitude.trim() !== '';
+  const hasLng = form.longitude.trim() !== '';
+  if (hasLat !== hasLng) {
+    warnings.push('Latitude and longitude should both be set, or both left blank — otherwise no map can show.');
+  }
+  if (!hasLat && !hasLng && form.featuredOnHomepage) {
+    warnings.push('No coordinates set — the homepage will show venue details as text but no map.');
+  }
+  if (form.featuredOnHomepage && !form.venue && !form.city) {
+    warnings.push('No venue or city set — parents will see no location details for this cohort.');
+  }
+  return warnings;
+}
+
+function Field({ label, help, children }: { label: string; help?: string; children: React.ReactNode }) {
+  return (
+    <div style={{ marginBottom:'12px' }}>
+      <label style={S.label}>{label}</label>
+      {children}
+      {help && <p style={S.help}>{help}</p>}
+    </div>
+  );
 }
 
 function CohortModal({ initial, courses, onSave, onClose, saving, error }:
   { initial: CohortForm; courses: CourseRef[]; onSave: (f: CohortForm) => void; onClose: () => void; saving: boolean; error: string|null }) {
   const [form, setForm] = useState(initial);
   const set = <K extends keyof CohortForm>(k: K, v: CohortForm[K]) => setForm(f => ({ ...f, [k]: v }));
+  const warnings = computeWarnings(form);
+  const canFeature = form.isConfirmed && !!form.courseId;
   return (
     <div style={{ position:'fixed', inset:0, zIndex:50, background:'rgba(0,0,0,0.8)', backdropFilter:'blur(6px)', display:'flex', alignItems:'flex-start', justifyContent:'center', padding:'48px 16px', overflowY:'auto' }}
       onClick={e => { if (e.target===e.currentTarget) onClose(); }}>
-      <div style={{ width:'100%', maxWidth:'520px', background:'#1B1B20', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'14px', overflow:'hidden', marginBottom:'2rem' }}>
+      <div style={{ width:'100%', maxWidth:'620px', background:'#1B1B20', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'14px', overflow:'hidden', marginBottom:'2rem' }}>
         <div style={{ padding:'16px 24px', borderBottom:'1px solid rgba(255,255,255,0.07)', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
           <span style={{ fontWeight:800, fontSize:'15px' }}>{initial.title ? 'Edit Cohort' : 'New Cohort'}</span>
           <button onClick={onClose} style={{ background:'none', border:'none', color:'rgba(255,255,255,0.4)', cursor:'pointer', fontSize:'20px' }}>×</button>
@@ -97,7 +150,71 @@ function CohortModal({ initial, courses, onSave, onClose, saving, error }:
             </button>
             <span style={{ fontSize:'13px', color:'rgba(255,255,255,0.5)' }}>{form.isConfirmed ? 'Confirmed date' : 'Date not yet confirmed'}</span>
           </div>
-          <div style={{ display:'flex', gap:'10px', justifyContent:'flex-end' }}>
+
+          <p style={S.sectionLabel}>Schedule (optional)</p>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
+            <Field label="End date" help="Leave blank for a single-day cohort — Date above is used as the start.">
+              <input type="date" style={{ ...S.input, colorScheme:'dark' }} value={form.endDate} onChange={e => set('endDate', e.target.value)} />
+            </Field>
+            <Field label="Available spaces"><input type="number" style={S.input} value={form.availableSpaces} onChange={e => set('availableSpaces', e.target.value)} placeholder="4" /></Field>
+          </div>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
+            <Field label="Start time"><input type="time" style={{ ...S.input, colorScheme:'dark' }} value={form.startTime} onChange={e => set('startTime', e.target.value)} /></Field>
+            <Field label="Finish time"><input type="time" style={{ ...S.input, colorScheme:'dark' }} value={form.finishTime} onChange={e => set('finishTime', e.target.value)} /></Field>
+          </div>
+
+          <p style={S.sectionLabel}>Venue &amp; map (optional)</p>
+          <Field label="Address line"><input style={S.input} value={form.addressLine} onChange={e => set('addressLine', e.target.value)} placeholder="Street address" /></Field>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
+            <Field label="Postcode"><input style={S.input} value={form.postcode} onChange={e => set('postcode', e.target.value)} placeholder="S1 2AB" /></Field>
+            <Field label="Directions URL" help="Overrides the auto-generated Google Maps link.">
+              <input style={S.input} value={form.directionsUrl} onChange={e => set('directionsUrl', e.target.value)} placeholder="https://…" />
+            </Field>
+          </div>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
+            <Field label="Latitude" help="Required together with Longitude for a homepage map to appear.">
+              <input type="number" step="any" style={S.input} value={form.latitude} onChange={e => set('latitude', e.target.value)} placeholder="53.3811" />
+            </Field>
+            <Field label="Longitude">
+              <input type="number" step="any" style={S.input} value={form.longitude} onChange={e => set('longitude', e.target.value)} placeholder="-1.4701" />
+            </Field>
+          </div>
+
+          <p style={S.sectionLabel}>Pricing &amp; interest (optional)</p>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
+            <Field label="Price (£)"><input type="number" style={S.input} value={form.price} onChange={e => set('price', e.target.value)} placeholder="500" /></Field>
+            <Field label="Register interest URL" help="Overrides the default register-interest link.">
+              <input style={S.input} value={form.registerInterestUrl} onChange={e => set('registerInterestUrl', e.target.value)} placeholder="https://…" />
+            </Field>
+          </div>
+          <Field label="Short homepage description" help="A one- or two-sentence summary shown on the homepage card, distinct from the course page.">
+            <textarea style={{ ...S.input, minHeight:'64px', resize:'vertical', fontFamily:'inherit' }} value={form.shortDescription} onChange={e => set('shortDescription', e.target.value)} placeholder="e.g. Two days of hands-on coaching across the six core Strongman events." />
+          </Field>
+
+          <p style={S.sectionLabel}>Homepage feature</p>
+          <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'4px' }}>
+            <button type="button" disabled={!canFeature} onClick={() => set('featuredOnHomepage', !form.featuredOnHomepage)}
+              style={{ position:'relative', display:'inline-flex', alignItems:'center', width:'36px', height:'20px', borderRadius:'999px', background: form.featuredOnHomepage ? '#A41C64' : 'rgba(255,255,255,0.12)', border:'none', cursor: canFeature ? 'pointer' : 'not-allowed', opacity: canFeature ? 1 : 0.5, transition:'background 0.15s', flexShrink:0 }}>
+              <span style={{ position:'absolute', left: form.featuredOnHomepage ? '18px' : '2px', width:'16px', height:'16px', borderRadius:'50%', background:'#fff', transition:'left 0.15s' }} />
+            </button>
+            <span style={{ fontSize:'13px', color:'rgba(255,255,255,0.5)' }}>
+              {form.featuredOnHomepage ? 'Featured on homepage' : 'Not featured on homepage'}
+            </span>
+          </div>
+          <p style={S.help}>
+            Optional — showing a cohort on the homepage is a separate decision from confirming it.{' '}
+            {!canFeature && 'Available once this cohort is marked confirmed above and linked to a course.'}
+          </p>
+
+          {warnings.length > 0 && (
+            <div style={{ marginTop:'16px', padding:'10px 12px', background:'rgba(225,154,71,0.08)', border:'1px solid rgba(225,154,71,0.25)', borderRadius:'8px' }}>
+              {warnings.map((w, i) => (
+                <p key={i} style={{ fontSize:'12px', color:'#E19A47', margin: i === 0 ? 0 : '6px 0 0', lineHeight:1.5 }}>{w}</p>
+              ))}
+            </div>
+          )}
+
+          <div style={{ display:'flex', gap:'10px', justifyContent:'flex-end', marginTop:'20px' }}>
             <button style={S.btnGhost} onClick={onClose} disabled={saving}>Cancel</button>
             <button style={{ ...S.btnPrimary, opacity: saving ? 0.6 : 1 }} onClick={() => onSave(form)} disabled={saving}>{saving ? 'Saving…' : 'Save Cohort'}</button>
           </div>
@@ -155,6 +272,19 @@ export default function CohortManager() {
         bookingUrl: form.bookingUrl || null,
         isConfirmed: form.isConfirmed,
         sortOrder: Number(form.sortOrder) || 0,
+        addressLine: form.addressLine || null,
+        postcode: form.postcode || null,
+        latitude: form.latitude !== '' ? Number(form.latitude) : null,
+        longitude: form.longitude !== '' ? Number(form.longitude) : null,
+        directionsUrl: form.directionsUrl || null,
+        featuredOnHomepage: form.featuredOnHomepage,
+        endDate: form.endDate || null,
+        startTime: form.startTime || null,
+        finishTime: form.finishTime || null,
+        price: form.price !== '' ? Number(form.price) : null,
+        availableSpaces: form.availableSpaces !== '' ? Number(form.availableSpaces) : null,
+        registerInterestUrl: form.registerInterestUrl || null,
+        shortDescription: form.shortDescription || null,
       };
       if (modal.editing) {
         const res = await api.put<Cohort>(`/admin/cohorts/${modal.editing.id}`, body);
@@ -216,6 +346,8 @@ export default function CohortManager() {
                   <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', marginBottom:'4px', alignItems:'center' }}>
                     <span style={statusPill(c.status)}>{c.status}</span>
                     {c.isConfirmed && <span style={{ fontSize:'10px', fontWeight:700, color:'rgba(164,28,100,0.8)', background:'rgba(164,28,100,0.08)', padding:'1px 6px', borderRadius:'999px' }}>CONFIRMED</span>}
+                    {c.featuredOnHomepage && <span style={{ fontSize:'10px', fontWeight:700, color:'#E19A47', background:'rgba(225,154,71,0.1)', padding:'1px 6px', borderRadius:'999px' }}>FEATURED ON HOMEPAGE</span>}
+                    {c.featuredOnHomepage && (c.latitude == null || c.longitude == null) && <span style={{ fontSize:'10px', fontWeight:700, color:'rgba(239,68,68,0.85)', background:'rgba(239,68,68,0.08)', padding:'1px 6px', borderRadius:'999px' }}>NO MAP DATA</span>}
                   </div>
                   <p style={{ fontWeight:700, fontSize:'14px', color:'#fff', margin:'0 0 2px' }}>{c.title}</p>
                   <p style={{ fontSize:'12px', color:'rgba(255,255,255,0.35)', margin:0 }}>

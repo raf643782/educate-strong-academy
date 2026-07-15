@@ -1051,6 +1051,21 @@ router.put('/register-interest/:id', authenticate, requireRole('ADMIN'), async (
 
 // ── Cohorts (Stage 7) ─────────────────────────────────────────────────────────
 
+// Latitude/longitude must arrive together (or not at all) and within range —
+// otherwise the homepage map would either misplace the pin or silently fail.
+function validateLatLong(lat: unknown, lng: unknown): string | null {
+  const latProvided = lat !== null && lat !== undefined && lat !== '';
+  const lngProvided = lng !== null && lng !== undefined && lng !== '';
+  if (!latProvided && !lngProvided) return null;
+  if (latProvided !== lngProvided) return 'Latitude and longitude must both be provided, or both left blank.';
+  const latNum = Number(lat);
+  const lngNum = Number(lng);
+  if (Number.isNaN(latNum) || Number.isNaN(lngNum)) return 'Latitude and longitude must be numbers.';
+  if (latNum < -90 || latNum > 90) return 'Latitude must be between -90 and 90.';
+  if (lngNum < -180 || lngNum > 180) return 'Longitude must be between -180 and 180.';
+  return null;
+}
+
 // GET /api/admin/cohorts
 router.get('/cohorts', authenticate, requireRole('ADMIN'), async (_req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -1068,9 +1083,22 @@ router.get('/cohorts', authenticate, requireRole('ADMIN'), async (_req: AuthRequ
 // POST /api/admin/cohorts
 router.post('/cohorts', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { courseId, title, status, city, venue, date, capacity, bookingUrl, isConfirmed, sortOrder } = req.body;
+    const {
+      courseId, title, status, city, venue, date, capacity, bookingUrl, isConfirmed, sortOrder,
+      addressLine, postcode, latitude, longitude, directionsUrl, featuredOnHomepage, endDate,
+      startTime, finishTime, price, availableSpaces, registerInterestUrl, shortDescription,
+    } = req.body;
     if (!title || !title.trim()) {
       res.status(400).json({ error: 'Title is required.' });
+      return;
+    }
+    const latLongError = validateLatLong(latitude, longitude);
+    if (latLongError) {
+      res.status(400).json({ error: latLongError });
+      return;
+    }
+    if (featuredOnHomepage && (!isConfirmed || !courseId)) {
+      res.status(400).json({ error: 'A cohort must be confirmed and linked to a course before it can be featured on the homepage.' });
       return;
     }
     const maxSort = await prisma.cohort.aggregate({ _max: { sortOrder: true } });
@@ -1086,6 +1114,19 @@ router.post('/cohorts', authenticate, requireRole('ADMIN'), async (req: AuthRequ
         bookingUrl: bookingUrl || null,
         isConfirmed: isConfirmed ?? false,
         sortOrder: sortOrder ?? (maxSort._max.sortOrder ?? 0) + 10,
+        addressLine: addressLine || null,
+        postcode: postcode || null,
+        latitude: latitude !== undefined && latitude !== '' ? Number(latitude) : null,
+        longitude: longitude !== undefined && longitude !== '' ? Number(longitude) : null,
+        directionsUrl: directionsUrl || null,
+        featuredOnHomepage: featuredOnHomepage ?? false,
+        endDate: endDate ? new Date(endDate) : null,
+        startTime: startTime || null,
+        finishTime: finishTime || null,
+        price: price !== undefined && price !== '' ? Number(price) : null,
+        availableSpaces: availableSpaces !== undefined && availableSpaces !== '' ? Number(availableSpaces) : null,
+        registerInterestUrl: registerInterestUrl || null,
+        shortDescription: shortDescription || null,
       },
       include: { course: { select: { id: true, title: true, slug: true } } },
     });
@@ -1099,7 +1140,32 @@ router.post('/cohorts', authenticate, requireRole('ADMIN'), async (req: AuthRequ
 // PUT /api/admin/cohorts/:id
 router.put('/cohorts/:id', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { courseId, title, status, city, venue, date, capacity, bookingUrl, isConfirmed, sortOrder } = req.body;
+    const existing = await prisma.cohort.findUnique({ where: { id: req.params.id } });
+    if (!existing) {
+      res.status(404).json({ error: 'Cohort not found.' });
+      return;
+    }
+    const {
+      courseId, title, status, city, venue, date, capacity, bookingUrl, isConfirmed, sortOrder,
+      addressLine, postcode, latitude, longitude, directionsUrl, featuredOnHomepage, endDate,
+      startTime, finishTime, price, availableSpaces, registerInterestUrl, shortDescription,
+    } = req.body;
+
+    const effectiveLatitude = latitude !== undefined ? latitude : existing.latitude;
+    const effectiveLongitude = longitude !== undefined ? longitude : existing.longitude;
+    const latLongError = validateLatLong(effectiveLatitude, effectiveLongitude);
+    if (latLongError) {
+      res.status(400).json({ error: latLongError });
+      return;
+    }
+    const effectiveFeatured = featuredOnHomepage !== undefined ? featuredOnHomepage : existing.featuredOnHomepage;
+    const effectiveConfirmed = isConfirmed !== undefined ? isConfirmed : existing.isConfirmed;
+    const effectiveCourseId = courseId !== undefined ? courseId : existing.courseId;
+    if (effectiveFeatured && (!effectiveConfirmed || !effectiveCourseId)) {
+      res.status(400).json({ error: 'A cohort must be confirmed and linked to a course before it can be featured on the homepage.' });
+      return;
+    }
+
     const data: Record<string, unknown> = {};
     if (courseId !== undefined) data.courseId = courseId || null;
     if (title !== undefined) data.title = title;
@@ -1111,6 +1177,19 @@ router.put('/cohorts/:id', authenticate, requireRole('ADMIN'), async (req: AuthR
     if (bookingUrl !== undefined) data.bookingUrl = bookingUrl || null;
     if (isConfirmed !== undefined) data.isConfirmed = isConfirmed;
     if (sortOrder !== undefined) data.sortOrder = sortOrder;
+    if (addressLine !== undefined) data.addressLine = addressLine || null;
+    if (postcode !== undefined) data.postcode = postcode || null;
+    if (latitude !== undefined) data.latitude = latitude !== '' ? Number(latitude) : null;
+    if (longitude !== undefined) data.longitude = longitude !== '' ? Number(longitude) : null;
+    if (directionsUrl !== undefined) data.directionsUrl = directionsUrl || null;
+    if (featuredOnHomepage !== undefined) data.featuredOnHomepage = featuredOnHomepage;
+    if (endDate !== undefined) data.endDate = endDate ? new Date(endDate) : null;
+    if (startTime !== undefined) data.startTime = startTime || null;
+    if (finishTime !== undefined) data.finishTime = finishTime || null;
+    if (price !== undefined) data.price = price !== '' ? Number(price) : null;
+    if (availableSpaces !== undefined) data.availableSpaces = availableSpaces !== '' ? Number(availableSpaces) : null;
+    if (registerInterestUrl !== undefined) data.registerInterestUrl = registerInterestUrl || null;
+    if (shortDescription !== undefined) data.shortDescription = shortDescription || null;
 
     const cohort = await prisma.cohort.update({
       where: { id: req.params.id },
