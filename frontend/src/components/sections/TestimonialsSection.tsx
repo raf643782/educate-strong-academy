@@ -171,9 +171,9 @@ export default function TestimonialsSection() {
       style={{ background: '#0A0A0A', padding: '96px 0', borderTop: '1px solid rgba(255,255,255,0.05)' }}
       aria-labelledby="testimonials-heading"
     >
-      <div className="es-container">
+      <div className="es-container-wide">
         {/* Heading */}
-        <div className="mb-12">
+        <div className="mb-12" style={{ maxWidth: '640px' }}>
           <p className="es-label mb-3">What Coaches and Referees Say</p>
           <h2
             id="testimonials-heading"
@@ -188,22 +188,24 @@ export default function TestimonialsSection() {
         </div>
 
         {confirmed.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6 lg:gap-8">
             {confirmed.map(t => (
               <TestimonialCard key={t.id} testimonial={t} />
             ))}
           </div>
         ) : (
           <div
+            className="flex items-center justify-center"
             style={{
               background: '#111',
               border: '1px solid rgba(255,255,255,0.07)',
               borderRadius: '16px',
-              padding: '48px 32px',
+              padding: '72px 32px',
               textAlign: 'center',
+              width: '100%',
             }}
           >
-            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '14px', lineHeight: 1.7 }}>
+            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '14px', lineHeight: 1.7, maxWidth: '480px' }}>
               No testimonials have been published yet.
               <br />
               Verified coach and referee feedback will appear here once consent is confirmed.

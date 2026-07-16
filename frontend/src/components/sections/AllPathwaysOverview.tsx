@@ -60,7 +60,7 @@ const PATHWAYS: Pathway[] = [
     badge: 'StrongKidz',
     colour: '#E19A47',
     title: 'StrongKidz',
-    desc: 'Strength training for children looks nothing like strength training for adults. StrongKidz introduces young people to functional movement, confidence and resilience through age appropriate sessions in Sheffield, led by coaches trained specifically to work with young athletes.',
+    desc: 'StrongKidz introduces young people to strength and movement through age appropriate coaching, built around confidence, positive experience and long term development. Sessions run in Sheffield, led by coaches trained through StrongKidz Coach Education.',
     status: 'available',
     statusLabel: 'Sheffield Sessions',
     leads: 'A StrongKidz Coach Education qualification for adults delivering sessions.',
@@ -74,7 +74,7 @@ const PATHWAYS: Pathway[] = [
     badge: 'EatStrong',
     colour: '#888899',
     title: 'EatStrong',
-    desc: 'Strongman athletes eat differently to most gym goers, and coaches are often the first person asked about it. EatStrong gives coaches and athletes nutrition education grounded in evidence, built around competition, recovery and everyday training, without straying into personalised dietary advice.',
+    desc: 'EatStrong is practical performance nutrition for Strongman: fuelling training, supporting recovery, and preparing properly for competition. It gives athletes and coaches evidence based nutrition education for long term performance, without straying into personalised dietary advice.',
     status: 'live',
     statusLabel: 'Live Resources',
     leads: 'Nutrition content built into the coaching pathway, with more to follow.',
@@ -266,7 +266,7 @@ export default function AllPathwaysOverview() {
       }}
       aria-labelledby="pathways-heading"
     >
-      <div className="es-container">
+      <div className="es-container-wide">
         {/* Heading */}
         <div className="mb-12">
           <p className="es-label mb-3">The Academy</p>
@@ -289,7 +289,7 @@ export default function AllPathwaysOverview() {
         </div>
 
         {/* Grid */}
-        <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-5">
+        <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-6 lg:gap-8">
           {PATHWAYS.map(p => (
             <PathwayCard key={p.id} pathway={p} />
           ))}

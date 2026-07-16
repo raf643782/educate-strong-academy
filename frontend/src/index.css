@@ -75,6 +75,11 @@
 
   /* Layout */
   .es-container { @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8; }
+  /* Wider desktop container — used only by sections whose card grids/major
+     compositions need more room than a text-focused max-w-7xl column
+     (Tutor Credibility, Explore the Academy, Knowledge, Shop, Testimonials).
+     Hero, Coach Directory, footer and nav intentionally keep .es-container. */
+  .es-container-wide { @apply mx-auto px-4 sm:px-6 lg:px-16; max-width: 1500px; }
   .es-section   { @apply py-16 md:py-24; }
   .pt-navbar    { padding-top: 64px; }
 
@@ -500,5 +505,78 @@
     background: linear-gradient(to right, #A41C64, transparent);
     transform: translateY(-50%);
     pointer-events: none;
+  }
+
+  /* ── Tutor Credibility grid + biography panel ──────────────────────────
+     Five cards, centred last row (flex-wrap + justify-content:center
+     handles "3 then 2 centred" without nth-child maths). Bio panel is
+     absolutely positioned inside the fixed-aspect-ratio image box, so
+     opening it never changes the card's or the page's height — it slides
+     up from the bottom, overlaying the lower part of the photo only.
+     Name/role/credential live outside that box and are always visible. */
+  .es-tutor-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+  }
+  @media (min-width: 640px)  { .es-tutor-grid { gap: 24px; } }
+  @media (min-width: 1024px) { .es-tutor-grid { gap: 28px; } }
+  @media (min-width: 1600px) { .es-tutor-grid { gap: 32px; } }
+
+  .es-tutor-card-wrap {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+  @media (min-width: 640px) {
+    .es-tutor-card-wrap { flex-basis: calc(50% - 12px); max-width: calc(50% - 12px); }
+  }
+  @media (min-width: 1024px) {
+    .es-tutor-card-wrap { flex-basis: calc((100% - 56px) / 3); max-width: calc((100% - 56px) / 3); }
+  }
+  @media (min-width: 1600px) {
+    .es-tutor-card-wrap { flex-basis: calc((100% - 128px) / 5); max-width: calc((100% - 128px) / 5); }
+  }
+
+  .es-tutor-card-image {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--es-panel-elevated);
+  }
+  .es-tutor-card-image img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+  }
+
+  .es-tutor-bio-panel {
+    position: absolute;
+    inset: auto 0 0 0;
+    max-height: 100%;
+    overflow-y: auto;
+    background: linear-gradient(180deg, rgba(8,8,10,0.35) 0%, rgba(8,8,10,0.94) 26%, rgba(6,6,8,0.98) 100%);
+    padding: 16px 14px 14px;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+  }
+  .es-tutor-card:focus-within .es-tutor-bio-panel,
+  .es-tutor-card.is-open .es-tutor-bio-panel {
+    transform: translateY(0);
+  }
+  @media (hover: hover) {
+    .es-tutor-card:hover .es-tutor-bio-panel { transform: translateY(0); }
+  }
+  .es-tutor-bio-toggle {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; font-weight: 700; color: var(--es-magenta);
+    background: none; border: none; padding: 0; margin-top: 8px; cursor: pointer;
+  }
+  .es-tutor-bio-toggle:focus-visible {
+    outline: 2px solid var(--es-magenta); outline-offset: 3px; border-radius: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .es-tutor-bio-panel { transition: none; }
   }
 }

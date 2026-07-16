@@ -224,9 +224,9 @@ export default function Home() {
               className="text-white/50 leading-relaxed mb-9"
               style={{ fontSize: 'clamp(1rem, 1.5vw, 1.125rem)', maxWidth: '420px' }}
             >
-              Strongman tests strength like nothing else, and Educate Strong teaches it properly.
-              Coaching, officiating, youth development and performance nutrition, each one built and
-              taught by people who compete.
+              Educate Strong brings coaching, refereeing, youth development and performance
+              nutrition together under one Strongman Academy. Whatever brought you here — training,
+              coaching, officiating, or supporting a young athlete — there's a place to start.
             </p>
 
             {/* Accreditation pills */}
@@ -302,10 +302,10 @@ export default function Home() {
           borderBottom: '1px solid rgba(255,255,255,0.04)',
         }}
       >
-        <div className="es-container">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+        <div className="es-container-wide">
+          <div className="grid lg:grid-cols-[0.85fr_1.15fr] gap-10 lg:gap-16 items-center">
             {/* Text side */}
-            <div style={{ maxWidth: '480px' }}>
+            <div style={{ maxWidth: '420px' }}>
               <p className="es-label mb-4">The Store</p>
               <h2
                 className="font-black text-white mb-4"
@@ -315,30 +315,36 @@ export default function Home() {
                 <br />
                 <span style={{ color: '#A41C64' }}>Academy Apparel</span>
               </h2>
-              <p className="text-white/45 leading-relaxed text-sm" style={{ maxWidth: '360px' }}>
+              <p className="text-white/45 leading-relaxed text-sm mb-8" style={{ maxWidth: '360px' }}>
                 Monster Dumbbells, coaching apparel, and Strongman equipment built for the culture we teach.
                 Products are being finalised — register your interest now.
               </p>
+              <Link
+                to="/shop"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all duration-200 hover:opacity-85"
+                style={{ background: 'rgba(164,28,100,0.18)', border: '1px solid rgba(164,28,100,0.35)', color: 'rgba(255,255,255,0.85)' }}
+              >
+                Browse the Shop
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </Link>
             </div>
 
-            {/* Category cards */}
-            <div className="flex flex-col sm:flex-row gap-4 flex-shrink-0">
+            {/* Product cards — equal width, generously separated */}
+            <div className="grid sm:grid-cols-2 gap-8 lg:gap-12">
               {/* Dumbbells card */}
               <Link
                 to="/shop"
                 className="group flex flex-col rounded-2xl overflow-hidden transition-all duration-200 hover:scale-[1.02]"
-                style={{
-                  background: '#151519',
-                  border: '1px solid rgba(255,255,255,0.07)',
-                  width: 'clamp(180px, 22vw, 220px)',
-                }}
+                style={{ background: '#151519', border: '1px solid rgba(255,255,255,0.07)' }}
               >
                 <div
                   className="flex items-center justify-center"
-                  style={{ background: '#1B1B20', height: '120px', padding: '16px' }}
+                  style={{ background: '#1B1B20', height: '160px', padding: '20px' }}
                   aria-hidden="true"
                 >
-                  <svg viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '140px', height: '72px', opacity: 0.8 }}>
+                  <svg viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '160px', height: '82px', opacity: 0.8 }}>
                     <rect x="10" y="44" width="28" height="32" rx="4" fill="rgba(194,24,106,0.25)" stroke="rgba(194,24,106,0.4)" strokeWidth="1.5"/>
                     <rect x="38" y="52" width="18" height="16" rx="2" fill="rgba(194,24,106,0.18)" stroke="rgba(194,24,106,0.3)" strokeWidth="1.5"/>
                     <rect x="56" y="56" width="88" height="8" rx="4" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.18)" strokeWidth="1.5"/>
@@ -346,7 +352,7 @@ export default function Home() {
                     <rect x="162" y="44" width="28" height="32" rx="4" fill="rgba(194,24,106,0.25)" stroke="rgba(194,24,106,0.4)" strokeWidth="1.5"/>
                   </svg>
                 </div>
-                <div className="p-4">
+                <div className="p-6">
                   <p className="text-sm font-semibold text-white mb-0.5">Monster Dumbbells</p>
                   <p className="text-[11px] text-white/35">Strongman Equipment</p>
                 </div>
@@ -356,18 +362,14 @@ export default function Home() {
               <Link
                 to="/shop"
                 className="group flex flex-col rounded-2xl overflow-hidden transition-all duration-200 hover:scale-[1.02]"
-                style={{
-                  background: '#151519',
-                  border: '1px solid rgba(255,255,255,0.07)',
-                  width: 'clamp(180px, 22vw, 220px)',
-                }}
+                style={{ background: '#151519', border: '1px solid rgba(255,255,255,0.07)' }}
               >
                 <div
                   className="flex items-center justify-center"
-                  style={{ background: '#1B1B20', height: '120px', padding: '16px' }}
+                  style={{ background: '#1B1B20', height: '160px', padding: '20px' }}
                   aria-hidden="true"
                 >
-                  <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '100px', height: '80px', opacity: 0.8 }}>
+                  <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '116px', height: '92px', opacity: 0.8 }}>
                     <path
                       d="M60 20 L30 50 L55 65 L55 140 L145 140 L145 65 L170 50 L140 20 Q120 32 100 32 Q80 32 60 20Z"
                       fill="rgba(194,24,106,0.15)"
@@ -383,26 +385,12 @@ export default function Home() {
                     />
                   </svg>
                 </div>
-                <div className="p-4">
+                <div className="p-6">
                   <p className="text-sm font-semibold text-white mb-0.5">Academy Apparel</p>
                   <p className="text-[11px] text-white/35">Coaches &amp; Athletes</p>
                 </div>
               </Link>
             </div>
-          </div>
-
-          {/* CTA */}
-          <div className="mt-8">
-            <Link
-              to="/shop"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all duration-200 hover:opacity-85"
-              style={{ background: 'rgba(164,28,100,0.18)', border: '1px solid rgba(164,28,100,0.35)', color: 'rgba(255,255,255,0.85)' }}
-            >
-              Browse the Shop
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-            </Link>
           </div>
         </div>
       </section>
@@ -445,9 +433,9 @@ export default function Home() {
             <span style={{ color: '#A41C64' }}>You Are.</span>
           </h2>
           <p className="text-white/45 leading-relaxed mb-10 text-base">
-            Whether you are trying to understand Strongman for the first time, coaching your first
-            session, or building toward a full qualification, Educate Strong is built to meet you
-            there. Explore the Academy, or register your interest and we will be in touch.
+            Whether you are training, coaching, officiating, or exploring StrongKidz and EatStrong
+            for the first time, Educate Strong is built to meet you where you are. Explore the
+            Academy, or register your interest and we will be in touch.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <a

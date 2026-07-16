@@ -211,7 +211,7 @@ export default function KnowledgeHubPreview() {
       }}
       aria-labelledby="learn-strongman-heading"
     >
-      <div className="es-container">
+      <div className="es-container-wide">
         {/* Header */}
         <div className="mb-12" style={{ maxWidth: '720px' }}>
           <p className="es-label mb-3">Knowledge and Technical Learning</p>
@@ -223,7 +223,7 @@ export default function KnowledgeHubPreview() {
               letterSpacing: '-0.035em',
             }}
           >
-            Learn Strongman Properly
+            Strongman Training, Explained
           </h2>
           <p className="text-[#B8B8BE] leading-relaxed">
             Good coaching starts with good information. The Knowledge Hub covers programming, safe
@@ -235,7 +235,7 @@ export default function KnowledgeHubPreview() {
         </div>
 
         {/* Knowledge Hub articles, full width row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-14">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mb-14">
           {ARTICLES.map((article) => (
             <ArticleCard key={article.slug} article={article} />
           ))}
@@ -245,7 +245,7 @@ export default function KnowledgeHubPreview() {
         <div className="grid md:grid-cols-2 gap-10 pt-10" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
           <LibraryColumn
             eyebrow="Exercise Library"
-            title="Technique, one lift at a time"
+            title="Strongman Exercises, One Lift at a Time"
             desc="Real entries from the library, showing exactly the kind of technique and coaching cue detail every event and accessory movement gets."
             cta="Browse the Exercise Library"
             to="/exercises"
@@ -253,7 +253,7 @@ export default function KnowledgeHubPreview() {
           />
           <LibraryColumn
             eyebrow="Event Library"
-            title="How each event actually works"
+            title="How Strongman Events Actually Work"
             desc="Real entries from the library, covering rules, judging and how each event is trained, drawn live from the same source the full library uses."
             cta="Browse the Event Library"
             to="/events"
