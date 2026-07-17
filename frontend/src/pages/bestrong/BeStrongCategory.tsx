@@ -83,6 +83,7 @@ export default function EatStrongCategory() {
   useDocumentHead({
     title: `${categoryLabel} — EatStrong`,
     description: categoryMeta?.description,
+    canonical: categorySlug ? `https://educate-strong-academy.vercel.app/eatstrong/category/${categorySlug}` : undefined,
   });
 
   return (

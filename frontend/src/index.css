@@ -114,6 +114,10 @@
     box-shadow: 0 0 28px var(--es-magenta-glow-soft), 0 8px 32px rgba(0,0,0,0.5);
     transform: translateY(-2px);
   }
+  .es-card-hover:focus-visible {
+    outline: 2px solid var(--es-magenta); outline-offset: 3px;
+    border-color: var(--es-magenta);
+  }
 
   /* Grey card — matches brand containers */
   .es-card-grey {

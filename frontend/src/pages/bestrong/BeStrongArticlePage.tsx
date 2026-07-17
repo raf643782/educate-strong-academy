@@ -57,6 +57,7 @@ export default function EatStrongArticlePage() {
   useDocumentHead({
     title: article?.title || 'Article Not Found',
     description: article?.summary,
+    canonical: slug ? `https://educate-strong-academy.vercel.app/eatstrong/articles/${slug}` : undefined,
   });
 
   useEffect(() => {
@@ -70,6 +71,36 @@ export default function EatStrongArticlePage() {
       })
       .finally(() => setLoading(false));
   }, [slug]);
+
+  // Article schema — only once the real article has loaded, and only for
+  // fields actually shown on the page (no invented author/date/publisher
+  // fields beyond what the article record itself provides).
+  useEffect(() => {
+    if (!article || !slug) return;
+    const scriptId = 'eatstrong-article-schema';
+    const url = `https://educate-strong-academy.vercel.app/eatstrong/articles/${slug}`;
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = scriptId;
+    script.text = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: article.title,
+      description: article.summary || undefined,
+      url,
+      author: article.authorName ? { '@type': 'Person', name: article.authorName } : undefined,
+      dateModified: article.lastReviewedAt || undefined,
+      publisher: {
+        '@type': 'Organization',
+        name: 'Educate Strong Academy',
+        sameAs: 'https://educate-strong-academy.vercel.app/',
+      },
+    });
+    document.head.appendChild(script);
+    return () => {
+      document.getElementById(scriptId)?.remove();
+    };
+  }, [article, slug]);
 
   if (loading) {
     return (
