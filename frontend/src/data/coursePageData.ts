@@ -22,6 +22,9 @@ export interface TutorData {
   credentials: string[];
   description: string;
   photoAlt: string;
+  /** Real, existing photo asset path. Optional — falls back to the
+   * initials placeholder when not set, so this is additive only. */
+  photoUrl?: string;
 }
 
 export interface AudienceCard {
@@ -67,10 +70,16 @@ export interface PricingData {
 export interface CoursePageData {
   slug: string;
 
+  // SEO — dedicated document title, distinct from the plain DB course
+  // title (which stays as-is for admin/API use). Falls back to the DB
+  // title if not set, so this is additive-only for existing callers.
+  metaTitle?: string;
+
   // Trust badges (top of page)
   badges: string[];
 
   // Hero
+  eyebrow: string;
   headline: string;
   subHeadline: string;
   keyFacts: string[];
@@ -100,6 +109,10 @@ export interface CoursePageData {
   practicalHeading: string;
   practicalCopy: string;
   practicalFeatures: PracticalFeature[];
+  /** Real, existing course photo. Optional — falls back to the dashed
+   * placeholder when not set. */
+  practicalMediaUrl?: string;
+  practicalMediaAlt?: string;
 
   // Qualification OR Endorsements — one or the other per course
   showQualification: boolean;
@@ -146,6 +159,7 @@ const PAUL_SMITH: TutorData = {
   description:
     'Paul does not just teach Strongman — he has competed at the highest level of the sport and spent years building the coaching frameworks that underpin this course. His experience coaching through the MOD and charity sector means he understands how to develop coaches as well as athletes.',
   photoAlt: 'Paul Smith — Lead Tutor, Educate.Strong',
+  photoUrl: '/assets/paul-smith.avif',
 };
 
 const DR_CHRIS_FITZGERALD: TutorData = {
@@ -161,6 +175,7 @@ const DR_CHRIS_FITZGERALD: TutorData = {
   description:
     'Chris brings the academic framework and sports science depth that gives Educate.Strong\'s qualifications professional credibility. His research background and competition experience sit alongside each other — making the course content both evidence-based and practically grounded.',
   photoAlt: 'Dr Chris Fitzgerald — Tutor, Educate.Strong',
+  photoUrl: '/assets/chris-fitzgerald.avif',
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -173,16 +188,19 @@ export const COURSE_PAGE_DATA: Record<string, CoursePageData> = {
   'level-1-coaching-strongman': {
     slug: 'level-1-coaching-strongman',
 
+    metaTitle: 'Strongman Coaching Course UK — Level 1 Qualification',
+
     badges: ['Active IQ Accredited', 'Level 1 Qualification', 'No Prerequisites Required'],
 
-    headline: 'Learn to Coach Strongman from the People Who Shaped the Sport',
+    eyebrow: 'Coaching Pathway',
+    headline: 'Become a Qualified Strongman Coach',
     subHeadline:
-      'The UK\'s original Strongman coaching qualification — practical, accredited, and built for coaches who want to do it properly.',
-    keyFacts: ['Two-day in-person course', 'Maximum 10 participants', 'Active IQ accredited'],
+      'Level 1 Fundamentals of Coaching Strongman is an Active IQ accredited qualification built specifically for the sport — awkward-object loading, carry mechanics and safe progression that a general strength coaching course doesn\'t cover.',
+    keyFacts: ['Two-day in-person course', 'Maximum 10 participants', 'Active IQ accredited', '£500 total course fee'],
 
-    whyHeading: 'The UK\'s Original Strongman Coaching Course',
+    whyHeading: 'Why Strongman Coaching Is Different',
     whyCopy:
-      'Strongman is one of the most technically varied strength sports. Coaching it well requires specialist knowledge — not just of technique, but of how to teach awkward-object loading, carry mechanics, and overhead pressing to beginners safely. This course gives coaches that knowledge in a structured, practical, accredited format. No other Strongman coaching qualification in the UK has the history, the tutors, or the accreditation that this one does.',
+      'Strongman is one of the most technically varied strength sports. Coaching it well requires specialist knowledge — not just of technique, but of how to teach awkward-object loading, carry mechanics, and overhead pressing to beginners safely. This course gives coaches that knowledge in a structured, practical, Active IQ accredited format, taught by tutors who compete in the sport themselves.',
 
     tutors: [PAUL_SMITH, DR_CHRIS_FITZGERALD],
 
@@ -203,7 +221,7 @@ export const COURSE_PAGE_DATA: Record<string, CoursePageData> = {
     prerequisiteStatement:
       'No previous coaching qualifications are required. Participants should have a background in strength training and be confident in a gym environment.',
 
-    curriculumHeading: 'Six Core Events. Taught Properly.',
+    curriculumHeading: 'Six Core Events. Taught in Depth.',
     curriculumIntro:
       'The course covers the six events that form the foundation of Strongman competition. For each one, you will learn not just the technique, but how to teach it — how to break it down, identify faults, apply coaching cues, and progress a beginner safely.',
     curriculumItems: [
@@ -246,6 +264,8 @@ export const COURSE_PAGE_DATA: Record<string, CoursePageData> = {
     practicalHeading: 'Practical. Hands-On. No Classroom Theory Without Application.',
     practicalCopy:
       'This is not a lecture course. The two-day programme is structured around coaching on the gym floor — with real athletes, real implements, and real scenarios. You will coach, receive coaching, be observed, and be challenged. Every participant gets direct time with Paul and Chris, which is why the group size is deliberately kept to a maximum of ten.',
+    practicalMediaUrl: '/assets/coaching-l1-cover.webp',
+    practicalMediaAlt: 'Level 1 Fundamentals of Coaching Strongman — practical coaching delivery',
     practicalFeatures: [
       {
         label: 'Hands-On Coaching',
@@ -315,6 +335,10 @@ export const COURSE_PAGE_DATA: Record<string, CoursePageData> = {
         answer: 'Comfortable training clothing and footwear appropriate for a gym floor. Full logistics and preparation details will be included in your pre-course materials.',
       },
       {
+        question: 'How am I assessed on this course?',
+        answer: 'There is no separate written exam. You are assessed through practical observation across both days — coaching real athletes on real events under Paul and Chris\'s supervision.',
+      },
+      {
         question: 'Is the Saturday evening dinner included in the course fee?',
         answer: 'Lunch on both days is included in the course fee. The Saturday evening is an optional informal social and is not included — it is a chance to continue conversations with fellow coaches.',
       },
@@ -335,12 +359,15 @@ export const COURSE_PAGE_DATA: Record<string, CoursePageData> = {
   'level-1-strongman-refereeing': {
     slug: 'level-1-strongman-refereeing',
 
+    metaTitle: 'Strongman Referee Course UK — Level 1 Refereeing Qualification',
+
     badges: ['Endorsed by WHEA.GB', 'Armed Forces Strongman', 'Level 1 Certification'],
 
-    headline: 'Become a Trusted Official in Strongman Competition',
+    eyebrow: 'Refereeing Pathway',
+    headline: 'Become a Certified Strongman Referee',
     subHeadline:
-      'The first formal Strongman refereeing certification in the UK — practical, endorsed, and built around the standards the sport deserves.',
-    keyFacts: ['One-day in-person certification', 'Live practical drills', 'No refereeing experience required'],
+      'Level 1 Strongman Refereeing is a practical certification built around consistent, confident officiating — covering event rules, live judging drills, and the standards competitions and athletes rely on.',
+    keyFacts: ['One-day in-person certification', 'Live practical drills', 'No refereeing experience required', '£250 total course fee'],
 
     whyHeading: 'The Standard Strongman Competition Deserves',
     whyCopy:
@@ -404,6 +431,8 @@ export const COURSE_PAGE_DATA: Record<string, CoursePageData> = {
     practicalHeading: 'A Day Spent Making Calls, Not Just Taking Notes',
     practicalCopy:
       'The certification is structured to put knowledge into practice as quickly as possible. A significant portion of the day is spent on the gym floor — making real judging decisions, handling equipment, and applying rules in live scenarios. Confidence in a refereeing role comes from having made calls under pressure, and this course is designed to give you that experience in a supported environment.',
+    practicalMediaUrl: '/assets/refereeing-l1-content.webp',
+    practicalMediaAlt: 'Level 1 Strongman Refereeing — practical officiating delivery',
     practicalFeatures: [
       {
         label: 'Live Decision Making',
@@ -479,6 +508,10 @@ export const COURSE_PAGE_DATA: Record<string, CoursePageData> = {
       {
         question: 'What do I need to bring?',
         answer: 'Comfortable clothing and footwear appropriate for a gym environment, and a working knowledge of Strongman event rules. Full logistics details will be included with your booking confirmation.',
+      },
+      {
+        question: 'How am I assessed on this certification?',
+        answer: 'You are assessed through the live practical drills on the day — making real officiating calls under supervision. There is no separate written exam.',
       },
       {
         question: 'Will I be able to officiate at competitions immediately after completing the course?',

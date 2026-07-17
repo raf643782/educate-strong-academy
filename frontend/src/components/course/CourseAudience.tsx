@@ -8,7 +8,7 @@ interface CourseAudienceProps {
 export default function CourseAudience({ cards, prerequisiteStatement }: CourseAudienceProps) {
   return (
     <section style={{ background: '#050506', borderBottom: '1px solid rgba(194,24,106,0.08)' }} className="py-14 md:py-18">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="es-container-wide">
         <p className="es-label mb-3">Who Should Attend</p>
         <h2 className="text-2xl md:text-3xl font-black text-white mb-8" style={{ letterSpacing: '-0.03em' }}>Who This Is For</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-6">

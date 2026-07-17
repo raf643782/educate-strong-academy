@@ -11,7 +11,7 @@ export default function CourseLearningOutcomes({ heading, intro, outcomes }: Cou
       borderBottom: '1px solid rgba(194,24,106,0.08)',
       position: 'relative',
     }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-18">
+      <div className="es-container-wide py-14 md:py-18">
         <div className="max-w-3xl">
           <p className="es-label mb-2">Outcomes</p>
           <h2 className="text-2xl md:text-3xl font-black text-white mb-2" style={{ letterSpacing: '-0.03em' }}>{heading}</h2>

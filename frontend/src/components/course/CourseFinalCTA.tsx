@@ -15,7 +15,7 @@ export default function CourseFinalCTA({ courseTitle, contactEmail, interestType
       background: 'radial-gradient(ellipse 70% 60% at 50% 50%, rgba(164,28,100,0.22) 0%, transparent 65%), #050506',
       position: 'relative',
     }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+      <div className="es-container-wide py-16 md:py-20">
         <div className="max-w-2xl">
           <h2 className="text-2xl md:text-3xl font-black text-white mb-3" style={{ letterSpacing: '-0.03em' }}>Ready to Take the Next Step?</h2>
           <p className="text-es-muted mb-2">Spaces are limited. Contact Educate.Strong to secure your place.</p>

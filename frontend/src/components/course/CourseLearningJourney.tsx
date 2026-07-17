@@ -2,12 +2,24 @@ import type { JourneyStep } from '../../data/coursePageData';
 
 interface CourseLearningJourneyProps {
   steps: JourneyStep[];
+  /**
+   * Real enrolment status (see CourseDetail's `/courses/:slug/enrolled`
+   * check) — not fabricated progress. An enrolled learner has, by
+   * definition, already registered interest and received course
+   * information, so those first two steps can honestly show as reached.
+   * Later steps (attendance, assessment, qualification) have no reliable
+   * signal available, so they stay neutral rather than guessed at.
+   */
+  isEnrolled?: boolean;
 }
 
-export default function CourseLearningJourney({ steps }: CourseLearningJourneyProps) {
+export default function CourseLearningJourney({ steps, isEnrolled }: CourseLearningJourneyProps) {
+  const reachedCount = isEnrolled ? Math.min(2, steps.length) : 1;
+  const stepState = (idx: number) => (idx < reachedCount ? 'reached' : 'pending');
+
   return (
     <section className="es-grit" style={{ background: '#050506', borderBottom: '1px solid rgba(194,24,106,0.08)', position: 'relative' }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+      <div className="es-container-wide py-14">
         <p className="es-label mb-3">The Process</p>
         <h2 className="text-2xl font-black text-white mb-10" style={{ letterSpacing: '-0.03em' }}>Your Learning Journey</h2>
 
@@ -18,8 +30,14 @@ export default function CourseLearningJourney({ steps }: CourseLearningJourneyPr
               <div className="flex-1 pr-4">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs font-black"
-                    style={{ background: idx === 0 ? '#A41C64' : '#1B1B20' }}>
-                    {idx + 1}
+                    style={{ background: stepState(idx) === 'reached' ? '#A41C64' : '#1B1B20' }}>
+                    {stepState(idx) === 'reached' && idx < reachedCount - 1 ? (
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : (
+                      idx + 1
+                    )}
                   </div>
                   {idx < steps.length - 1 && <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, #A41C64, rgba(255,255,255,0.06))' }} />}
                 </div>
@@ -36,7 +54,7 @@ export default function CourseLearningJourney({ steps }: CourseLearningJourneyPr
             <div key={step.label} className="flex gap-4">
               <div className="flex flex-col items-center">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-black flex-shrink-0"
-                  style={{ background: idx === 0 ? '#A41C64' : '#1B1B20' }}>
+                  style={{ background: stepState(idx) === 'reached' ? '#A41C64' : '#1B1B20' }}>
                   {idx + 1}
                 </div>
                 {idx < steps.length - 1 && <div className="w-px flex-1 my-1" style={{ background: '#1B1B20' }} />}

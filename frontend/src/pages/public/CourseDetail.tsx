@@ -91,8 +91,9 @@ export default function CourseDetail() {
   const richData = slug ? COURSE_PAGE_DATA[slug] : undefined;
 
   useDocumentHead({
-    title: course?.title || richData?.headline || 'Course',
+    title: richData?.metaTitle || course?.title || richData?.headline || 'Course',
     description: richData?.subHeadline || course?.summary || course?.description,
+    canonical: slug ? `https://educate-strong-academy.vercel.app/courses/${slug}` : undefined,
   });
 
   const loadCourse = () => {
@@ -128,6 +129,61 @@ export default function CourseDetail() {
       .then(res => setEnrolled(res.data.enrolled))
       .catch(() => {});
   }, [isAuthenticated, slug]);
+
+  // Course + FAQPage + BreadcrumbList structured data — only for the rich
+  // marketing pages, only built from data that's actually visible on the
+  // page (real price, real published FAQs, the real breadcrumb above the
+  // hero). Scoped and removed on unmount/navigation so it never leaks.
+  useEffect(() => {
+    if (!richData || !course) return;
+    const scriptId = 'course-schema';
+    const url = `https://educate-strong-academy.vercel.app/courses/${richData.slug}`;
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = scriptId;
+    script.text = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'Course',
+          name: course.title,
+          description: richData.subHeadline,
+          provider: {
+            '@type': 'Organization',
+            name: 'Educate Strong Academy',
+            sameAs: 'https://educate-strong-academy.vercel.app/',
+          },
+          url,
+          offers: {
+            '@type': 'Offer',
+            price: richData.pricing.totalFee,
+            priceCurrency: 'GBP',
+            url,
+            availability: 'https://schema.org/InStock',
+          },
+        },
+        {
+          '@type': 'FAQPage',
+          mainEntity: richData.faqs.map((f) => ({
+            '@type': 'Question',
+            name: f.question,
+            acceptedAnswer: { '@type': 'Answer', text: f.answer },
+          })),
+        },
+        {
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Courses', item: 'https://educate-strong-academy.vercel.app/courses' },
+            { '@type': 'ListItem', position: 2, name: course.title, item: url },
+          ],
+        },
+      ],
+    });
+    document.head.appendChild(script);
+    return () => {
+      document.getElementById(scriptId)?.remove();
+    };
+  }, [richData, course]);
 
   const toggleModule = (moduleId: string) => {
     setOpenModules((prev) => {
@@ -197,11 +253,23 @@ export default function CourseDetail() {
   // ── RICH MARKETING PAGE (courses with static data) ────────────────────────
   if (richData) {
     return (
-      <div className="min-h-screen flex flex-col" id="course-details" style={{ background: '#050506' }}>
+      <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
         <Navbar />
+
+        {/* Breadcrumb — also the internal link back to the course catalogue */}
+        <nav aria-label="Breadcrumb" className="pt-navbar" style={{ background: '#050506' }}>
+          <div className="es-container-wide pt-4">
+            <ol className="flex items-center gap-2 text-xs" style={{ color: '#75757D' }}>
+              <li><Link to="/courses" className="hover:text-white transition-colors">Courses</Link></li>
+              <li aria-hidden="true">/</li>
+              <li aria-current="page" className="text-white/70">{course.title}</li>
+            </ol>
+          </div>
+        </nav>
 
         {/* 1 — 2: Trust badges + Hero */}
         <CourseHero
+          eyebrow={richData.eyebrow}
           badges={richData.badges}
           headline={richData.headline}
           subHeadline={richData.subHeadline}
@@ -214,7 +282,7 @@ export default function CourseDetail() {
 
         {/* 3: Why this course */}
         <section style={{ background: '#050506', borderBottom: '1px solid rgba(194,24,106,0.08)' }} className="py-14 md:py-18">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="es-container-wide">
             <div className="max-w-3xl">
               <p className="es-label mb-3">Overview</p>
               <h2 className="text-2xl md:text-3xl font-black text-white mb-5" style={{ letterSpacing: '-0.03em' }}>
@@ -253,6 +321,8 @@ export default function CourseDetail() {
           heading={richData.practicalHeading}
           copy={richData.practicalCopy}
           features={richData.practicalFeatures}
+          mediaUrl={richData.practicalMediaUrl}
+          mediaAlt={richData.practicalMediaAlt}
         />
 
         {/* 9: Qualification OR Endorsements */}
@@ -291,10 +361,53 @@ export default function CourseDetail() {
         />
 
         {/* 12: Learning journey */}
-        <CourseLearningJourney steps={richData.journeySteps} />
+        <CourseLearningJourney steps={richData.journeySteps} isEnrolled={enrolled} />
 
         {/* 13: FAQ */}
         <CourseFAQ faqs={richData.faqs} />
+
+        {/* 13.5: Continue exploring — internal links into the rest of the Academy */}
+        <section style={{ background: '#050506', borderBottom: '1px solid rgba(194,24,106,0.08)' }} className="py-14">
+          <div className="es-container-wide">
+            <p className="es-label mb-3">Continue Exploring</p>
+            <h2 className="text-xl font-black text-white mb-6">
+              {richData.slug === 'level-1-strongman-refereeing' ? 'Related Rules, Judging and Coaching Resources' : 'Related Pathways and Resources'}
+            </h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {(richData.slug === 'level-1-strongman-refereeing'
+                ? [
+                    { label: 'Course Catalogue', to: '/courses', desc: 'Browse every Educate Strong course and certification.' },
+                    { label: 'Event Library', to: '/events', desc: 'How each Strongman event works, event by event.' },
+                    { label: 'Rules Vary: How Strongman Judging Standards Work', to: '/knowledge/rules-vary-strongman-judging', desc: 'Knowledge Hub article on judging consistency.' },
+                    { label: 'Good Lift vs No Lift', to: '/knowledge/good-lift-vs-no-lift', desc: 'Developing consistent officiating decisions.' },
+                    { label: 'Understanding Lockout Criteria', to: '/knowledge/understanding-lockout-criteria', desc: 'Lockout standards across different events.' },
+                    { label: 'Coaching Pathway', to: '/coaching', desc: 'See the full coaching qualification pathway.' },
+                    { label: 'About and Our Tutors', to: '/about', desc: "Meet the people delivering this certification." },
+                  ]
+                : [
+                    { label: 'Coaching Pathway', to: '/coaching', desc: 'See Level 1 in context, including Level 2 and Level 3 progression.' },
+                    { label: 'Course Catalogue', to: '/courses', desc: 'Browse every Educate Strong course and certification.' },
+                    { label: 'Exercise Library', to: '/exercises', desc: 'Technique breakdowns for individual lifts and events.' },
+                    { label: 'Event Library', to: '/events', desc: 'How each Strongman event works, event by event.' },
+                    { label: 'Teaching the Hip Hinge', to: '/knowledge/teaching-the-hip-hinge', desc: "A coach's framework from the Knowledge Hub." },
+                    { label: 'Risk Assessment for Strongman Environments', to: '/knowledge/risk-assessment-strongman-environments', desc: 'Safety planning for coaching sessions.' },
+                    { label: 'EatStrong', to: '/eatstrong', desc: 'Performance nutrition education for coaches and athletes.' },
+                    { label: 'About and Our Tutors', to: '/about', desc: 'Meet the people delivering this qualification.' },
+                  ]
+              ).map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className="es-card p-4 block transition-colors hover:border-es-accent"
+                  style={{ borderColor: 'rgba(255,255,255,0.08)' }}
+                >
+                  <p className="font-semibold text-white text-sm mb-1">{link.label}</p>
+                  <p className="text-xs text-es-subtle leading-relaxed">{link.desc}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
 
         {/* 14: Final CTA */}
         <CourseFinalCTA
@@ -310,7 +423,7 @@ export default function CourseDetail() {
         {/* LMS module accordion */}
         {course.modules.length > 0 && (
           <section style={{ background: '#0A0A0D', borderTop: '1px solid rgba(194,24,106,0.08)' }} className="py-14">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="es-container-wide">
               <div className="max-w-3xl">
                 <div className="flex items-start justify-between gap-4 mb-6">
                   <div>
@@ -341,6 +454,8 @@ export default function CourseDetail() {
                     >
                       <button
                         onClick={() => toggleModule(mod.id)}
+                        aria-expanded={openModules.has(mod.id)}
+                        aria-controls={`module-panel-${mod.id}`}
                         className="w-full flex items-center justify-between p-4 text-left hover:bg-es-card transition-colors"
                       >
                         <div className="flex items-center gap-3">
@@ -355,6 +470,7 @@ export default function CourseDetail() {
                           </div>
                         </div>
                         <svg
+                          aria-hidden="true"
                           className={`w-4 h-4 text-es-subtle transition-transform ${
                             openModules.has(mod.id) ? 'rotate-180' : ''
                           }`}
@@ -371,7 +487,7 @@ export default function CourseDetail() {
                         </svg>
                       </button>
                       {openModules.has(mod.id) && (
-                        <div className="divide-y divide-es-grey-dark">
+                        <div id={`module-panel-${mod.id}`} className="divide-y divide-es-grey-dark">
                           {mod.lessons.map((lesson) => (
                             <div
                               key={lesson.id}
@@ -507,6 +623,8 @@ export default function CourseDetail() {
               <div key={mod.id} className="es-card overflow-hidden">
                 <button
                   onClick={() => toggleModule(mod.id)}
+                  aria-expanded={openModules.has(mod.id)}
+                  aria-controls={`module-panel-fallback-${mod.id}`}
                   className="w-full flex items-center justify-between p-4 text-left hover:bg-es-card transition-colors"
                 >
                   <div className="flex items-center gap-3">
@@ -521,6 +639,7 @@ export default function CourseDetail() {
                     </div>
                   </div>
                   <svg
+                    aria-hidden="true"
                     className={`w-4 h-4 text-es-subtle transition-transform ${
                       openModules.has(mod.id) ? 'rotate-180' : ''
                     }`}
@@ -532,7 +651,7 @@ export default function CourseDetail() {
                   </svg>
                 </button>
                 {openModules.has(mod.id) && (
-                  <div className="divide-y divide-es-grey-dark">
+                  <div id={`module-panel-fallback-${mod.id}`} className="divide-y divide-es-grey-dark">
                     {mod.lessons.map((lesson) => (
                       <div key={lesson.id} className="flex items-center justify-between px-5 py-3">
                         <span className="text-sm text-es-muted">{lesson.title}</span>

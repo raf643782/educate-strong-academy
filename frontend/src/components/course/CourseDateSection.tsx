@@ -13,7 +13,7 @@ export default function CourseDateSection({ heading, copy, subCopy, interestType
   const registerHref = `/register-interest?type=${encodeURIComponent(interestType)}`;
   return (
     <section style={{ background: '#050506', borderBottom: '1px solid rgba(194,24,106,0.08)' }} className="py-14">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="es-container-wide">
         <div className="max-w-2xl">
           <p className="es-label mb-3">Dates</p>
           <h2 className="text-2xl font-black text-white mb-5" style={{ letterSpacing: '-0.03em' }}>{heading}</h2>

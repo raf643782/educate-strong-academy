@@ -2,6 +2,7 @@ import CourseBadgeRow from './CourseBadgeRow';
 import { Link } from 'react-router-dom';
 
 interface CourseHeroProps {
+  eyebrow: string;
   badges: string[];
   headline: string;
   subHeadline: string;
@@ -13,7 +14,7 @@ interface CourseHeroProps {
 }
 
 export default function CourseHero({
-  badges, headline, subHeadline, keyFacts, contactEmail, interestType,
+  eyebrow, badges, headline, subHeadline, keyFacts, contactEmail, interestType,
   isEnrolled, firstLessonUrl,
 }: CourseHeroProps) {
   const registerInterestHref = `/register-interest?type=${encodeURIComponent(interestType)}`;
@@ -25,7 +26,6 @@ export default function CourseHero({
         background: 'radial-gradient(ellipse 110% 75% at 50% -10%, rgba(164,28,100,0.28) 0%, transparent 56%), radial-gradient(ellipse 55% 55% at 4% 80%, rgba(194,24,106,0.08) 0%, transparent 52%), #050506',
         borderBottom: '1px solid rgba(194,24,106,0.08)',
         position: 'relative',
-        paddingTop: '64px',
       }}
     >
       {/* Grid texture */}
@@ -34,8 +34,9 @@ export default function CourseHero({
         backgroundSize: '48px 48px',
       }} />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 relative z-10">
+      <div className="es-container-wide py-20 md:py-28 relative z-10">
         <div className="max-w-3xl">
+          <p className="es-label mb-4">{eyebrow}</p>
           <div className="mb-6">
             <CourseBadgeRow badges={badges} />
           </div>

@@ -10,7 +10,7 @@ export default function CourseCurriculumGrid({ heading, intro, items }: CourseCu
   return (
     <section className="es-grit" style={{ background: '#050506', borderBottom: '1px solid rgba(194,24,106,0.08)', position: 'relative' }}
       id="course-details">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-18">
+      <div className="es-container-wide py-14 md:py-18">
         <div className="mb-10 max-w-2xl">
           <p className="es-label mb-2">Curriculum</p>
           <h2 className="text-2xl md:text-3xl font-black text-white mb-3" style={{ letterSpacing: '-0.03em' }}>{heading}</h2>

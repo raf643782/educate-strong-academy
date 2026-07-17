@@ -30,7 +30,7 @@ const BLOCKS: { heading: string; copy: string }[] = [
 export default function CourseAccessOverview({ interestType }: CourseAccessOverviewProps) {
   return (
     <section style={{ background: '#050506', borderBottom: '1px solid rgba(194,24,106,0.08)' }} className="py-14 md:py-18">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="es-container-wide">
         <div className="max-w-3xl">
           <p className="es-label mb-3">How access works</p>
           <h2 className="text-2xl md:text-3xl font-black text-white mb-5" style={{ letterSpacing: '-0.03em' }}>
