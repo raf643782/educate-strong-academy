@@ -294,7 +294,7 @@ export default function CourseDetail() {
         </section>
 
         {/* 4: Tutors — high up for credibility */}
-        <CourseTutors tutors={richData.tutors} />
+        <CourseTutors heading={richData.tutorsHeading} tutors={richData.tutors} />
 
         {/* 5: Who this is for */}
         <CourseAudience
@@ -358,6 +358,7 @@ export default function CourseDetail() {
           contactEmail={richData.contactEmail}
           courseTitle={richData.pricing.title}
           interestType={interestType}
+          courseSlug={richData.slug === 'level-1-coaching-strongman' ? richData.slug : undefined}
         />
 
         {/* 12: Learning journey */}

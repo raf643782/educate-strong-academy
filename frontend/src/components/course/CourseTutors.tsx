@@ -1,12 +1,12 @@
 import type { TutorData } from '../../data/coursePageData';
 
 interface CourseTutorsProps {
-  heading?: string;
+  heading: string;
   intro?: string;
   tutors: TutorData[];
 }
 
-export default function CourseTutors({ heading = 'Taught by Coaches With the Record to Back It', intro, tutors }: CourseTutorsProps) {
+export default function CourseTutors({ heading, intro, tutors }: CourseTutorsProps) {
   return (
     <section style={{ background: '#050506', borderBottom: '1px solid rgba(194,24,106,0.08)' }} className="py-14 md:py-18">
       <div className="es-container-wide">

@@ -30,6 +30,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../lib/api';
 import { COURSE_PAGE_DATA } from '../../data/coursePageData';
+import { hasValidCoords as hasValidCoordsPair, VenueMap } from '../../lib/cohortMap';
 
 interface CohortCourse {
   id: string;
@@ -90,36 +91,7 @@ function pickFeaturedCohort(cohorts: Cohort[]): Cohort | null {
 }
 
 function hasValidCoords(cohort: Cohort): cohort is Cohort & { latitude: number; longitude: number } {
-  return (
-    typeof cohort.latitude === 'number' && typeof cohort.longitude === 'number' &&
-    Number.isFinite(cohort.latitude) && Number.isFinite(cohort.longitude) &&
-    cohort.latitude >= -90 && cohort.latitude <= 90 && cohort.longitude >= -180 && cohort.longitude <= 180
-  );
-}
-
-function VenueMap({ latitude, longitude, label }: { latitude: number; longitude: number; label: string }) {
-  const [failed, setFailed] = useState(false);
-  const span = 0.01;
-  const bbox = `${longitude - span},${latitude - span},${longitude + span},${latitude + span}`;
-  const src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${latitude},${longitude}`;
-
-  if (failed) {
-    return (
-      <div className="flex items-center justify-center" style={{ minHeight: 220, background: 'rgba(255,255,255,0.03)' }}>
-        <p className="text-xs text-white/35 px-6 text-center">Map unavailable right now — see the address and directions link above.</p>
-      </div>
-    );
-  }
-
-  return (
-    <iframe
-      title={`Map showing ${label}`}
-      src={src}
-      style={{ border: 0, width: '100%', minHeight: 220 }}
-      loading="lazy"
-      onError={() => setFailed(true)}
-    />
-  );
+  return hasValidCoordsPair(cohort.latitude, cohort.longitude);
 }
 
 export default function UpcomingCohortSpotlight() {
