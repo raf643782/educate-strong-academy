@@ -215,7 +215,7 @@ export default function Home() {
             >
               Learn Strongman.
               <br />
-              <span style={{ color: '#A41C64' }}>Build Real Strength.</span>
+              <span style={{ color: '#A41C64', letterSpacing: '-0.02em' }}>Build Strength.</span>
               <br />
               Pass It On.
             </h1>
@@ -225,8 +225,8 @@ export default function Home() {
               style={{ fontSize: 'clamp(1rem, 1.5vw, 1.125rem)', maxWidth: '420px' }}
             >
               Educate Strong brings coaching, refereeing, youth development and performance
-              nutrition together under one Strongman Academy. Whatever brought you here — training,
-              coaching, officiating, or supporting a young athlete — there's a place to start.
+              nutrition together in one Strongman Academy. Whether you are here to train, coach or
+              officiate, or you are a parent exploring StrongKidz, there is a clear place to begin.
             </p>
 
             {/* Accreditation pills */}

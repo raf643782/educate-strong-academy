@@ -223,14 +223,14 @@ export default function KnowledgeHubPreview() {
               letterSpacing: '-0.035em',
             }}
           >
-            Strongman Training, Explained
+            Strongman, Explained
           </h2>
           <p className="text-[#B8B8BE] leading-relaxed">
-            Good coaching starts with good information. The Knowledge Hub covers programming, safe
-            practice and competition preparation. The Exercise Library breaks individual lifts down
-            into technique, common mistakes and coaching cues. The Event Library explains how each
-            competition event works, how it is judged, and how to train for it. Together they are
-            built for coaches and athletes, and open to anyone learning Strongman for the first time.
+            Strongman rewards technical understanding at every stage, from a first session onwards.
+            The Knowledge Hub, Exercise Library and Event Library deepen that understanding,
+            covering programming, lifting technique, movement execution, competition rules and
+            judging. Built for athletes, coaches and officials alike, they help you keep learning,
+            refining and progressing.
           </p>
         </div>
 

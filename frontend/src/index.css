@@ -553,7 +553,14 @@
   .es-tutor-bio-panel {
     position: absolute;
     inset: auto 0 0 0;
-    max-height: 100%;
+    /* Capped so a meaningful part of the photo stays visible even at the
+       narrowest (five-column, ~249px-wide card) desktop tier. Measured
+       against the shortest realistic tutor content (a ~35 word bio + 3
+       short credentials, ~77% of the image height at that card width):
+       a 60% cap still forced a scrollbar there, so this is set just
+       above the minimum that fits real content without scrolling —
+       overflow-y stays as a fallback only, not the normal path. */
+    max-height: 80%;
     overflow-y: auto;
     background: linear-gradient(180deg, rgba(8,8,10,0.35) 0%, rgba(8,8,10,0.94) 26%, rgba(6,6,8,0.98) 100%);
     padding: 16px 14px 14px;
@@ -573,6 +580,10 @@
     background: none; border: none; padding: 0; margin-top: 8px; cursor: pointer;
   }
   .es-tutor-bio-toggle:focus-visible {
+    outline: 2px solid var(--es-magenta); outline-offset: 3px; border-radius: 2px;
+  }
+
+  .es-inline-link:focus-visible {
     outline: 2px solid var(--es-magenta); outline-offset: 3px; border-radius: 2px;
   }
 

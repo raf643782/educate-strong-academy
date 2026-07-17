@@ -33,8 +33,6 @@ const TUTORS: Tutor[] = [
     bio: 'Paul brings decades of elite competition and coaching experience to every qualification he delivers. His record speaks for itself — but what makes him exceptional as an educator is the ability to translate that experience into practical, teachable coaching frameworks.',
     credentials: [
       "3× UK's Strongest Man",
-      'Junior UK and World Champion',
-      "4× England's Strongest Man",
       "World's Strongest Man competitor",
       'Coached multiple national and international champions',
     ],
@@ -51,8 +49,6 @@ const TUTORS: Tutor[] = [
       'PhD in Health — published researcher',
       "Natural World's Strongest Man athlete",
       'Multiple national Strongman titles',
-      'Over a decade with Mind Body Connect charity',
-      'Extensive MOD coaching experience',
     ],
   },
   {
@@ -66,9 +62,7 @@ const TUTORS: Tutor[] = [
     credentials: [
       "Natural World's Strongest Man 2024 — Under 90kg — Bronze",
       "UK & Ireland's Strongest Man 2024 — Under 90kg — Silver",
-      'Wales Strongest Man 2024 — Under 90kg — Gold',
       'Digital strategy and media production',
-      'Education platform development',
     ],
   },
   {
@@ -81,8 +75,6 @@ const TUTORS: Tutor[] = [
     bio: 'Laura co-founded StrongKidz with a belief that building physical confidence in young people changes how they see themselves — in the gym and everywhere else. Her competition background and coaching approach make her one of the most compelling youth strength educators in the UK.',
     credentials: [
       "Britain's Strongest Woman u73",
-      "Europe's Strongest Woman u73",
-      'International Strongwoman podiums',
       'StrongKidz co-founder',
       'Youth strength development specialist',
     ],
@@ -99,7 +91,6 @@ const TUTORS: Tutor[] = [
       'Strength and Conditioning Coach',
       'Youth development specialist',
       'Powerlifting, weightlifting, and strongwoman competitor',
-      'Former Sheffield Steel Roller Derby captain',
     ],
   },
 ];
@@ -190,9 +181,9 @@ export default function TutorCredibilityStrip() {
     >
       <div className="es-container-wide">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
+        <div className="mb-10">
           <div style={{ maxWidth: '640px' }}>
-            <p className="es-label mb-3">Tutor Credibility</p>
+            <p className="es-label mb-3">Experience Behind the Academy</p>
             <h2
               id="tutors-heading"
               className="font-black text-[#F5F5F7] leading-tight mb-4"
@@ -201,26 +192,22 @@ export default function TutorCredibilityStrip() {
                 letterSpacing: '-0.035em',
               }}
             >
-              Taught by Competitors and Coaches
+              Learn From People Who Know the Sport
             </h2>
             <p className="text-[#B8B8BE] leading-relaxed" style={{ maxWidth: '580px' }}>
-              Every course at Educate Strong is delivered by people who compete and coach at a
-              serious level, not simply study it. Lead tutor Paul Smith has won UK's Strongest Man
-              three times and has spent years coaching other coaches through the armed forces and
-              charity sector. Dr Chris Fitzgerald pairs a PhD in Health with his own competition
-              record as a natural World's Strongest Man athlete. Kris Herbert, a Natural World's
-              Strongest Man 2024 bronze medallist, leads the Academy's digital and media platform.
-              Laura Hollywood and Victoria Wilson lead StrongKidz coaching, each with their own
-              competition background.
+              Educate Strong is delivered by coaches, competitors and educators with practical
+              experience across Strongman. Together, they bring years of competition, coaching and
+              professional expertise to the courses, technical resources and learning pathways
+              across the Academy. Explore their backgrounds and the knowledge they contribute.
             </p>
+            <Link
+              to="/about"
+              className="es-inline-link text-sm font-semibold inline-block mt-4 transition-colors duration-200 hover:text-[#C2186A]"
+              style={{ color: '#75757D' }}
+            >
+              Meet the Team
+            </Link>
           </div>
-          <Link
-            to="/about"
-            className="text-sm font-semibold whitespace-nowrap transition-colors duration-200 hover:text-[#C2186A]"
-            style={{ color: '#75757D' }}
-          >
-            Meet the Full Team →
-          </Link>
         </div>
 
         {/* Tutor grid — portrait cards, mandatory order, biography panel per card */}
