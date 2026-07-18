@@ -23,7 +23,13 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem('es_token'));
+  // Guarded for server-side rendering (the build-time prerender step for
+  // public Exercise/Event pages renders this provider in Node, where
+  // localStorage doesn't exist). Real browser behaviour is unchanged —
+  // window is always defined there, so this always reads the real token.
+  const [token, setToken] = useState<string | null>(
+    typeof window !== 'undefined' ? localStorage.getItem('es_token') : null
+  );
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

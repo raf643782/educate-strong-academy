@@ -7,11 +7,23 @@
       "config": {
         "distDir": "dist"
       }
+    },
+    {
+      "src": "api/**/*.mjs",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "handle": "filesystem"
+    },
+    {
+      "src": "/exercises/([^/]+)",
+      "dest": "/api/library-not-found.mjs?type=exercise&slug=$1"
+    },
+    {
+      "src": "/events/([^/]+)",
+      "dest": "/api/library-not-found.mjs?type=event&slug=$1"
     },
     {
       "src": "/(.*)",

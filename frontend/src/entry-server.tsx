@@ -2,17 +2,23 @@
  * Build-time-only SSR entry, used exclusively by scripts/prerender.mjs
  * to produce static HTML snapshots for public Exercise/Event pages.
  *
- * This is intentionally NOT the app's client entry (main.tsx is
- * unchanged) and does NOT render Navbar/Footer/AuthProvider — those
- * depend on browser-only APIs (localStorage, in AuthContext) that don't
- * exist in this Node build. It renders only the unique per-page content
- * (breadcrumb, H1, technique/rules, related links) that a crawler or
- * unfurler needs — the client bundle renders the full page with
- * navigation chrome immediately after, exactly as it does for every
- * other route today.
+ * This is NOT the app's client entry (main.tsx is unchanged — every
+ * route, including these two, still mounts client-side via a plain
+ * `createRoot().render()`, exactly as before). This entry renders the
+ * real public page shell — Navbar, the page's own content, Footer —
+ * wrapped in the real AuthProvider so the real Navbar component can be
+ * reused as-is (no separate/duplicated navigation implementation).
+ *
+ * AuthContext's initial token read is guarded (`typeof window !==
+ * 'undefined'`) so it renders its logged-out state here instead of
+ * throwing on the missing `localStorage` — real browser behaviour is
+ * unchanged, since `window` always exists there.
  */
 import { renderToStaticMarkup } from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom/server';
+import { AuthProvider } from './context/AuthContext';
+import Navbar from './components/layout/Navbar';
+import Footer from './components/layout/Footer';
 import { ExerciseDetailContent, type Exercise } from './pages/exercises/ExerciseDetail';
 import { EventDetailContent, type Event } from './pages/events/EventDetail';
 import { buildExerciseMeta, buildEventMeta, type PageMeta } from './lib/libraryMeta';
@@ -35,7 +41,7 @@ interface EventRenderInput {
 }
 
 export function render(input: ExerciseRenderInput | EventRenderInput): { html: string; meta: PageMeta } {
-  const body =
+  const content =
     input.type === 'exercise' ? (
       <ExerciseDetailContent
         exercise={input.exercise}
@@ -51,7 +57,15 @@ export function render(input: ExerciseRenderInput | EventRenderInput): { html: s
     );
 
   const html = renderToStaticMarkup(
-    <StaticRouter location={input.url}>{body}</StaticRouter>
+    <StaticRouter location={input.url}>
+      <AuthProvider>
+        <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
+          <Navbar />
+          <main className="flex-1">{content}</main>
+          <Footer />
+        </div>
+      </AuthProvider>
+    </StaticRouter>
   );
 
   const meta = input.type === 'exercise' ? buildExerciseMeta(input.exercise) : buildEventMeta(input.event);
