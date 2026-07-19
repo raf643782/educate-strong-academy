@@ -60,6 +60,14 @@ interface NewEvent {
   technicalNotes: string;
   judgingCriteria: string;
   commonErrors: string;
+  /** Explicitly owned and left empty by this script — no sourced,
+   * competition-specific coaching/programming content exists for any
+   * of these 6 events, consistent with the Stage 4 standard that this
+   * content belongs on the Exercise page. Declared explicitly (not
+   * omitted) so the conflict check below can verify a pre-existing
+   * record hasn't been given content in a field this script owns. */
+  coachingNotes: null;
+  programmingNotes: null;
   isPublished: boolean;
   isLaunchPriority: boolean;
 }
@@ -76,7 +84,9 @@ const NEW_EVENTS: NewEvent[] = [
     judgingCriteria:
       "A flip counts only once the tyre has been pushed down and rotated fully onto its opposite face; rolling the tyre onto its side rather than flipping it end over end is not a valid rep under at least one published federation ruleset. Where the event is run over a fixed distance, the tyre must reach the finish line in a flipped position. Rules vary by federation, promoter and competition; always confirm before each event.",
     commonErrors:
-      "Rolling the tyre onto its side instead of completing a full end-over-end flip is not counted as a valid rep under at least one federation's rules. Failing to bring the tyre to a full, flat landing before the next flip is attempted can also invalidate a rep. Failing to reach the required distance or rep count within the time cap results in a partial score rather than a completion time.",
+      "Rolling the tyre onto its side instead of completing a full end-over-end flip is not counted as a valid rep under at least one federation's rules. Failing to bring the tyre to a full, flat landing before the next flip is attempted can also invalidate a rep. Failing to reach the required distance or rep count within the time cap often results in a partial score rather than a completion time, depending on the competition.",
+    coachingNotes: null,
+    programmingNotes: null,
     isPublished: true,
     isLaunchPriority: false,
   },
@@ -92,6 +102,8 @@ const NEW_EVENTS: NewEvent[] = [
       'The arm must be carried in a Zercher hold; it may not rest on the shoulders or ride at or above shoulder height under rulesets that specify this. The attempt starts the moment the arm leaves the base and ends the instant the athlete drops or loses control of it, locking in the distance covered at that point. A minimum distance is sometimes required for the attempt to score at all. Rules vary by federation, promoter and competition; always confirm before each event.',
     commonErrors:
       'Letting the arm rise up onto or above the shoulder is a fault under rulesets that specify a strict Zercher carry. Resting the implement on the belt for support is not valid where a competition restricts load-bearing to the arms. A drop outside any permitted starting tolerance ends the attempt immediately and locks in whatever distance had been covered.',
+    coachingNotes: null,
+    programmingNotes: null,
     isPublished: true,
     isLaunchPriority: false,
   },
@@ -102,26 +114,30 @@ const NEW_EVENTS: NewEvent[] = [
     description:
       'Loading Race, also called a Loading Medley, is a timed strongman event in which an athlete moves a sequence of different implements, commonly a mix of kegs, sandbags, stones, anvils or odd objects, from a start line onto a platform or truck bed, one at a time, over a set course.',
     technicalNotes:
-      'Course length, implement count and time cap vary significantly by competition and year, historically ranging from three to eight implements over distances of roughly eight to thirty five metres, with time caps typically between sixty and ninety seconds. Implements are loaded in a fixed order; competitions generally do not allow an athlete to skip a failed or unloaded implement to attempt a later one.',
+      'Course length, implement count and time cap vary significantly by competition and year, historically ranging from three to eight implements over distances of roughly eight to thirty five metres, with time caps typically between sixty and ninety seconds. Implements are commonly loaded in a fixed order, and many formats do not allow an athlete to skip a failed or unloaded implement to attempt a later one, though this depends on the competition.',
     judgingCriteria:
       'An implement is considered successfully loaded once it is fully and stably placed on the target platform or truck bed, judged to the same standard used for that implement type on its own dedicated page. If the time cap expires before all implements are loaded, the run is typically scored on implements or distance completed rather than receiving no result. Rules vary by federation, promoter and competition; always confirm before each event.',
     commonErrors:
       'Pacing the whole race poorly, for example sprinting too hard between implements and arriving too fatigued to execute a clean load on the next one, is a common way time is lost. Because skipping ahead is not permitted, failing an implement and having to reattempt it costs meaningful time against the clock.',
+    coachingNotes: null,
+    programmingNotes: null,
     isPublished: true,
     isLaunchPriority: false,
   },
   {
     name: 'Hercules Hold',
     slug: 'hercules-hold',
-    category: 'Carry Events',
+    category: 'Static Events',
     description:
       'The Hercules Hold is a static strength event in which the athlete stands on a raised platform in a fixed position and holds two weighted pillars upright using chains, one on each side of the body. Unlike carry events, the athlete does not move; the pillars pull outward under their own weight, and the contest is decided by how long the athlete can resist that pull.',
     technicalNotes:
-      'Each pillar is chained to a handle held by the athlete. Competition pillar weights vary significantly by event; there is no fixed time limit or target, and the clock runs until the athlete can no longer support both pillars.',
+      'Each pillar is chained to a handle held by the athlete. Competition pillar weights vary significantly by event. In the classic format there is no fixed time limit, and the clock runs until the athlete can no longer support both pillars, though this may vary by promoter.',
     judgingCriteria:
       'The clock starts once the athlete takes control of both handles and stops the instant the hold is broken. A hold ends when the athlete drops a handle, a pillar touches the ground, grip is lost, or the athlete otherwise loses control. Longest time under control wins. Permitted equipment commonly includes chalk, with tacky and lifting straps commonly disallowed as a matter of general practice, though this varies by federation and promoter; always confirm before each event.',
     commonErrors:
       'Losing grip on a handle, allowing a pillar to touch the ground, or losing the fixed stance all end the hold immediately and are the recorded reasons for a result in competition.',
+    coachingNotes: null,
+    programmingNotes: null,
     isPublished: true,
     isLaunchPriority: false,
   },
@@ -130,13 +146,15 @@ const NEW_EVENTS: NewEvent[] = [
     slug: 'fingals-fingers',
     category: 'Loading Events',
     description:
-      "Fingal's Fingers is a strongman flipping event. A series of five hinged poles, each heavier and longer than the last, must be lifted from a horizontal resting position and flipped fully onto the opposite side, one after another, against the clock.",
+      "Fingal's Fingers is a strongman flipping event. A series of hinged poles, most commonly five, each heavier and longer than the last, must be lifted from a horizontal resting position and flipped fully onto the opposite side, one after another, against the clock.",
     technicalNotes:
       'The poles are hinged at a ground-level pivot. Pole weights and time limits vary by competition and promoter. It appears intermittently at major competitions rather than as a fixture of every event calendar.',
     judgingCriteria:
       'A pole must be fully flipped and come to rest on the opposite side to count. Scoring is typically by time to clear all poles, with partial completions ranked by the number flipped within the time limit. Allowed grip aids vary by promoter; some rulesets explicitly disallow tacky. Rules vary by federation, promoter and competition; always confirm before each event.',
     commonErrors:
       'Losing hand position or repositioning too slowly during the transition up the pole is a common source of lost time. Losing stability during the flip phase can stall momentum partway through, particularly on the later, heavier poles.',
+    coachingNotes: null,
+    programmingNotes: null,
     isPublished: true,
     isLaunchPriority: false,
   },
@@ -147,11 +165,13 @@ const NEW_EVENTS: NewEvent[] = [
     description:
       'Block Press is a strongman overhead pressing event using a plate-loadable steel block instead of a log, axle or dumbbell. The athlete cleans the block from the floor to the chest or shoulder, then presses it to full overhead lockout.',
     technicalNotes:
-      'Most commonly run as a medley of several blocks of ascending weight, pressed in succession within a set time limit, scored by total blocks or reps completed, or by the heaviest single block locked out in a max-single format. Competition weight ranges and time limits vary by promoter.',
+      'Often run as a medley of several blocks of ascending weight, pressed in succession within a set time limit and scored by total blocks or reps completed; some formats instead score a single maximum block locked out. Competition weight ranges and time limits vary by promoter.',
     judgingCriteria:
       'A successful lift requires the block to reach full overhead lockout with both arms extended and the implement under control, held until the judge gives a down signal. Reps or implements are only credited once the down command has been given. Rules vary by federation, promoter and competition; always confirm before each event.',
     commonErrors:
       'Failing to reach full lockout, lowering or dropping the block before the down command is given, and losing control of the implement overhead are all common reasons a lift is not counted.',
+    coachingNotes: null,
+    programmingNotes: null,
     isPublished: true,
     isLaunchPriority: false,
   },
@@ -178,7 +198,11 @@ async function main() {
       existing.description === ev.description &&
       existing.technicalNotes === ev.technicalNotes &&
       existing.judgingCriteria === ev.judgingCriteria &&
-      existing.commonErrors === ev.commonErrors;
+      existing.commonErrors === ev.commonErrors &&
+      (existing.coachingNotes ?? null) === ev.coachingNotes &&
+      (existing.programmingNotes ?? null) === ev.programmingNotes &&
+      existing.isPublished === ev.isPublished &&
+      existing.isLaunchPriority === ev.isLaunchPriority;
     if (matches) {
       console.log(`${ev.slug}: already exists and matches approved content — ALREADY_APPLIED, skipping`);
       alreadyApplied.push(ev.slug);

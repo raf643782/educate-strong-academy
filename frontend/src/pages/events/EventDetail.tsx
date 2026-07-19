@@ -37,6 +37,7 @@ const CATEGORY_BADGE: Record<string, string> = {
   'Carry Events':    'badge-amber',
   'Loading Events':  'badge-amber',
   'Pull Events':     'badge-grey',
+  'Static Events':   'badge-grey',
 };
 
 function splitLines(text?: string): string[] {

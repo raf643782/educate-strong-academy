@@ -154,15 +154,37 @@ migration rather than bolted on early).
 
 ## Stage 7 handover
 
-The `Event` Prisma model does not yet have `alternativeNames`, `sources`, `publicationDate`, `reviewStatus`, `author`, or `reviewer` columns. This file is the interim record of that information for the 6 new Events until that migration happens. When Stage 7 designs the real schema (compatible with the future Sanity migration per the CMS system-boundary rules already agreed for this project), it should migrate:
+The `Event` Prisma model does not yet have `alternativeNames`, `sources`, `publicationDate`, `reviewStatus`, `author`, or `reviewer` columns. This file is the interim record of that information for the 6 new Events until that migration happens.
 
-| Event slug | Needs: alternativeNames | Needs: sources | Needs: author/reviewer | Needs: publicationDate/reviewStatus |
-|---|---|---|---|---|
-| `tyre-flip` | "Tire Flip" (US spelling) | 4 sources above | not yet assigned — do not invent | not yet assigned — do not invent |
-| `conans-wheel` | "Conan's Bar" (implement, not event), "Wheel of Pain" (informal) | 7 sources above | not yet assigned | not yet assigned |
-| `loading-race` | "Loading Medley"; lower-confidence: "Death Medley", "Load and Carry" | 5 sources above | not yet assigned | not yet assigned |
-| `hercules-hold` | "Pillars of Hercules" | 4 sources above | not yet assigned | not yet assigned |
-| `fingals-fingers` | "Fingal's Finger", "Fingal Finger(s)" | 5 sources above | not yet assigned | not yet assigned |
-| `block-press` | none found | 5 sources above | not yet assigned | not yet assigned |
+**Every name below is recorded for Stage 7 to evaluate, not to publish automatically.** None of these have been exposed on any public page. The future schema should decide, per value, whether it is public, internal-only, or rejected — this record only classifies how confident the research is that each value genuinely refers to the same event, not whether it should ever be shown to a visitor. In particular, do not have Stage 7 publish **Conan's Bar, Wheel of Pain, Death Medley, or Load and Carry** as public Event alternative names without its own independent review — they are recorded below at low confidence or as non-event names, not as ready-to-publish aliases.
 
-No author or reviewer name has been invented for any of the 6 records above — this table exists so Stage 7 has a ready-made source list to migrate, not to pre-empt that stage's schema design.
+### `tyre-flip`
+- **Confirmed alias (spelling variant):** "Tire Flip" — US spelling of the identical event; high confidence (BarBend, FitnessVolt, Generation Iron, Wikipedia all use this spelling for the same event).
+- Sources: 4, listed above.
+
+### `conans-wheel`
+- **Implement name, not an event alias:** "Conan's Bar" — refers to the lever-arm apparatus itself, not the event. Should not be published as an alternative name for the event.
+- **Informal reference:** "Wheel of Pain" — the film scene (*Conan the Barbarian*, 1982) the event is named after; used colloquially by some media, not an official competition name. Low priority for public display even if Stage 7 adds an aliasing feature.
+- **Rejected (not verified anywhere in research):** "Conan's Wheel Press" — no source, primary or secondary, uses this term. "Cart Circle" as a name for the modern event — this appeared in unreliable search-summary text only and is contradicted by the primary historical-results record (which shows a different, linear-distance event called "Cart Carry" at the cited 1989 contest). Do not use either.
+- Sources: 7, listed above.
+
+### `loading-race`
+- **Confirmed alias:** "Loading Medley" — well-supported, appears as the umbrella/interchangeable term across multiple independent sources.
+- **Lower-confidence search terms:** "Death Medley", "Load and Carry" — reported by a single lower-credibility commercial source only, not corroborated anywhere else. Should not be published without independent corroboration.
+- Sources: 5, listed above.
+
+### `hercules-hold`
+- **Confirmed alias:** "Pillars of Hercules" — used directly in WSM's own official mythological framing copy and in the WSM site's current event URL slug. High confidence.
+- Sources: 4, listed above.
+
+### `fingals-fingers`
+- **Confirmed spelling/formatting variants:** "Fingal's Finger" (singular, used as a page title by one reference site), "Fingal Finger(s)" (no apostrophe, used by IronMind and a commercial equipment listing). Same event in both cases, formatting only.
+- Sources: 5, listed above.
+
+### `block-press`
+- No alternative event name found at all. Implement/equipment brand names exist ("Mouser block", "Block Brothers", "Big Open Block") but these name products, not the event, and should not be treated as event aliases.
+- Sources: 5, listed above.
+
+---
+
+No author, reviewer, publication date, or review status has been invented for any of the 6 records above — this file exists so Stage 7 has a ready-made, confidence-graded source list to migrate, not to pre-empt that stage's schema design or its own editorial judgement on what becomes public.

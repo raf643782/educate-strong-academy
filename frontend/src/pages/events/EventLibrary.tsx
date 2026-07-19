@@ -29,8 +29,10 @@ interface Event {
   isLaunchPriority: boolean;
 }
 
-// Hold Events removed — not a standard Strongman event family
-const CATEGORIES = ['All', 'Press Events', 'Deadlift Events', 'Carry Events', 'Loading Events', 'Pull Events'];
+// "Static Events" (Stage 5 closure) covers stationary max-hold events like
+// Hercules Hold — distinct from a generic "Hold Events" family, which was
+// considered earlier and rejected as not a standard Strongman grouping.
+const CATEGORIES = ['All', 'Press Events', 'Deadlift Events', 'Carry Events', 'Loading Events', 'Pull Events', 'Static Events'];
 
 const CATEGORY_BADGE: Record<string, string> = {
   'Press Events':    'badge-accent',
@@ -38,6 +40,7 @@ const CATEGORY_BADGE: Record<string, string> = {
   'Carry Events':    'badge-amber',
   'Loading Events':  'badge-amber',
   'Pull Events':     'badge-grey',
+  'Static Events':   'badge-grey',
 };
 
 const CORE_SIX = ['Log Press', 'Axle Press', 'Deadlift', "Farmer's Walk", 'Yoke Walk', 'Atlas Stones'];
