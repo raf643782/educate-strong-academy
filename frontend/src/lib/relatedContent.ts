@@ -104,6 +104,9 @@ const EXPLICIT_EVENT_FOR_EXERCISE: Record<string, string> = {
   'stone-to-shoulder-exercise': 'stone-to-shoulder',
   'viking-press-exercise': 'viking-press',
   'truck-pull': 'vehicle-pull',
+  // Stage 5: the new Tyre Flip event pairs with the pre-existing Tyre
+  // Flip exercise (published before this event existed).
+  'tyre-flip': 'tyre-flip',
 };
 
 const EXPLICIT_EXERCISE_FOR_EVENT: Record<string, string[]> = {
@@ -120,6 +123,7 @@ const EXPLICIT_EXERCISE_FOR_EVENT: Record<string, string[]> = {
   'stone-to-shoulder': ['stone-to-shoulder-exercise'],
   'viking-press': ['viking-press-exercise'],
   'vehicle-pull': ['truck-pull'],
+  'tyre-flip': ['tyre-flip'],
 };
 
 // Movement family -> the Event Library category most relevant to it.
