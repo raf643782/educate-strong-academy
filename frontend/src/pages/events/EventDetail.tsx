@@ -8,6 +8,8 @@ import { buildEventMeta } from '../../lib/libraryMeta';
 import { pickExercisesForEvent, pickRelatedEvents } from '../../lib/relatedContent';
 import { apiToPublicSlug } from '../../lib/exerciseSlugs';
 import { readEmbeddedLibraryData } from '../../lib/initialData';
+import EntryVideoPlayer from '../../components/media/EntryVideoPlayer';
+import VideoObjectSchema from '../../components/media/VideoObjectSchema';
 
 export interface Event {
   id: string;
@@ -22,6 +24,16 @@ export interface Event {
   commonErrors?: string;
   videoUrl?: string | null;
   isLaunchPriority: boolean;
+  imageUrl?: string | null;
+  imageAlt?: string | null;
+  videoProvider?: string | null;
+  videoThumbnailUrl?: string | null;
+  videoTitle?: string | null;
+  videoDescription?: string | null;
+  videoUploadDate?: string | null;
+  videoDuration?: string | null;
+  videoTranscript?: string | null;
+  captionsUrl?: string | null;
 }
 
 interface ExerciseSummary {
@@ -89,6 +101,31 @@ export function EventDetailContent({
       <div className="es-section">
         <div className="es-container max-w-3xl">
           <div className="space-y-8">
+
+            {event.videoUrl && (
+              <>
+                <EntryVideoPlayer
+                  videoUrl={event.videoUrl}
+                  videoProvider={event.videoProvider}
+                  videoThumbnailUrl={event.videoThumbnailUrl}
+                  imageUrl={event.imageUrl}
+                  videoTitle={event.videoTitle}
+                  videoDescription={event.videoDescription}
+                  captionsUrl={event.captionsUrl}
+                  videoTranscript={event.videoTranscript}
+                />
+                <VideoObjectSchema
+                  videoUrl={event.videoUrl}
+                  videoProvider={event.videoProvider}
+                  videoTitle={event.videoTitle}
+                  videoDescription={event.videoDescription}
+                  videoThumbnailUrl={event.videoThumbnailUrl}
+                  imageUrl={event.imageUrl}
+                  videoUploadDate={event.videoUploadDate}
+                  videoDuration={event.videoDuration}
+                />
+              </>
+            )}
 
             {event.technicalNotes && (
               <div>
@@ -241,6 +278,7 @@ export default function EventDetail({ ssrEvent }: { ssrEvent?: Event }) {
     title: meta?.title || 'Event',
     description: meta?.description,
     canonical: meta?.canonical,
+    ogImage: meta?.ogImage,
   });
 
   if (loading) {

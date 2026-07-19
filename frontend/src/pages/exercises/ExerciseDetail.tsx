@@ -8,6 +8,8 @@ import { buildExerciseMeta } from '../../lib/libraryMeta';
 import { pickRelatedExercises, pickEventsForExercise } from '../../lib/relatedContent';
 import { apiToPublicSlug, publicToApiSlug } from '../../lib/exerciseSlugs';
 import { readEmbeddedLibraryData } from '../../lib/initialData';
+import EntryVideoPlayer from '../../components/media/EntryVideoPlayer';
+import VideoObjectSchema from '../../components/media/VideoObjectSchema';
 
 export interface Exercise {
   id: string;
@@ -27,6 +29,16 @@ export interface Exercise {
   musclesWorked: string | null;
   safetyNotes: string | null;
   isCompetitionEvent: boolean;
+  imageUrl?: string | null;
+  imageAlt?: string | null;
+  videoProvider?: string | null;
+  videoThumbnailUrl?: string | null;
+  videoTitle?: string | null;
+  videoDescription?: string | null;
+  videoUploadDate?: string | null;
+  videoDuration?: string | null;
+  videoTranscript?: string | null;
+  captionsUrl?: string | null;
 }
 
 interface EventSummary {
@@ -108,6 +120,31 @@ export function ExerciseDetailContent({
       <div className="es-section">
         <div className="es-container max-w-3xl">
           <div className="space-y-8">
+
+            {exercise.videoUrl && (
+              <>
+                <EntryVideoPlayer
+                  videoUrl={exercise.videoUrl}
+                  videoProvider={exercise.videoProvider}
+                  videoThumbnailUrl={exercise.videoThumbnailUrl}
+                  imageUrl={exercise.imageUrl}
+                  videoTitle={exercise.videoTitle}
+                  videoDescription={exercise.videoDescription}
+                  captionsUrl={exercise.captionsUrl}
+                  videoTranscript={exercise.videoTranscript}
+                />
+                <VideoObjectSchema
+                  videoUrl={exercise.videoUrl}
+                  videoProvider={exercise.videoProvider}
+                  videoTitle={exercise.videoTitle}
+                  videoDescription={exercise.videoDescription}
+                  videoThumbnailUrl={exercise.videoThumbnailUrl}
+                  imageUrl={exercise.imageUrl}
+                  videoUploadDate={exercise.videoUploadDate}
+                  videoDuration={exercise.videoDuration}
+                />
+              </>
+            )}
 
             {(exercise.musclesWorked || exercise.equipmentNeeded) && (
               <div className="grid sm:grid-cols-2 gap-6">
@@ -313,7 +350,7 @@ export default function ExerciseDetail({ ssrExercise }: { ssrExercise?: Exercise
     title: meta?.title || 'Exercise',
     description: meta?.description,
     canonical: meta?.canonical,
-    ogImage: undefined,
+    ogImage: meta?.ogImage,
   });
 
   if (loading) {

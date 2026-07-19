@@ -18,6 +18,7 @@ import api from '../../lib/api';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
 import { apiToPublicSlug } from '../../lib/exerciseSlugs';
 import { SITE_URL } from '../../lib/siteUrl';
+import EntryImage from '../../components/media/EntryImage';
 
 interface Exercise {
   id: string;
@@ -29,6 +30,8 @@ interface Exercise {
   equipmentNeeded: string | null;
   isCompetitionEvent: boolean;
   isLaunchPriority: boolean;
+  imageUrl?: string | null;
+  imageAlt?: string | null;
 }
 
 // IDs must match DB category strings exactly. Labels use training
@@ -345,7 +348,19 @@ export default function ExerciseLibrary() {
                       to={`/exercises/${apiToPublicSlug(ex.slug)}`}
                       className="es-card-hover flex flex-col p-4"
                     >
-                      <ExercisePlaceholder category={ex.category} compact />
+                      {ex.imageUrl ? (
+                        <div className="overflow-hidden rounded-md" style={{ height: '64px' }}>
+                          <img
+                            src={ex.imageUrl}
+                            alt={ex.imageAlt || ex.name}
+                            loading="lazy"
+                            decoding="async"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <ExercisePlaceholder category={ex.category} compact />
+                      )}
                       <div className="flex items-center justify-between mt-3 mb-2">
                         <span className={DIFF_BADGE[ex.difficulty] || 'badge-grey'}>{difficultyLabel(ex.difficulty)}</span>
                         {ex.isCompetitionEvent && (

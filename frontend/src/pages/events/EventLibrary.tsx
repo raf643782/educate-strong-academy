@@ -14,6 +14,7 @@ import Footer from '../../components/layout/Footer';
 import api from '../../lib/api';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
 import { SITE_URL } from '../../lib/siteUrl';
+import EntryImage from '../../components/media/EntryImage';
 
 interface Event {
   id: string;
@@ -27,6 +28,8 @@ interface Event {
   programmingNotes?: string;
   commonErrors?: string;
   isLaunchPriority: boolean;
+  imageUrl?: string | null;
+  imageAlt?: string | null;
 }
 
 // "Static Events" (Stage 5 closure) covers stationary max-hold events like
@@ -200,6 +203,14 @@ export default function EventLibrary() {
                         className="es-card-hover p-6 block"
                         style={{ borderTop: '2px solid #E19A47' }}
                       >
+                        <EntryImage
+                          imageUrl={event.imageUrl}
+                          imageAlt={event.imageAlt}
+                          category={event.category}
+                          entryName={event.name}
+                          compact
+                          className="mb-3"
+                        />
                         <span className={`${CATEGORY_BADGE[event.category] || 'badge-grey'} mb-3 inline-block`}>
                           {event.category}
                         </span>
@@ -242,6 +253,14 @@ export default function EventLibrary() {
                         to={`/events/${event.slug}`}
                         className="es-card-hover flex flex-col p-5"
                       >
+                        <EntryImage
+                          imageUrl={event.imageUrl}
+                          imageAlt={event.imageAlt}
+                          category={event.category}
+                          entryName={event.name}
+                          compact
+                          className="mb-3"
+                        />
                         <span className={`${CATEGORY_BADGE[event.category] || 'badge-grey'} mb-3 inline-block`}>
                           {event.category}
                         </span>

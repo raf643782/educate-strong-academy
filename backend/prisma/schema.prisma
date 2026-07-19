@@ -345,6 +345,19 @@ model Exercise {
   isCompetitionEvent Boolean  @default(false)
   isPublished      Boolean    @default(false)
   isLaunchPriority Boolean    @default(false)
+  // Stage 6 media infrastructure — all nullable, additive. Left empty
+  // until real assets exist; the frontend never fabricates a thumbnail
+  // or video from an empty field.
+  imageUrl           String?
+  imageAlt           String?
+  videoProvider      String?
+  videoThumbnailUrl  String?
+  videoTitle         String?
+  videoDescription   String?
+  videoUploadDate    DateTime?
+  videoDuration      String?
+  videoTranscript    String?
+  captionsUrl        String?
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
 }
@@ -363,6 +376,19 @@ model Event {
   videoUrl         String?
   isPublished      Boolean  @default(false)
   isLaunchPriority Boolean  @default(false)
+  // Stage 6 media infrastructure — all nullable, additive. Left empty
+  // until real assets exist; the frontend never fabricates a thumbnail
+  // or video from an empty field.
+  imageUrl           String?
+  imageAlt           String?
+  videoProvider      String?
+  videoThumbnailUrl  String?
+  videoTitle         String?
+  videoDescription   String?
+  videoUploadDate    DateTime?
+  videoDuration      String?
+  videoTranscript    String?
+  captionsUrl        String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }

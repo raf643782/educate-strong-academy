@@ -13,6 +13,7 @@ export interface ExerciseLike {
   slug: string;
   category: string;
   description: string | null;
+  imageUrl?: string | null;
 }
 
 export interface EventLike {
@@ -20,6 +21,7 @@ export interface EventLike {
   slug: string;
   category: string;
   description?: string;
+  imageUrl?: string | null;
 }
 
 export interface PageMeta {
@@ -28,6 +30,7 @@ export interface PageMeta {
   canonical: string;
   ogTitle: string;
   ogDescription: string;
+  ogImage?: string;
 }
 
 export function buildExerciseMeta(exercise: ExerciseLike): PageMeta {
@@ -41,6 +44,7 @@ export function buildExerciseMeta(exercise: ExerciseLike): PageMeta {
     canonical: `${SITE_URL}/exercises/${apiToPublicSlug(exercise.slug)}`,
     ogTitle: `${exercise.name} — Educate Strong Exercise Library`,
     ogDescription: description,
+    ...(exercise.imageUrl ? { ogImage: exercise.imageUrl } : {}),
   };
 }
 
@@ -55,5 +59,6 @@ export function buildEventMeta(event: EventLike): PageMeta {
     canonical: `${SITE_URL}/events/${event.slug}`,
     ogTitle: `${event.name} — Educate Strong Event Library`,
     ogDescription: description,
+    ...(event.imageUrl ? { ogImage: event.imageUrl } : {}),
   };
 }
