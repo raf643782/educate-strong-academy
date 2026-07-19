@@ -83,6 +83,14 @@ export default function EventLibrary() {
 
   const coreSix = events.filter(e => CORE_SIX.includes(e.name));
 
+  const hasActiveFilters = category !== 'All' || query.trim().length > 0;
+  const resultCountLabel = `${filtered.length} ${filtered.length === 1 ? 'event' : 'events'}${hasActiveFilters ? ' found' : ''}`;
+
+  const resetFilters = useCallback(() => {
+    setQuery('');
+    setCategory('All');
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
       <Navbar />
@@ -125,6 +133,23 @@ export default function EventLibrary() {
               </button>
             ))}
           </div>
+
+          {!loading && !error && (
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <p className="text-sm text-es-muted" aria-live="polite">{resultCountLabel}</p>
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                  aria-label="Reset search and filters"
+                  className="text-sm font-semibold hover:underline"
+                  style={{ color: '#A41C64' }}
+                >
+                  Reset search and filters
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -195,7 +220,17 @@ export default function EventLibrary() {
                 </h2>
 
                 {filtered.length === 0 ? (
-                  <div className="text-center py-16 text-es-muted">No events match your search or filters.</div>
+                  <div className="text-center py-16">
+                    <p className="text-es-muted mb-4">No events match your current search or category filter.</p>
+                    <button
+                      type="button"
+                      onClick={resetFilters}
+                      aria-label="Clear search and filters"
+                      className="btn-secondary text-sm py-2 px-5"
+                    >
+                      Clear search and filters
+                    </button>
+                  </div>
                 ) : (
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
                     {filtered.map(event => (

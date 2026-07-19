@@ -82,6 +82,46 @@ const EXPLICIT_RELATED_EXERCISE_SLUGS: Record<string, string[]> = {
   'grip-holds-thick-bar': ['exercise-farmers-walk', 'frame-carry-exercise', 'arm-over-arm-rope-pull', 'exercise-axle-press'],
 };
 
+// Stage 4: the 13 confirmed exercise/event duplicate-wording pairs (plus
+// the Truck Pull/Vehicle Pull near-duplicate) each name one specific
+// counterpart on the other library, not just "something in this
+// category" — e.g. the Log Press exercise page should link straight to
+// the Log Press event page, not to every Press Event. These explicit
+// pairs take priority over the movement-family/category fallback below
+// in both directions. Log Press's event side also names Log Clean
+// (its own listed accessory) alongside Log Press itself.
+const EXPLICIT_EVENT_FOR_EXERCISE: Record<string, string> = {
+  'exercise-axle-press': 'axle-press',
+  "exercise-farmers-walk": 'farmers-walk',
+  'exercise-log-press': 'log-press',
+  'exercise-yoke-walk': 'yoke-walk',
+  'arm-over-arm-rope-pull': 'arm-over-arm-rope-pull',
+  'axle-deadlift-exercise': 'axle-deadlift',
+  'circus-dumbbell-exercise': 'circus-dumbbell',
+  'frame-carry-exercise': 'frame-carry',
+  'husafell-carry-exercise': 'husafell-carry',
+  'power-stairs-exercise': 'power-stairs',
+  'stone-to-shoulder-exercise': 'stone-to-shoulder',
+  'viking-press-exercise': 'viking-press',
+  'truck-pull': 'vehicle-pull',
+};
+
+const EXPLICIT_EXERCISE_FOR_EVENT: Record<string, string[]> = {
+  'axle-press': ['exercise-axle-press'],
+  'farmers-walk': ['exercise-farmers-walk'],
+  'log-press': ['exercise-log-press', 'log-clean'],
+  'yoke-walk': ['exercise-yoke-walk'],
+  'arm-over-arm-rope-pull': ['arm-over-arm-rope-pull'],
+  'axle-deadlift': ['axle-deadlift-exercise'],
+  'circus-dumbbell': ['circus-dumbbell-exercise'],
+  'frame-carry': ['frame-carry-exercise'],
+  'husafell-carry': ['husafell-carry-exercise'],
+  'power-stairs': ['power-stairs-exercise'],
+  'stone-to-shoulder': ['stone-to-shoulder-exercise'],
+  'viking-press': ['viking-press-exercise'],
+  'vehicle-pull': ['truck-pull'],
+};
+
 // Movement family -> the Event Library category most relevant to it.
 const FAMILY_TO_EVENT_CAT: Record<string, string> = {
   'atlas-stone': 'Loading Events',
@@ -125,21 +165,32 @@ export function pickRelatedExercises<T extends CategoryItem>(all: T[], current: 
     .slice(0, MAX_RELATED);
 }
 
-/** Related events for an exercise page: only the event category that
- * matches the exercise's real movement family (not its broad DB
+/** Related events for an exercise page: the exercise's own named
+ * competition counterpart first (Stage 4 explicit pairing), then the
+ * event category matching its real movement family (not its broad DB
  * category) — this is what stops e.g. an "atlas-stone" family exercise
  * from surfacing Power Stairs as if it were related. */
 export function pickEventsForExercise<T extends CategoryItem>(allEvents: T[], exercise: CategoryItem): T[] {
+  const explicitSlug = EXPLICIT_EVENT_FOR_EXERCISE[exercise.slug];
+  const explicit = explicitSlug ? allEvents.find(e => e.slug === explicitSlug) : undefined;
+
   const family = EXERCISE_MOVEMENT_FAMILY[exercise.slug];
   const eventCat = family ? FAMILY_TO_EVENT_CAT[family] : undefined;
-  if (!eventCat) return [];
-  return allEvents.filter(e => e.category === eventCat).slice(0, MAX_RELATED);
+  const familyMatches = eventCat ? allEvents.filter(e => e.category === eventCat && e.slug !== explicitSlug) : [];
+
+  const result = explicit ? [explicit, ...familyMatches] : familyMatches;
+  return result.slice(0, MAX_RELATED);
 }
 
-/** Related exercises for an event page — Stage 2 keeps the Stage 1
- * category-based fallback here (events don't yet have their own
- * movement-family data; Stage 3 covers the full Event Library). */
+/** Related exercises for an event page: the event's own named exercise
+ * counterpart(s) first (Stage 4 explicit pairing, e.g. Log Press event
+ * names both Log Press and Log Clean exercises), then the Stage 1
+ * category-based fallback for events without an explicit pairing yet. */
 export function pickExercisesForEvent<T extends CategoryItem>(allExercises: T[], event: CategoryItem): T[] {
+  const explicitSlugs = EXPLICIT_EXERCISE_FOR_EVENT[event.slug];
+  const explicit = byExplicitSlugs(allExercises, explicitSlugs);
+  if (explicit.length > 0) return explicit.slice(0, MAX_RELATED);
+
   const exerciseCat = EVENT_TO_EXERCISE_CAT[event.category];
   return exerciseCat ? allExercises.filter(e => e.category === exerciseCat).slice(0, MAX_RELATED) : [];
 }
