@@ -1,9 +1,19 @@
-import { useEffect, useState, useCallback } from 'react';
+/**
+ * EventLibrary — fetches real events from /api/events.
+ *
+ * Stage 3: every card links to its own dedicated, prerendered page
+ * (/events/<slug>) as the primary destination — the old quick-view
+ * modal was removed for the same reason it was removed from the
+ * Exercise Library: it duplicated dedicated-page content with none of
+ * a dedicated page's benefits, once every event has a real page.
+ */
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import api from '../../lib/api';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
+import { SITE_URL } from '../../lib/siteUrl';
 
 interface Event {
   id: string;
@@ -30,45 +40,46 @@ const CATEGORY_BADGE: Record<string, string> = {
   'Pull Events':     'badge-grey',
 };
 
-// Map event category to exercise library category for cross-linking
-const EVENT_TO_EXERCISE_CAT: Record<string, string> = {
-  'Press Events':    'Pressing',
-  'Deadlift Events': 'Deadlift / Hinge',
-  'Carry Events':    'Carry',
-  'Loading Events':  'Loading',
-  'Pull Events':     'Pull',
-};
-
 const CORE_SIX = ['Log Press', 'Axle Press', 'Deadlift', "Farmer's Walk", 'Yoke Walk', 'Atlas Stones'];
 
 export default function EventLibrary() {
   useDocumentHead({
-    title: 'Event Library',
-    description: 'Technical notes, coaching notes, and judging criteria for Strongman competition events.',
+    title: 'Strongman Event Library | Rules, Judging and Training',
+    description: 'Explore how major Strongman events are judged and scored, with common formats, rule variations and links to the technique behind each event.',
+    canonical: `${SITE_URL}/events`,
+    ogImage: undefined,
   });
 
-  const [events, setEvents]         = useState<Event[]>([]);
-  const [filtered, setFiltered]     = useState<Event[]>([]);
-  const [category, setCategory]     = useState('All');
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState<string | null>(null);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [events, setEvents]     = useState<Event[]>([]);
+  const [category, setCategory] = useState('All');
+  const [query, setQuery]       = useState('');
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState<string | null>(null);
 
   const loadEvents = useCallback(() => {
     setLoading(true);
     setError(null);
     api.get<Event[]>('/events')
-      .then(res => { setEvents(res.data); setFiltered(res.data); })
+      .then(res => setEvents(res.data))
       .catch(() => setError('Failed to load events. Please try again.'))
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => { loadEvents(); }, [loadEvents]);
 
-  useEffect(() => {
-    if (category === 'All') setFiltered(events);
-    else setFiltered(events.filter(e => e.category === category));
-  }, [category, events]);
+  const filtered = useMemo(() => {
+    let list = category === 'All' ? events : events.filter(e => e.category === category);
+    const q = query.trim().toLowerCase();
+    if (q) {
+      list = list.filter(e =>
+        e.name.toLowerCase().includes(q) ||
+        (e.description ?? '').toLowerCase().includes(q) ||
+        e.category.toLowerCase().includes(q) ||
+        (e.technicalNotes ?? '').toLowerCase().includes(q)
+      );
+    }
+    return list;
+  }, [events, category, query]);
 
   const coreSix = events.filter(e => CORE_SIX.includes(e.name));
 
@@ -80,26 +91,40 @@ export default function EventLibrary() {
       <section className="pt-navbar es-grit" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C', position: 'relative' }}>
         <div className="es-container py-16">
           <p className="es-label mb-3">Competition Reference</p>
-          <h1 className="text-4xl md:text-5xl font-black text-white mb-4" style={{ letterSpacing: '-0.04em' }}>Event Library</h1>
+          <h1 className="text-4xl md:text-5xl font-black text-white mb-4" style={{ letterSpacing: '-0.04em' }}>Strongman Event Library</h1>
           <p className="text-es-muted text-lg max-w-2xl">
-            Technical breakdowns, coaching notes, judging criteria, and programming guidance for major Strongman competition events.
+            Explore major Strongman competition events through common formats, judging criteria, scoring, rule
+            variations and direct links to the technique behind each event.
           </p>
         </div>
       </section>
 
-      {/* Filters */}
+      {/* Search + filters */}
       <div style={{ background: '#111111', borderBottom: '1px solid #2C2C2C' }}>
-        <div className="es-container py-4 flex flex-wrap gap-2">
-          {CATEGORIES.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setCategory(cat)}
-              className={`px-4 py-3 rounded text-sm font-semibold transition-all ${category === cat ? 'text-white' : 'text-es-muted hover:text-white border border-es-grey-dark hover:border-es-accent'}`}
-              style={category === cat ? { background: '#A41C64', border: '1px solid rgba(164,28,100,0.6)' } : {}}
-            >
-              {cat}
-            </button>
-          ))}
+        <div className="es-container py-4 space-y-3">
+          <label htmlFor="event-search" className="sr-only">Search events</label>
+          <input
+            id="event-search"
+            type="search"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Search events, e.g. &quot;deadlift&quot; or &quot;stones&quot;"
+            className="text-sm rounded px-4 py-2.5 w-full max-w-md"
+            style={{ background: '#1B1B20', border: '1px solid #2C2C2C', color: 'white' }}
+          />
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by category">
+            {CATEGORIES.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setCategory(cat)}
+                aria-pressed={category === cat}
+                className={`px-4 py-3 rounded text-sm font-semibold transition-all ${category === cat ? 'text-white' : 'text-es-muted hover:text-white border border-es-grey-dark hover:border-es-accent'}`}
+                style={category === cat ? { background: '#A41C64', border: '1px solid rgba(164,28,100,0.6)' } : {}}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -133,7 +158,7 @@ export default function EventLibrary() {
           {!loading && !error && (
             <>
               {/* Core Six featured */}
-              {coreSix.length > 0 && category === 'All' && (
+              {coreSix.length > 0 && category === 'All' && !query && (
                 <div className="mb-12">
                   <div className="flex items-center gap-3 mb-6">
                     <h2 className="text-2xl font-black text-white">The Core Six Events</h2>
@@ -141,9 +166,10 @@ export default function EventLibrary() {
                   </div>
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
                     {coreSix.map(event => (
-                      <div
+                      <Link
                         key={event.id}
-                        className="es-card-hover p-6"
+                        to={`/events/${event.slug}`}
+                        className="es-card-hover p-6 block"
                         style={{ borderTop: '2px solid #E19A47' }}
                       >
                         <span className={`${CATEGORY_BADGE[event.category] || 'badge-grey'} mb-3 inline-block`}>
@@ -153,13 +179,10 @@ export default function EventLibrary() {
                         {event.description && (
                           <p className="text-sm text-es-muted leading-relaxed line-clamp-3 mb-4">{event.description}</p>
                         )}
-                        <button
-                          onClick={() => setSelectedEvent(event)}
-                          className="btn-amber text-xs py-2 px-4"
-                        >
+                        <span className="btn-amber text-xs py-2 px-4 inline-block">
                           View Event
-                        </button>
-                      </div>
+                        </span>
+                      </Link>
                     ))}
                   </div>
                 </div>
@@ -172,11 +195,15 @@ export default function EventLibrary() {
                 </h2>
 
                 {filtered.length === 0 ? (
-                  <div className="text-center py-16 text-es-muted">No events found in this category.</div>
+                  <div className="text-center py-16 text-es-muted">No events match your search or filters.</div>
                 ) : (
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
                     {filtered.map(event => (
-                      <div key={event.id} className="es-card-hover flex flex-col p-5">
+                      <Link
+                        key={event.id}
+                        to={`/events/${event.slug}`}
+                        className="es-card-hover flex flex-col p-5"
+                      >
                         <span className={`${CATEGORY_BADGE[event.category] || 'badge-grey'} mb-3 inline-block`}>
                           {event.category}
                         </span>
@@ -184,13 +211,10 @@ export default function EventLibrary() {
                         {event.description && (
                           <p className="text-sm text-es-muted leading-relaxed line-clamp-2 mb-4 flex-1">{event.description}</p>
                         )}
-                        <button
-                          onClick={() => setSelectedEvent(event)}
-                          className="btn-secondary text-xs py-2"
-                        >
+                        <span className="btn-secondary text-xs py-2 text-center">
                           View Event
-                        </button>
-                      </div>
+                        </span>
+                      </Link>
                     ))}
                   </div>
                 )}
@@ -205,152 +229,6 @@ export default function EventLibrary() {
 
         </div>
       </div>
-
-      {/* Event Detail Modal */}
-      {selectedEvent && (
-        <div
-          className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-16 overflow-y-auto"
-          style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}
-          onClick={(e) => { if (e.target === e.currentTarget) setSelectedEvent(null); }}
-        >
-          <div
-            className="w-full max-w-2xl rounded-lg overflow-hidden"
-            style={{ background: '#1A1A1A', border: '1px solid #3C3C3C', boxShadow: '0 20px 80px rgba(0,0,0,0.9)', marginBottom: '2rem' }}
-          >
-            {/* Modal header */}
-            <div
-              className="flex items-start justify-between p-6"
-              style={{ borderBottom: '1px solid #2C2C2C', background: 'linear-gradient(135deg, rgba(225,154,71,0.10), transparent)' }}
-            >
-              <div>
-                <p className="es-label mb-1">{selectedEvent.category}</p>
-                <h2 className="text-2xl font-black text-white">{selectedEvent.name}</h2>
-                <div className="flex gap-2 mt-2 flex-wrap">
-                  <span className={CATEGORY_BADGE[selectedEvent.category] || 'badge-grey'}>{selectedEvent.category}</span>
-                  {selectedEvent.isLaunchPriority && <span className="badge-amber">Core Six</span>}
-                </div>
-              </div>
-              <button
-                onClick={() => setSelectedEvent(null)}
-                className="p-2 rounded text-es-muted hover:text-white transition-colors flex-shrink-0"
-                style={{ background: '#2A2A2A' }}
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Modal body */}
-            <div className="p-6 space-y-6">
-
-              {selectedEvent.description && (
-                <div>
-                  <p className="es-label mb-2">Event Overview</p>
-                  <p className="text-es-muted text-sm leading-relaxed">{selectedEvent.description}</p>
-                </div>
-              )}
-
-              {selectedEvent.technicalNotes && (
-                <div>
-                  <p className="es-label mb-2">Technical Notes</p>
-                  <p className="text-es-muted text-sm leading-relaxed">{selectedEvent.technicalNotes}</p>
-                </div>
-              )}
-
-              {selectedEvent.coachingNotes && (
-                <div>
-                  <p className="es-label mb-3">Coaching Notes</p>
-                  <div className="es-card-grey p-4 rounded-lg">
-                    <p className="text-sm text-es-muted leading-relaxed">{selectedEvent.coachingNotes}</p>
-                  </div>
-                </div>
-              )}
-
-              {selectedEvent.judgingCriteria && (
-                <div>
-                  <p className="es-label mb-3">Judging Criteria</p>
-                  <p className="text-sm text-es-muted leading-relaxed">{selectedEvent.judgingCriteria}</p>
-                  <p className="text-xs text-es-subtle mt-2 italic">
-                    Rules vary by federation, promoter, and competition. Confirm specific rules before each event.
-                  </p>
-                </div>
-              )}
-
-              {selectedEvent.commonErrors && (
-                <div>
-                  <p className="es-label mb-3">Common Errors</p>
-                  <ul className="space-y-2">
-                    {selectedEvent.commonErrors.split(';').map(s => s.trim()).filter(Boolean).map((err, i) => (
-                      <li key={i} className="flex items-start gap-3 text-sm text-es-muted">
-                        <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1.5" style={{ background: '#E19A47' }} />
-                        {err}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {selectedEvent.programmingNotes && (
-                <div className="es-card-grey p-4 rounded-lg">
-                  <p className="es-label mb-2">Programming Notes</p>
-                  <p className="text-sm text-es-muted leading-relaxed">{selectedEvent.programmingNotes}</p>
-                </div>
-              )}
-
-              {!selectedEvent.description && !selectedEvent.coachingNotes && !selectedEvent.technicalNotes && (
-                <div className="text-center py-8">
-                  <p className="text-es-muted text-sm">Full event details are in development.</p>
-                  <p className="text-es-subtle text-xs mt-2">Coaching notes, judging criteria, and programming guidance will be added shortly.</p>
-                </div>
-              )}
-
-              {/* Cross-link to Exercise Library */}
-              {EVENT_TO_EXERCISE_CAT[selectedEvent.category] && (
-                <div style={{ borderTop: '1px solid #2C2C2C', paddingTop: '16px' }}>
-                  <p className="text-xs text-es-subtle mb-2">Related training</p>
-                  <Link
-                    to={`/exercises?category=${encodeURIComponent(EVENT_TO_EXERCISE_CAT[selectedEvent.category])}`}
-                    className="text-xs font-semibold transition-colors hover:opacity-80"
-                    style={{ color: '#A41C64' }}
-                    onClick={() => setSelectedEvent(null)}
-                  >
-                    View related exercises in the Exercise Library
-                  </Link>
-                </div>
-              )}
-
-              {/* Non-gated CTA — this reference is free today; deeper judging and
-                  competition-day content lives in the course pathway */}
-              <div
-                className="rounded-lg p-4"
-                style={{ background: 'rgba(164,28,100,0.06)', border: '1px solid rgba(164,28,100,0.2)' }}
-              >
-                <p className="text-sm font-bold text-white mb-1">Want the full judging and coaching framework?</p>
-                <p className="text-xs text-es-muted leading-relaxed mb-2">
-                  Detailed scoring standards, event setup, and tutor-supported coaching for this event are covered
-                  inside the Level 1 Coaching Strongman course.
-                </p>
-                <Link
-                  to="/courses/level-1-coaching-strongman"
-                  className="text-xs font-semibold"
-                  style={{ color: '#A41C64' }}
-                  onClick={() => setSelectedEvent(null)}
-                >
-                  Explore the Level 1 Coaching course →
-                </Link>
-              </div>
-
-              <div className="pt-2" style={{ borderTop: '1px solid #2C2C2C' }}>
-                <p className="text-xs text-es-subtle italic">
-                  Event reference data is reviewed by the Educate.Strong coaching and refereeing team.
-                </p>
-              </div>
-
-            </div>
-          </div>
-        </div>
-      )}
 
       <Footer />
     </div>

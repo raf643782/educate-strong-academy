@@ -23,10 +23,9 @@
  * these are caught and swallowed — a broken build must not deploy
  * incomplete or broken public pages.
  *
- * Stage 2: every published Exercise is now discovered from the API and
- * prerendered (no manual slug list). Events remain restricted to the
- * Stage 1 proof-of-concept page (Atlas Stones) — the full Event
- * Library rollout is Stage 3.
+ * Stage 3: every published Exercise and every published Event is now
+ * discovered from the API and prerendered — no manually maintained
+ * slug list for either library.
  */
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
@@ -39,11 +38,6 @@ const DIST_DIR = path.join(FRONTEND_ROOT, 'dist');
 const API_BASE = process.env.VITE_API_URL || 'https://educate-strong-api.onrender.com/api';
 const REQUEST_TIMEOUT_MS = 10_000;
 const MAX_RETRIES = 2;
-
-// Stage 2: Event Library rollout is Stage 3 — keep events restricted to
-// the Stage 1 proof-of-concept page for now. Exercises are no longer
-// restricted (see EXERCISE_SLUG_LIMIT below, now unused/removed).
-const EVENT_SLUG_LIMIT = ['atlas-stones'];
 
 class PrerenderError extends Error {}
 
@@ -175,15 +169,9 @@ async function main() {
   }
   console.log(`[prerender] fetched ${allExercises.length} exercises, ${allEvents.length} events`);
 
-  // Every published exercise, no manual list.
+  // Every published exercise and event, no manual list for either.
   const exercisesToRender = allExercises;
-
-  const eventSlugsToRender = allEvents.map(e => e.slug).filter(slug => EVENT_SLUG_LIMIT.includes(slug));
-  for (const slug of EVENT_SLUG_LIMIT) {
-    if (!allEvents.some(e => e.slug === slug)) {
-      throw new PrerenderError(`EVENT_SLUG_LIMIT requested event slug "${slug}" but no such published event exists.`);
-    }
-  }
+  const eventSlugsToRender = allEvents.map(e => e.slug);
 
   let written = 0;
   const seenPublicSlugs = new Set();
@@ -211,7 +199,14 @@ async function main() {
   }
   console.log(`[prerender] wrote ${exercisesToRender.length} exercise page(s)`);
 
+  const seenEventSlugs = new Set();
+
   for (const slug of eventSlugsToRender) {
+    if (seenEventSlugs.has(slug)) {
+      throw new PrerenderError(`Public slug collision: "${slug}" is produced by more than one event.`);
+    }
+    seenEventSlugs.add(slug);
+
     const event = allEvents.find(e => e.slug === slug);
     const { html, meta, initialData } = render({
       type: 'event',
@@ -225,9 +220,9 @@ async function main() {
     await mkdir(outDir, { recursive: true });
     const page = injectInitialData(injectRoot(injectHead(template, meta), html), initialData);
     await writeFile(path.join(outDir, 'index.html'), page);
-    console.log(`[prerender] wrote /events/${slug}/index.html`);
     written++;
   }
+  console.log(`[prerender] wrote ${eventSlugsToRender.length} event page(s)`);
 
   const intendedCount = exercisesToRender.length + eventSlugsToRender.length;
   if (written !== intendedCount) {
@@ -236,6 +231,11 @@ async function main() {
   if (exercisesToRender.length !== allExercises.length) {
     throw new PrerenderError(
       `Expected to prerender all ${allExercises.length} published exercises but only rendered ${exercisesToRender.length}.`
+    );
+  }
+  if (eventSlugsToRender.length !== allEvents.length) {
+    throw new PrerenderError(
+      `Expected to prerender all ${allEvents.length} published events but only rendered ${eventSlugsToRender.length}.`
     );
   }
 
