@@ -349,10 +349,14 @@ export default function ExerciseLibrary() {
                       className="es-card-hover flex flex-col p-4"
                     >
                       {ex.imageUrl ? (
+                        // Decorative: the card already shows ex.name as a
+                        // real heading, so this thumbnail isn't announced
+                        // a second time via alt text.
                         <div className="overflow-hidden rounded-md" style={{ height: '64px' }}>
                           <img
                             src={ex.imageUrl}
-                            alt={ex.imageAlt || ex.name}
+                            alt=""
+                            aria-hidden="true"
                             loading="lazy"
                             decoding="async"
                             className="w-full h-full object-cover"

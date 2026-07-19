@@ -12,6 +12,10 @@
  * (Press Events, Deadlift Events, Carry Events, Loading Events, Pull
  * Events, Static Events) onto the same shared icon families used
  * there, rather than introducing a second icon style.
+ *
+ * Purely decorative: the card it sits in already shows the category
+ * as visible text and the entry name as a heading, so this is
+ * aria-hidden rather than announced a second time via role="img".
  */
 const BRAND = 'rgba(164,28,100,0.7)';
 
@@ -117,8 +121,7 @@ export default function CategoryIllustration({
         overflow: 'hidden',
         border: '1px solid rgba(164,28,100,0.14)',
       }}
-      role="img"
-      aria-label={`${category} illustration`}
+      aria-hidden="true"
     >
       <div
         style={{

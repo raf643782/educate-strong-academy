@@ -205,9 +205,7 @@ export default function EventLibrary() {
                       >
                         <EntryImage
                           imageUrl={event.imageUrl}
-                          imageAlt={event.imageAlt}
                           category={event.category}
-                          entryName={event.name}
                           compact
                           className="mb-3"
                         />
@@ -255,9 +253,7 @@ export default function EventLibrary() {
                       >
                         <EntryImage
                           imageUrl={event.imageUrl}
-                          imageAlt={event.imageAlt}
                           category={event.category}
-                          entryName={event.name}
                           compact
                           className="mb-3"
                         />

@@ -16,11 +16,20 @@
  * loading, loaded, error), so nothing on the page moves when the
  * player loads.
  *
+ * Exactly one <iframe> element is ever mounted for the lifetime of a
+ * play session: the loading and loaded states share the same JSX
+ * branch, so React never unmounts and recreates it when onLoad fires —
+ * only a loading overlay is toggled on top of it. This matters because
+ * two separate iframe elements (even with identical props) are two
+ * separate DOM nodes to React, which would force the provider to
+ * receive a second navigation and could restart the video.
+ *
  * Embeds are always rewritten to the providers' privacy-enhanced
  * domains/params (youtube-nocookie.com, Vimeo's dnt=1) — never a
  * plain youtube.com/vimeo.com embed.
  */
 import { useState } from 'react';
+import { buildEmbedSrc } from '../../lib/videoEmbed';
 
 interface EntryVideoPlayerProps {
   videoUrl?: string | null;
@@ -34,42 +43,6 @@ interface EntryVideoPlayerProps {
 }
 
 type PlayerState = 'facade' | 'loading' | 'loaded' | 'error';
-
-function parseYouTubeId(url: string): string | null {
-  const patterns = [
-    /youtube-nocookie\.com\/embed\/([\w-]+)/,
-    /youtube\.com\/embed\/([\w-]+)/,
-    /youtube\.com\/watch\?v=([\w-]+)/,
-    /youtu\.be\/([\w-]+)/,
-  ];
-  for (const re of patterns) {
-    const m = url.match(re);
-    if (m) return m[1];
-  }
-  return null;
-}
-
-function parseVimeoId(url: string): string | null {
-  const patterns = [/player\.vimeo\.com\/video\/(\d+)/, /vimeo\.com\/(\d+)/];
-  for (const re of patterns) {
-    const m = url.match(re);
-    if (m) return m[1];
-  }
-  return null;
-}
-
-/** Builds a privacy-enhanced embed URL, or null if the URL doesn't
- * match a supported provider — callers show a failure state rather
- * than attempting to embed an unrecognised source. */
-function buildEmbedSrc(videoUrl: string, provider?: string | null): string | null {
-  if (provider !== 'vimeo') {
-    const ytId = parseYouTubeId(videoUrl);
-    if (ytId) return `https://www.youtube-nocookie.com/embed/${ytId}?rel=0&modestbranding=1&cc_load_policy=1`;
-  }
-  const vimeoId = parseVimeoId(videoUrl);
-  if (vimeoId) return `https://player.vimeo.com/video/${vimeoId}?dnt=1`;
-  return null;
-}
 
 export default function EntryVideoPlayer({
   videoUrl,
@@ -103,7 +76,7 @@ export default function EntryVideoPlayer({
         className="aspect-video w-full rounded-xl overflow-hidden relative"
         style={{ background: '#111114' }}
       >
-        {(state === 'facade' || state === 'loading') && (
+        {state === 'facade' && (
           <>
             {poster ? (
               <img
@@ -119,7 +92,6 @@ export default function EntryVideoPlayer({
               type="button"
               onClick={handleActivate}
               aria-label={`Play video: ${title}`}
-              disabled={state === 'loading'}
               className="absolute inset-0 w-full h-full flex items-center justify-center focus:outline-none focus-visible:ring-4"
               style={{ background: 'rgba(0,0,0,0.25)' }}
             >
@@ -127,37 +99,36 @@ export default function EntryVideoPlayer({
                 className="w-16 h-16 rounded-full flex items-center justify-center"
                 style={{ background: 'rgba(164,28,100,0.9)' }}
               >
-                {state === 'loading' ? (
-                  <span className="w-6 h-6 rounded-full border-2 border-white/40 border-t-white animate-spin" aria-hidden="true" />
-                ) : (
-                  <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                )}
+                <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
               </span>
             </button>
           </>
         )}
 
-        {state === 'loading' && embedSrc && (
-          <iframe
-            src={embedSrc}
-            title={title}
-            className="w-full h-full absolute inset-0"
-            allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            onLoad={() => setState('loaded')}
-          />
-        )}
-
-        {state === 'loaded' && embedSrc && (
-          <iframe
-            src={embedSrc}
-            title={title}
-            className="w-full h-full absolute inset-0"
-            allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
+        {/* One iframe instance for the whole loading -> loaded lifetime.
+            The loading overlay sits on top of it and disappears on
+            onLoad; the iframe itself is never unmounted/recreated. */}
+        {(state === 'loading' || state === 'loaded') && embedSrc && (
+          <>
+            <iframe
+              src={embedSrc}
+              title={title}
+              className="w-full h-full absolute inset-0"
+              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              onLoad={() => setState('loaded')}
+            />
+            {state === 'loading' && (
+              <div
+                className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                style={{ background: 'rgba(0,0,0,0.35)' }}
+              >
+                <span className="w-10 h-10 rounded-full border-2 border-white/40 border-t-white animate-spin" aria-hidden="true" />
+              </div>
+            )}
+          </>
         )}
 
         {state === 'error' && (
