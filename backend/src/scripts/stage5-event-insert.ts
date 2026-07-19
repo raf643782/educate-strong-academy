@@ -118,7 +118,7 @@ const NEW_EVENTS: NewEvent[] = [
     judgingCriteria:
       'An implement is considered successfully loaded once it is fully and stably placed on the target platform or truck bed, judged to the same standard used for that implement type on its own dedicated page. If the time cap expires before all implements are loaded, the run is typically scored on implements or distance completed rather than receiving no result. Rules vary by federation, promoter and competition; always confirm before each event.',
     commonErrors:
-      'Pacing the whole race poorly, for example sprinting too hard between implements and arriving too fatigued to execute a clean load on the next one, is a common way time is lost. Because skipping ahead is not permitted, failing an implement and having to reattempt it costs meaningful time against the clock.',
+      'Pacing the whole race poorly, for example sprinting too hard between implements and arriving too fatigued to execute a clean load on the next one, is a common way time is lost. In formats that require implements to be completed in a fixed order, failing an implement and having to reattempt it can cost meaningful time against the clock.',
     coachingNotes: null,
     programmingNotes: null,
     isPublished: true,
