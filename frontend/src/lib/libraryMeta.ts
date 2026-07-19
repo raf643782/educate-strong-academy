@@ -6,6 +6,7 @@
  * through this one function.
  */
 import { SITE_URL } from './siteUrl';
+import { apiToPublicSlug } from './exerciseSlugs';
 
 export interface ExerciseLike {
   name: string;
@@ -37,7 +38,7 @@ export function buildExerciseMeta(exercise: ExerciseLike): PageMeta {
   return {
     title,
     description,
-    canonical: `${SITE_URL}/exercises/${exercise.slug}`,
+    canonical: `${SITE_URL}/exercises/${apiToPublicSlug(exercise.slug)}`,
     ogTitle: `${exercise.name} — Educate Strong Exercise Library`,
     ogDescription: description,
   };

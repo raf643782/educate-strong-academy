@@ -1,14 +1,23 @@
 /**
  * ExerciseLibrary — fetches real exercises from /api/exercises.
  * Category filter IDs match DB category strings exactly.
+ *
+ * Stage 2: every card links to its own dedicated, prerendered page
+ * (/exercises/<slug>) as the primary destination — the old quick-view
+ * modal was removed. It duplicated the same content with none of a
+ * dedicated page's benefits (its own URL, canonical, related content,
+ * shareability) and gave no clear secondary value once every exercise
+ * has a real page to link to.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import api from '../../lib/api';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
+import { apiToPublicSlug } from '../../lib/exerciseSlugs';
+import { SITE_URL } from '../../lib/siteUrl';
 
 interface Exercise {
   id: string;
@@ -17,28 +26,21 @@ interface Exercise {
   category: string;
   difficulty: string;
   description: string | null;
-  techniqueNotes: string | null;
-  coachingCues: string | null;
-  commonMistakes: string | null;
-  progressions: string | null;
-  regressions: string | null;
-  programmingNotes: string | null;
-  videoUrl: string | null;
   equipmentNeeded: string | null;
-  musclesWorked: string | null;
-  safetyNotes: string | null;
   isCompetitionEvent: boolean;
   isLaunchPriority: boolean;
 }
 
-// IDs must match DB category strings exactly
+// IDs must match DB category strings exactly. Labels use training
+// language rather than borrowing "Events" wording — that distinction
+// belongs to the Event Library, not here.
 const CATEGORIES_FILTER = [
   { id: 'all',              label: 'All' },
-  { id: 'Pressing',         label: 'Press Events' },
-  { id: 'Deadlift / Hinge', label: 'Deadlift Events' },
-  { id: 'Carry',            label: 'Carry Events' },
-  { id: 'Loading',          label: 'Loading Events' },
-  { id: 'Pull',             label: 'Pull Events' },
+  { id: 'Pressing',         label: 'Pressing' },
+  { id: 'Deadlift / Hinge', label: 'Deadlift and Hinge' },
+  { id: 'Carry',            label: 'Carry' },
+  { id: 'Loading',          label: 'Loading' },
+  { id: 'Pull',             label: 'Pull' },
   { id: 'Accessories',      label: 'Accessories' },
   { id: 'Conditioning',     label: 'Conditioning' },
 ];
@@ -58,11 +60,6 @@ function difficultyLabel(d: string): string {
     ELITE: 'Elite',
   };
   return map[d] ?? d;
-}
-
-function splitLines(text: string | null): string[] {
-  if (!text) return [];
-  return text.split(/[;\n]/).map(s => s.trim()).filter(Boolean);
 }
 
 // ── Category icon SVGs ────────────────────────────────────────────────────────
@@ -185,17 +182,22 @@ function ExercisePlaceholder({ category, compact = false }: { category: string; 
 
 export default function ExerciseLibrary() {
   useDocumentHead({
-    title: 'Exercise Library',
-    description: 'Coaching cues, technique breakdowns, common mistakes, and progression pathways for Strongman events and accessory work.',
+    title: 'Strongman Exercise Library | Technique and Training Guides',
+    description: 'Explore coaching cues, common mistakes, progressions and regressions for Strongman movements, from Atlas Stones to Yoke Walk.',
+    canonical: `${SITE_URL}/exercises`,
+    ogImage: undefined,
   });
 
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState('all');
-  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+  const [query, setQuery] = useState('');
+  const [beginnerOnly, setBeginnerOnly] = useState(false);
 
-  // Support ?category= query param for cross-linking from Event Library
+  // Support ?category= query param for cross-linking from Event Library.
+  // This does not create a separate indexable URL — the hub's canonical
+  // always points at the bare /exercises URL regardless of query state.
   const [searchParams] = useSearchParams();
   useEffect(() => {
     const cat = searchParams.get('category');
@@ -219,9 +221,20 @@ export default function ExerciseLibrary() {
 
   useEffect(() => { loadExercises(); }, [loadExercises]);
 
-  const filtered = activeCategory === 'all'
-    ? exercises
-    : exercises.filter(e => e.category === activeCategory);
+  const filtered = useMemo(() => {
+    let list = activeCategory === 'all' ? exercises : exercises.filter(e => e.category === activeCategory);
+    if (beginnerOnly) list = list.filter(e => e.difficulty === 'BEGINNER');
+    const q = query.trim().toLowerCase();
+    if (q) {
+      list = list.filter(e =>
+        e.name.toLowerCase().includes(q) ||
+        (e.description ?? '').toLowerCase().includes(q) ||
+        e.category.toLowerCase().includes(q) ||
+        (e.equipmentNeeded ?? '').toLowerCase().includes(q)
+      );
+    }
+    return list;
+  }, [exercises, activeCategory, beginnerOnly, query]);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
@@ -230,29 +243,54 @@ export default function ExerciseLibrary() {
       {/* Header */}
       <section className="pt-navbar es-grit" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C', position: 'relative' }}>
         <div className="es-container py-16">
-          <p className="es-label mb-3">Exercise Library</p>
+          <p className="es-label mb-3">Technique and Coaching Reference</p>
           <h1 className="text-4xl font-black text-white mb-3" style={{ letterSpacing: '-0.04em' }}>
-            Technique &amp; Coaching Reference
+            Strongman Exercise Library
           </h1>
-          <p className="text-es-muted max-w-xl">
-            Coaching cues, technique breakdowns, common mistakes, and progression pathways for Strongman events and accessory work.
+          <p className="text-es-muted max-w-2xl">
+            Coaching cues, technique breakdowns, common mistakes and progression pathways for Strongman events
+            and accessory work, written for beginners, coaches and competitive athletes.
           </p>
         </div>
       </section>
 
-      {/* Filters */}
+      {/* Search + filters */}
       <div style={{ background: '#111111', borderBottom: '1px solid #2C2C2C' }}>
-        <div className="es-container py-4 flex flex-wrap gap-2">
-          {CATEGORIES_FILTER.map(cat => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`px-4 py-3 rounded text-sm font-semibold transition-all ${activeCategory === cat.id ? 'text-white' : 'text-es-muted hover:text-white border border-es-grey-dark hover:border-es-accent'}`}
-              style={activeCategory === cat.id ? { background: '#A41C64', border: '1px solid rgba(164,28,100,0.6)' } : {}}
-            >
-              {cat.label}
-            </button>
-          ))}
+        <div className="es-container py-4 space-y-3">
+          <div className="flex flex-wrap gap-3 items-center">
+            <label htmlFor="exercise-search" className="sr-only">Search exercises</label>
+            <input
+              id="exercise-search"
+              type="search"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder="Search exercises, e.g. &quot;grip&quot; or &quot;carry&quot;"
+              className="text-sm rounded px-4 py-2.5 flex-1 min-w-[220px]"
+              style={{ background: '#1B1B20', border: '1px solid #2C2C2C', color: 'white' }}
+            />
+            <label className="flex items-center gap-2 text-sm text-es-muted cursor-pointer select-none px-3 py-2.5 rounded" style={{ border: '1px solid #2C2C2C' }}>
+              <input
+                type="checkbox"
+                checked={beginnerOnly}
+                onChange={e => setBeginnerOnly(e.target.checked)}
+                className="w-4 h-4"
+              />
+              Beginner-suitable only
+            </label>
+          </div>
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by category">
+            {CATEGORIES_FILTER.map(cat => (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                aria-pressed={activeCategory === cat.id}
+                className={`px-4 py-3 rounded text-sm font-semibold transition-all ${activeCategory === cat.id ? 'text-white' : 'text-es-muted hover:text-white border border-es-grey-dark hover:border-es-accent'}`}
+                style={activeCategory === cat.id ? { background: '#A41C64', border: '1px solid rgba(164,28,100,0.6)' } : {}}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -296,15 +334,17 @@ export default function ExerciseLibrary() {
                   style={{ border: '1px solid #2C2C2C', borderRadius: '12px', background: '#111' }}
                 >
                   <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '14px', lineHeight: 1.7 }}>
-                    No exercises have been published yet for this category.
-                    <br />
-                    Exercises will be added by the EducateStrong team.
+                    No exercises match your search or filters.
                   </p>
                 </div>
               ) : (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {filtered.map(ex => (
-                    <div key={ex.id} className="es-card-hover flex flex-col p-4">
+                    <Link
+                      key={ex.id}
+                      to={`/exercises/${apiToPublicSlug(ex.slug)}`}
+                      className="es-card-hover flex flex-col p-4"
+                    >
                       <ExercisePlaceholder category={ex.category} compact />
                       <div className="flex items-center justify-between mt-3 mb-2">
                         <span className={DIFF_BADGE[ex.difficulty] || 'badge-grey'}>{difficultyLabel(ex.difficulty)}</span>
@@ -318,13 +358,10 @@ export default function ExerciseLibrary() {
                       ) : (
                         <p className="text-es-subtle text-xs mb-4 italic">Details coming soon</p>
                       )}
-                      <button
-                        onClick={() => setSelectedExercise(ex)}
-                        className="btn-secondary text-xs text-center py-2"
-                      >
+                      <span className="btn-secondary text-xs text-center py-2">
                         View Exercise
-                      </button>
-                    </div>
+                      </span>
+                    </Link>
                   ))}
                 </div>
               )}
@@ -333,227 +370,6 @@ export default function ExerciseLibrary() {
 
         </div>
       </div>
-
-      {/* Exercise Detail Modal */}
-      {selectedExercise && (
-        <div
-          className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-16 overflow-y-auto"
-          style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}
-          onClick={(e) => { if (e.target === e.currentTarget) setSelectedExercise(null); }}
-        >
-          <div
-            className="w-full max-w-2xl rounded-lg overflow-hidden"
-            style={{ background: '#1A1A1A', border: '1px solid #3C3C3C', boxShadow: '0 20px 80px rgba(0,0,0,0.9)', marginBottom: '2rem' }}
-          >
-            {/* Modal header */}
-            <div
-              className="flex items-start gap-4 p-6"
-              style={{ borderBottom: '1px solid #2C2C2C', background: 'linear-gradient(135deg, rgba(164,28,100,0.12), transparent)' }}
-            >
-              {/* Branded icon */}
-              <div style={{
-                width: '72px',
-                height: '72px',
-                flexShrink: 0,
-                background: 'linear-gradient(135deg, #1A0D13 0%, #12101A 100%)',
-                borderRadius: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: '1px solid rgba(164,28,100,0.2)',
-                position: 'relative',
-                overflow: 'hidden',
-              }}>
-                <div style={{
-                  position: 'absolute', inset: 0,
-                  background: 'radial-gradient(ellipse 80% 80% at 50% 50%, rgba(164,28,100,0.2), transparent)',
-                }} />
-                <CategoryIcon category={selectedExercise.category} size={36} />
-              </div>
-
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p className="es-label mb-1">
-                  {CATEGORIES_FILTER.find(c => c.id === selectedExercise.category)?.label ?? selectedExercise.category}
-                </p>
-                <h2 className="text-2xl font-black text-white leading-tight">{selectedExercise.name}</h2>
-                <div className="flex gap-2 mt-2 flex-wrap">
-                  <span className={DIFF_BADGE[selectedExercise.difficulty] || 'badge-grey'}>
-                    {difficultyLabel(selectedExercise.difficulty)}
-                  </span>
-                  {selectedExercise.isCompetitionEvent && (
-                    <span className="badge-accent">Competition Event</span>
-                  )}
-                </div>
-              </div>
-
-              <button
-                onClick={() => setSelectedExercise(null)}
-                className="p-2 rounded text-es-muted hover:text-white transition-colors flex-shrink-0"
-                style={{ background: '#2A2A2A' }}
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Modal body */}
-            <div className="p-6 space-y-6">
-
-              {selectedExercise.description && (
-                <div>
-                  <p className="es-label mb-2">Description</p>
-                  <p className="text-es-muted text-sm leading-relaxed">{selectedExercise.description}</p>
-                </div>
-              )}
-
-              {selectedExercise.techniqueNotes && (
-                <div>
-                  <p className="es-label mb-2">Technique Notes</p>
-                  <p className="text-es-muted text-sm leading-relaxed">{selectedExercise.techniqueNotes}</p>
-                </div>
-              )}
-
-              {splitLines(selectedExercise.coachingCues).length > 0 && (
-                <div>
-                  <p className="es-label mb-3">Coaching Cues</p>
-                  <ul className="space-y-2">
-                    {splitLines(selectedExercise.coachingCues).map((cue, i) => (
-                      <li key={i} className="flex items-start gap-3 text-sm text-es-muted">
-                        <span className="font-black text-xs mt-0.5 flex-shrink-0" style={{ color: '#A41C64' }}>{i + 1}</span>
-                        {cue}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {splitLines(selectedExercise.commonMistakes).length > 0 && (
-                <div>
-                  <p className="es-label mb-3">Common Mistakes</p>
-                  <ul className="space-y-2">
-                    {splitLines(selectedExercise.commonMistakes).map((m, i) => (
-                      <li key={i} className="flex items-start gap-3 text-sm text-es-muted">
-                        <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1.5" style={{ background: '#E19A47' }} />
-                        {m}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {selectedExercise.safetyNotes && (
-                <div
-                  className="p-4 rounded-lg"
-                  style={{ background: 'rgba(164,28,100,0.06)', border: '1px solid rgba(164,28,100,0.15)' }}
-                >
-                  <p className="es-label mb-2">Safety Notes</p>
-                  <p className="text-sm text-es-muted leading-relaxed">{selectedExercise.safetyNotes}</p>
-                </div>
-              )}
-
-              {(selectedExercise.progressions || selectedExercise.regressions) && (
-                <div className="grid sm:grid-cols-2 gap-4">
-                  {selectedExercise.progressions && (
-                    <div className="es-card-grey p-4 rounded-lg">
-                      <p className="es-label mb-2">Progressions</p>
-                      <p className="text-sm text-es-muted leading-relaxed">{selectedExercise.progressions}</p>
-                    </div>
-                  )}
-                  {selectedExercise.regressions && (
-                    <div className="es-card-grey p-4 rounded-lg">
-                      <p className="es-label mb-2">Regressions</p>
-                      <p className="text-sm text-es-muted leading-relaxed">{selectedExercise.regressions}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {(selectedExercise.equipmentNeeded || selectedExercise.musclesWorked) && (
-                <div className="grid sm:grid-cols-2 gap-4">
-                  {selectedExercise.equipmentNeeded && (
-                    <div>
-                      <p className="es-label mb-2">Equipment</p>
-                      <p className="text-sm text-es-muted">{selectedExercise.equipmentNeeded}</p>
-                    </div>
-                  )}
-                  {selectedExercise.musclesWorked && (
-                    <div>
-                      <p className="es-label mb-2">Muscles Worked</p>
-                      <p className="text-sm text-es-muted">{selectedExercise.musclesWorked}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {selectedExercise.programmingNotes && (
-                <div>
-                  <p className="es-label mb-2">Programming Notes</p>
-                  <p className="text-sm text-es-muted leading-relaxed">{selectedExercise.programmingNotes}</p>
-                </div>
-              )}
-
-              {selectedExercise.videoUrl && (
-                <div>
-                  <p className="es-label mb-2">Video</p>
-                  <a
-                    href={selectedExercise.videoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-secondary text-sm inline-block"
-                  >
-                    Watch Video
-                  </a>
-                </div>
-              )}
-
-              {/* Cross-link to Event Library */}
-              {selectedExercise.isCompetitionEvent && (
-                <div style={{ borderTop: '1px solid #2C2C2C', paddingTop: '16px' }}>
-                  <p className="text-xs text-es-subtle mb-2">Competition reference</p>
-                  <Link
-                    to="/events"
-                    className="text-xs font-semibold transition-colors hover:opacity-80"
-                    style={{ color: '#A41C64' }}
-                    onClick={() => setSelectedExercise(null)}
-                  >
-                    View this event in the Event Library
-                  </Link>
-                </div>
-              )}
-
-              {!selectedExercise.description &&
-                !selectedExercise.coachingCues &&
-                !selectedExercise.techniqueNotes && (
-                  <p className="text-xs text-es-subtle italic">
-                    Detailed content for this exercise will be added by the EducateStrong coaching team.
-                  </p>
-                )}
-
-              {/* Non-gated CTA — this reference is free today; deeper coaching
-                  content (session plans, assessment guidance) lives in the course */}
-              <div
-                className="rounded-lg p-4"
-                style={{ background: 'rgba(164,28,100,0.06)', border: '1px solid rgba(164,28,100,0.2)' }}
-              >
-                <p className="text-sm font-bold text-white mb-1">Want the full coaching framework?</p>
-                <p className="text-xs text-es-muted leading-relaxed mb-2">
-                  Session plans, assessment guidance and tutor-supported coaching for this movement are covered
-                  inside the Level 1 Coaching Strongman course.
-                </p>
-                <Link
-                  to="/courses/level-1-coaching-strongman"
-                  className="text-xs font-semibold"
-                  style={{ color: '#A41C64' }}
-                  onClick={() => setSelectedExercise(null)}
-                >
-                  Explore the Level 1 Coaching course →
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       <Footer />
     </div>

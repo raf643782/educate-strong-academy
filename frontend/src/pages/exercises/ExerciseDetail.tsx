@@ -6,6 +6,8 @@ import api from '../../lib/api';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
 import { buildExerciseMeta } from '../../lib/libraryMeta';
 import { pickRelatedExercises, pickEventsForExercise } from '../../lib/relatedContent';
+import { apiToPublicSlug, publicToApiSlug } from '../../lib/exerciseSlugs';
+import { readEmbeddedLibraryData } from '../../lib/initialData';
 
 export interface Exercise {
   id: string;
@@ -213,7 +215,7 @@ export function ExerciseDetailContent({
                       <ul className="space-y-2">
                         {relatedExercises.map(r => (
                           <li key={r.slug}>
-                            <Link to={`/exercises/${r.slug}`} className="text-sm font-semibold es-inline-link" style={{ color: '#A41C64' }}>
+                            <Link to={`/exercises/${apiToPublicSlug(r.slug)}`} className="text-sm font-semibold es-inline-link" style={{ color: '#A41C64' }}>
                               {r.name}
                             </Link>
                           </li>
@@ -264,36 +266,47 @@ export function ExerciseDetailContent({
  * absent (the normal client-navigation case) this behaves exactly like
  * every other data-fetching page in the app. */
 export default function ExerciseDetail({ ssrExercise }: { ssrExercise?: Exercise }) {
-  const { slug } = useParams<{ slug: string }>();
-  const [exercise, setExercise] = useState<Exercise | null>(ssrExercise ?? null);
-  const [relatedExercises, setRelatedExercises] = useState<Exercise[]>([]);
-  const [relatedEvents, setRelatedEvents] = useState<EventSummary[]>([]);
-  const [loading, setLoading] = useState(!ssrExercise);
+  const { slug: publicSlug } = useParams<{ slug: string }>();
+
+  // Build-time-embedded data for this exact route, if this page was
+  // prerendered — read once, synchronously, so the first client render
+  // (which hydrateRoot in main.tsx expects to match the server output)
+  // uses the same data that produced the static HTML, with no refetch.
+  const [embedded] = useState(() =>
+    ssrExercise ? null : readEmbeddedLibraryData<Exercise>('exercise', publicSlug)
+  );
+
+  const [exercise, setExercise] = useState<Exercise | null>(ssrExercise ?? embedded?.record ?? null);
+  const [relatedExercises, setRelatedExercises] = useState<Exercise[]>((embedded?.relatedExercises as Exercise[]) ?? []);
+  const [relatedEvents, setRelatedEvents] = useState<EventSummary[]>((embedded?.relatedEvents as EventSummary[]) ?? []);
+  const [loading, setLoading] = useState(!ssrExercise && !embedded);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    if (ssrExercise) return;
-    if (!slug) return;
+    if (ssrExercise || embedded) return; // already have complete, matching data
+    if (!publicSlug) return;
+    const apiSlug = publicToApiSlug(publicSlug);
     setLoading(true);
     setNotFound(false);
-    api.get<Exercise>(`/exercises/${slug}`)
-      .then(res => setExercise(res.data))
+    api.get<Exercise>(`/exercises/${apiSlug}`)
+      .then(res => setExercise({ ...res.data, slug: apiToPublicSlug(res.data.slug) }))
       .catch(err => {
         if (err.response?.status === 404) setNotFound(true);
       })
       .finally(() => setLoading(false));
-  }, [slug, ssrExercise]);
+  }, [publicSlug, ssrExercise, embedded]);
 
   useEffect(() => {
     if (!exercise) return;
+    if (embedded) return; // related content already known from embedded data
     Promise.all([
       api.get<Exercise[]>('/exercises'),
       api.get<EventSummary[]>('/events'),
     ]).then(([exRes, evRes]) => {
-      setRelatedExercises(pickRelatedExercises(exRes.data, exercise));
-      setRelatedEvents(pickEventsForExercise(evRes.data, exercise));
+      setRelatedExercises(pickRelatedExercises(exRes.data, { ...exercise, slug: publicToApiSlug(exercise.slug)! }));
+      setRelatedEvents(pickEventsForExercise(evRes.data, { ...exercise, slug: publicToApiSlug(exercise.slug)! }));
     }).catch(() => {});
-  }, [exercise]);
+  }, [exercise, embedded]);
 
   const meta = exercise ? buildExerciseMeta(exercise) : null;
   useDocumentHead({

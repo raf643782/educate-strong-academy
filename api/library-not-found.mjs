@@ -30,11 +30,36 @@
 const API_BASE = process.env.VITE_API_URL || 'https://educate-strong-api.onrender.com/api';
 const REQUEST_TIMEOUT_MS = 5000;
 
-async function recordExists(endpoint, slug) {
+// Public slug -> real API/database slug. Mirrors
+// frontend/src/lib/exerciseSlugs.ts (PUBLIC_TO_API_SLUG) — kept as a
+// small standalone copy here because this function is a separate
+// Vercel deployment unit (plain .mjs, not built through Vite) and the
+// mapping is small and rarely changes. Update both places together.
+const PUBLIC_TO_API_EXERCISE_SLUG = {
+  'axle-press': 'exercise-axle-press',
+  'farmers-walk': 'exercise-farmers-walk',
+  'log-press': 'exercise-log-press',
+  'yoke-walk': 'exercise-yoke-walk',
+  'axle-deadlift': 'axle-deadlift-exercise',
+  'circus-dumbbell': 'circus-dumbbell-exercise',
+  'duck-walk': 'duck-walk-exercise',
+  'frame-carry': 'frame-carry-exercise',
+  'front-squat': 'front-squat-exercise',
+  'husafell-carry': 'husafell-carry-exercise',
+  'power-stairs': 'power-stairs-exercise',
+  'stone-to-shoulder': 'stone-to-shoulder-exercise',
+  'viking-press': 'viking-press-exercise',
+};
+
+async function recordExists(endpoint, publicSlug) {
+  const apiSlug =
+    endpoint === 'exercises'
+      ? PUBLIC_TO_API_EXERCISE_SLUG[publicSlug] ?? publicSlug
+      : publicSlug;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
-    const res = await fetch(`${API_BASE}/${endpoint}/${encodeURIComponent(slug)}`, {
+    const res = await fetch(`${API_BASE}/${endpoint}/${encodeURIComponent(apiSlug)}`, {
       signal: controller.signal,
     });
     return res.ok; // true (200) / false (404 from the real API)

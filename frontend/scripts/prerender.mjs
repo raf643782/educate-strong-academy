@@ -5,14 +5,16 @@
  * Runs after `vite build` (client) and `vite build --ssr` (server
  * bundle at dist-server/entry-server.js). Fetches real data from the
  * live API, renders each page with entry-server's `render()`, and
- * writes static HTML snapshots into dist/exercises/<slug>/index.html
- * and dist/events/<slug>/index.html.
+ * writes static HTML snapshots into dist/exercises/<publicSlug>/index.html
+ * and dist/events/<slug>/index.html — plus a safely-escaped embedded
+ * JSON payload of the exact data used, so main.tsx's hydrateRoot can
+ * reproduce the same first render client-side with no refetch.
  *
  * Vercel's existing vercel.json already serves real files under dist/
  * before falling back to the SPA shell ("handle": "filesystem" first),
  * so these static files are served automatically with no routing
- * changes beyond the dedicated not-found function (api/library-not-found.mjs)
- * added for slugs that have no static file at all.
+ * changes beyond the dedicated not-found function
+ * (api/library-not-found.mjs) added for slugs that have no static file.
  *
  * FAILS THE BUILD (non-zero exit) on any of: API unreachable, API
  * timeout, an empty response where records were expected, a rendered
@@ -21,12 +23,10 @@
  * these are caught and swallowed — a broken build must not deploy
  * incomplete or broken public pages.
  *
- * Stage 1 scope note: PRERENDER_SLUG_LIMIT restricts the real,
- * API-derived slug list down to the two Stage 1 proof-of-concept pages
- * so this script only writes 2 files today — but the discovery
- * mechanism itself already reads every real published slug from the
- * API, exactly as it will for the full rollout. Removing
- * PRERENDER_SLUG_LIMIT (Stage 2) requires no other code change.
+ * Stage 2: every published Exercise is now discovered from the API and
+ * prerendered (no manual slug list). Events remain restricted to the
+ * Stage 1 proof-of-concept page (Atlas Stones) — the full Event
+ * Library rollout is Stage 3.
  */
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
@@ -40,10 +40,10 @@ const API_BASE = process.env.VITE_API_URL || 'https://educate-strong-api.onrende
 const REQUEST_TIMEOUT_MS = 10_000;
 const MAX_RETRIES = 2;
 
-// Stage 1 closure: intentionally limit the real, API-derived slug list
-// to the two proof-of-concept pages. Remove this line in Stage 2 to
-// prerender every published record — no other change required.
-const PRERENDER_SLUG_LIMIT = { exercises: ['hip-hinge-drill'], events: ['atlas-stones'] };
+// Stage 2: Event Library rollout is Stage 3 — keep events restricted to
+// the Stage 1 proof-of-concept page for now. Exercises are no longer
+// restricted (see EXERCISE_SLUG_LIMIT below, now unused/removed).
+const EVENT_SLUG_LIMIT = ['atlas-stones'];
 
 class PrerenderError extends Error {}
 
@@ -99,6 +99,22 @@ function injectRoot(html, appHtml) {
   return html.replace('<div id="root"></div>', `<div id="root">${appHtml}</div>`);
 }
 
+/** Safe JSON-in-HTML serialisation — escapes the characters that could
+ * break out of the <script> tag or be (mis)interpreted as HTML if this
+ * were ever reflected elsewhere. Standard "safe embedded JSON" pattern. */
+function serializeForScriptTag(data) {
+  return JSON.stringify(data)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026');
+}
+
+function injectInitialData(html, initialData) {
+  const json = serializeForScriptTag(initialData);
+  const tag = `    <script type="application/json" id="__ES_LIBRARY_DATA__">${json}</script>\n`;
+  return html.replace('</body>', `${tag}  </body>`);
+}
+
 function escapeHtml(str) {
   return String(str)
     .replace(/&/g, '&amp;')
@@ -133,7 +149,7 @@ function validateGeneratedPage({ label, html, meta }) {
 }
 
 async function main() {
-  const { render } = await import(path.join(FRONTEND_ROOT, 'dist-server', 'entry-server.js'));
+  const { render, apiToPublicSlug } = await import(path.join(FRONTEND_ROOT, 'dist-server', 'entry-server.js'));
 
   const template = await readFile(path.join(DIST_DIR, 'index.html'), 'utf-8');
 
@@ -159,49 +175,45 @@ async function main() {
   }
   console.log(`[prerender] fetched ${allExercises.length} exercises, ${allEvents.length} events`);
 
-  const exerciseSlugsToRender = allExercises
-    .map(e => e.slug)
-    .filter(slug => !PRERENDER_SLUG_LIMIT || PRERENDER_SLUG_LIMIT.exercises.includes(slug));
-  const eventSlugsToRender = allEvents
-    .map(e => e.slug)
-    .filter(slug => !PRERENDER_SLUG_LIMIT || PRERENDER_SLUG_LIMIT.events.includes(slug));
+  // Every published exercise, no manual list.
+  const exercisesToRender = allExercises;
 
-  // Catch a typo'd/removed slug in PRERENDER_SLUG_LIMIT before it silently renders nothing.
-  if (PRERENDER_SLUG_LIMIT) {
-    for (const slug of PRERENDER_SLUG_LIMIT.exercises) {
-      if (!allExercises.some(e => e.slug === slug)) {
-        throw new PrerenderError(`PRERENDER_SLUG_LIMIT requested exercise slug "${slug}" but no such published exercise exists.`);
-      }
-    }
-    for (const slug of PRERENDER_SLUG_LIMIT.events) {
-      if (!allEvents.some(e => e.slug === slug)) {
-        throw new PrerenderError(`PRERENDER_SLUG_LIMIT requested event slug "${slug}" but no such published event exists.`);
-      }
+  const eventSlugsToRender = allEvents.map(e => e.slug).filter(slug => EVENT_SLUG_LIMIT.includes(slug));
+  for (const slug of EVENT_SLUG_LIMIT) {
+    if (!allEvents.some(e => e.slug === slug)) {
+      throw new PrerenderError(`EVENT_SLUG_LIMIT requested event slug "${slug}" but no such published event exists.`);
     }
   }
 
   let written = 0;
+  const seenPublicSlugs = new Set();
 
-  for (const slug of exerciseSlugsToRender) {
-    const exercise = allExercises.find(e => e.slug === slug);
-    const { html, meta } = render({
+  for (const exercise of exercisesToRender) {
+    const publicSlug = apiToPublicSlug(exercise.slug);
+    if (seenPublicSlugs.has(publicSlug)) {
+      throw new PrerenderError(`Public slug collision: "${publicSlug}" is produced by more than one exercise.`);
+    }
+    seenPublicSlugs.add(publicSlug);
+
+    const { html, meta, initialData } = render({
       type: 'exercise',
-      url: `/exercises/${slug}`,
+      url: `/exercises/${publicSlug}`,
       exercise,
       allExercises,
       allEvents,
     });
-    validateGeneratedPage({ label: `/exercises/${slug}`, html, meta });
-    const outDir = path.join(DIST_DIR, 'exercises', slug);
+    validateGeneratedPage({ label: `/exercises/${publicSlug}`, html, meta });
+    const outDir = path.join(DIST_DIR, 'exercises', publicSlug);
     await mkdir(outDir, { recursive: true });
-    await writeFile(path.join(outDir, 'index.html'), injectRoot(injectHead(template, meta), html));
-    console.log(`[prerender] wrote /exercises/${slug}/index.html`);
+    const page = injectInitialData(injectRoot(injectHead(template, meta), html), initialData);
+    await writeFile(path.join(outDir, 'index.html'), page);
     written++;
   }
+  console.log(`[prerender] wrote ${exercisesToRender.length} exercise page(s)`);
 
   for (const slug of eventSlugsToRender) {
     const event = allEvents.find(e => e.slug === slug);
-    const { html, meta } = render({
+    const { html, meta, initialData } = render({
       type: 'event',
       url: `/events/${slug}`,
       event,
@@ -211,14 +223,20 @@ async function main() {
     validateGeneratedPage({ label: `/events/${slug}`, html, meta });
     const outDir = path.join(DIST_DIR, 'events', slug);
     await mkdir(outDir, { recursive: true });
-    await writeFile(path.join(outDir, 'index.html'), injectRoot(injectHead(template, meta), html));
+    const page = injectInitialData(injectRoot(injectHead(template, meta), html), initialData);
+    await writeFile(path.join(outDir, 'index.html'), page);
     console.log(`[prerender] wrote /events/${slug}/index.html`);
     written++;
   }
 
-  const intendedCount = exerciseSlugsToRender.length + eventSlugsToRender.length;
+  const intendedCount = exercisesToRender.length + eventSlugsToRender.length;
   if (written !== intendedCount) {
     throw new PrerenderError(`Expected to write ${intendedCount} page(s) but wrote ${written}.`);
+  }
+  if (exercisesToRender.length !== allExercises.length) {
+    throw new PrerenderError(
+      `Expected to prerender all ${allExercises.length} published exercises but only rendered ${exercisesToRender.length}.`
+    );
   }
 
   console.log(`[prerender] done — ${written} page(s) prerendered (of ${allExercises.length + allEvents.length} total published records)`);

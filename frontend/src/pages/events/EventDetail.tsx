@@ -6,6 +6,8 @@ import api from '../../lib/api';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
 import { buildEventMeta } from '../../lib/libraryMeta';
 import { pickExercisesForEvent, pickRelatedEvents } from '../../lib/relatedContent';
+import { apiToPublicSlug } from '../../lib/exerciseSlugs';
+import { readEmbeddedLibraryData } from '../../lib/initialData';
 
 export interface Event {
   id: string;
@@ -140,7 +142,7 @@ export function EventDetailContent({
                   For setup, coaching cues and progressions, see{' '}
                   {relatedExercises.map((r, i) => (
                     <span key={r.slug}>
-                      <Link to={`/exercises/${r.slug}`} className="es-inline-link font-semibold" style={{ color: '#A41C64' }}>
+                      <Link to={`/exercises/${apiToPublicSlug(r.slug)}`} className="es-inline-link font-semibold" style={{ color: '#A41C64' }}>
                         {r.name}
                       </Link>
                       {i < relatedExercises.length - 1 ? ', ' : ''}
@@ -199,14 +201,17 @@ export function EventDetailContent({
 
 export default function EventDetail({ ssrEvent }: { ssrEvent?: Event }) {
   const { slug } = useParams<{ slug: string }>();
-  const [event, setEvent] = useState<Event | null>(ssrEvent ?? null);
-  const [relatedExercises, setRelatedExercises] = useState<ExerciseSummary[]>([]);
-  const [relatedEvents, setRelatedEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(!ssrEvent);
+
+  const [embedded] = useState(() => (ssrEvent ? null : readEmbeddedLibraryData<Event>('event', slug)));
+
+  const [event, setEvent] = useState<Event | null>(ssrEvent ?? embedded?.record ?? null);
+  const [relatedExercises, setRelatedExercises] = useState<ExerciseSummary[]>((embedded?.relatedExercises as ExerciseSummary[]) ?? []);
+  const [relatedEvents, setRelatedEvents] = useState<Event[]>((embedded?.relatedEvents as Event[]) ?? []);
+  const [loading, setLoading] = useState(!ssrEvent && !embedded);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    if (ssrEvent) return;
+    if (ssrEvent || embedded) return;
     if (!slug) return;
     setLoading(true);
     setNotFound(false);
@@ -216,10 +221,11 @@ export default function EventDetail({ ssrEvent }: { ssrEvent?: Event }) {
         if (err.response?.status === 404) setNotFound(true);
       })
       .finally(() => setLoading(false));
-  }, [slug, ssrEvent]);
+  }, [slug, ssrEvent, embedded]);
 
   useEffect(() => {
     if (!event) return;
+    if (embedded) return;
     Promise.all([
       api.get<ExerciseSummary[]>('/exercises'),
       api.get<Event[]>('/events'),
@@ -227,7 +233,7 @@ export default function EventDetail({ ssrEvent }: { ssrEvent?: Event }) {
       setRelatedExercises(pickExercisesForEvent(exRes.data, event));
       setRelatedEvents(pickRelatedEvents(evRes.data, event));
     }).catch(() => {});
-  }, [event]);
+  }, [event, embedded]);
 
   const meta = event ? buildEventMeta(event) : null;
   useDocumentHead({
