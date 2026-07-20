@@ -105,7 +105,14 @@ const TARGETS: RecordTarget[] = [
     changes: [
       {
         field: 'description',
-        from: 'A Strongman event and training drill where the athlete pulls a heavy implement hand-over-hand using a rope. Tests back strength, bicep endurance, grip, and core stability.',
+        // Corrected 2026-07-20: a production dry run found this
+        // record's actual current value is the Event's old wording
+        // (apparently copied into the Exercise record before Stage 4),
+        // not the value originally assumed here. Updated to match the
+        // real current production text exactly, so the drift check
+        // classifies it as PENDING instead of aborting. The approved
+        // final value is unchanged.
+        from: 'The athlete drags a heavy implement (sled, vehicle, or loaded rope system) hand-over-hand using a rope. A test of back strength, bicep endurance, grip, and core stability — either seated or standing depending on competition format.',
         to: 'A hand-over-hand rope-pulling drill, seated or standing, that trains the pulling pattern used in the Arm-Over-Arm Rope Pull competition event. Tests back strength, biceps endurance, grip and core stability.',
       },
     ],
