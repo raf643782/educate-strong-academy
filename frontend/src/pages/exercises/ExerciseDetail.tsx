@@ -10,6 +10,9 @@ import { apiToPublicSlug, publicToApiSlug } from '../../lib/exerciseSlugs';
 import { readEmbeddedLibraryData } from '../../lib/initialData';
 import EntryVideoPlayer from '../../components/media/EntryVideoPlayer';
 import VideoObjectSchema from '../../components/media/VideoObjectSchema';
+import EditorialAttribution from '../../components/content/EditorialAttribution';
+import { resolveRelatedArticles } from '../../lib/relatedArticles';
+import { resolveCourseLinks } from '../../lib/courseLinks';
 
 export interface Exercise {
   id: string;
@@ -39,6 +42,17 @@ export interface Exercise {
   videoDuration?: string | null;
   videoTranscript?: string | null;
   captionsUrl?: string | null;
+  authorName?: string | null;
+  authorRole?: string | null;
+  reviewerName?: string | null;
+  reviewerQualification?: string | null;
+  publishedDate?: string | null;
+  lastReviewedDate?: string | null;
+  sources?: string | null;
+  relatedExerciseSlugs?: string[];
+  relatedEventSlugs?: string[];
+  relatedArticleSlugs?: string[];
+  relevantCourseSlugs?: string[];
 }
 
 interface EventSummary {
@@ -86,6 +100,8 @@ export function ExerciseDetailContent({
 }) {
   const pairedEvent = relatedEvents.find(e => e.name === exercise.name);
   const otherRelatedEvents = relatedEvents.filter(e => e.name !== exercise.name);
+  const relatedArticles = resolveRelatedArticles(exercise.relatedArticleSlugs);
+  const extraCourseLinks = resolveCourseLinks(exercise.relevantCourseSlugs);
 
   return (
     <div style={{ background: '#0D0D0D' }}>
@@ -278,6 +294,23 @@ export function ExerciseDetailContent({
               </div>
             )}
 
+            {/* Related articles (Stage 7) — only shown when relatedArticleSlugs
+                resolves to real Knowledge Hub articles */}
+            {relatedArticles.length > 0 && (
+              <div style={{ borderTop: '1px solid #2C2C2C', paddingTop: '20px' }}>
+                <p className="es-label mb-3">Related Reading</p>
+                <ul className="space-y-2">
+                  {relatedArticles.map(a => (
+                    <li key={a.slug}>
+                      <Link to={`/knowledge/${a.slug}`} className="text-sm font-semibold es-inline-link" style={{ color: '#A41C64' }}>
+                        {a.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             {/* Contextual course CTA */}
             <div className="rounded-lg p-5" style={{ background: 'rgba(164,28,100,0.06)', border: '1px solid rgba(164,28,100,0.2)' }}>
               <p className="text-sm font-bold text-white mb-1">Want the full coaching framework?</p>
@@ -289,6 +322,34 @@ export function ExerciseDetailContent({
                 Explore the Level 1 Coaching course →
               </Link>
             </div>
+
+            {/* Additional course CTAs (Stage 7) — only when relevantCourseSlugs
+                explicitly names one, e.g. StrongKidz for a confirmed
+                age-appropriate foundation movement. Nothing is assigned here
+                automatically. */}
+            {extraCourseLinks.map(course => (
+              <div
+                key={course.slug}
+                className="rounded-lg p-5"
+                style={{ background: 'rgba(225,154,71,0.06)', border: '1px solid rgba(225,154,71,0.2)' }}
+              >
+                <p className="text-sm font-bold text-white mb-1">{course.label}</p>
+                <p className="text-xs text-es-muted leading-relaxed mb-2">{course.description}</p>
+                <Link to={course.href} className="text-xs font-semibold" style={{ color: course.accentColor }}>
+                  {course.linkText} →
+                </Link>
+              </div>
+            ))}
+
+            <EditorialAttribution
+              authorName={exercise.authorName}
+              authorRole={exercise.authorRole}
+              reviewerName={exercise.reviewerName}
+              reviewerQualification={exercise.reviewerQualification}
+              publishedDate={exercise.publishedDate}
+              lastReviewedDate={exercise.lastReviewedDate}
+              sources={exercise.sources}
+            />
 
           </div>
         </div>

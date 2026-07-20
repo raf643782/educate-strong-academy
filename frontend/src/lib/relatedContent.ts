@@ -23,6 +23,13 @@ export interface CategoryItem {
   slug: string;
   name: string;
   category: string;
+  // Stage 7: editorial-curated relationship overrides stored on the
+  // record itself, checked ahead of every other rule below. Optional
+  // and empty by default — no curated relationship has been added for
+  // any record yet, so every page still falls through to the same
+  // family/category logic that was already live before Stage 7.
+  relatedExerciseSlugs?: string[];
+  relatedEventSlugs?: string[];
 }
 
 // ── Movement families (Exercise Library) ────────────────────────────────────
@@ -154,11 +161,15 @@ function byExplicitSlugs<T extends CategoryItem>(all: T[], slugs: string[] | und
   return slugs.map(slug => all.find(item => item.slug === slug)).filter((x): x is T => !!x);
 }
 
-/** Related exercises for an exercise page: explicit stated relations
- * first, then same movement-family, excluding itself. No category
- * fallback — an exercise with no family and no explicit relations
- * simply gets no related-exercises section. */
+/** Related exercises for an exercise page: a curated DB override
+ * first (Stage 7), then explicit stated relations, then same
+ * movement-family, excluding itself. No category fallback — an
+ * exercise with no family and no explicit relations simply gets no
+ * related-exercises section. */
 export function pickRelatedExercises<T extends CategoryItem>(all: T[], current: CategoryItem): T[] {
+  const curated = byExplicitSlugs(all, current.relatedExerciseSlugs).filter(e => e.slug !== current.slug);
+  if (curated.length > 0) return curated.slice(0, MAX_RELATED);
+
   const explicit = byExplicitSlugs(all, EXPLICIT_RELATED_EXERCISE_SLUGS[current.slug]).filter(e => e.slug !== current.slug);
   if (explicit.length > 0) return explicit.slice(0, MAX_RELATED);
 
@@ -169,12 +180,16 @@ export function pickRelatedExercises<T extends CategoryItem>(all: T[], current: 
     .slice(0, MAX_RELATED);
 }
 
-/** Related events for an exercise page: the exercise's own named
- * competition counterpart first (Stage 4 explicit pairing), then the
- * event category matching its real movement family (not its broad DB
- * category) — this is what stops e.g. an "atlas-stone" family exercise
- * from surfacing Power Stairs as if it were related. */
+/** Related events for an exercise page: a curated DB override first
+ * (Stage 7), then the exercise's own named competition counterpart
+ * (Stage 4 explicit pairing), then the event category matching its
+ * real movement family (not its broad DB category) — this is what
+ * stops e.g. an "atlas-stone" family exercise from surfacing Power
+ * Stairs as if it were related. */
 export function pickEventsForExercise<T extends CategoryItem>(allEvents: T[], exercise: CategoryItem): T[] {
+  const curated = byExplicitSlugs(allEvents, exercise.relatedEventSlugs);
+  if (curated.length > 0) return curated.slice(0, MAX_RELATED);
+
   const explicitSlug = EXPLICIT_EVENT_FOR_EXERCISE[exercise.slug];
   const explicit = explicitSlug ? allEvents.find(e => e.slug === explicitSlug) : undefined;
 
@@ -186,11 +201,15 @@ export function pickEventsForExercise<T extends CategoryItem>(allEvents: T[], ex
   return result.slice(0, MAX_RELATED);
 }
 
-/** Related exercises for an event page: the event's own named exercise
- * counterpart(s) first (Stage 4 explicit pairing, e.g. Log Press event
- * names both Log Press and Log Clean exercises), then the Stage 1
- * category-based fallback for events without an explicit pairing yet. */
+/** Related exercises for an event page: a curated DB override first
+ * (Stage 7), then the event's own named exercise counterpart(s)
+ * (Stage 4 explicit pairing, e.g. Log Press event names both Log Press
+ * and Log Clean exercises), then the Stage 1 category-based fallback
+ * for events without an explicit pairing yet. */
 export function pickExercisesForEvent<T extends CategoryItem>(allExercises: T[], event: CategoryItem): T[] {
+  const curated = byExplicitSlugs(allExercises, event.relatedExerciseSlugs);
+  if (curated.length > 0) return curated.slice(0, MAX_RELATED);
+
   const explicitSlugs = EXPLICIT_EXERCISE_FOR_EVENT[event.slug];
   const explicit = byExplicitSlugs(allExercises, explicitSlugs);
   if (explicit.length > 0) return explicit.slice(0, MAX_RELATED);
@@ -199,6 +218,11 @@ export function pickExercisesForEvent<T extends CategoryItem>(allExercises: T[],
   return exerciseCat ? allExercises.filter(e => e.category === exerciseCat).slice(0, MAX_RELATED) : [];
 }
 
+/** Related events for an event page: a curated DB override first
+ * (Stage 7), then the existing same-category fallback. */
 export function pickRelatedEvents<T extends CategoryItem>(all: T[], current: CategoryItem): T[] {
+  const curated = byExplicitSlugs(all, current.relatedEventSlugs).filter(e => e.slug !== current.slug);
+  if (curated.length > 0) return curated.slice(0, MAX_RELATED);
+
   return all.filter(e => e.category === current.category && e.slug !== current.slug).slice(0, MAX_RELATED);
 }
