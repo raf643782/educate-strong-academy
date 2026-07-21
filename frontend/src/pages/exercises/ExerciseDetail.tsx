@@ -11,6 +11,8 @@ import { readEmbeddedLibraryData } from '../../lib/initialData';
 import EntryVideoPlayer from '../../components/media/EntryVideoPlayer';
 import VideoObjectSchema from '../../components/media/VideoObjectSchema';
 import EditorialAttribution from '../../components/content/EditorialAttribution';
+import BreadcrumbSchema from '../../components/content/BreadcrumbSchema';
+import ArticleSchema from '../../components/content/ArticleSchema';
 import { resolveRelatedArticles } from '../../lib/relatedArticles';
 import { resolveCourseLinks } from '../../lib/courseLinks';
 
@@ -105,6 +107,22 @@ export function ExerciseDetailContent({
 
   return (
     <div style={{ background: '#0D0D0D' }}>
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', path: '/' },
+          { name: 'Exercise Library', path: '/exercises' },
+          { name: exercise.name, path: `/exercises/${exercise.slug}` },
+        ]}
+      />
+      <ArticleSchema
+        headline={exercise.name}
+        description={exercise.description}
+        authorName={exercise.authorName}
+        publishedDate={exercise.publishedDate}
+        lastReviewedDate={exercise.lastReviewedDate}
+        canonicalPath={`/exercises/${exercise.slug}`}
+      />
+
       {/* Breadcrumb */}
       <nav aria-label="Breadcrumb" className="pt-navbar" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C' }}>
         <div className="es-container py-4">

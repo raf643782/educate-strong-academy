@@ -1,2 +1,22 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /coach
+Disallow: /tutor
+Disallow: /assessor
+Disallow: /dashboard
+Disallow: /learn
+Disallow: /certificates
+Disallow: /cpd
+Disallow: /coursework
+Disallow: /documents
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /qa-demo
+Disallow: /portal-preview
+Disallow: /homepagepreview
+Disallow: /dev
+
+Sitemap: https://educate-strong-academy.vercel.app/sitemap.xml

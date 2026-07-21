@@ -32,6 +32,11 @@ import { pickRelatedExercises, pickEventsForExercise, pickExercisesForEvent, pic
 import { apiToPublicSlug } from './lib/exerciseSlugs';
 
 export { apiToPublicSlug, API_TO_PUBLIC_SLUG, publicToApiSlug } from './lib/exerciseSlugs';
+// Stage 8: re-exported so the build-time sitemap generator can read the
+// exact same Knowledge Hub article list the site actually renders (the
+// hardcoded array, not the separate/different DB-seeded KnowledgeArticle
+// table the frontend does not read from) — one source, no drift.
+export { KNOWLEDGE_ARTICLES } from './data/knowledgeArticles';
 
 interface ExerciseRenderInput {
   type: 'exercise';

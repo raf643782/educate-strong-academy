@@ -11,6 +11,8 @@ import { readEmbeddedLibraryData } from '../../lib/initialData';
 import EntryVideoPlayer from '../../components/media/EntryVideoPlayer';
 import VideoObjectSchema from '../../components/media/VideoObjectSchema';
 import EditorialAttribution from '../../components/content/EditorialAttribution';
+import BreadcrumbSchema from '../../components/content/BreadcrumbSchema';
+import ArticleSchema from '../../components/content/ArticleSchema';
 import { resolveRelatedArticles } from '../../lib/relatedArticles';
 import { resolveCourseLinks } from '../../lib/courseLinks';
 
@@ -89,6 +91,22 @@ export function EventDetailContent({
 
   return (
     <div style={{ background: '#0D0D0D' }}>
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', path: '/' },
+          { name: 'Event Library', path: '/events' },
+          { name: event.name, path: `/events/${event.slug}` },
+        ]}
+      />
+      <ArticleSchema
+        headline={event.name}
+        description={event.description}
+        authorName={event.authorName}
+        publishedDate={event.publishedDate}
+        lastReviewedDate={event.lastReviewedDate}
+        canonicalPath={`/events/${event.slug}`}
+      />
+
       {/* Breadcrumb */}
       <nav aria-label="Breadcrumb" className="pt-navbar" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C' }}>
         <div className="es-container py-4">

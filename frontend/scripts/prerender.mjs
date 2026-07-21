@@ -36,8 +36,46 @@ const FRONTEND_ROOT = path.resolve(__dirname, '..');
 const DIST_DIR = path.join(FRONTEND_ROOT, 'dist');
 
 const API_BASE = process.env.VITE_API_URL || 'https://educate-strong-api.onrender.com/api';
+// Same env var name and fallback value as frontend/src/lib/siteUrl.ts —
+// one real source of truth for the domain, read independently here only
+// because this is a plain Node script outside the Vite module graph,
+// not because the value itself is allowed to drift from that file.
+const SITE_URL = process.env.VITE_SITE_URL || 'https://educate-strong-academy.vercel.app';
 const REQUEST_TIMEOUT_MS = 10_000;
 const MAX_RETRIES = 2;
+
+// Static, always-public routes — every admin/tutor/coach/learner-
+// dashboard/auth/reset/preview/demo route is excluded by construction,
+// since this list only ever names routes that are genuinely public.
+const STATIC_PUBLIC_ROUTES = [
+  '/',
+  '/courses',
+  '/courses/level-1-coaching-strongman',
+  '/courses/level-1-strongman-refereeing',
+  '/about',
+  '/strongkidz',
+  '/coaching',
+  '/coaches',
+  '/shop',
+  '/register-interest',
+  '/verify',
+  '/terms',
+  '/privacy',
+  '/refund-policy',
+  '/knowledge',
+  '/exercises',
+  '/events',
+  '/eatstrong',
+  '/eatstrong/category/basics',
+  '/eatstrong/category/competition',
+  '/eatstrong/category/recovery',
+  '/eatstrong/category/making_weight',
+  '/eatstrong/category/hydration',
+  '/eatstrong/category/supplements',
+  '/eatstrong/category/coaches_guide',
+  '/eatstrong/category/youth_nutrition',
+  '/eatstrong/category/downloads',
+];
 
 class PrerenderError extends Error {}
 
@@ -118,6 +156,87 @@ function escapeHtml(str) {
 }
 
 /**
+ * Stage 8 — generates a genuine sitemap.xml and robots.txt at build
+ * time, from the same allExercises/allEvents this build just
+ * prerendered (not a second independent fetch, so the two can never
+ * drift apart), plus the same Knowledge Hub article list the site
+ * actually renders from, plus a live, filtered fetch of only FREE
+ * (fully public) EatStrong articles and published coach profiles.
+ *
+ * Deliberately excludes: every admin/tutor/coach-workspace/learner-
+ * dashboard/auth/reset/preview/demo route (never in
+ * STATIC_PUBLIC_ROUTES to begin with), any unpublished exercise/event
+ * (allExercises/allEvents already only contain published records —
+ * confirmed by the API's own isPublished filter), and any EatStrong
+ * article whose accessLevel is ENROLLED/CERTIFIED rather than FREE
+ * (private course content).
+ */
+async function generateSitemapAndRobots({ allExercises, allEvents, apiToPublicSlug, knowledgeArticles }) {
+  const urls = new Set(STATIC_PUBLIC_ROUTES);
+
+  for (const ex of allExercises) urls.add(`/exercises/${apiToPublicSlug(ex.slug)}`);
+  for (const ev of allEvents) urls.add(`/events/${ev.slug}`);
+  for (const a of knowledgeArticles) urls.add(`/knowledge/${a.slug}`);
+
+  try {
+    const beStrongArticles = await fetchJsonWithRetry(`${API_BASE}/be-strong/articles`, { retries: 1 });
+    if (Array.isArray(beStrongArticles)) {
+      for (const a of beStrongArticles) {
+        if (a.accessLevel === 'FREE' && a.slug) urls.add(`/eatstrong/articles/${a.slug}`);
+      }
+    }
+  } catch (err) {
+    console.warn(`[sitemap] could not fetch EatStrong articles, continuing without them: ${err.message}`);
+  }
+
+  try {
+    const coaches = await fetchJsonWithRetry(`${API_BASE}/coaches`, { retries: 1 });
+    if (Array.isArray(coaches)) {
+      for (const c of coaches) {
+        if (c.slug) urls.add(`/coaches/${c.slug}`);
+      }
+    }
+  } catch (err) {
+    console.warn(`[sitemap] could not fetch coach profiles, continuing without them: ${err.message}`);
+  }
+
+  const sortedUrls = Array.from(urls).sort();
+
+  const body = sortedUrls.map(u => `  <url>\n    <loc>${escapeHtml(SITE_URL + u)}</loc>\n  </url>`).join('\n');
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`;
+  await writeFile(path.join(DIST_DIR, 'sitemap.xml'), xml);
+  console.log(`[sitemap] wrote sitemap.xml with ${sortedUrls.length} URL(s)`);
+
+  const robotsTxt = `User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /coach
+Disallow: /tutor
+Disallow: /assessor
+Disallow: /dashboard
+Disallow: /learn
+Disallow: /certificates
+Disallow: /cpd
+Disallow: /coursework
+Disallow: /documents
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /qa-demo
+Disallow: /portal-preview
+Disallow: /homepagepreview
+Disallow: /dev
+
+Sitemap: ${SITE_URL}/sitemap.xml
+`;
+  await writeFile(path.join(DIST_DIR, 'robots.txt'), robotsTxt);
+  console.log('[sitemap] wrote robots.txt');
+
+  return sortedUrls;
+}
+
+/**
  * Fails the build loudly if a generated page is missing anything a real
  * public page must have. This is deliberately strict — a page that
  * fails this check must not be written to dist/.
@@ -143,7 +262,7 @@ function validateGeneratedPage({ label, html, meta }) {
 }
 
 async function main() {
-  const { render, apiToPublicSlug } = await import(path.join(FRONTEND_ROOT, 'dist-server', 'entry-server.js'));
+  const { render, apiToPublicSlug, KNOWLEDGE_ARTICLES } = await import(path.join(FRONTEND_ROOT, 'dist-server', 'entry-server.js'));
 
   const template = await readFile(path.join(DIST_DIR, 'index.html'), 'utf-8');
 
@@ -240,6 +359,13 @@ async function main() {
   }
 
   console.log(`[prerender] done — ${written} page(s) prerendered (of ${allExercises.length + allEvents.length} total published records)`);
+
+  await generateSitemapAndRobots({
+    allExercises,
+    allEvents,
+    apiToPublicSlug,
+    knowledgeArticles: KNOWLEDGE_ARTICLES,
+  });
 }
 
 main().catch(err => {

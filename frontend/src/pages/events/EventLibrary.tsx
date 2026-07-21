@@ -15,6 +15,7 @@ import api from '../../lib/api';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
 import { SITE_URL } from '../../lib/siteUrl';
 import EntryImage from '../../components/media/EntryImage';
+import BreadcrumbSchema from '../../components/content/BreadcrumbSchema';
 
 interface Event {
   id: string;
@@ -101,8 +102,21 @@ export default function EventLibrary() {
     <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
       <Navbar />
 
+      <BreadcrumbSchema items={[{ name: 'Home', path: '/' }, { name: 'Event Library', path: '/events' }]} />
+
+      {/* Breadcrumb */}
+      <nav aria-label="Breadcrumb" className="pt-navbar" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C' }}>
+        <div className="es-container py-4">
+          <ol className="flex items-center gap-2 text-xs" style={{ color: '#75757D' }}>
+            <li><Link to="/" className="hover:text-white transition-colors">Home</Link></li>
+            <li aria-hidden="true">/</li>
+            <li aria-current="page" className="text-white/70">Event Library</li>
+          </ol>
+        </div>
+      </nav>
+
       {/* Header */}
-      <section className="pt-navbar es-grit" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C', position: 'relative' }}>
+      <section className="es-grit" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C', position: 'relative' }}>
         <div className="es-container py-16">
           <p className="es-label mb-3">Competition Reference</p>
           <h1 className="text-4xl md:text-5xl font-black text-white mb-4" style={{ letterSpacing: '-0.04em' }}>Strongman Event Library</h1>
