@@ -345,6 +345,34 @@ model Exercise {
   isCompetitionEvent Boolean  @default(false)
   isPublished      Boolean    @default(false)
   isLaunchPriority Boolean    @default(false)
+  // Stage 6 media infrastructure — all nullable, additive. Left empty
+  // until real assets exist; the frontend never fabricates a thumbnail
+  // or video from an empty field.
+  imageUrl           String?
+  imageAlt           String?
+  videoProvider      String?
+  videoThumbnailUrl  String?
+  videoTitle         String?
+  videoDescription   String?
+  videoUploadDate    DateTime?
+  videoDuration      String?
+  videoTranscript    String?
+  captionsUrl        String?
+  // Stage 7 editorial attribution, sources and related content — all
+  // nullable/empty-array, additive. Left empty until a real author,
+  // reviewer, source, or curated relationship is confirmed; the
+  // frontend never invents or auto-assigns a name here.
+  authorName             String?
+  authorRole             String?
+  reviewerName           String?
+  reviewerQualification  String?
+  publishedDate          DateTime?
+  lastReviewedDate       DateTime?
+  sources                String?
+  relatedExerciseSlugs   String[]  @default([])
+  relatedEventSlugs      String[]  @default([])
+  relatedArticleSlugs    String[]  @default([])
+  relevantCourseSlugs    String[]  @default([])
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
 }
@@ -363,6 +391,37 @@ model Event {
   videoUrl         String?
   isPublished      Boolean  @default(false)
   isLaunchPriority Boolean  @default(false)
+  // Stage 6 media infrastructure — all nullable, additive. Left empty
+  // until real assets exist; the frontend never fabricates a thumbnail
+  // or video from an empty field.
+  imageUrl           String?
+  imageAlt           String?
+  videoProvider      String?
+  videoThumbnailUrl  String?
+  videoTitle         String?
+  videoDescription   String?
+  videoUploadDate    DateTime?
+  videoDuration      String?
+  videoTranscript    String?
+  captionsUrl        String?
+  // Stage 7 editorial attribution, sources and related content — all
+  // nullable/empty-array, additive. Left empty until a real author,
+  // reviewer, source, or curated relationship is confirmed; the
+  // frontend never invents or auto-assigns a name here. ruleReviewDate
+  // is Event-only — the date a promoter/federation rule summary was
+  // last confirmed as current, distinct from general editorial review.
+  authorName             String?
+  authorRole             String?
+  reviewerName           String?
+  reviewerQualification  String?
+  publishedDate          DateTime?
+  lastReviewedDate       DateTime?
+  ruleReviewDate         DateTime?
+  sources                String?
+  relatedExerciseSlugs   String[]  @default([])
+  relatedEventSlugs      String[]  @default([])
+  relatedArticleSlugs    String[]  @default([])
+  relevantCourseSlugs    String[]  @default([])
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }
