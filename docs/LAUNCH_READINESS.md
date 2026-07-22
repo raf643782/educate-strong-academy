@@ -2,7 +2,7 @@
 
 Living document. Updated at the end of every programme section. No credentials, connection strings, or secret values are ever recorded in this file — only status, ownership and evidence references.
 
-**Last updated:** Section 1 (Safety, Checkpoint and Current State Audit) — 2026-07-21.
+**Last updated:** Section 2 (Credential Rotation and Environment Security) — 2026-07-22.
 
 ---
 
@@ -19,7 +19,8 @@ Living document. Updated at the end of every programme section. No credentials, 
 | Open pull request | None found for `feature/libraryPages` |
 | `main` branch | `f9980d8` — the commit immediately before Stage 1 began. **`feature/libraryPages` has not been merged; production is running pre-Stage-1 code.** |
 | Second git worktree | `/Users/raffa/Projects/esa-db-update`, detached HEAD at `65d6182` (the Stage 4 drift-correction commit) — see Findings below |
-| Local checkpoint tag | `checkpoint-section1-audit` created at `79b11db` (local only, not pushed) |
+| Local checkpoint tag | `checkpoint-section1-audit` created at `79b11db`, pushed to `origin` |
+| Documentation commit | `f6bf404` — this tracking document, pushed to `origin/feature/libraryPages` |
 
 ## Workstream status table
 
@@ -31,8 +32,8 @@ Living document. Updated at the end of every programme section. No credentials, 
 | Stage 6 media migration | Prepared, **not confirmed applied to production** | Owner | Same as above, via `prisma migrate deploy` | Owner to run | Not verified this session (would require production DB access) | Not started |
 | Stage 7 editorial migration | Prepared, **not confirmed applied to production** | Owner | Same as above | Owner to run | Not verified this session | Not started |
 | Arm-Over-Arm Rope Pull Exercise description drift | One-time correction script prepared (`stage4-correction-arm-over-arm-rope-pull.ts`), **not confirmed run** | Owner | Needs a dry run + live run | Owner to run, then re-run Stage 4 dry run to confirm zero drift | Not verified this session | Not started |
-| Production database credential | **Treated as compromised per owner's own report** | Owner (Neon/Render account holder) | Rotation not yet performed | Owner must rotate via the account they hold | See Section 1 findings below | Not started |
-| Neon vs Render-native database | **Unresolved discrepancy** — `render.yaml` in this repo defines a Render-native Postgres database (`educate-strong-db`), not a Neon project | Owner | Needs owner to confirm which is actually authoritative in production today | Owner confirmation | `render.yaml` reviewed directly | Not started |
+| Production database credential | **Rotated and verified 2026-07-22.** Confirmed as the active production credential (owner copied it from Render's `DATABASE_URL` to run the Stage 4 live update); replaced in Neon, applied to Render, redeployed, old value invalidated in place | Owner (Neon/Render account holder) | None | — | Backend health, public APIs, DB connectivity and auth all verified working post-rotation; see Section 2 findings below | **Accepted** |
+| Neon vs Render-native database | **Resolved** — production `DATABASE_URL` on Render is confirmed to point at Neon (host contains `neon.tech`), set as a plain manually-entered value, not the `fromDatabase` binding. The `render.yaml`-defined `educate-strong-db` Render-native database resource appears unused in production | Owner | Decide whether to delete or repurpose the unused `educate-strong-db` resource | Owner decision (not urgent) | Owner confirmed via Render dashboard Environment tab | **Accepted** (identity confirmed; disposal decision outstanding) |
 | Analytics (GA4/GTM) | Not present in code | — | Not yet decided/implemented | Owner + assistant, later section | Repo-wide search: zero matches | Not started |
 | Payments (Stripe or similar) | Not present in code | — | Commercial policy not yet decided | Owner, Section 6/8 | Repo-wide search: zero matches | Not started |
 | Sanity CMS | Not connected — no config files found | — | Decision pending (Section 9) | Owner + assistant | Repo-wide search: zero Sanity config | Not started |
@@ -60,12 +61,33 @@ Living document. Updated at the end of every programme section. No credentials, 
 
 ---
 
+## Section 2 findings of note
+
+1. **Production database confirmed as Neon**, not the Render-native Postgres declared in `render.yaml`. Render's `DATABASE_URL` was a plain manually-entered value pointing at a Neon host, overriding the `fromDatabase` binding. The `educate-strong-db` Render-native resource is therefore not the live database — it appears to be an unused/orphaned resource. **Not deleted** — left in place pending an owner decision, per instruction.
+
+2. **The exposed credential was confirmed by the owner to be the active production credential** — it had been copied directly from Render's `DATABASE_URL` field to run the Stage 4 live production update locally, and was subsequently exposed during troubleshooting (most likely via local shell history, per the Section 1 finding).
+
+3. **Coordinated rotation completed 2026-07-22**, in this order: (1) new password generated for the same Neon role via Neon's dashboard "Reset password" action — this replaces the role's password in place rather than adding a second valid credential; (2) new value applied to Render's `DATABASE_URL`; (3) Render redeployed; (4) full verification run against the live backend. Because Neon role passwords are a single value, not additive, the exposed credential was already invalidated at step (1) — there was no separate "old credential still valid" window to close afterwards. This is noted as a clarification of mechanism, not a deviation from intent: the net outcome (old value dead, new value the only one that authenticates) is the same either way.
+
+4. **Post-rotation verification, all passed:**
+   - Backend health (`GET /api/health`): `200 OK`
+   - Public APIs (`GET /api/exercises`, `GET /api/events`): both return live data from the database on the new credential
+   - Authentication (`POST /api/auth/login` with a deliberately invalid test email/password, no real account): returned a clean `401 Invalid credentials` — confirms the login route is querying the database correctly, not erroring
+   - Frontend local storage / session storage on the live production site (`educate-strong-academy.vercel.app`): both empty — no stray credentials or sensitive test data
+   - Vercel project environment variables: no `DATABASE_URL` present; only `VITE_API_URL` (Production and Preview) — correct for a static Vite frontend with no legitimate server-side DB access
+   - Render service logs (deploy + runtime, covering the rotation window): owner confirmed no line contains a full connection string, `neon.tech`, or a `postgres(ql)://` URI
+   - Git history and working tree: unchanged since the Section 1 secrets scan — still clean
+
+5. **Not independently re-verified this session** (would need production DB access this assistant does not have and should not request): whether Stage 5 Events, Stage 6 media fields, and Stage 7 editorial fields are actually present in the production data now being served through the rotated credential. The public API spot-checks above confirm connectivity and basic data return, not full schema/content parity — that remains a distinct, still-open item for a later section.
+
+---
+
 ## Launch blocker table
 
 | Item | Label |
 |---|---|
-| Production database credential rotation | **Critical blocker** |
-| Neon vs Render-native database identity confirmation | **Critical blocker** |
+| Production database credential rotation | ~~Critical blocker~~ **Resolved 2026-07-22** |
+| Neon vs Render-native database identity confirmation | ~~Critical blocker~~ **Resolved 2026-07-22** — production is Neon; unused `educate-strong-db` Render resource left in place pending owner decision |
 | Stage 5/6/7 production alignment (Events, media schema, editorial schema) | **Launch blocker** |
 | Arm-Over-Arm Rope Pull Exercise description drift resolution | **Launch blocker** |
 | Commercial access policy (pricing, payment model) | **Client decision** |
