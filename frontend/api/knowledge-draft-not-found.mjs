@@ -1,13 +1,4 @@
 /**
- * ⚠ NOT DEPLOYED — kept for reference only. Confirmed 2026-07-23 that
- * this Vercel project's Root Directory is 'frontend', so Vercel never
- * reads this file or the root vercel.json that references it. The
- * active copy of this function is
- * frontend/api/knowledge-draft-not-found.mjs, wired up via
- * frontend/vercel.json. Keep both in sync if this logic ever changes,
- * or remove this copy once the duplication is no longer useful as a
- * reference. See docs/LAUNCH_READINESS.md for the finding.
- *
  * Vercel serverless function — returns a genuine HTTP 404 for Knowledge
  * Hub article slugs that exist only as unpublished editorial drafts.
  * These slugs are never present in frontend/src/data/knowledgeArticles.ts,
@@ -18,7 +9,14 @@
  * /index.html; the browser's React Router only decides what to *show*
  * well after the server has already answered).
  *
- * Mirrors api/library-not-found.mjs's approach for the Exercise/Event
+ * Lives here (frontend/api/) rather than at the repository root because
+ * this Vercel project's Root Directory is set to frontend/ — only files
+ * under this directory are actually deployed. A root-level api/ folder
+ * with the same logic also exists in this repo but is not governing any
+ * live deployment; see api/knowledge-draft-not-found.mjs's own header
+ * for that note. Keep both copies in sync if this logic ever changes.
+ *
+ * Mirrors library-not-found.mjs's approach for the Exercise/Event
  * libraries, but simpler: there is no live record to check for
  * existence via an API call. A request reaching this function has, by
  * definition, matched a vercel.json rule for a specific, known,

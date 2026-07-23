@@ -1,15 +1,14 @@
 /**
- * ⚠ NOT DEPLOYED — kept for reference only. Confirmed 2026-07-23 that
- * this Vercel project's Root Directory is 'frontend', so Vercel never
- * reads this file or the root vercel.json that references it. The
- * active copy of this function is frontend/api/library-not-found.mjs,
- * wired up via frontend/vercel.json. Keep both in sync if this logic
- * ever changes, or remove this copy once the duplication is no longer
- * useful as a reference. See docs/LAUNCH_READINESS.md for the finding.
- *
  * Vercel serverless function — the only thing standing between
  * /exercises/:slug and /events/:slug and a *real* HTTP status when no
  * prerendered static file exists for that path.
+ *
+ * Lives here (frontend/api/) rather than at the repository root because
+ * this Vercel project's Root Directory is set to frontend/ — only files
+ * under this directory are actually deployed. A root-level api/ folder
+ * with the same logic also exists in this repo but is not governing any
+ * live deployment; see api/library-not-found.mjs's own header for that
+ * note. Keep both copies in sync if this logic ever changes.
  *
  * Static SPA hosting cannot, by itself, return anything other than 200
  * for an unmatched path once vercel.json falls back to /index.html —

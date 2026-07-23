@@ -1,5 +1,24 @@
 {
+  "redirects": [
+    {
+      "source": "/knowledge/start-strongman-safely",
+      "destination": "/knowledge/strongman-for-beginners",
+      "permanent": true
+    }
+  ],
   "rewrites": [
+    {
+      "source": "/knowledge/is-strongman-safe-for-children",
+      "destination": "/api/knowledge-draft-not-found"
+    },
+    {
+      "source": "/exercises/:slug",
+      "destination": "/api/library-not-found?type=exercise&slug=:slug"
+    },
+    {
+      "source": "/events/:slug",
+      "destination": "/api/library-not-found?type=event&slug=:slug"
+    },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

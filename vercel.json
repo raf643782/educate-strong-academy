@@ -1,4 +1,5 @@
 {
+  "_INACTIVE_CONFIG_NOTE": "This root-level vercel.json is NOT the active deployment configuration. This Vercel project's Root Directory is set to 'frontend', so Vercel only reads frontend/vercel.json and only deploys files under frontend/ (including frontend/api/). Confirmed 2026-07-23 by live testing: routes and functions defined only here do not apply to any real deployment, preview or production. The equivalent active config, functions, and routing logic live in frontend/vercel.json and frontend/api/ — update those instead. This file and the root api/ folder are kept only for reference and are not deleted pending an explicit decision on whether Root Directory should change; see docs/LAUNCH_READINESS.md for the full finding.",
   "version": 2,
   "builds": [
     {
