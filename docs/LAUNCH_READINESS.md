@@ -2,7 +2,7 @@
 
 Living document. Updated at the end of every programme section. No credentials, connection strings, or secret values are ever recorded in this file — only status, ownership and evidence references.
 
-**Last updated:** Priority 3 Closure (Master Continuation Programme — Knowledge Hub and EatStrong Editorial Completion) — 2026-07-23. **Priority 3 remains OPEN** pending owner approval and post-merge verification of the EatStrong disclaimer production migration (PR #3) — see the closure findings below.
+**Last updated:** Priority 3 Final Verification (Master Continuation Programme — Knowledge Hub and EatStrong Editorial Completion) — 2026-07-23. **Priority 3 remains OPEN.** PR #3 (EatStrong disclaimer) is merged and fully verified live in production. The Knowledge Hub true-404 could not be verified — the `feature/libraryPages` Vercel preview deployment is gated behind Vercel Authentication (SSO), which intercepts every request before it reaches the app. See the final verification findings below.
 
 ## Priority 3 audit status (2026-07-23)
 
@@ -307,29 +307,41 @@ Checked at desktop (1280px) and mobile (375px) widths, against the live producti
 
 ---
 
-## Priority 3 closure findings of note (both items still open until verified — see below)
+## Priority 3 final verification findings of note
 
-### 1. EatStrong disclaimer — production migration drafted, PR opened, not merged
+### 1. EatStrong disclaimer — merged and verified live in production ✅
 
 Same fully Render-managed process as the Viking Press correction — no `DATABASE_URL` was requested, typed, or handled at any point.
 
 - **Branch**: `production-eatstrong-scope-note-correction`, created from `main` (not `feature/libraryPages`).
 - **Migration**: `backend/prisma/migrations/20260723180000_correct_nutrition_conversations_scope_note/migration.sql` — a guarded `DO $$ ... $$` block, exactly mirroring the Viking Press pattern. Updates `BeStrongArticle.scopeOfPracticeNote` only where `slug = 'nutrition-conversations-with-athletes'` AND `scopeOfPracticeNote IS NULL`; raises an exception (aborting the whole transaction) if zero or more than one row matches. No schema change; touches no other row or table.
-- **PR**: [#3](https://github.com/raf643782/educate-strong-academy/pull/3), opened into `main`, **left unmerged pending explicit owner approval**.
-- **Validation performed**: `prisma validate` passed (schema-only check, using the repo's own already-public `.env.example` placeholder `DATABASE_URL` — no real credential involved, and this migration makes no schema change so the check is unaffected by it either way); manual SQL review against the exact guard pattern used in PR #2 (Viking Press). No Docker/local Postgres available in this environment to exercise the guard logic with a live test run — same disclosed limitation as the Viking Press correction.
-- **Expected production effect once merged**: exactly one `BeStrongArticle` row (`nutrition-conversations-with-athletes`) gains the standard scope-of-practice disclaimer text. No other article, field, or table affected.
+- **PR**: [#3](https://github.com/raf643782/educate-strong-academy/pull/3), merged into `main` at commit `9fc9e36` on 2026-07-23, following your explicit approval.
+- **Deploy monitoring**: this environment has no Render API token or dashboard access, so Render's own build logs / "Live" status could not be observed directly — same disclosed limitation as the Viking Press correction. Instead, deploy success was confirmed indirectly but conclusively: Render's build command runs `npx prisma migrate deploy` as a required step; if that migration had failed (0 or >1 rows matched, or any SQL error), the build step itself would fail and Render would keep serving the prior deployment, which would still show `scopeOfPracticeNote: null` for this article. The public API now shows the corrected value, which is only possible if the new deploy went live **and** the migration applied without error.
+- **Production API verification, all passed** (`GET /api/be-strong/articles`, `GET /api/be-strong/articles/nutrition-conversations-with-athletes`, `GET /api/health`):
+  - `nutrition-conversations-with-athletes` now returns `scopeOfPracticeNote` matching the approved disclaimer text verbatim.
+  - All other fields on that record (`authorName`, `reviewerName`, `reviewerQualification`, `lastReviewedAt`, `content`, `summary`, `accessLevel`, `isPublished`, `isFeatured`) unchanged from the documented baseline.
+  - All **11** EatStrong articles still present, same slugs/categories/access levels as before.
+  - Spot-checked 3 other articles (`energy-balance-strongman`, `supplements-strongman-evidence-scope`, `managing-long-competition-days`) — `scopeOfPracticeNote` and all other fields unchanged, confirming exactly one row was affected.
+  - `GET /api/health` returns `200`.
+- **Item complete and verified.**
 - **Failure behaviour**: if the row has already been corrected, or its `scopeOfPracticeNote` is unexpectedly non-null, the migration raises an exception and Postgres rolls back the entire transaction — nothing is left partially applied.
 - **Not yet done**: merge (awaiting your explicit approval) and post-merge live-API verification.
 
-### 2. Knowledge Hub true 404 — implemented, needs a real Vercel deployment to fully confirm
+### 2. Knowledge Hub true 404 — implemented and deployed, but live verification is BLOCKED ⚠️
 
 The client-side soft-404 (HTTP 200) did not meet the approved requirement. Implemented the smallest change that reuses the project's existing mechanism rather than inventing a new one:
 
 - **New file**: `api/knowledge-draft-not-found.mjs` — a minimal Vercel serverless function, modelled directly on the existing `api/library-not-found.mjs` (used today for Exercise/Event 404s), but simpler: since this covers one specific, permanently-unpublished draft slug rather than a dynamic DB-backed set, it always returns a static HTTP 404 with a `noindex` header and a generic "not currently published" message — it never reads or serves the draft's own content.
 - **Changed file**: `vercel.json` — added one **exact-match** routes rule, `{"src": "/knowledge/is-strongman-safe-for-children", "dest": "/api/knowledge-draft-not-found.mjs"}`, inserted before the SPA catch-all. Because it matches one literal path (not a wildcard like `/knowledge/:slug`), it cannot affect any of the 24 real Knowledge Hub articles or the existing `start-strongman-safely` redirect rule.
-- **Validation performed**: `vercel.json` confirmed valid JSON; the new function's syntax confirmed valid via `node --check`; the handler was invoked directly with a mock request/response, confirming `status 404`, `Content-Type: text/html; charset=utf-8`, `X-Robots-Tag: noindex`, and a body containing no draft content. Frontend `tsc --noEmit` re-confirmed clean (no frontend files touched this round).
-- **Known limitation, disclosed rather than glossed over**: this environment has no Vercel CLI and cannot run `vercel dev`, so the actual routes-array + serverless-function combination can only be fully exercised once deployed to Vercel — the same limitation already disclosed for the `start-strongman-safely` 308 redirect. Local verification covered everything short of an actual Vercel request.
-- **Still true**: absent from the sitemap, the Knowledge Hub listing, prerendering, and all internal links — none of this was affected, since none of it required a routing change.
+- **Local validation performed**: `vercel.json` confirmed valid JSON; the new function's syntax confirmed valid via `node --check`; the handler was invoked directly with a mock request/response, confirming `status 404`, `Content-Type: text/html; charset=utf-8`, `X-Robots-Tag: noindex`, and a body containing no draft content. Frontend `tsc --noEmit` re-confirmed clean.
+- **Vercel deployed the change successfully**: GitHub's Deployments API confirms a `Preview` deployment for `feature/libraryPages` commit `46d153a` completed with state `success`, at `https://educate-strong-academy-qm0zm1h4s-raf643782s-projects.vercel.app`.
+- **BLOCKER — cannot verify live behaviour**: that preview URL is protected by **Vercel Authentication (SSO)** at the project/team level. Every request to it, including `curl` requests to the specific 404 route, returns `HTTP 302` to `vercel.com/sso-api/...` before reaching the application at all — meaning the actual HTTP status, headers, and body for `/knowledge/is-strongman-safe-for-children` on this deployment could not be observed. A guessed alternate branch-alias URL (`...-git-feature-librarypages-...vercel.app`) does not exist (DNS resolution failure). No Vercel API token or CLI is available in this environment, and bypassing Vercel's own SSO protection was not attempted. **This is the blocker to report, per your instruction, rather than claiming the 404 is live.**
+- **What remains true regardless**: the article is still absent from the sitemap, the Knowledge Hub listing, prerendering, and all internal links — none of this required a routing change, so it's unaffected by the verification blocker above.
+- **To unblock**: either you disable/adjust Vercel's Preview Deployment protection for this project (a Vercel project-settings change — outside what I can or should do myself), configure a "Protection Bypass for Automation" secret and share only the resulting bypass mechanism (not a login credential), or test the URL directly yourself while logged into the Vercel account and report back what you see.
+
+### Final Priority 3 status
+
+**OPEN — one of two items verified, one blocked.** Item 1 (EatStrong disclaimer) is merged, deployed, and fully confirmed live via the public API. Item 2 (Knowledge Hub true 404) is implemented and deployed, but its actual live behaviour is unverifiable from this environment due to Vercel's Preview Deployment authentication wall. Priority 3 will move to complete only once item 2 is independently confirmed.
 
 ---
 
@@ -372,8 +384,9 @@ The client-side soft-404 (HTTP 200) did not meet the approved requirement. Imple
 | "EatStrong" brand name — UK trademark clearance not yet confirmed (flagged in source code) | **Legal or accreditation review required** |
 | Public "Preview the portals" link on the Login page | **Client decision** (keep visible pre-launch or remove) |
 | Dead/unwired placeholder components (`TestimonialCard`/`TestimonialGrid`, `CommunitySection`, `EatStrongSection`, `CoursePractical`, `QualifiedReferees`, `ProfessionalPathway`, `PublicPathwayPreview`, `UpcomingCohortAlert`, `AcademyInAction`, `NextCourseSection`) | **Recommended improvement** (wire up or remove — not currently live, not a launch blocker) |
-| `nutrition-conversations-with-athletes` missing `scopeOfPracticeNote` disclaimer in the **live production database** | **Awaiting owner approval** — `seed.ts` corrected 2026-07-23; a guarded, Viking-Press-pattern data-only migration has been drafted (see chat report) but not created as a branch/PR or executed, pending separate gated approval per standing rule |
+| `nutrition-conversations-with-athletes` missing `scopeOfPracticeNote` disclaimer in the **live production database** | ~~Awaiting owner approval~~ **Resolved and verified live 2026-07-23** — PR #3 merged into `main` (commit `9fc9e36`), Render auto-deployed, live API confirms the disclaimer text on exactly this one article, all other 10 articles and all fields unchanged |
 | EatStrong admin panel has no field-level content editing UI (only publish/feature toggles) | **Recommended improvement** — confirmed 2026-07-23 by direct inspection of `BeStrongManager.tsx`/`bestrong.ts`; not a launch blocker, but means any future EatStrong text correction (including the disclaimer above) requires a guarded migration, not an admin-panel edit |
+| Knowledge Hub true-404 route (`/knowledge/is-strongman-safe-for-children`) — live verification blocked | **Blocked, needs owner action** — code deployed successfully (Vercel deployment `success`), but the `feature/libraryPages` preview URL is gated behind Vercel Authentication (SSO), returning a 302 to `vercel.com/sso-api` before reaching the app for every request. Cannot be verified from this environment. See Priority 3 final verification findings above for exactly what's needed to unblock |
 | Is Strongman Safe for Children? draft remains unpublished, no reviewer identified | **Content/handover blocker** — see [DRAFT_is-strongman-safe-for-children.md](DRAFT_is-strongman-safe-for-children.md) for the required reviewer-approval checklist before this can be published |
 | Handover documentation pack | **Handover blocker** |
 | Client final signoff | **Handover blocker** |
