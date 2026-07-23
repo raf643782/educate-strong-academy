@@ -2,7 +2,7 @@
 
 Living document. Updated at the end of every programme section. No credentials, connection strings, or secret values are ever recorded in this file — only status, ownership and evidence references.
 
-**Last updated:** Priority 1 (Master Continuation Programme — Viking Press Production Closure) — 2026-07-23.
+**Last updated:** Priority 2F (Master Continuation Programme — Confirmed Claims, Accreditation Scope, Course Scope, StrongKidz Provenance) — 2026-07-23.
 
 ---
 
@@ -31,6 +31,7 @@ Living document. Updated at the end of every programme section. No credentials, 
 | Feature branch code (Stages 1–8) | Complete, pushed, preview green | Assistant | None | — | Vercel check-run `success` on latest `feature/libraryPages` commit | Not yet accepted |
 | Production merge (full frontend/library build) | Not started — only the scoped Stage 6/7 schema PR has merged so far | Owner approval required | Content completeness (Section 4 findings below) + everything else in this table | Owner to approve launch scope | `main` at `af1998a`, DB-alignment only | Not started |
 | Public content completeness (Section 4) | **Audited 2026-07-23, read-only.** Full findings below | Owner (content decisions) + Assistant (future implementation, once approved) | See launch blocker table | Owner to approve realistic launch scope per Section 4 §15 | Route inventory, content source map, claims register, placeholder sweep (agent + manually verified), Exercise/Event field audit, visual/mobile spot-check all completed this section | Audit complete; content decisions pending |
+| Claims and accreditation scope (Priority 2) | **Implemented 2026-07-23.** Owner confirmed 10 categories of claims; register created; Course Catalogue metadata, hero badge scope text, Coaching Pathway wording, Coach Directory pills, StrongKidz safeguarding wording, and Level 2/3/StrongKidz curriculum exposure all updated | Assistant (implementation) + Owner (decisions) | None for implemented items | — | Frontend `tsc` clean, full production build + prerender (55/55) + sitemap (113 URLs) succeeded, visual verification desktop + mobile across 8 pages | **Accepted** |
 | Stage 5 Event insertion (6 new Events) | **Applied and verified 2026-07-23.** Live run created all 6 Events atomically in one transaction | Owner (ran the script locally via secure hidden-input credential entry) | None | — | `GET /api/events` confirmed: 26 total, all 6 target slugs present, no duplicates, 29 Exercises unchanged, backend health `200 OK` | **Accepted** |
 | Stage 6 media migration | **Applied and verified 2026-07-23** via a narrowly scoped PR (#1, schema + migrations only) merged to `main`, deployed automatically by Render | Assistant (scoped PR) + Owner (merge approval) | None | — | Render deploy `dep-d9ges977f7vs73f3k9vg` Live at commit `af1998a`; live API responses now carry `imageUrl` etc. as `null` | **Accepted** |
 | Stage 7 editorial migration | **Applied and verified 2026-07-23** — same scoped PR/deploy as Stage 6 | Assistant + Owner | None | — | Same deploy; live API responses now carry `authorName`/`sources`/`relatedExerciseSlugs` etc. as `null`/`[]` | **Accepted** |
@@ -250,6 +251,32 @@ Checked at desktop (1280px) and mobile (375px) widths, against the live producti
 
 ---
 
+## Priority 2 findings of note (Master Continuation Programme — confirmed claims, accreditation scope, StrongKidz provenance)
+
+1. **Owner confirmed 10 categories of claims as legitimate** (Active IQ, WHEA.GB, Armed Forces Strongman, British Army, MOD experience, Mind Body Connect/charities, tutor/founder achievements, competition achievements, 300+ graduates, existing logos). None removed or weakened — full register with exact scope now recorded in [docs/CLAIMS_AND_ACCREDITATION_SCOPE.md](CLAIMS_AND_ACCREDITATION_SCOPE.md).
+
+2. **Course Catalogue metadata** replaced with the owner's exact approved wording, precisely scoping Active IQ to Coaching and WHEA.GB to Refereeing, with StrongKidz described as education (not a qualification).
+
+3. **Hero badge scope clarification** added on Home and Coaching Pathway — a visible (not hover-only), accessible sentence under the existing accreditation pills, explaining exactly which course each badge applies to. Design preserved; no clutter.
+
+4. **"Nationally recognised. Employer accepted."** replaced with "Active IQ accredited Level 1 qualification." on the Coaching Pathway accreditation strip — scoped to Level 1 Coaching only, per the owner's exact instruction.
+
+5. **Coach Directory trust pills removed** ("Active IQ Verified", "WHEA.GB Endorsed", "UK & Worldwide") — the directory has zero published coaches, so these described no current coach. Honest empty state and future DB-driven profile system untouched.
+
+6. **StrongKidz safeguarding claims replaced** with a neutral holding statement ("Full safeguarding, Coach verification and booking information will be confirmed before sessions open.") — the specific DBS/qualification/named-lead claims were not owner-confirmed and are now withheld rather than asserted. The "raise a concern" contact route was preserved, and nothing implies safeguarding is absent. Session logistics fields (location/age/group size/duration/price) remain honestly marked "to be confirmed" — unchanged, as instructed.
+
+7. **Level 2 Coaching, Level 3 Coaching, and StrongKidz Coach Education**: the shared fallback course-detail view's interactive module/lesson curriculum section — confirmed, by direct code reading, to display programmatically template-generated placeholder lesson titles and content when expanded — has been replaced with a static "Full curriculum details for this course are being finalised and will be published here once confirmed" notice. No database records were touched or deleted; only the public presentation was suppressed. This applies uniformly to all three courses since they share one code path.
+
+8. **StrongKidz Coach Education's course summary** ("Professional coach education for adults delivering StrongKidz sessions...") was kept as-is rather than replaced — its content makes no specific unverifiable claims (no price, dates, accreditation, or safeguarding facts), consistent with the similarly-generic Level 2/3 summaries. Provenance from Educate Strong's official website was not independently confirmed; a proposed neutral holding statement was prepared as an alternative but not applied without your sign-off — flagged explicitly rather than assumed either way.
+
+9. **Two documentation files created**: [docs/CLAIMS_AND_ACCREDITATION_SCOPE.md](CLAIMS_AND_ACCREDITATION_SCOPE.md) (internal claims register) and [docs/EDUCATE_STRONG_STRONGKIDZ_INFORMATION_REQUEST.md](EDUCATE_STRONG_STRONGKIDZ_INFORMATION_REQUEST.md) (client-facing information request, separated into required/recommended/can-wait).
+
+10. **Three residual claims noticed but left untouched**, as they fell outside this round's explicit approved decisions: the Course Catalogue page's own visible H1 subheading ("Accredited qualifications across coaching, refereeing, and youth development" — a different string from the `<meta>` description already corrected); the StrongKidz hero subtext ("safeguarding-trained coaches"); and the homepage "UK Wide Reach" stat. All three recorded in the claims register's open-items table for a future decision.
+
+11. **Validation**: frontend `tsc --noEmit` clean (no backend files touched this priority); full production build succeeded; prerender wrote all 55 Exercise/Event pages; sitemap regenerated with 113 URLs; visual verification completed at both desktop and mobile widths on Home, Coaching Pathway, Course Catalogue, Level 2, Level 3, StrongKidz Coach Education, the parent-facing StrongKidz page, and the Coach Directory empty state. `git diff --stat` confirmed exactly the 6 intended files changed, nothing else.
+
+---
+
 ## Launch blocker table
 
 | Item | Label |
@@ -270,9 +297,16 @@ Checked at desktop (1280px) and mobile (375px) widths, against the live producti
 | CORS wildcard on `*.vercel.app` | **Recommended improvement** (tighten at domain cutover) |
 | Legal pages (Terms/Privacy/Refund Policy) explicitly marked `[LEGAL REVIEW REQUIRED]` | **Legal or accreditation review required** |
 | `viking-press-exercise` content drift | ~~Technical fix required~~ **Resolved and verified 2026-07-23** via guarded production migration (PR #2) |
-| Unverified authority/accreditation/partnership/safety claims (see Section 4 claims register) | **Client decision** (Educate Strong confirmation required per claim) |
+| Confirmed authority/accreditation/partnership claims (Active IQ, WHEA.GB, Armed Forces Strongman, British Army, MOD, charities, tutor/competition achievements, 300+ graduates) | ~~Client decision~~ **Confirmed by owner and scope-mapped 2026-07-23** — see [CLAIMS_AND_ACCREDITATION_SCOPE.md](CLAIMS_AND_ACCREDITATION_SCOPE.md) |
+| StrongKidz DBS/safeguarding-qualification/named-lead claims (unconfirmed) | ~~Client decision~~ **Resolved 2026-07-23** — replaced with a neutral holding statement pending Educate Strong confirmation (see StrongKidz information request doc) |
+| "Nationally recognised. Employer accepted." (unscoped qualification-recognition claim) | ~~Client decision~~ **Resolved 2026-07-23** — replaced with precisely-scoped "Active IQ accredited Level 1 qualification." |
+| Coach Directory "UK & Worldwide" unscoped reach claim | ~~Client decision~~ **Resolved 2026-07-23** — pill removed along with the other trust pills |
+| Seeded/template-generated placeholder curriculum publicly exposed on Level 2/3 and StrongKidz Coach Education | ~~Technical fix required~~ **Resolved 2026-07-23** — public module/lesson expansion suppressed; database records untouched |
+| Course Catalogue page's visible H1 subheading still reads "Accredited qualifications across coaching, refereeing, and youth development" | **Client decision** (separate from the `<meta>` description already corrected; not yet addressed) |
+| StrongKidz hero subtext "safeguarding-trained coaches" | **Client decision** (separate from the safeguarding section already corrected; not yet addressed) |
+| Homepage "UK Wide Reach" stat | **Client decision** (noticed during Priority 2 visual verification, not yet addressed) |
 | Level 2/3 Coaching and StrongKidz Coach Education course pages missing commercial details | **Client content required** |
-| StrongKidz parent-facing session logistics (location, age range, price, etc.) | **Client content required** |
+| StrongKidz parent-facing session logistics (location, age range, price, etc.) | **Client content required** — see [EDUCATE_STRONG_STRONGKIDZ_INFORMATION_REQUEST.md](EDUCATE_STRONG_STRONGKIDZ_INFORMATION_REQUEST.md) |
 | Tutor personal statements (`tutorsData.ts`) still placeholder text | **Client content required** (not yet wired to any live page — no launch urgency until it is) |
 | Coaching Pathway event photography assets missing (6 files) | **Client content required** |
 | EatStrong download file hosting not configured | **Technical fix required** |

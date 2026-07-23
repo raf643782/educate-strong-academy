@@ -65,7 +65,7 @@ function CourseCard({ course }: { course: Course }) {
 export default function CourseCatalogue() {
   useDocumentHead({
     title: 'All Courses',
-    description: 'Strongman coaching, refereeing, and youth development qualifications from Educate.Strong Academy.',
+    description: 'Explore Active IQ accredited Level 1 Strongman coaching, WHEA.GB endorsed Level 1 Strongman refereeing, and StrongKidz youth education from Educate.Strong Academy.',
   });
 
   const [courses, setCourses] = useState<Course[]>([]);

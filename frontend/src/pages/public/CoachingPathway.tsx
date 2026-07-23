@@ -309,7 +309,7 @@ export default function CoachingPathway() {
             </p>
 
             {/* Accreditation pills */}
-            <div className="flex flex-wrap gap-2" role="list" aria-label="Accreditations">
+            <div className="flex flex-wrap gap-2 mb-3" role="list" aria-label="Accreditations">
               {['Active IQ Accredited', 'WHEA.GB Endorsed', 'Armed Forces Strongman'].map(t => (
                 <span key={t} role="listitem"
                   className="text-[11px] font-medium text-white/40 px-3 py-1.5 rounded-full"
@@ -318,6 +318,9 @@ export default function CoachingPathway() {
                 </span>
               ))}
             </div>
+            <p className="text-[11px] text-white/30 leading-relaxed max-w-md">
+              Active IQ accreditation applies to Level 1 Coaching. WHEA.GB endorsement applies to Level 1 Refereeing. Armed Forces Strongman endorses both Level 1 courses.
+            </p>
           </div>
         </div>
       </section>
@@ -432,7 +435,7 @@ export default function CoachingPathway() {
             <div>
               <p className="text-white/25 text-xs uppercase tracking-[0.1em] font-semibold mb-2">Qualification Standard</p>
               <p className="font-bold text-white text-base">Active IQ Level 1 Certificate</p>
-              <p className="text-white/35 text-sm mt-1">Nationally recognised. Employer accepted.</p>
+              <p className="text-white/35 text-sm mt-1">Active IQ accredited Level 1 qualification.</p>
             </div>
             <div className="flex flex-wrap gap-3">
               {[

@@ -230,7 +230,7 @@ export default function Home() {
             </p>
 
             {/* Accreditation pills */}
-            <div className="flex flex-wrap gap-2 mb-10" role="list" aria-label="Accreditations and endorsements">
+            <div className="flex flex-wrap gap-2 mb-3" role="list" aria-label="Accreditations and endorsements">
               {['Active IQ Accredited', 'WHEA.GB Endorsed', 'Armed Forces Strongman'].map(t => (
                 <span
                   key={t}
@@ -242,6 +242,9 @@ export default function Home() {
                 </span>
               ))}
             </div>
+            <p className="text-[11px] text-white/30 leading-relaxed mb-8 max-w-md">
+              Active IQ accreditation applies to Level 1 Coaching. WHEA.GB endorsement applies to Level 1 Refereeing. Armed Forces Strongman endorses both Level 1 courses.
+            </p>
 
             {/* CTAs */}
             <div className="flex flex-wrap gap-3">

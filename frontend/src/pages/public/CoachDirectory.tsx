@@ -121,26 +121,6 @@ export default function CoachDirectory() {
           <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '17px', lineHeight: 1.7, maxWidth: '620px', margin: '0 auto 32px' }}>
             Every coach who completes an Educate.Strong qualification will appear in our verified directory. Browse certified coaches and find one near you.
           </p>
-
-          {/* Trust pills */}
-          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            {['Active IQ Verified', 'WHEA.GB Endorsed', 'UK & Worldwide'].map(pill => (
-              <span
-                key={pill}
-                style={{
-                  background: 'rgba(164,28,100,0.12)',
-                  border: '1px solid rgba(164,28,100,0.3)',
-                  color: 'rgba(255,255,255,0.7)',
-                  borderRadius: '999px',
-                  padding: '6px 16px',
-                  fontSize: '12px',
-                  fontWeight: 500,
-                }}
-              >
-                {pill}
-              </span>
-            ))}
-          </div>
         </div>
       </section>
 

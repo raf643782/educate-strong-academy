@@ -615,57 +615,15 @@ export default function CourseDetail() {
         </div>
       </div>
 
-      {/* Module list */}
+      {/* Curriculum — withheld from public view for un-detailed courses until
+          confirmed content is available; the database records themselves are
+          untouched, only the public presentation is suppressed here. */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex-1">
         <div className="max-w-3xl">
-          <h2 className="text-2xl font-black text-white mb-6">Course Curriculum</h2>
-          <div className="space-y-2">
-            {course.modules.map((mod, idx) => (
-              <div key={mod.id} className="es-card overflow-hidden">
-                <button
-                  onClick={() => toggleModule(mod.id)}
-                  aria-expanded={openModules.has(mod.id)}
-                  aria-controls={`module-panel-fallback-${mod.id}`}
-                  className="w-full flex items-center justify-between p-4 text-left hover:bg-es-card transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 bg-es-grey text-white rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0">
-                      {idx + 1}
-                    </span>
-                    <div>
-                      <p className="font-semibold text-white text-sm">{mod.title}</p>
-                      <p className="text-xs text-es-subtle mt-0.5">
-                        {mod.lessons.length} lesson{mod.lessons.length !== 1 ? 's' : ''}
-                      </p>
-                    </div>
-                  </div>
-                  <svg
-                    aria-hidden="true"
-                    className={`w-4 h-4 text-es-subtle transition-transform ${
-                      openModules.has(mod.id) ? 'rotate-180' : ''
-                    }`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                {openModules.has(mod.id) && (
-                  <div id={`module-panel-fallback-${mod.id}`} className="divide-y divide-es-grey-dark">
-                    {mod.lessons.map((lesson) => (
-                      <div key={lesson.id} className="flex items-center justify-between px-5 py-3">
-                        <span className="text-sm text-es-muted">{lesson.title}</span>
-                        {lesson.durationMinutes && (
-                          <span className="text-xs text-es-subtle">{lesson.durationMinutes}m</span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+          <h2 className="text-2xl font-black text-white mb-4">Course Curriculum</h2>
+          <p className="text-sm leading-relaxed" style={{ color: '#75757D' }}>
+            Full curriculum details for this course are being finalised and will be published here once confirmed.
+          </p>
         </div>
       </div>
 

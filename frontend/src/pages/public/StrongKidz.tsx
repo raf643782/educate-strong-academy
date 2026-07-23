@@ -22,15 +22,6 @@ const BENEFITS = [
   },
 ];
 
-const SAFEGUARDING = [
-  'All StrongKidz coaches hold current DBS (Disclosure and Barring Service) clearances',
-  'All coaches hold safeguarding qualifications specific to youth sport',
-  'Session content is age-appropriate — no maximum loads, no adult lifting protocols',
-  'All participants require a signed consent and health information form before attending',
-  'Photography and filming policy: confirmed written consent required before any images are shared',
-  'Any safeguarding concern can be raised directly with Educate.Strong',
-];
-
 const SESSION_FIELDS = [
   { label: 'Location', value: 'Sheffield — exact venue to be confirmed' },
   { label: 'Age range', value: 'To be confirmed' },
@@ -294,16 +285,9 @@ export default function StrongKidz() {
               </div>
 
               <div className="rounded-2xl p-6 mb-5" style={{ background: '#151519', border: '1px solid rgba(255,255,255,0.07)' }}>
-                <ul className="space-y-3">
-                  {SAFEGUARDING.map(item => (
-                    <li key={item} className="flex items-start gap-3 text-sm" style={{ color: '#B8B8BE' }}>
-                      <svg className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: '#C2186A' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
+                <p className="text-sm leading-relaxed" style={{ color: '#B8B8BE' }}>
+                  Full safeguarding, Coach verification and booking information will be confirmed before sessions open.
+                </p>
               </div>
 
               <div className="rounded-xl p-4" style={{ background: 'rgba(225,154,71,0.07)', border: '1px solid rgba(225,154,71,0.22)' }}>
