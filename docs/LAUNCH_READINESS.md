@@ -2,7 +2,15 @@
 
 Living document. Updated at the end of every programme section. No credentials, connection strings, or secret values are ever recorded in this file — only status, ownership and evidence references.
 
-**Last updated:** Priority 2 Final Wording Pass (Master Continuation Programme) — 2026-07-23.
+**Last updated:** Priority 3 Audit (Master Continuation Programme — Knowledge Hub and EatStrong Editorial Completion, audit only, no implementation) — 2026-07-23.
+
+## Priority 3 audit status (2026-07-23)
+
+- **Knowledge Hub**: all 21 existing articles inventoried directly from `frontend/src/data/knowledgeArticles.ts`. No author/reviewer/published-date/source fields exist in this data model for any article — a pre-existing structural limitation, not new.
+- **The five new articles the owner referenced** ("What Is Strongman?", "Strongman for Beginners", "Strongman Events Explained", "How to Become a Strongman Coach", "Is Strongman Safe for Children?") **could not be located** after searching the git repository, a stale duplicate checkout on the Desktop, and the Downloads/Desktop/Documents folders. Two related ChatGPT-authored research PDFs were found (`~/Downloads/LMS Content/EducateStrong Academy Knowledge Hub Research and Content Map.pdf` and `.../Strongman Reference Base for EducateStrong Academy.pdf`) — useful background content strategy, but neither contains the five requested articles' final text. Full detail in the Priority 3 chat report.
+- **EatStrong**: all 11 articles re-verified directly against the live production API (not assumed from prior audits). `nutrition-conversations-with-athletes` confirmed missing its `scopeOfPracticeNote`. Author is listed as "EatStrong Editorial Team" (institutional, not a named individual) on all 11; reviewer is "Victoria Wilson" (a real, named person already known elsewhere on the site) on all 11 — her review of this specific content has not been separately confirmed by the owner.
+- New: [docs/EATSTRONG_OWNERSHIP_HANDOVER.md](EATSTRONG_OWNERSHIP_HANDOVER.md) — prepared for the future EatStrong ownership transition the owner described.
+- **No articles were rewritten, published, or unpublished. No production write occurred. `feature/libraryPages` was not merged.**
 
 ---
 
