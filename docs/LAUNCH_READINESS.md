@@ -2,7 +2,7 @@
 
 Living document. Updated at the end of every programme section. No credentials, connection strings, or secret values are ever recorded in this file — only status, ownership and evidence references.
 
-**Last updated:** Section 3B (Scoped Database Alignment Execution) — 2026-07-23.
+**Last updated:** Section 4 (Public Content Completeness and Launch Inventory Audit) — 2026-07-23.
 
 ---
 
@@ -12,22 +12,24 @@ Living document. Updated at the end of every programme section. No credentials, 
 |---|---|
 | Repository | `raf643782/educate-strong-academy` (public on GitHub) |
 | Local path | `/Users/raffa/Projects/EducateStrong` |
-| Working branch | `feature/libraryPages` |
-| Current commit | `79b11db` (Stage 8) |
+| Working branch | `feature/libraryPages` (checked out for Section 4 read-only inspection) |
+| Current commit (as of Section 4) | `2dd0833` (Section 3B docs update) — **superseded by this section's docs commit, see below** |
 | Working tree | Clean |
 | Remote sync | Up to date with `origin/feature/libraryPages` |
-| Open pull request | None found for `feature/libraryPages` |
-| `main` branch | `f9980d8` — the commit immediately before Stage 1 began. **`feature/libraryPages` has not been merged; production is running pre-Stage-1 code.** |
-| Second git worktree | `/Users/raffa/Projects/esa-db-update`, detached HEAD at `65d6182` (the Stage 4 drift-correction commit) — see Findings below |
-| Local checkpoint tag | `checkpoint-section1-audit` created at `79b11db`, pushed to `origin` |
-| Documentation commit | `f6bf404` — this tracking document, pushed to `origin/feature/libraryPages` |
+| Open pull request | None found for `feature/libraryPages` (still true as of Section 4) |
+| `main` branch | `af1998a` — scoped database-alignment merge (PR #1, Stage 6/7 schema + migrations only). **The full Stage 1–8 frontend/library build on `feature/libraryPages` has still not been merged to `main`.** |
+| Second git worktree | `/Users/raffa/Projects/esa-db-update`, detached HEAD at `65d6182` (unchanged since Section 1) |
+| Local checkpoint tag | `checkpoint-section1-audit`, pushed to `origin` |
+| `db-alignment-stage6-7` branch | Merged into `main` via PR #1; still present on `origin`, not deleted |
+| Documentation history | `f6bf404` (Section 1) → `8a01061` (Section 2) → `fbb3e44` (Section 3A) → `2dd0833` (Section 3B) → this section's commit below |
 
 ## Workstream status table
 
 | Workstream | Current status | Owner | Blocker | Required decision | Verification evidence | Final acceptance |
 |---|---|---|---|---|---|---|
-| Feature branch code (Stages 1–8) | Complete, pushed, preview green | Assistant | None | — | Vercel check-run `success` on `79b11db` | Not yet accepted |
-| Production merge | Not started | Owner approval required | Everything below | Owner to approve launch | `main` still at `f9980d8` | Not started |
+| Feature branch code (Stages 1–8) | Complete, pushed, preview green | Assistant | None | — | Vercel check-run `success` on latest `feature/libraryPages` commit | Not yet accepted |
+| Production merge (full frontend/library build) | Not started — only the scoped Stage 6/7 schema PR has merged so far | Owner approval required | Content completeness (Section 4 findings below) + everything else in this table | Owner to approve launch scope | `main` at `af1998a`, DB-alignment only | Not started |
+| Public content completeness (Section 4) | **Audited 2026-07-23, read-only.** Full findings below | Owner (content decisions) + Assistant (future implementation, once approved) | See launch blocker table | Owner to approve realistic launch scope per Section 4 §15 | Route inventory, content source map, claims register, placeholder sweep (agent + manually verified), Exercise/Event field audit, visual/mobile spot-check all completed this section | Audit complete; content decisions pending |
 | Stage 5 Event insertion (6 new Events) | **Applied and verified 2026-07-23.** Live run created all 6 Events atomically in one transaction | Owner (ran the script locally via secure hidden-input credential entry) | None | — | `GET /api/events` confirmed: 26 total, all 6 target slugs present, no duplicates, 29 Exercises unchanged, backend health `200 OK` | **Accepted** |
 | Stage 6 media migration | **Applied and verified 2026-07-23** via a narrowly scoped PR (#1, schema + migrations only) merged to `main`, deployed automatically by Render | Assistant (scoped PR) + Owner (merge approval) | None | — | Render deploy `dep-d9ges977f7vs73f3k9vg` Live at commit `af1998a`; live API responses now carry `imageUrl` etc. as `null` | **Accepted** |
 | Stage 7 editorial migration | **Applied and verified 2026-07-23** — same scoped PR/deploy as Stage 6 | Assistant + Owner | None | — | Same deploy; live API responses now carry `authorName`/`sources`/`relatedExerciseSlugs` etc. as `null`/`[]` | **Accepted** |
@@ -131,6 +133,101 @@ Living document. Updated at the end of every programme section. No credentials, 
 
 ---
 
+## Section 4 findings of note (read-only public content audit — no writes, no code changes, no merge)
+
+### Verified content counts
+
+| Content group | Count | Source |
+|---|---|---|
+| Exercises | 29 | Live `GET /api/exercises` |
+| Events | 26 | Live `GET /api/events` |
+| Combined Exercise + Event records | 55 | 29 + 26 |
+| Knowledge Hub articles | 21 | `frontend/src/data/knowledgeArticles.ts` (static data, direct read) |
+| EatStrong (BeStrong) published articles | 11 total — 10 FREE, 1 ENROLLED, 0 CERTIFIED | Live `GET /api/be-strong` (mounted path is `/api/be-strong`, not `/api/eatstrong`) |
+| Courses (DB-published) | 5 (`level-1-coaching-strongman`, `level-2-coaching-strongman`, `level-3-coaching-strongman`, `level-1-strongman-refereeing`, `strongkidz-coach-education`) | `backend/prisma/seed.ts` + `GET /api/courses` |
+| Courses with full rich marketing content | 2 of 5 (Level 1 Coaching, Level 1 Refereeing) | `frontend/src/data/coursePageData.ts` — other 3 use a generic DB-driven fallback template with real curriculum modules/lessons but no price/tutor/outcomes copy |
+| Coach Directory public profiles | 0 (honest empty state, not fake data) | `GET /api/coaches`, live |
+
+### Content source-of-truth map (summary)
+
+| Content group | Source | Client-editable without a developer? |
+|---|---|---|
+| Course catalogue listing | DB (`Course` model via `/api/courses`) | Yes, once an admin UI is used |
+| Individual Course marketing pages (price, tutor bio, outcomes) | Hardcoded TS object literal, `frontend/src/data/coursePageData.ts` | No — developer required |
+| Course "coming soon" flags | Hardcoded, `frontend/src/data/courseLaunchStatus.ts` | No |
+| About, StrongKidz, Coaching Pathway pages | Fully hardcoded in their own `.tsx` files, no separate data file | No |
+| Coach Directory / Coach Profile | DB (`CoachProfile` model), fully API-driven | Yes, once an admin UI is used |
+| Exercise Library / Event Library | DB (`Exercise`/`Event` models), fully API-driven | Yes, once an admin UI is used |
+| Knowledge Hub | Static TS array, `frontend/src/data/knowledgeArticles.ts` | No — developer required; no author/reviewer/date/source fields exist in this data model at all |
+| EatStrong | DB (`BeStrongArticle` model, `accessLevel` gated) | Yes, once an admin UI is used |
+| Legal pages (Terms/Privacy/Refund Policy) | Hardcoded placeholder drafts, explicitly marked `[LEGAL REVIEW REQUIRED]` | No |
+| Tutor personal statements | Hardcoded, `frontend/src/data/tutorsData.ts` — contains literal "Placeholder ... To be provided by Educate.Strong" text for all 4 tutors, but this file is not currently imported by any live page | No — and not yet wired up regardless |
+
+### Launch-ready content
+
+- Exercise Library index + all 29 detail pages: unique slugs, no duplicates, real technique/coaching content, correct breadcrumbs/canonical/structured-data eligibility (per Stage 8 tooling). One content-accuracy issue — see below.
+- Event Library index + all 26 detail pages (including the 6 new Stage 5 Events): same standard, all correctly framed as competition/judging content.
+- Knowledge Hub index + all 21 articles: complete, finished prose, zero placeholder text found. Structural/attribution gaps noted below are pre-existing data-model limits, not incomplete copy.
+- EatStrong hub + all 10 FREE articles: complete, finished prose, author/reviewer/date fields populated (unlike Knowledge Hub), zero placeholder text.
+- Level 1 Coaching Strongman and Level 1 Strongman Refereeing course pages: price, duration, tutor, entry requirements, accreditation wording, outcomes, assessment method all present.
+- Homepage, 404 page, Register Interest form, Login page: functionally complete, no placeholder/broken content found.
+
+### Incomplete content (specific, not generic)
+
+- **Level 2/3 Coaching Strongman and StrongKidz Coach Education** course pages: no price, no dates, no tutor bio, no learning outcomes, no assessment method — generic "being prepared" fallback (StrongKidz Coach Education does show real curriculum modules/lessons from the DB, but no commercial/delivery details).
+- **StrongKidz parent-facing session details** (location, age range, group size, session length, price): all explicitly "To be confirmed" — honestly flagged, not disguised, but genuinely missing.
+- **`viking-press-exercise`** (Exercise record): description and "Competition Event" badge both incorrectly frame it as the competition event rather than a training drill — content-drift matching the earlier Arm-Over-Arm Rope Pull pattern, confirmed live and visually.
+- **Coaching Pathway page**: six event photography assets referenced (`/assets/event-log-press.jpg` etc.) do not exist on disk; degrades gracefully to an icon (no broken-image icon shown), but real photography is missing.
+- **Tutor personal statements** (`tutorsData.ts`): literal placeholder text for all 4 tutors, not yet wired into any live page — content debt to resolve before whichever component consumes this file goes live.
+- **Legal pages** (Terms, Privacy, Refund Policy): explicitly marked as placeholder drafts requiring qualified legal review — critical pre-launch item.
+- **Shop**: every product marked "Coming soon — register your interest" — intentional current design, not a bug, but a launch-scope decision.
+- **EatStrong downloads**: file hosting not configured; clicking a download shows a real user-facing "will be available once document hosting is configured" message.
+- **`nutrition-conversations-with-athletes`** (EatStrong): missing its scope-of-practice disclaimer banner (`null` where all 9 sibling FREE articles have it populated).
+
+### Placeholder/dead-code sweep — verified, not just grep-reported
+
+A repo-wide sweep found several matches for placeholder/"to be confirmed" patterns. Each was individually verified for whether the containing component is actually reachable from any live route (`grep` for importers) before being classified:
+
+- **Confirmed reachable on a live page (real findings):** StrongKidz session-detail "To be confirmed" fields; Shop "Coming soon" notes; EatStrong download "hosting not configured" message; `NextCourseSection`'s "Location TBC" — **this component was checked and is NOT currently imported anywhere, so it is not live either, downgraded from the initial sweep**; the Login page's public "Preview the portals" link to `/portal-preview` (excluded from `robots.txt` but still visitor-clickable).
+- **Found in source but confirmed NOT rendered on any live page (verified via import search, not assumed):** `components/testimonials/TestimonialCard.tsx` + `TestimonialGrid.tsx` (contains dev-warning text "Placeholder — consent not yet confirmed. Do not publish publicly." — this text is NOT visible to real visitors; the actual live homepage testimonials block is a *different* component, `components/sections/TestimonialsSection.tsx`, which correctly shows an honest "No testimonials have been published yet" empty state since none of its 6 entries have `consentConfirmed: true`); `components/community/CommunitySection.tsx` (literal `[Name]`/`[Date]` tokens, unused); `components/sections/EatStrongSection.tsx` ("Image or video placeholder" text, unused); `components/course/CoursePractical.tsx` (default placeholder label, unused); `components/sections/QualifiedReferees.tsx` (hardcoded-false photo flag + one broken image path, unused); `components/sections/ProfessionalPathway.tsx`, `PublicPathwayPreview.tsx`, `UpcomingCohortAlert.tsx`, `AcademyInAction.tsx` (all unused/unwired).
+- **Recommendation:** either wire these components up with real content or remove them — they are dead code today, not live bugs, but they represent either duplicate/superseded work or genuine future features left unfinished.
+- No lorem ipsum, no `href="#"`, no fake prices/phone numbers, no placeholder social links found anywhere reachable.
+- Hardcoded `educate-strong-academy.vercel.app` canonical/OG/JSON-LD URLs exist per-file (Home, CourseDetail, StrongKidz, all EatStrong pages) rather than centralized — will need updating at custom domain cutover (consistent with the Section 1 finding).
+
+### Claims requiring Educate Strong confirmation (register, not exhaustive prose)
+
+Per standing instruction, no claim below is treated as confirmed merely because it currently appears on the site. The "300+ graduates" figure remains the sole pre-confirmed exception.
+
+- "Active IQ Accredited" / "Formally Accredited" / "built by champions"-style wording — appears on the homepage hero, About page, Coaching Pathway page, and a page-level `useDocumentHead` description on `CourseCatalogue.tsx` (a second instance beyond the `index.html` meta tags already corrected in Stage 8).
+- Named competition results and titles for Paul Smith, Dr Chris Fitzgerald, Laura Hollywood, Kris Herbert (About page) — specific, checkable claims.
+- "Co-founder, Mind Body Connect (Charity No. 1173834)" — specific registration number claim.
+- "Extensive MOD coaching experience" and "British Army — Partner" (footer accreditation strip) — organisational relationship/endorsement claims.
+- "WHEA.GB Endorsed", "Armed Forces Strongman" endorsement wording — repeated across Home, About, Coaching Pathway, footer.
+- "Active IQ Level 1 Certificate ... Nationally recognised. Employer accepted." (Coaching Pathway) — employer-recognition claim.
+- DBS clearance and safeguarding-qualification claims for StrongKidz coaches (compliance-relevant, worth an evidence check).
+- Several unsourced/unattributed medical, safety, and nutrition claims in Knowledge Hub articles (youth growth-plate safety, caffeine dosage, dehydration/force-output figures, a duty-of-care legal claim) and two EatStrong articles (protein dosage range, heat-illness recognition) reviewed only by a Strength & Conditioning coach credential, not a dietitian or medical professional.
+- "EatStrong" brand name — a source-code comment in `BeStrongHub.tsx` explicitly flags that eatstrong.com is a pre-existing US company and recommends UK trademark clearance before public commitment to the name.
+
+### CTA and journey issues
+
+- No dead-end CTAs, no `href="#"`, no broken destinations found across the full public CTA inventory (Courses, Register Interest, Shop, Coaches, Knowledge Hub, EatStrong, Exercise/Event Libraries all checked).
+- The Login page's "Preview the portals" link is the one CTA whose presence on a public page is worth an explicit owner decision (keep visible pre-launch, or remove/hide) rather than a content fix.
+- `UpcomingCohortSpotlight`'s "Book Now" CTA uses a per-cohort `bookingUrl` field — worth confirming each live cohort record actually has a real URL before launch, since this wasn't independently checked at the data level this section.
+
+### Visual and mobile findings
+
+Checked at desktop (1280px) and mobile (375px) widths, against the live production API data, using a local `feature/libraryPages` build: Homepage, Exercise Library index + 2 detail pages (including the `viking-press-exercise` drift), Event detail (`viking-press`), Knowledge Hub index, EatStrong index, Course detail (Level 1 Coaching, and the StrongKidz Coach Education fallback), Register Interest, Login, 404. No content clipping, broken media, or mobile navigation issues found. No broken-image icons anywhere (missing assets degrade gracefully to icon/initial placeholders by design). One minor mobile spacing quirk noted (two stat bullets sharing a line on the Level 1 Coaching course page at 375px) — cosmetic only, not a launch blocker.
+
+### Recommended realistic launch scope (assistant recommendation only — not a business decision)
+
+- **Ready to launch as-is:** Exercise Library, Event Library (pending the `viking-press-exercise` correction), Knowledge Hub, EatStrong FREE articles, Level 1 Coaching and Level 1 Refereeing course pages, homepage, 404, Register Interest, Login.
+- **Ready with a small, narrowly-scoped fix:** `viking-press-exercise` description/badge correction (same pattern as the earlier Arm-Over-Arm Rope Pull fix).
+- **Should remain unpublished or clearly marked deferred:** Level 2/3 Coaching and StrongKidz Coach Education course pages (until Educate Strong supplies pricing/dates/tutor/outcomes), Shop (until real products or a firm "coming soon" decision is made), EatStrong downloads (until file hosting exists).
+- **Requires Educate Strong input before any further work:** every item in the claims register above; all missing course commercial details; StrongKidz session logistics; tutor personal statements; legal document review.
+- **Owner decision needed, not a content fix:** whether the public "Preview the portals" Login page link should remain visible pre-launch.
+
+---
+
 ## Launch blocker table
 
 | Item | Label |
@@ -149,6 +246,17 @@ Living document. Updated at the end of every programme section. No credentials, 
 | QA demo login confirmed disabled in production | **Launch blocker** |
 | `backend/.env.docker` tracked in git (low-risk local-only values) | **Recommended improvement** |
 | CORS wildcard on `*.vercel.app` | **Recommended improvement** (tighten at domain cutover) |
+| Legal pages (Terms/Privacy/Refund Policy) explicitly marked `[LEGAL REVIEW REQUIRED]` | **Legal or accreditation review required** |
+| `viking-press-exercise` content drift (Exercise page reads/badges as a competition Event) | **Technical fix required** (narrow, same pattern as the earlier Arm-Over-Arm Rope Pull correction) |
+| Unverified authority/accreditation/partnership/safety claims (see Section 4 claims register) | **Client decision** (Educate Strong confirmation required per claim) |
+| Level 2/3 Coaching and StrongKidz Coach Education course pages missing commercial details | **Client content required** |
+| StrongKidz parent-facing session logistics (location, age range, price, etc.) | **Client content required** |
+| Tutor personal statements (`tutorsData.ts`) still placeholder text | **Client content required** (not yet wired to any live page — no launch urgency until it is) |
+| Coaching Pathway event photography assets missing (6 files) | **Client content required** |
+| EatStrong download file hosting not configured | **Technical fix required** |
+| "EatStrong" brand name — UK trademark clearance not yet confirmed (flagged in source code) | **Legal or accreditation review required** |
+| Public "Preview the portals" link on the Login page | **Client decision** (keep visible pre-launch or remove) |
+| Dead/unwired placeholder components (`TestimonialCard`/`TestimonialGrid`, `CommunitySection`, `EatStrongSection`, `CoursePractical`, `QualifiedReferees`, `ProfessionalPathway`, `PublicPathwayPreview`, `UpcomingCohortAlert`, `AcademyInAction`, `NextCourseSection`) | **Recommended improvement** (wire up or remove — not currently live, not a launch blocker) |
 | Handover documentation pack | **Handover blocker** |
 | Client final signoff | **Handover blocker** |
 | Sanity CMS phased rollout | **Future enhancement** (if Section 9 decision defers it) |
