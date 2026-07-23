@@ -2,7 +2,7 @@
 
 Living document. Updated at the end of every programme section. No credentials, connection strings, or secret values are ever recorded in this file — only status, ownership and evidence references.
 
-**Last updated:** Section 4 (Public Content Completeness and Launch Inventory Audit) — 2026-07-23.
+**Last updated:** Priority 1 (Master Continuation Programme — Viking Press Production Closure) — 2026-07-23.
 
 ---
 
@@ -12,16 +12,17 @@ Living document. Updated at the end of every programme section. No credentials, 
 |---|---|
 | Repository | `raf643782/educate-strong-academy` (public on GitHub) |
 | Local path | `/Users/raffa/Projects/EducateStrong` |
-| Working branch | `feature/libraryPages` (checked out for Section 4 read-only inspection) |
-| Current commit (as of Section 4) | `2dd0833` (Section 3B docs update) — **superseded by this section's docs commit, see below** |
+| Working branch | `feature/libraryPages` |
+| Current commit | `3a5fbed` — merge of `main` (bringing in the Viking Press production migration) on top of `80baa4b` (Section 5B) |
 | Working tree | Clean |
 | Remote sync | Up to date with `origin/feature/libraryPages` |
-| Open pull request | None found for `feature/libraryPages` (still true as of Section 4) |
-| `main` branch | `af1998a` — scoped database-alignment merge (PR #1, Stage 6/7 schema + migrations only). **The full Stage 1–8 frontend/library build on `feature/libraryPages` has still not been merged to `main`.** |
+| Open pull request | None open (PR #1 and PR #2 both merged and closed) |
+| `main` branch | `ddb3bbc` — PR #1 (Stage 6/7 schema + migrations) + PR #2 (Viking Press data correction). **The full Stage 1–8 frontend/library build on `feature/libraryPages` has still not been merged to `main`.** |
 | Second git worktree | `/Users/raffa/Projects/esa-db-update`, detached HEAD at `65d6182` (unchanged since Section 1) |
 | Local checkpoint tag | `checkpoint-section1-audit`, pushed to `origin` |
 | `db-alignment-stage6-7` branch | Merged into `main` via PR #1; still present on `origin`, not deleted |
-| Documentation history | `f6bf404` (Section 1) → `8a01061` (Section 2) → `fbb3e44` (Section 3A) → `2dd0833` (Section 3B) → this section's commit below |
+| `production-viking-press-correction` branch | Merged into `main` via PR #2; still present on `origin`, not deleted |
+| Documentation history | `f6bf404` (Section 1) → `8a01061` (Section 2) → `fbb3e44` (Section 3A) → `2dd0833` (Section 3B) → `aabbab3` (Section 4) → this commit below |
 
 ## Workstream status table
 
@@ -34,6 +35,7 @@ Living document. Updated at the end of every programme section. No credentials, 
 | Stage 6 media migration | **Applied and verified 2026-07-23** via a narrowly scoped PR (#1, schema + migrations only) merged to `main`, deployed automatically by Render | Assistant (scoped PR) + Owner (merge approval) | None | — | Render deploy `dep-d9ges977f7vs73f3k9vg` Live at commit `af1998a`; live API responses now carry `imageUrl` etc. as `null` | **Accepted** |
 | Stage 7 editorial migration | **Applied and verified 2026-07-23** — same scoped PR/deploy as Stage 6 | Assistant + Owner | None | — | Same deploy; live API responses now carry `authorName`/`sources`/`relatedExerciseSlugs` etc. as `null`/`[]` | **Accepted** |
 | Arm-Over-Arm Rope Pull Exercise description drift | **Resolved and confirmed** — production description now exactly matches the approved Exercise wording | — | None | — | Live `GET /api/exercises` checked directly: description field matches the approved value verbatim | **Accepted** |
+| Viking Press Exercise description drift | **Resolved and confirmed 2026-07-23** via a guarded, data-only Prisma migration (PR #2), merged to `main`, deployed automatically by Render. `feature/libraryPages` merged back in afterwards without losing commit `80baa4b` | Assistant (scoped migration PR) + Owner (merge approval) | None | — | Live `GET /api/exercises` confirmed: description matches approved wording exactly; 29 Exercises/26 Events unchanged; no duplicate slugs; Event record untouched; backend health `200 OK` | **Accepted** |
 | Production database credential | **Rotated and verified 2026-07-22.** Confirmed as the active production credential (owner copied it from Render's `DATABASE_URL` to run the Stage 4 live update); replaced in Neon, applied to Render, redeployed, old value invalidated in place | Owner (Neon/Render account holder) | None | — | Backend health, public APIs, DB connectivity and auth all verified working post-rotation; see Section 2 findings below | **Accepted** |
 | Neon vs Render-native database | **Resolved** — production `DATABASE_URL` on Render is confirmed to point at Neon (host contains `neon.tech`), set as a plain manually-entered value, not the `fromDatabase` binding. The `render.yaml`-defined `educate-strong-db` Render-native database resource appears unused in production | Owner | Decide whether to delete or repurpose the unused `educate-strong-db` resource | Owner decision (not urgent) | Owner confirmed via Render dashboard Environment tab | **Accepted** (identity confirmed; disposal decision outstanding) |
 | Analytics (GA4/GTM) | Not present in code | — | Not yet decided/implemented | Owner + assistant, later section | Repo-wide search: zero matches | Not started |
@@ -228,6 +230,26 @@ Checked at desktop (1280px) and mobile (375px) widths, against the live producti
 
 ---
 
+## Priority 1 findings of note (Master Continuation Programme — Viking Press production closure)
+
+1. **Owner declined the terminal-based `read -s DATABASE_URL` route for this correction** — did not want to handle the production credential locally again, even via hidden input. Replaced with a fully Render-managed release, mirroring the Section 3B schema-migration pattern but for a guarded data correction instead.
+
+2. **Guarded, data-only Prisma migration**: `backend/prisma/migrations/20260723150000_correct_viking_press_exercise_description/migration.sql`. A `DO $$ ... $$` block updates `Exercise.description` only where `slug = 'viking-press-exercise'` AND the current value exactly equals the known-incorrect text; raises an exception (aborting and rolling back the whole statement) if zero rows match or, though structurally impossible given the unique `slug` constraint, more than one would. No schema change, no other table touched.
+
+3. **Scoped branch `production-viking-press-correction`, created from `main`** (not `feature/libraryPages`) — exactly one file, PR #2, reviewed via GitHub's API to confirm the file list before merge, approved, merged by the assistant.
+
+4. **Validation limitation, disclosed rather than glossed over**: this environment has no Docker and no reachable local Postgres (`localhost:5433` connection refused, `docker` not installed), so the guard logic could not be exercised with a live test run. Validation instead relied on manual SQL review, `prisma validate` (schema-only, unaffected by this migration), and repository diff confirmation. The SQL pattern used (`GET DIAGNOSTICS ROW_COUNT` + conditional `RAISE EXCEPTION` inside a `DO` block) is standard, well-established Postgres behaviour.
+
+5. **Render auto-deployed from `main`** on merge and ran the correction via its existing `prisma migrate deploy` build step, using its own `DATABASE_URL` binding — no credential was typed, displayed, or handled by the owner or the assistant at any point in this correction.
+
+6. **Post-deploy verification, all passed**: 29 Exercises, 26 Events (both unchanged), `viking-press-exercise` now reads the approved training-framed wording, `viking-press` (Event) unchanged, no duplicate Exercise or Event slugs, backend health `200 OK`. Spot-checked two other Exercise descriptions (`atlas-stone-to-lap`, `arm-over-arm-rope-pull`) against values captured earlier in this session — both unchanged. Combined with the migration's slug+value-scoped `WHERE` clause, this rules out any other record being affected both structurally and empirically.
+
+7. **`feature/libraryPages` reconciled with `main`** via `git merge main` (commit `3a5fbed`) — clean, no conflicts. `backend/prisma/schema.prisma` and the two Stage 6/7 migration folders were byte-identical on both branches already (originally copied verbatim in Section 3B), so only the new Viking Press migration folder was actually added. Commit `80baa4b` (Section 5B) confirmed still present as an ancestor of the new `HEAD`. `seed.ts` confirmed still carries the corrected wording. Backend `prisma validate` and `tsc --noEmit` both re-confirmed clean post-merge.
+
+8. **`section5-correction-viking-press-exercise.ts`** (the TypeScript script prepared in Part 5B) remains in the repository for historical reference only — it was never run against production; the guarded SQL migration superseded it as the actual correction mechanism.
+
+---
+
 ## Launch blocker table
 
 | Item | Label |
@@ -247,7 +269,7 @@ Checked at desktop (1280px) and mobile (375px) widths, against the live producti
 | `backend/.env.docker` tracked in git (low-risk local-only values) | **Recommended improvement** |
 | CORS wildcard on `*.vercel.app` | **Recommended improvement** (tighten at domain cutover) |
 | Legal pages (Terms/Privacy/Refund Policy) explicitly marked `[LEGAL REVIEW REQUIRED]` | **Legal or accreditation review required** |
-| `viking-press-exercise` content drift (Exercise page reads/badges as a competition Event) | **Technical fix required** (narrow, same pattern as the earlier Arm-Over-Arm Rope Pull correction) |
+| `viking-press-exercise` content drift | ~~Technical fix required~~ **Resolved and verified 2026-07-23** via guarded production migration (PR #2) |
 | Unverified authority/accreditation/partnership/safety claims (see Section 4 claims register) | **Client decision** (Educate Strong confirmation required per claim) |
 | Level 2/3 Coaching and StrongKidz Coach Education course pages missing commercial details | **Client content required** |
 | StrongKidz parent-facing session logistics (location, age range, price, etc.) | **Client content required** |
