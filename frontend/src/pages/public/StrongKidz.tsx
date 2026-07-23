@@ -166,8 +166,8 @@ export default function StrongKidz() {
               <p className="mb-8 max-w-xl text-lg leading-relaxed" style={{ color: '#B8B8BE' }}>
                 A weekly Strongman-inspired strength programme for children in Sheffield —
                 developed around movement, confidence and positive experiences of strength.
-                Age-appropriate coaching from experienced, safeguarding-trained coaches,
-                delivered with care.
+                Full Coach, safeguarding and session information will be confirmed before
+                bookings open.
               </p>
 
               {/* Audience portal tabs */}

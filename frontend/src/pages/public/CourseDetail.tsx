@@ -556,7 +556,11 @@ export default function CourseDetail() {
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-5 max-w-3xl leading-tight">
             {course.title}
           </h1>
-          <p className="text-lg max-w-2xl leading-relaxed mb-8" style={{ color: '#B8B8BE' }}>{course.description}</p>
+          <p className="text-lg max-w-2xl leading-relaxed mb-8" style={{ color: '#B8B8BE' }}>
+            {course.slug === 'strongkidz-coach-education'
+              ? 'Full details of this course, including its curriculum, are being finalised by Educate.Strong and will be published once confirmed.'
+              : course.description}
+          </p>
           <div className="flex items-center gap-6 text-sm mb-8" style={{ color: '#75757D' }}>
             {course.durationHours && <span>{course.durationHours} hours</span>}
             <span>{course.modules.length} modules</span>

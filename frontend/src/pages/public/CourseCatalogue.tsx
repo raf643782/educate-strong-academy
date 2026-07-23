@@ -122,7 +122,7 @@ export default function CourseCatalogue() {
             All Courses
           </h1>
           <p className="text-[#B8B8BE] max-w-xl">
-            Accredited qualifications across coaching, refereeing, and youth development.
+            Explore Strongman coaching, refereeing and youth development education.
           </p>
         </div>
       </section>

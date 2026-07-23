@@ -2,7 +2,7 @@
 
 Living document. Updated at the end of every programme section. No credentials, connection strings, or secret values are ever recorded in this file — only status, ownership and evidence references.
 
-**Last updated:** Priority 2F (Master Continuation Programme — Confirmed Claims, Accreditation Scope, Course Scope, StrongKidz Provenance) — 2026-07-23.
+**Last updated:** Priority 2 Closure Pass (Master Continuation Programme) — 2026-07-23.
 
 ---
 
@@ -302,9 +302,11 @@ Checked at desktop (1280px) and mobile (375px) widths, against the live producti
 | "Nationally recognised. Employer accepted." (unscoped qualification-recognition claim) | ~~Client decision~~ **Resolved 2026-07-23** — replaced with precisely-scoped "Active IQ accredited Level 1 qualification." |
 | Coach Directory "UK & Worldwide" unscoped reach claim | ~~Client decision~~ **Resolved 2026-07-23** — pill removed along with the other trust pills |
 | Seeded/template-generated placeholder curriculum publicly exposed on Level 2/3 and StrongKidz Coach Education | ~~Technical fix required~~ **Resolved 2026-07-23** — public module/lesson expansion suppressed; database records untouched |
-| Course Catalogue page's visible H1 subheading still reads "Accredited qualifications across coaching, refereeing, and youth development" | **Client decision** (separate from the `<meta>` description already corrected; not yet addressed) |
-| StrongKidz hero subtext "safeguarding-trained coaches" | **Client decision** (separate from the safeguarding section already corrected; not yet addressed) |
-| Homepage "UK Wide Reach" stat | **Client decision** (noticed during Priority 2 visual verification, not yet addressed) |
+| Course Catalogue page's visible H1 subheading | ~~Client decision~~ **Resolved 2026-07-23** — replaced with "Explore Strongman coaching, refereeing and youth development education." |
+| StrongKidz hero subtext "safeguarding-trained coaches" | ~~Client decision~~ **Resolved 2026-07-23** — replaced with "Full Coach, safeguarding and session information will be confirmed before bookings open." |
+| StrongKidz Coach Education course summary (unconfirmed provenance) | ~~Client decision~~ **Resolved 2026-07-23** — public page now shows a neutral holding statement; underlying database record untouched |
+| Homepage "UK Wide Reach" stat | **Client decision — source untraceable.** Git history traced to commit `e659683`, no reference to an official source found. Left unchanged pending owner confirmation or replacement wording |
+| `WhyEducateStrong.tsx:71` — "Educate.Strong Academy is the UK's only accredited pathway for Strongman coaching and refereeing" | **Client decision** (new finding, not yet addressed — claims market exclusivity and describes Refereeing as accredited rather than endorsed) |
 | Level 2/3 Coaching and StrongKidz Coach Education course pages missing commercial details | **Client content required** |
 | StrongKidz parent-facing session logistics (location, age range, price, etc.) | **Client content required** — see [EDUCATE_STRONG_STRONGKIDZ_INFORMATION_REQUEST.md](EDUCATE_STRONG_STRONGKIDZ_INFORMATION_REQUEST.md) |
 | Tutor personal statements (`tutorsData.ts`) still placeholder text | **Client content required** (not yet wired to any live page — no launch urgency until it is) |
