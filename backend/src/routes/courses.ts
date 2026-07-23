@@ -87,7 +87,7 @@ router.get('/:slug', async (req: Request, res: Response): Promise<void> => {
         },
       },
     });
-    if (!course) {
+    if (!course || !course.isPublished) {
       res.status(404).json({ error: 'Course not found' });
       return;
     }

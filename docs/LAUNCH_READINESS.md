@@ -2,7 +2,7 @@
 
 Living document. Updated at the end of every programme section. No credentials, connection strings, or secret values are ever recorded in this file — only status, ownership and evidence references.
 
-**Last updated:** Priority 3 CLOSED (Master Continuation Programme — Knowledge Hub and EatStrong Editorial Completion) — 2026-07-23. **Both outstanding items are now resolved and verified live.** PR #3 (EatStrong disclaimer) is merged and confirmed live in production. The Knowledge Hub true-404, permanent redirect, and the pre-existing Exercise/Event 404 mechanism were all fixed by moving the routing/serverless functions into `frontend/api/` and `frontend/vercel.json` — the directory and config this Vercel project's Root Directory (`frontend`) actually deploys — and every one of the 12 required checks passed on the live `feature/libraryPages` preview. See the final verification findings below.
+**Last updated:** Priority 4, Stage 4A (Master Continuation Programme — Real Account Journey, Email Delivery and Secure Downloads) — 2026-07-24. Immediate security closure stage: unauthenticated lesson content exposure fixed, unpublished course metadata leak fixed, Portal Preview restricted to ADMIN, JWT fallback-secret removed with a fail-fast production check, and a frontend 401 handler added. See the Priority 4 findings below. **Stage 4A only — Priority 4 is not complete.** Priority 3 (Knowledge Hub and EatStrong Editorial Completion) closed 2026-07-23 — see its own findings section further down, unchanged by this update.
 
 ## Priority 3 audit status (2026-07-23)
 
@@ -355,6 +355,55 @@ You confirmed the root cause (Vercel project Root Directory = `frontend`) and as
 
 ---
 
+## Priority 4 — Real Account Journey, Email Delivery and Secure Downloads
+
+**Confirmed decisions for the full programme:** email provider Resend, private file storage Cloudflare R2, Portal Preview retained (ADMIN-only, not deleted), Register Interest sends both an owner notification and a submitter confirmation, email verification uses the soft approach (never blocks login/dashboard access), registration only ever creates `LEARNER` accounts and never grants enrolment or paid content access, no payments implemented. Work proceeds in separate stages, each stopping for approval.
+
+### Stage 4A — Immediate Security Closure (2026-07-24)
+
+**Vulnerabilities closed:**
+
+1. **`GET /api/lessons/:id` had no authentication and no enrolment check** — any lesson's full content, video URL, and resource URL were readable by anyone with the lesson ID, logged in or not. Fixed: the route now requires `authenticate`, and unless the caller is `ADMIN`, requires a matching `Enrolment` record for the course containing that lesson (looked up via `lesson.module.course.id`) before returning anything. No lock/access-tier concept exists for individual lessons in the data model today (unlike `CourseDocument.status`), so enrolment is the sole and correct gate, matching the pattern already used in `documents.ts`. Non-enrolled authenticated users get a generic 403 (`"You are not enrolled in this course."`) with no course details leaked; missing/invalid lessons still 404.
+
+2. **`GET /api/courses/:slug` had no `isPublished` filter** — any unpublished/draft course's metadata (title, modules, every lesson's ID/title — which then fed directly into finding #1) was fetchable by slug regardless of publish status. Fixed: the route now treats a course with `isPublished: false` the same as a course that doesn't exist (generic 404). The separate, already-existing ADMIN course-editing routes (`/api/admin/courses*`, all `requireRole('ADMIN')`-gated, looked up by ID not slug) are untouched and continue to see unpublished courses as before.
+
+3. **Portal Preview was public** — `/portal-preview/*` (8 routes) required no authentication at all. Fixed: every route now requires `ADMIN` via the existing `<ProtectedRoute roles={['ADMIN']}>` component — no new authorization mechanism was built, this reuses the identical pattern already applied to `/admin/*`. The "Preview the portals" link was removed from the public `/login` page. None of the preview pages, components, or routes were deleted — the tooling is intact for internal review, just no longer public.
+
+4. **`JWT_SECRET` fell back to the fixed literal `'fallback-secret'`** in 5 call sites across 3 files if the env var was ever unset — anyone who discovered that string could forge a valid token for any user ID and role. Fixed: a new single source of truth, `backend/src/config/jwtSecret.ts`, throws an error at process startup if `NODE_ENV=production` and `JWT_SECRET` is not set (a clear, immediate crash in deploy logs, never printing any secret value) — the app will not run insecurely in production. Outside production, a clearly-labelled, non-secret placeholder (`'dev-only-insecure-secret-do-not-use-in-production'`) is used instead, with a console warning (not the value itself). All 5 usages (`middleware/auth.ts` ×2, `routes/auth.ts` ×2, `routes/qaDemo.ts` ×1) now import this one constant, so behaviour is consistent everywhere.
+
+5. **No frontend handling for an expired/invalid token** — a stale token would leave the app in an inconsistent authenticated-looking state until a page's own error handling happened to catch it. Fixed: a global axios response interceptor in `frontend/src/lib/api.ts` clears the stored token and redirects to `/login` on any 401, except when already on a public auth page (`/login`, `/register`, `/forgot-password`, `/reset-password`, `/verify-email` — the last of these doesn't exist yet, included pre-emptively for Stage 4B) to avoid redirect loops or interrupting a flow that doesn't need an existing session.
+
+**Authorization test results:**
+
+- Confirmed live via direct middleware invocation (no database needed for these branches, since they return before any Prisma call): no `Authorization` header → `401 "No token provided"`, route never reached. Malformed token → `401 "Invalid token"`, route never reached. Token forged with the wrong secret → `401 "Invalid token"`, route never reached.
+- The enrolled / non-enrolled / ADMIN branches of `lessons.ts`, and the published/unpublished branches of `courses.ts`, were verified by direct code trace against the exact logic as written (confirmed correct), but **could not be executed live** — this environment has no Docker and no local Postgres available (the same limitation already disclosed for the Viking Press correction earlier in this programme), and creating test accounts/enrolments against the live production database was correctly out of scope ("do not make production writes"). Recommend a follow-up live check once a database is reachable, or via the owner's own account in a controlled way.
+
+**Portal Preview results (all confirmed live, frontend dev server):**
+- Unauthenticated request to `/portal-preview` and `/portal-preview/admin` → redirected to `/login`.
+- Authenticated as `LEARNER` (via a throwaway local mock auth server used only for this test — no real accounts, no production contact) requesting `/portal-preview/admin` → redirected to `/dashboard` (the learner's own correct dashboard), not shown an error page.
+- Authenticated as `ADMIN` (same mock) requesting `/portal-preview/admin` → loads normally, full preview content renders correctly with its existing "Preview only, no real data" banner intact.
+
+**JWT handling results:** verified all three startup scenarios directly (`NODE_ENV=production` + missing `JWT_SECRET` → throws immediately with a clear message, no secret printed; `NODE_ENV=production` + `JWT_SECRET` set → loads silently, unchanged behaviour; non-production + missing `JWT_SECRET` → warns and uses the placeholder). Render's `render.yaml` already sets `JWT_SECRET: generateValue: true` for the real deploy, so this fail-fast path is a safety net, not an active behaviour change for the current production configuration.
+
+**401 handling results:** using the same throwaway mock, confirmed a mid-session 401 (simulating an expired token) clears the stored token and redirects to `/login`. Confirmed no redirect loop: submitting a (mock) failed login attempt on the `/login` page itself does not trigger the interceptor's redirect, since `/login` is on the excluded-paths list — the page's own error handling remains in control there.
+
+**Build/validation results:** backend `tsc --noEmit` clean; frontend `tsc --noEmit` clean; full production build succeeded unchanged (55 pages prerendered, sitemap at 116 URLs — this stage touched no frontend data/build files, so these numbers are unaffected).
+
+**Desktop and mobile results:** `/login` checked at 1280px and 375px — the removed link left no layout gap, "Verifying a certificate? Check a certificate" remains the last line at both widths, no visual regression. `/register` and `/forgot-password` also loaded cleanly with no console errors during this pass.
+
+**Login, registration, password reset regression:** the only change to `auth.ts` in this stage was replacing `process.env.JWT_SECRET || 'fallback-secret'` with the imported `JWT_SECRET` constant — behaviourally identical wherever `JWT_SECRET` is already set (true in production per `render.yaml`), so no functional regression is possible from that change. `Login.tsx` was changed only by removing the preview link (no logic touched). Full live registration/login/reset round-trips against a real database could not be exercised for the same no-local-database reason noted above.
+
+**`KnowledgeArticle.accessLevel` finding:** the DB-backed `KnowledgeArticle` model (separate from the static file-based Knowledge Hub the public site actually uses — confirmed the live Knowledge Hub UI never calls this API) is seeded with exactly 6 rows, and **all 6 have `accessLevel: 'FREE'`**. `GET /api/knowledge` and `GET /api/knowledge/:slug` do not check `accessLevel` at all, but since nothing seeded is non-FREE, **no protected content is currently exposed by this gap**. Documenting only, per instruction — not broadening Stage 4A to fix this.
+
+**Files modified:** `backend/src/middleware/auth.ts`, `backend/src/routes/auth.ts`, `backend/src/routes/courses.ts`, `backend/src/routes/lessons.ts`, `backend/src/routes/qaDemo.ts`, new `backend/src/config/jwtSecret.ts`, `frontend/src/App.tsx`, `frontend/src/lib/api.ts`, `frontend/src/pages/auth/Login.tsx`. No database schema changes.
+
+**Remaining Priority 4 stages (not started):**
+- **Stage 4B** — email verification (soft approach): schema migration (`User.emailVerified`, new `EmailVerificationToken` model), new auth routes, `VerifyEmail.tsx`, dashboard banner.
+- **Stage 4C** — Register Interest reliability: Resend-based owner notification + submitter confirmation emails.
+- **Stage 4D** — secure downloads: Cloudflare R2 integration, presigned URLs, admin upload flow, `Documents.tsx`/`CoursePlayer.tsx` download-flow fixes.
+
+---
+
 ## Launch blocker table
 
 | Item | Label |
@@ -392,7 +441,11 @@ You confirmed the root cause (Vercel project Root Directory = `frontend`) and as
 | Coaching Pathway event photography assets missing (6 files) | **Client content required** |
 | EatStrong download file hosting not configured | **Technical fix required** |
 | "EatStrong" brand name — UK trademark clearance not yet confirmed (flagged in source code) | **Legal or accreditation review required** |
-| Public "Preview the portals" link on the Login page | **Client decision** (keep visible pre-launch or remove) |
+| Public "Preview the portals" link on the Login page | ~~Client decision~~ **Resolved 2026-07-24 (Priority 4, Stage 4A)** — link removed from Login; all `/portal-preview/*` routes now require ADMIN authentication; tooling itself retained, not deleted |
+| `GET /api/lessons/:id` had no auth or enrolment check (full lesson content, video/resource URLs exposed to anyone) | ~~Critical security risk~~ **Resolved 2026-07-24 (Priority 4, Stage 4A)** — now requires authentication + enrolment (or ADMIN), matching the existing `documents.ts` pattern |
+| `GET /api/courses/:slug` had no `isPublished` filter (unpublished/draft course metadata publicly fetchable) | ~~Security risk~~ **Resolved 2026-07-24 (Priority 4, Stage 4A)** — unpublished courses now return 404 on the public route; ADMIN editing routes unaffected |
+| `JWT_SECRET` fell back to a fixed, guessable literal (`'fallback-secret'`) if unset | ~~Security risk~~ **Resolved 2026-07-24 (Priority 4, Stage 4A)** — centralised in `backend/src/config/jwtSecret.ts`, fails fast at startup in production if unset, never falls back silently |
+| No frontend handling for an expired/invalid auth token | ~~Recommended improvement~~ **Resolved 2026-07-24 (Priority 4, Stage 4A)** — global 401 interceptor added, excludes public auth pages to avoid redirect loops |
 | Dead/unwired placeholder components (`TestimonialCard`/`TestimonialGrid`, `CommunitySection`, `EatStrongSection`, `CoursePractical`, `QualifiedReferees`, `ProfessionalPathway`, `PublicPathwayPreview`, `UpcomingCohortAlert`, `AcademyInAction`, `NextCourseSection`) | **Recommended improvement** (wire up or remove — not currently live, not a launch blocker) |
 | `nutrition-conversations-with-athletes` missing `scopeOfPracticeNote` disclaimer in the **live production database** | ~~Awaiting owner approval~~ **Resolved and verified live 2026-07-23** — PR #3 merged into `main` (commit `9fc9e36`), Render auto-deployed, live API confirms the disclaimer text on exactly this one article, all other 10 articles and all fields unchanged |
 | EatStrong admin panel has no field-level content editing UI (only publish/feature toggles) | **Recommended improvement** — confirmed 2026-07-23 by direct inspection of `BeStrongManager.tsx`/`bestrong.ts`; not a launch blocker, but means any future EatStrong text correction (including the disclaimer above) requires a guarded migration, not an admin-panel edit |

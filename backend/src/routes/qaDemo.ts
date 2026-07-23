@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
+import { JWT_SECRET } from '../config/jwtSecret';
 
 // ── Internal QA demo login + demo data — TEMPORARY TOOLING ──────────────────
 //
@@ -90,8 +91,7 @@ router.post('/qa-demo-login', async (req: Request, res: Response): Promise<void>
 
     const user = await ensureDemoUser(role as DemoRole);
 
-    const jwtSecret = process.env.JWT_SECRET || 'fallback-secret';
-    const token = jwt.sign({ userId: user.id, role: user.role }, jwtSecret, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
 
     res.json({
       token,

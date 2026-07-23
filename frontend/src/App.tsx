@@ -106,16 +106,36 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           {/* Internal QA tooling — never linked in nav. Renders "not available" unless VITE_ENABLE_QA_DEMO_LOGIN=true. */}
           <Route path="/qa-demo" element={<QaDemoLogin />} />
-          {/* Internal portal previews — never linked in nav. Read-only, no auth, no API calls. */}
-          <Route path="/portal-preview" element={<PortalPreviewHub />} />
-          <Route path="/portal-preview/learner" element={<LearnerPreview />} />
-          <Route path="/portal-preview/coach" element={<CoachPreview />} />
-          <Route path="/portal-preview/coach/profile" element={<CoachProfilePreview />} />
-          <Route path="/portal-preview/tutor" element={<TutorPreview />} />
-          <Route path="/portal-preview/tutor/courses" element={<TutorCoursesPreview />} />
-          <Route path="/portal-preview/tutor/profile" element={<TutorProfilePreview />} />
-          <Route path="/portal-preview/assessor" element={<AssessorPreview />} />
-          <Route path="/portal-preview/admin" element={<AdminPreview />} />
+          {/* Internal portal previews — never linked in nav (except a removed
+              public Login link, now gone). Read-only, no API calls, but
+              ADMIN-only: retained for internal review, not a public journey. */}
+          <Route path="/portal-preview" element={
+            <ProtectedRoute roles={['ADMIN']}><PortalPreviewHub /></ProtectedRoute>
+          } />
+          <Route path="/portal-preview/learner" element={
+            <ProtectedRoute roles={['ADMIN']}><LearnerPreview /></ProtectedRoute>
+          } />
+          <Route path="/portal-preview/coach" element={
+            <ProtectedRoute roles={['ADMIN']}><CoachPreview /></ProtectedRoute>
+          } />
+          <Route path="/portal-preview/coach/profile" element={
+            <ProtectedRoute roles={['ADMIN']}><CoachProfilePreview /></ProtectedRoute>
+          } />
+          <Route path="/portal-preview/tutor" element={
+            <ProtectedRoute roles={['ADMIN']}><TutorPreview /></ProtectedRoute>
+          } />
+          <Route path="/portal-preview/tutor/courses" element={
+            <ProtectedRoute roles={['ADMIN']}><TutorCoursesPreview /></ProtectedRoute>
+          } />
+          <Route path="/portal-preview/tutor/profile" element={
+            <ProtectedRoute roles={['ADMIN']}><TutorProfilePreview /></ProtectedRoute>
+          } />
+          <Route path="/portal-preview/assessor" element={
+            <ProtectedRoute roles={['ADMIN']}><AssessorPreview /></ProtectedRoute>
+          } />
+          <Route path="/portal-preview/admin" element={
+            <ProtectedRoute roles={['ADMIN']}><AdminPreview /></ProtectedRoute>
+          } />
           <Route path="/homepagepreview" element={<HomepagePreview />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
