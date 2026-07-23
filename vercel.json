@@ -31,6 +31,10 @@
       "headers": { "Location": "/knowledge/strongman-for-beginners" }
     },
     {
+      "src": "/knowledge/is-strongman-safe-for-children",
+      "dest": "/api/knowledge-draft-not-found.mjs"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.html"
     }

@@ -2,7 +2,7 @@
 
 Living document. Updated at the end of every programme section. No credentials, connection strings, or secret values are ever recorded in this file — only status, ownership and evidence references.
 
-**Last updated:** Priority 3 Implementation (Master Continuation Programme — Knowledge Hub and EatStrong Editorial Completion) — 2026-07-23.
+**Last updated:** Priority 3 Closure (Master Continuation Programme — Knowledge Hub and EatStrong Editorial Completion) — 2026-07-23. **Priority 3 remains OPEN** pending owner approval and post-merge verification of the EatStrong disclaimer production migration (PR #3) — see the closure findings below.
 
 ## Priority 3 audit status (2026-07-23)
 
@@ -304,6 +304,32 @@ Checked at desktop (1280px) and mobile (375px) widths, against the live producti
 8. **EatStrong admin panel inspected** (`frontend/src/pages/admin/BeStrongManager.tsx`, `backend/src/routes/bestrong.ts`) — confirmed the admin UI exposes **only** publish/unpublish and feature/unfeature toggles (`togglePublish`, `toggleFeatured`); there is no form field anywhere in the admin UI for editing `scopeOfPracticeNote`, `content`, `authorName`, `reviewerName`, or any other text field. The backend's `PUT /api/be-strong/admin/articles/:id` route does accept an arbitrary request body and would persist a `scopeOfPracticeNote` value if sent directly via the API — but there is no UI path to do so today. This confirms a real production correction (not an admin-panel edit) is the only way to apply the disclaimer fix to the live database.
 
 9. **Validation performed**: frontend `tsc --noEmit` clean; backend `tsc --noEmit` clean; full production build (`npm run build`) succeeded, including SSR bundle and prerender (`55 page(s) prerendered` — unchanged, Knowledge Hub articles are sitemap-only, never individually prerendered); sitemap regenerated at 116 URLs (actual count, not assumed); all 4 new articles and one legacy article visually verified at desktop (1280px) and mobile (375px) widths via the local dev server; browser console showed zero errors throughout; `git diff --stat` confirmed exactly the 7 intended files changed plus 1 new file, nothing else.
+
+---
+
+## Priority 3 closure findings of note (both items still open until verified — see below)
+
+### 1. EatStrong disclaimer — production migration drafted, PR opened, not merged
+
+Same fully Render-managed process as the Viking Press correction — no `DATABASE_URL` was requested, typed, or handled at any point.
+
+- **Branch**: `production-eatstrong-scope-note-correction`, created from `main` (not `feature/libraryPages`).
+- **Migration**: `backend/prisma/migrations/20260723180000_correct_nutrition_conversations_scope_note/migration.sql` — a guarded `DO $$ ... $$` block, exactly mirroring the Viking Press pattern. Updates `BeStrongArticle.scopeOfPracticeNote` only where `slug = 'nutrition-conversations-with-athletes'` AND `scopeOfPracticeNote IS NULL`; raises an exception (aborting the whole transaction) if zero or more than one row matches. No schema change; touches no other row or table.
+- **PR**: [#3](https://github.com/raf643782/educate-strong-academy/pull/3), opened into `main`, **left unmerged pending explicit owner approval**.
+- **Validation performed**: `prisma validate` passed (schema-only check, using the repo's own already-public `.env.example` placeholder `DATABASE_URL` — no real credential involved, and this migration makes no schema change so the check is unaffected by it either way); manual SQL review against the exact guard pattern used in PR #2 (Viking Press). No Docker/local Postgres available in this environment to exercise the guard logic with a live test run — same disclosed limitation as the Viking Press correction.
+- **Expected production effect once merged**: exactly one `BeStrongArticle` row (`nutrition-conversations-with-athletes`) gains the standard scope-of-practice disclaimer text. No other article, field, or table affected.
+- **Failure behaviour**: if the row has already been corrected, or its `scopeOfPracticeNote` is unexpectedly non-null, the migration raises an exception and Postgres rolls back the entire transaction — nothing is left partially applied.
+- **Not yet done**: merge (awaiting your explicit approval) and post-merge live-API verification.
+
+### 2. Knowledge Hub true 404 — implemented, needs a real Vercel deployment to fully confirm
+
+The client-side soft-404 (HTTP 200) did not meet the approved requirement. Implemented the smallest change that reuses the project's existing mechanism rather than inventing a new one:
+
+- **New file**: `api/knowledge-draft-not-found.mjs` — a minimal Vercel serverless function, modelled directly on the existing `api/library-not-found.mjs` (used today for Exercise/Event 404s), but simpler: since this covers one specific, permanently-unpublished draft slug rather than a dynamic DB-backed set, it always returns a static HTTP 404 with a `noindex` header and a generic "not currently published" message — it never reads or serves the draft's own content.
+- **Changed file**: `vercel.json` — added one **exact-match** routes rule, `{"src": "/knowledge/is-strongman-safe-for-children", "dest": "/api/knowledge-draft-not-found.mjs"}`, inserted before the SPA catch-all. Because it matches one literal path (not a wildcard like `/knowledge/:slug`), it cannot affect any of the 24 real Knowledge Hub articles or the existing `start-strongman-safely` redirect rule.
+- **Validation performed**: `vercel.json` confirmed valid JSON; the new function's syntax confirmed valid via `node --check`; the handler was invoked directly with a mock request/response, confirming `status 404`, `Content-Type: text/html; charset=utf-8`, `X-Robots-Tag: noindex`, and a body containing no draft content. Frontend `tsc --noEmit` re-confirmed clean (no frontend files touched this round).
+- **Known limitation, disclosed rather than glossed over**: this environment has no Vercel CLI and cannot run `vercel dev`, so the actual routes-array + serverless-function combination can only be fully exercised once deployed to Vercel — the same limitation already disclosed for the `start-strongman-safely` 308 redirect. Local verification covered everything short of an actual Vercel request.
+- **Still true**: absent from the sitemap, the Knowledge Hub listing, prerendering, and all internal links — none of this was affected, since none of it required a routing change.
 
 ---
 
