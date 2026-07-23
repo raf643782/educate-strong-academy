@@ -17,7 +17,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   athlete:     'Safe Practice',
 };
 
-const PREVIEW_SLUGS = ['how-to-read-a-strongman-event-sheet', 'atlas-stone-technique', 'start-strongman-safely'];
+const PREVIEW_SLUGS = ['how-to-read-a-strongman-event-sheet', 'atlas-stone-technique', 'strongman-for-beginners'];
 
 const ARTICLES: Article[] = PREVIEW_SLUGS.map(slug => {
   const article = KNOWLEDGE_ARTICLES.find(a => a.slug === slug)!;

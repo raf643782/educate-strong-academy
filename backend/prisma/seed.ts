@@ -1497,7 +1497,7 @@ async function main() {
       reviewerName: 'Victoria Wilson',
       reviewerQualification: 'Strength and Conditioning Coach',
       lastReviewedAt: new Date('2026-01-01'),
-      scopeOfPracticeNote: null,
+      scopeOfPracticeNote: SCOPE_NOTE,
       accessLevel: 'FREE' as const,
       isPublished: true,
       isFeatured: true,

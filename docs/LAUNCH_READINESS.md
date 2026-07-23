@@ -2,7 +2,7 @@
 
 Living document. Updated at the end of every programme section. No credentials, connection strings, or secret values are ever recorded in this file — only status, ownership and evidence references.
 
-**Last updated:** Priority 3 Audit (Master Continuation Programme — Knowledge Hub and EatStrong Editorial Completion, audit only, no implementation) — 2026-07-23.
+**Last updated:** Priority 3 Implementation (Master Continuation Programme — Knowledge Hub and EatStrong Editorial Completion) — 2026-07-23.
 
 ## Priority 3 audit status (2026-07-23)
 
@@ -193,7 +193,7 @@ Living document. Updated at the end of every programme section. No credentials, 
 - **Legal pages** (Terms, Privacy, Refund Policy): explicitly marked as placeholder drafts requiring qualified legal review — critical pre-launch item.
 - **Shop**: every product marked "Coming soon — register your interest" — intentional current design, not a bug, but a launch-scope decision.
 - **EatStrong downloads**: file hosting not configured; clicking a download shows a real user-facing "will be available once document hosting is configured" message.
-- **`nutrition-conversations-with-athletes`** (EatStrong): missing its scope-of-practice disclaimer banner (`null` where all 9 sibling FREE articles have it populated).
+- **`nutrition-conversations-with-athletes`** (EatStrong): missing its scope-of-practice disclaimer banner (`null` where all 9 sibling FREE articles have it populated). **Update 2026-07-23: `seed.ts` source-of-truth corrected; the live production DB row correction has been drafted (guarded migration, Viking Press pattern) but not yet executed — see Priority 3 findings and the launch blocker table.**
 
 ### Placeholder/dead-code sweep — verified, not just grep-reported
 
@@ -285,6 +285,28 @@ Checked at desktop (1280px) and mobile (375px) widths, against the live producti
 
 ---
 
+## Priority 3 implementation findings of note (Master Continuation Programme — Knowledge Hub and EatStrong editorial completion)
+
+1. **Knowledge Hub data model extended, backward-compatible.** `frontend/src/data/knowledgeArticles.ts`'s `KnowledgeArticle` interface gained optional `sections` (structured heading/paragraph/list blocks), `faqs`, `sources`, `author`, `reviewer`, `publishedDate`, and `lastReviewedDate` fields, alongside the original flat `body` string (now optional). All 20 remaining legacy articles are untouched and continue to render via the original `body` path; the 4 new articles use the structured path. `KnowledgeArticlePage.tsx` was upgraded with `renderInlineText` (parses `**bold**` and `[text](/path)` markup) and `renderBlocks` helpers, plus conditional FAQ/Sources/attribution sections — verified via full `tsc --noEmit` (both frontend and backend) and direct browser inspection of all 4 new articles and one legacy article (`the-six-core-events`).
+
+2. **Article 20 ("Start Strongman Safely: A Guide for New Athletes", slug `start-strongman-safely`) retired**, superseded by the new "Strongman for Beginners" article. A true HTTP 308 redirect was added to the root `vercel.json`'s `routes` array (`/knowledge/start-strongman-safely` → `/knowledge/strongman-for-beginners`), plus a client-side `<Navigate replace>` fallback in `App.tsx` matching the existing `/be-strong` precedent. The two files referencing the old slug in `PREVIEW_SLUGS` arrays (`KnowledgeHubPreview.tsx`, `LearnStrongmanProperly.tsx`) were updated to the new slug. The Vercel-level 308 could not be exercised locally (Vercel-specific routing only applies once deployed); the client-side redirect was verified working in the local dev server.
+
+3. **4 new articles added verbatim from the owner-supplied source text** ("What Is Strongman?", "Strongman for Beginners", "Strongman Events Explained", "How to Become a Strongman Coach") — slugs `what-is-strongman`, `strongman-for-beginners`, `strongman-events-explained`, `how-to-become-a-strongman-coach`. Every sentence was cross-checked against the original pasted source (recovered from this session's own prior transcript, since the source text itself is not persisted anywhere else in the repo) before being committed to the data file — no rewriting, shortening, or invented content. `author: "Educate.Strong Academy"` per the owner's explicit correction (not "Educate.Strong Knowledge Hub Team"); no reviewer/published-date set, since none was supplied. The handful of sentences referring readers to the still-unpublished "Is Strongman Safe for Children?" article were omitted (not merely un-linked) per the owner's explicit instruction, in the six locations previously identified.
+
+4. **A 5th supplied article ("Is Strongman Safe for Children?")** was deliberately kept out of `knowledgeArticles.ts` entirely. Its full text was preserved verbatim in a new file, [docs/DRAFT_is-strongman-safe-for-children.md](DRAFT_is-strongman-safe-for-children.md), clearly labelled as an unpublished editorial draft requiring a named, suitably qualified reviewer before publication, with the previously agreed reviewer-approval checklist attached. Confirmed via direct browser check: `/knowledge/is-strongman-safe-for-children` shows the existing "Article not found" fallback — this is a **client-side soft 404 (HTTP 200 under the hood)**, the same behaviour any invalid Knowledge Hub slug gets, not a true server-level 404 like Exercise/Event pages get via `/api/library-not-found.mjs`. It does not appear in the sitemap, the Knowledge Hub listing, search metadata, or any internal link — confirmed by direct sitemap/grep checks, not assumption.
+
+5. **Internal link mapping applied and verified against live routes** — no invented destinations. `/exercises`, `/events`, `/about`, `/coaching`, `/register-interest`, `/strongkidz`, and the article-to-article `/knowledge/<slug>` links were all cross-checked against `App.tsx`'s actual route table before use. Articles 1–3's closing CTA links to `/about` (matching Article 1's explicitly approved mapping, extended consistently to Articles 2 and 3 since their closing sentences are the same generic institutional phrasing); Article 4's closing CTA links to `/coaching` and `/register-interest` per its explicit approved mapping — flagged here for visibility since only Article 1 and Article 4's CTA targets were explicitly specified in the approval message; Articles 2 and 3 followed by inference from the same pattern.
+
+6. **Sitemap regenerated from a real build, not assumed**: `116 URL(s)` total (up from 113 pre-Priority-3). Confirmed via direct inspection of the generated `dist/sitemap.xml`: the 4 new `/knowledge/<slug>` URLs are present, `start-strongman-safely` and `is-strongman-safe-for-children` are both absent (zero matches), and the Knowledge Hub listing page now reports "24 resources" (21 − 1 retired + 4 new).
+
+7. **EatStrong disclaimer**: `backend/prisma/seed.ts`'s `nutrition-conversations-with-athletes` entry corrected from `scopeOfPracticeNote: null` to the standard `SCOPE_NOTE` value — this is a **seed-file (source-of-truth) correction only**. It does **not** change the already-seeded production database row; per the standing rule against unauthorised production writes, that requires a separate guarded migration (same pattern as the Viking Press correction), which has been drafted for review but deliberately **not created as a migration file, branch, or PR** pending explicit owner approval to proceed — see the chat report for the exact guarded SQL text.
+
+8. **EatStrong admin panel inspected** (`frontend/src/pages/admin/BeStrongManager.tsx`, `backend/src/routes/bestrong.ts`) — confirmed the admin UI exposes **only** publish/unpublish and feature/unfeature toggles (`togglePublish`, `toggleFeatured`); there is no form field anywhere in the admin UI for editing `scopeOfPracticeNote`, `content`, `authorName`, `reviewerName`, or any other text field. The backend's `PUT /api/be-strong/admin/articles/:id` route does accept an arbitrary request body and would persist a `scopeOfPracticeNote` value if sent directly via the API — but there is no UI path to do so today. This confirms a real production correction (not an admin-panel edit) is the only way to apply the disclaimer fix to the live database.
+
+9. **Validation performed**: frontend `tsc --noEmit` clean; backend `tsc --noEmit` clean; full production build (`npm run build`) succeeded, including SSR bundle and prerender (`55 page(s) prerendered` — unchanged, Knowledge Hub articles are sitemap-only, never individually prerendered); sitemap regenerated at 116 URLs (actual count, not assumed); all 4 new articles and one legacy article visually verified at desktop (1280px) and mobile (375px) widths via the local dev server; browser console showed zero errors throughout; `git diff --stat` confirmed exactly the 7 intended files changed plus 1 new file, nothing else.
+
+---
+
 ## Launch blocker table
 
 | Item | Label |
@@ -324,6 +346,9 @@ Checked at desktop (1280px) and mobile (375px) widths, against the live producti
 | "EatStrong" brand name — UK trademark clearance not yet confirmed (flagged in source code) | **Legal or accreditation review required** |
 | Public "Preview the portals" link on the Login page | **Client decision** (keep visible pre-launch or remove) |
 | Dead/unwired placeholder components (`TestimonialCard`/`TestimonialGrid`, `CommunitySection`, `EatStrongSection`, `CoursePractical`, `QualifiedReferees`, `ProfessionalPathway`, `PublicPathwayPreview`, `UpcomingCohortAlert`, `AcademyInAction`, `NextCourseSection`) | **Recommended improvement** (wire up or remove — not currently live, not a launch blocker) |
+| `nutrition-conversations-with-athletes` missing `scopeOfPracticeNote` disclaimer in the **live production database** | **Awaiting owner approval** — `seed.ts` corrected 2026-07-23; a guarded, Viking-Press-pattern data-only migration has been drafted (see chat report) but not created as a branch/PR or executed, pending separate gated approval per standing rule |
+| EatStrong admin panel has no field-level content editing UI (only publish/feature toggles) | **Recommended improvement** — confirmed 2026-07-23 by direct inspection of `BeStrongManager.tsx`/`bestrong.ts`; not a launch blocker, but means any future EatStrong text correction (including the disclaimer above) requires a guarded migration, not an admin-panel edit |
+| Is Strongman Safe for Children? draft remains unpublished, no reviewer identified | **Content/handover blocker** — see [DRAFT_is-strongman-safe-for-children.md](DRAFT_is-strongman-safe-for-children.md) for the required reviewer-approval checklist before this can be published |
 | Handover documentation pack | **Handover blocker** |
 | Client final signoff | **Handover blocker** |
 | Sanity CMS phased rollout | **Future enhancement** (if Section 9 decision defers it) |

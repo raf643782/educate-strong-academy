@@ -26,6 +26,11 @@
       "dest": "/api/library-not-found.mjs?type=event&slug=$1"
     },
     {
+      "src": "/knowledge/start-strongman-safely",
+      "status": 308,
+      "headers": { "Location": "/knowledge/strongman-for-beginners" }
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.html"
     }

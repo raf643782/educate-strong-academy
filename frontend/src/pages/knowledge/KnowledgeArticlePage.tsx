@@ -1,7 +1,8 @@
+import { Fragment, ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
-import { KNOWLEDGE_ARTICLES, KNOWLEDGE_CATEGORIES } from '../../data/knowledgeArticles';
+import { KNOWLEDGE_ARTICLES, KNOWLEDGE_CATEGORIES, KnowledgeContentBlock } from '../../data/knowledgeArticles';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 const LEVEL_COLOUR: Record<string, string> = {
@@ -12,6 +13,73 @@ const LEVEL_COLOUR: Record<string, string> = {
   Youth:       'badge-amber',
   Nutrition:   'badge-grey',
 };
+
+// Parses **bold** and [text](/path) inline markup used by structured (`sections`-based) articles.
+const INLINE_MARKUP = /\*\*(.+?)\*\*|\[([^\]]+)\]\(([^)]+)\)/g;
+
+function renderInlineText(text: string, keyPrefix: string): ReactNode[] {
+  const nodes: ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let i = 0;
+  INLINE_MARKUP.lastIndex = 0;
+  while ((match = INLINE_MARKUP.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      nodes.push(<Fragment key={`${keyPrefix}-t${i++}`}>{text.slice(lastIndex, match.index)}</Fragment>);
+    }
+    const [, boldText, linkText, linkHref] = match;
+    if (boldText !== undefined) {
+      nodes.push(<strong key={`${keyPrefix}-b${i++}`}>{boldText}</strong>);
+    } else if (linkHref.startsWith('/')) {
+      nodes.push(
+        <Link key={`${keyPrefix}-l${i++}`} to={linkHref} className="es-inline-link font-semibold" style={{ color: '#A41C64' }}>
+          {linkText}
+        </Link>
+      );
+    } else {
+      nodes.push(
+        <a key={`${keyPrefix}-a${i++}`} href={linkHref} className="es-inline-link font-semibold" style={{ color: '#A41C64' }} target="_blank" rel="noopener noreferrer">
+          {linkText}
+        </a>
+      );
+    }
+    lastIndex = INLINE_MARKUP.lastIndex;
+  }
+  if (lastIndex < text.length) {
+    nodes.push(<Fragment key={`${keyPrefix}-t${i++}`}>{text.slice(lastIndex)}</Fragment>);
+  }
+  return nodes;
+}
+
+function renderBlocks(blocks: KnowledgeContentBlock[]) {
+  return blocks.map((block, i) => {
+    switch (block.type) {
+      case 'heading': {
+        const Tag = block.level === 2 ? 'h2' : 'h3';
+        return (
+          <Tag key={i} className={block.level === 2 ? 'text-2xl font-black text-white mt-8 mb-3' : 'text-lg font-bold text-white mt-6 mb-2'}>
+            {renderInlineText(block.text, `h${i}`)}
+          </Tag>
+        );
+      }
+      case 'list':
+        return (
+          <ul key={i} className="list-disc list-inside space-y-1 text-es-muted leading-relaxed text-base">
+            {block.items.map((item, j) => (
+              <li key={j}>{renderInlineText(item, `l${i}-${j}`)}</li>
+            ))}
+          </ul>
+        );
+      case 'paragraph':
+      default:
+        return (
+          <p key={i} className="text-es-muted leading-relaxed text-base">
+            {renderInlineText(block.text, `p${i}`)}
+          </p>
+        );
+    }
+  });
+}
 
 export default function KnowledgeArticlePage() {
   const { slug } = useParams<{ slug: string }>();
@@ -71,14 +139,53 @@ export default function KnowledgeArticlePage() {
         {/* Article body */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="space-y-4">
-            {article.body.split('\n\n').map((para, i) => (
-              <p key={i} className="text-es-muted leading-relaxed text-base">{para}</p>
-            ))}
-            <div style={{ borderTop: '1px solid #2C2C2C', marginTop: '24px', paddingTop: '16px' }}>
-              <p className="text-xs text-es-subtle italic">
-                Content reviewed by the Educate.Strong coaching team. This article is for educational reference — it does not replace qualified instruction or professional coaching.
-              </p>
-            </div>
+            {article.sections
+              ? renderBlocks(article.sections)
+              : article.body!.split('\n\n').map((para, i) => (
+                  <p key={i} className="text-es-muted leading-relaxed text-base">{renderInlineText(para, `legacy${i}`)}</p>
+                ))}
+
+            {article.faqs && article.faqs.length > 0 && (
+              <div className="mt-8">
+                <h2 className="text-2xl font-black text-white mt-8 mb-3">Frequently Asked Questions</h2>
+                <div className="space-y-4">
+                  {article.faqs.map((faq, i) => (
+                    <div key={i}>
+                      <p className="font-bold text-white mb-1">{renderInlineText(faq.question, `faqq${i}`)}</p>
+                      <p className="text-es-muted leading-relaxed text-base">{renderInlineText(faq.answer, `faqa${i}`)}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {article.sources && article.sources.length > 0 && (
+              <div className="mt-8">
+                <h3 className="text-lg font-bold text-white mt-6 mb-2">Sources</h3>
+                <ul className="list-disc list-inside space-y-1 text-es-muted text-sm">
+                  {article.sources.map((source, i) => (
+                    <li key={i}>{source}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {(article.author || article.reviewer || article.publishedDate || article.lastReviewedDate) && (
+              <div style={{ borderTop: '1px solid #2C2C2C', marginTop: '24px', paddingTop: '16px' }}>
+                {article.author && <p className="text-xs text-es-subtle">Author: {article.author}</p>}
+                {article.reviewer && <p className="text-xs text-es-subtle">Reviewed by: {article.reviewer}</p>}
+                {article.publishedDate && <p className="text-xs text-es-subtle">Published: {article.publishedDate}</p>}
+                {article.lastReviewedDate && <p className="text-xs text-es-subtle">Last reviewed: {article.lastReviewedDate}</p>}
+              </div>
+            )}
+
+            {!article.sections && (
+              <div style={{ borderTop: '1px solid #2C2C2C', marginTop: '24px', paddingTop: '16px' }}>
+                <p className="text-xs text-es-subtle italic">
+                  Content reviewed by the Educate.Strong coaching team. This article is for educational reference — it does not replace qualified instruction or professional coaching.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Soft paywall CTA — free overview, paid depth */}
