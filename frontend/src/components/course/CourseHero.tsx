@@ -47,7 +47,7 @@ export default function CourseHero({
           <p className="text-es-muted text-lg leading-relaxed mb-8 max-w-2xl">{subHeadline}</p>
           <div className="flex flex-wrap gap-x-6 gap-y-2 mb-10">
             {keyFacts.map(fact => (
-              <div key={fact} className="flex items-center gap-2 text-sm text-es-muted">
+              <div key={fact} className="flex items-center gap-2 text-sm text-es-muted w-full sm:w-auto">
                 <span className="w-1 h-1 rounded-full bg-es-accent flex-shrink-0" />
                 {fact}
               </div>

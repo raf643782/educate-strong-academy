@@ -945,7 +945,7 @@ async function main() {
       slug: 'viking-press-exercise',
       category: 'Pressing',
       difficulty: Difficulty.INTERMEDIATE,
-      description: 'A fixed-lever overhead pressing event where the athlete presses a pivoting frame overhead for repetitions. Common in amateur and international Strongman competition. Demands pressing rhythm, timing, and overhead endurance rather than a single maximal effort.',
+      description: 'A fixed lever overhead pressing exercise that develops the pressing rhythm, timing and overhead endurance used in the Viking Press competition event.',
       techniqueNotes: 'Establish an even foot position under the pivot point. Dip into the start of each rep and drive through the natural path of the lever. Maintain a stacked lockout at the top of each rep. Breathe consistently for sustained output across multiple reps. The pivot path varies between apparatus — find the natural groove of the equipment before competition.',
       coachingCues: 'Stay under the line of force.\nShort controlled dip.\nFinish each rep stacked.\nBreathe rhythmically.\nDo not rush the turnaround.',
       commonMistakes: 'Drifting backward and losing the line of force.\nIncomplete lockout on later repetitions.\nHolding breath across multiple reps.\nRushing the reversal at the bottom of each rep.',
