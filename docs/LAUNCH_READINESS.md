@@ -2,7 +2,7 @@
 
 Living document. Updated at the end of every programme section. No credentials, connection strings, or secret values are ever recorded in this file — only status, ownership and evidence references.
 
-**Last updated:** Section 3A (Read-Only Production Database Alignment Audit) — 2026-07-22.
+**Last updated:** Section 3B (Scoped Database Alignment Execution) — 2026-07-23.
 
 ---
 
@@ -28,9 +28,9 @@ Living document. Updated at the end of every programme section. No credentials, 
 |---|---|---|---|---|---|---|
 | Feature branch code (Stages 1–8) | Complete, pushed, preview green | Assistant | None | — | Vercel check-run `success` on `79b11db` | Not yet accepted |
 | Production merge | Not started | Owner approval required | Everything below | Owner to approve launch | `main` still at `f9980d8` | Not started |
-| Stage 5 Event insertion (6 new Events) | **Confirmed not yet applied** — production Event count is 20; none of the 6 new Events exist | Owner (script requires production write) | Blocked behind Stage 6/7 migrations (see below) — running it before the schema is aligned would error | Owner approval of proposed sequence (Section 3B) | Live `GET /api/events` checked directly: 20 records, all 6 target slugs absent | Not started |
-| Stage 6 media migration | **Confirmed not applied** — `main` (what Render deploys) does not contain this migration file; live API responses have no `imageUrl` key at all | Owner (via Render's own automatic `prisma migrate deploy`, not a manual script) | Needs the migration to reach `main` | Owner approval of proposed sequence (Section 3B) | Migration file present only on `feature/libraryPages`; confirmed absent from `main`; confirmed absent from live API schema | Not started |
-| Stage 7 editorial migration | **Confirmed not applied** — same evidence as Stage 6; live API responses have no `authorName`/`sources` etc. keys | Owner | Same as above | Owner approval of proposed sequence (Section 3B) | Same method as above | Not started |
+| Stage 5 Event insertion (6 new Events) | **Applied and verified 2026-07-23.** Live run created all 6 Events atomically in one transaction | Owner (ran the script locally via secure hidden-input credential entry) | None | — | `GET /api/events` confirmed: 26 total, all 6 target slugs present, no duplicates, 29 Exercises unchanged, backend health `200 OK` | **Accepted** |
+| Stage 6 media migration | **Applied and verified 2026-07-23** via a narrowly scoped PR (#1, schema + migrations only) merged to `main`, deployed automatically by Render | Assistant (scoped PR) + Owner (merge approval) | None | — | Render deploy `dep-d9ges977f7vs73f3k9vg` Live at commit `af1998a`; live API responses now carry `imageUrl` etc. as `null` | **Accepted** |
+| Stage 7 editorial migration | **Applied and verified 2026-07-23** — same scoped PR/deploy as Stage 6 | Assistant + Owner | None | — | Same deploy; live API responses now carry `authorName`/`sources`/`relatedExerciseSlugs` etc. as `null`/`[]` | **Accepted** |
 | Arm-Over-Arm Rope Pull Exercise description drift | **Resolved and confirmed** — production description now exactly matches the approved Exercise wording | — | None | — | Live `GET /api/exercises` checked directly: description field matches the approved value verbatim | **Accepted** |
 | Production database credential | **Rotated and verified 2026-07-22.** Confirmed as the active production credential (owner copied it from Render's `DATABASE_URL` to run the Stage 4 live update); replaced in Neon, applied to Render, redeployed, old value invalidated in place | Owner (Neon/Render account holder) | None | — | Backend health, public APIs, DB connectivity and auth all verified working post-rotation; see Section 2 findings below | **Accepted** |
 | Neon vs Render-native database | **Resolved** — production `DATABASE_URL` on Render is confirmed to point at Neon (host contains `neon.tech`), set as a plain manually-entered value, not the `fromDatabase` binding. The `render.yaml`-defined `educate-strong-db` Render-native database resource appears unused in production | Owner | Decide whether to delete or repurpose the unused `educate-strong-db` resource | Owner decision (not urgent) | Owner confirmed via Render dashboard Environment tab | **Accepted** (identity confirmed; disposal decision outstanding) |
@@ -105,15 +105,41 @@ Living document. Updated at the end of every programme section. No credentials, 
 
 ---
 
+## Section 3B findings of note (scoped execution — production writes made, all approved and verified)
+
+1. **Scoped release, not a full merge.** A new branch (`db-alignment-stage6-7`) was created from `main` (not from `feature/libraryPages`), containing only `backend/prisma/schema.prisma` (Stage 6 + Stage 7 field additions to `Exercise`/`Event` only) and the two migration folders — 3 files, 121 insertions, 0 deletions. No frontend, SEO, content, or library-page changes were included. Confirmed locally: `prisma validate` passed, `prisma generate` succeeded, `tsc --noEmit` compiled with zero errors — no backend code changes were needed, since the API routes use no explicit `select` and pass full records through automatically.
+
+2. **Both migrations reconfirmed additive-only** by direct inspection of the SQL: every new column is nullable (`TEXT`, `TIMESTAMP(3)`) or `TEXT[] DEFAULT ARRAY[]::TEXT[]`. No column dropped, altered, or made required; no existing data touched.
+
+3. **PR #1** (`db-alignment-stage6-7` → `main`) opened by the owner, reviewed via GitHub's API to confirm the file list matched exactly, approved by the owner, merged by the assistant via `git merge --no-ff` + `git push origin main` (commit `af1998a`). Render auto-deployed from `main` (deployment `dep-d9ges977f7vs73f3k9vg`, 47.2s, trigger `Auto-Deploy`) and ran its existing `npx prisma migrate deploy` build step automatically, using Render's own `DATABASE_URL` binding — no manual credential entry involved in this step.
+
+4. **Post-migration verification (public API, no credentials):** both `GET /api/exercises` and `GET /api/events` now return the full Stage 6 + Stage 7 field set (`imageUrl`, `videoProvider`, `authorName`, `sources`, `relatedExerciseSlugs`, `relatedEventSlugs`, `relatedArticleSlugs`, `relevantCourseSlugs`, plus Event-only `ruleReviewDate`), all correctly `null`/`[]`. Record counts unchanged at this point (29 Exercises, 20 Events) — confirms the migration altered schema only, no data side effects.
+
+5. **Render Shell is not available** on the `educate-strong-api` service's current plan (owner confirmed — requires a plan upgrade). The Stage 5 dry run and live run were instead performed by the owner locally, using `read -s DATABASE_URL` to capture the credential via a silent, non-echoing prompt into a shell variable — never typed inline as part of a command, and never entering shell history in plaintext the way the original exposure did. The assistant could not and did not perform this step directly, as it requires a human to type the secret into an interactive `read` prompt.
+
+6. **Stage 5 dry run result:** exactly `6 to create, 0 already applied, 0 conflicts`, with all six expected slugs confirmed (`tyre-flip`, `conans-wheel`, `loading-race`, `hercules-hold`, `fingals-fingers`, `block-press`) — matching the approved script precisely. No write made at this point.
+
+7. **Stage 5 live run**, after explicit owner approval: all 6 Events created atomically in a single `prisma.$transaction([...])` (owner-reported script output: `6 to create, 0 already applied, 0 conflicts`, all created).
+
+8. **Final verification, all passed:**
+   - Events: **26** total (was 20), all six new slugs present, no duplicate event or exercise slugs
+   - Exercises: **29** (unchanged)
+   - Backend health: `200 OK`
+   - No Prisma errors in any response
+
+9. **Neon snapshot limitation, disclosed by owner:** the current Neon plan only supports **one manual snapshot at a time** — a second post-completion snapshot could not be taken without a plan upgrade, which was not requested. The pre-migration snapshot taken before the Section 3B write (see Section 3A findings) remains in place and was not deleted, so a rollback point covering the entire Stage 6/7/5 change window still exists. Recommend the owner consider a Neon plan upgrade before any future high-risk production write if repeatable before/after snapshotting is wanted — flagged as a recommended improvement, not a blocker, since PITR (6-hour window) and the existing snapshot both remain available.
+
+---
+
 ## Launch blocker table
 
 | Item | Label |
 |---|---|
 | Production database credential rotation | ~~Critical blocker~~ **Resolved 2026-07-22** |
 | Neon vs Render-native database identity confirmation | ~~Critical blocker~~ **Resolved 2026-07-22** — production is Neon; unused `educate-strong-db` Render resource left in place pending owner decision |
-| Stage 5/6/7 production alignment (Events, media schema, editorial schema) | **Launch blocker** — root cause confirmed, exact execution sequence proposed, awaiting Section 3B approval |
+| Stage 5/6/7 production alignment (Events, media schema, editorial schema) | ~~Launch blocker~~ **Resolved and verified 2026-07-23** — 26 Events, 29 Exercises, full Stage 6/7 schema live |
 | Arm-Over-Arm Rope Pull Exercise description drift resolution | ~~Launch blocker~~ **Resolved, confirmed 2026-07-22** |
-| No recent Neon manual snapshot (PITR alone is only 6 hours) | **Recommended improvement** — take a manual snapshot before any Section 3B write |
+| Neon plan only supports one manual snapshot at a time (no repeatable before/after snapshotting without upgrade) | **Recommended improvement** — consider a plan upgrade ahead of any future high-risk write; PITR (6h) and the existing pre-migration snapshot remain available in the meantime |
 | Commercial access policy (pricing, payment model) | **Client decision** |
 | Payment provider integration or manual-enquiry confirmation | **Launch blocker** (pending client decision) |
 | Sanity/CMS completion decision | **Client decision** |
