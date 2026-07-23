@@ -2,7 +2,7 @@
 
 Living document. Updated at the end of every programme section. No credentials, connection strings, or secret values are ever recorded in this file — only status, ownership and evidence references.
 
-**Last updated:** Priority 2 Closure Pass (Master Continuation Programme) — 2026-07-23.
+**Last updated:** Priority 2 Final Wording Pass (Master Continuation Programme) — 2026-07-23.
 
 ---
 
@@ -305,8 +305,9 @@ Checked at desktop (1280px) and mobile (375px) widths, against the live producti
 | Course Catalogue page's visible H1 subheading | ~~Client decision~~ **Resolved 2026-07-23** — replaced with "Explore Strongman coaching, refereeing and youth development education." |
 | StrongKidz hero subtext "safeguarding-trained coaches" | ~~Client decision~~ **Resolved 2026-07-23** — replaced with "Full Coach, safeguarding and session information will be confirmed before bookings open." |
 | StrongKidz Coach Education course summary (unconfirmed provenance) | ~~Client decision~~ **Resolved 2026-07-23** — public page now shows a neutral holding statement; underlying database record untouched |
-| Homepage "UK Wide Reach" stat | **Client decision — source untraceable.** Git history traced to commit `e659683`, no reference to an official source found. Left unchanged pending owner confirmation or replacement wording |
-| `WhyEducateStrong.tsx:71` — "Educate.Strong Academy is the UK's only accredited pathway for Strongman coaching and refereeing" | **Client decision** (new finding, not yet addressed — claims market exclusivity and describes Refereeing as accredited rather than endorsed) |
+| Homepage "UK Wide Reach" stat | **Client decision — source untraceable, awaiting explicit owner confirmation.** Git history traced to commit `e659683`, no reference to an official source found. Left unchanged, not removed, pending your confirmation or replacement wording |
+| `WhyEducateStrong.tsx:71` — exclusivity claim | ~~Client decision~~ **Wording corrected 2026-07-23**, but correction to prior report: this component is confirmed **not rendered on any live page** (`Home.tsx`'s own comment: "intentionally not rendered here... kept in the codebase, just not wired into this page"). The claim was never actually visible to a visitor — flagging it as a live finding in the prior report was an error; wording still corrected in source in case the component is reinstated |
+| "safeguarding-trained coaches" — remaining 4 instances (3 FAQ answers + meta description) | ~~Client decision~~ **Resolved 2026-07-23** — all replaced with neutral wording; zero instances of this claim remain anywhere in the codebase |
 | Level 2/3 Coaching and StrongKidz Coach Education course pages missing commercial details | **Client content required** |
 | StrongKidz parent-facing session logistics (location, age range, price, etc.) | **Client content required** — see [EDUCATE_STRONG_STRONGKIDZ_INFORMATION_REQUEST.md](EDUCATE_STRONG_STRONGKIDZ_INFORMATION_REQUEST.md) |
 | Tutor personal statements (`tutorsData.ts`) still placeholder text | **Client content required** (not yet wired to any live page — no launch urgency until it is) |

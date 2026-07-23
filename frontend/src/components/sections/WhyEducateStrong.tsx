@@ -68,7 +68,7 @@ export default function WhyEducateStrong() {
               The Standard Strongman Deserves
             </h2>
             <p className="leading-relaxed mb-4" style={{ color: '#888' }}>
-              Educate.Strong Academy is the UK's only accredited pathway for Strongman coaching and refereeing. Our qualifications are recognised by WHEA.GB, Armed Forces Strongman, and are awarded through Active IQ — an Ofqual-regulated awarding organisation.
+              Educate.Strong Academy provides a dedicated pathway combining Active IQ accredited Level 1 Strongman coaching with WHEA.GB endorsed Level 1 Strongman refereeing. Our qualifications are recognised by WHEA.GB, Armed Forces Strongman, and are awarded through Active IQ — an Ofqual-regulated awarding organisation.
             </p>
             <p className="leading-relaxed mb-8" style={{ color: '#888' }}>
               Every qualification is designed by active athletes and coaches who compete at the highest level. Theory meets practice from day one.

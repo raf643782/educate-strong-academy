@@ -50,11 +50,11 @@ const COACH_WHAT_YOU_LEARN = [
 const PARENT_FAQS = [
   {
     q: 'What is StrongKidz?',
-    a: "StrongKidz is Educate Strong's youth strength programme — Strongman-inspired training focused on movement, confidence and positive experiences of strength for children in Sheffield, delivered by safeguarding-trained coaches.",
+    a: "StrongKidz is Educate Strong's youth strength programme — Strongman-inspired training focused on movement, confidence and positive experiences of strength for children in Sheffield. Full Coach, safeguarding and session information will be confirmed before bookings open.",
   },
   {
     q: 'Who is StrongKidz for?',
-    a: 'StrongKidz is for children and young people in Sheffield who want to build strength, movement confidence and a positive introduction to training, under experienced, safeguarding-trained coaching.',
+    a: 'StrongKidz is for children and young people in Sheffield who want to build strength, movement confidence and a positive introduction to training. Full Coach, safeguarding and session information will be confirmed before bookings open.',
   },
   {
     q: 'What happens in a StrongKidz session?',
@@ -62,7 +62,7 @@ const PARENT_FAQS = [
   },
   {
     q: 'Is strength training appropriate for children?',
-    a: "Age-appropriate strength and movement coaching, delivered correctly, is a recognised way to build young people's physical confidence and movement skills. StrongKidz sessions are coached by qualified, safeguarding-trained coaches who prioritise technique over intensity throughout.",
+    a: "Age-appropriate strength and movement coaching, delivered correctly, is a recognised way to build young people's physical confidence and movement skills. Full Coach, safeguarding and session information will be confirmed before bookings open.",
   },
   {
     q: 'What information do I need to provide before my child joins?',
@@ -97,7 +97,7 @@ export default function StrongKidz() {
   useDocumentHead({
     title: 'StrongKidz — Youth Strength Programme in Sheffield',
     description:
-      "StrongKidz is Educate Strong's youth strength programme in Sheffield — movement, confidence and positive experiences of strength for children, coached by safeguarding-trained coaches. Also home to StrongKidz Coach Education for adults.",
+      "StrongKidz is Educate Strong's youth strength programme in Sheffield — movement, confidence and positive experiences of strength for children. Coach and safeguarding information will be confirmed before bookings open. Also home to StrongKidz Coach Education for adults.",
     canonical: canonicalUrl,
   });
 
