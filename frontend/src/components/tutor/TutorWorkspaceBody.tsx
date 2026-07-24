@@ -1,4 +1,5 @@
 import Navbar from '../layout/Navbar';
+import EmailVerificationBanner from '../layout/EmailVerificationBanner';
 import { WorkspaceSectionCard, WorkspaceActionCard } from '../workspace/WorkspaceSectionCard';
 import { FolderIcon, ResourcesIcon, NotesIcon, ChartIcon, ProfileIcon } from '../workspace/icons';
 
@@ -7,9 +8,12 @@ import { FolderIcon, ResourcesIcon, NotesIcon, ChartIcon, ProfileIcon } from '..
  * /portal-preview/tutor. `basePath` controls where "Assigned Courses
  * and Groups" and "Tutor Profile" link to ("/tutor" for real,
  * "/portal-preview/tutor" for preview), so the preview never sends a
- * visitor into a real protected route.
+ * visitor into a real protected route. `showVerificationBanner`
+ * defaults to false and must be passed explicitly by the real page
+ * only — the preview must never reflect a real logged-in user's
+ * verification state, so it simply never passes this prop.
  */
-export default function TutorWorkspaceBody({ basePath }: { basePath: string }) {
+export default function TutorWorkspaceBody({ basePath, showVerificationBanner }: { basePath: string; showVerificationBanner?: boolean }) {
   return (
     <div style={{ minHeight: '100vh', background: '#050506', color: '#fff' }}>
       <Navbar />
@@ -22,6 +26,7 @@ export default function TutorWorkspaceBody({ basePath }: { basePath: string }) {
         paddingBottom: '24px',
       }}>
         <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '0 24px' }}>
+          {showVerificationBanner && <EmailVerificationBanner />}
           <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', marginBottom: '6px', letterSpacing: '0.05em', textTransform: 'uppercase', fontWeight: 600 }}>
             Tutor Workspace
           </p>

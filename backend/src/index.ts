@@ -38,7 +38,7 @@ app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (Render health checks, Postman, etc.)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.some(o => origin.startsWith(o))) {
+    if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
     // Also allow any *.vercel.app preview deployment

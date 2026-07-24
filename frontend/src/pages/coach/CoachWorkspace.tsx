@@ -11,5 +11,5 @@ import CoachWorkspaceBody from '../../components/coach/CoachWorkspaceBody';
  * CoachWorkspaceBody, shared with /portal-preview/coach.
  */
 export default function CoachWorkspace() {
-  return <CoachWorkspaceBody basePath="/coach" />;
+  return <CoachWorkspaceBody basePath="/coach" showVerificationBanner />;
 }

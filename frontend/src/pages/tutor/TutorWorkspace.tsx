@@ -10,5 +10,5 @@ import TutorWorkspaceBody from '../../components/tutor/TutorWorkspaceBody';
  * TutorWorkspaceBody, shared with /portal-preview/tutor.
  */
 export default function TutorWorkspace() {
-  return <TutorWorkspaceBody basePath="/tutor" />;
+  return <TutorWorkspaceBody basePath="/tutor" showVerificationBanner />;
 }

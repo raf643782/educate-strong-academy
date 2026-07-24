@@ -7,6 +7,7 @@ interface User {
   firstName: string;
   lastName: string;
   role: 'LEARNER' | 'COACH' | 'TUTOR' | 'ASSESSOR' | 'ADMIN';
+  emailVerified: boolean;
   avatarUrl?: string;
 }
 
@@ -17,6 +18,8 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<User>;
   logout: () => void;
+  /** Re-fetches /auth/me so context state (e.g. emailVerified) reflects a change made without a full re-login, such as verifying an email. */
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -60,6 +63,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
+  const refreshUser = async (): Promise<void> => {
+    if (!localStorage.getItem('es_token')) return;
+    try {
+      const res = await api.get('/auth/me');
+      setUser(res.data);
+    } catch {
+      // Leave existing state as-is — the global 401 interceptor already
+      // handles a genuinely invalid/expired token.
+    }
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -68,6 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isLoading,
       login,
       logout,
+      refreshUser,
     }}>
       {children}
     </AuthContext.Provider>
