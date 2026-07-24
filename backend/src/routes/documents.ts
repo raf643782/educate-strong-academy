@@ -3,17 +3,20 @@
  *
  * GET /                        — all documents for enrolled courses + platform-wide
  * GET /course/:courseId        — documents for a specific course
- * GET /:documentId/download    — placeholder download endpoint
+ * GET /:documentId/download    — signed download URL (Cloudflare R2, Stage 4C)
  *
  * File hosting note:
- *   fileUrl is stored as metadata. Real file download requires S3 or equivalent.
- *   Until storage is configured, the download endpoint returns a safe placeholder
- *   response. When S3 is added, replace with a signed URL generation step.
+ *   fileUrl stores a private R2 object key, not a public URL (Stage 4C).
+ *   The download endpoint below re-verifies auth/enrolment/lock state on
+ *   every request, then returns a short-lived signed GET URL as JSON —
+ *   it never redirects to fileUrl directly, and the object key itself is
+ *   never exposed to a caller who isn't authorised for this document.
  */
 
 import { Router, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authenticate, AuthRequest } from '../middleware/auth';
+import { isR2Configured, getDownloadUrl } from '../lib/r2';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -129,12 +132,9 @@ router.get('/course/:courseId', authenticate, async (req: AuthRequest, res: Resp
 // GET /api/documents/:documentId/download
 // Verifies, server side: the requester is authenticated, is enrolled in
 // the document's course (or is ADMIN), and the document's status
-// actually allows access — before ever touching fileUrl.
-//
-// NEXT STEP: When S3 is configured, generate a pre-signed URL here and
-// redirect the client to it. Example:
-//   const signedUrl = await s3.getSignedUrlPromise('getObject', { Bucket, Key, Expires: 300 });
-//   res.redirect(signedUrl);
+// actually allows access — before ever touching fileUrl. Once authorised,
+// generates a fresh short-lived signed GET URL and returns it as JSON;
+// the object key itself is never returned to the client.
 // ─────────────────────────────────────────────────────────────────────────────
 router.get('/:documentId/download', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -180,18 +180,31 @@ router.get('/:documentId/download', authenticate, async (req: AuthRequest, res: 
     if (status === 'COMING_SOON' || !doc.fileUrl) {
       res.status(503).json({
         error: 'File not yet available.',
-        message: 'Document file hosting is not yet configured. ' +
-                 'Contact educate.strongltd@gmail.com to request this document directly. ' +
-                 'File storage (S3 or equivalent) will be integrated in Phase 3.',
+        message: 'This document has not been uploaded yet. ' +
+                 'Contact educate.strongltd@gmail.com to request it directly.',
         document: { id: doc.id, title: doc.title, type: doc.type },
       });
       return;
     }
 
-    // Status AVAILABLE (or ADMIN override) with a real fileUrl — safe to redirect.
-    res.redirect(doc.fileUrl);
+    if (!isR2Configured()) {
+      // Shouldn't normally happen (a real fileUrl only exists once the R2
+      // upload flow has run), but fail safely rather than leak the object
+      // key or throw if storage config is ever removed/misconfigured.
+      res.status(503).json({
+        error: 'Document storage is temporarily unavailable.',
+        message: 'Please try again shortly, or contact educate.strongltd@gmail.com.',
+      });
+      return;
+    }
+
+    // Status AVAILABLE (or ADMIN override) with a real object key —
+    // generate a fresh signed URL and return it as JSON. The frontend
+    // opens this URL directly; it is never persisted or logged.
+    const url = await getDownloadUrl(doc.fileUrl);
+    res.json({ url });
   } catch (err) {
-    console.error(err);
+    console.error('[documents/download]', err instanceof Error ? err.message : err);
     res.status(500).json({ error: 'Failed to process download.' });
   }
 });

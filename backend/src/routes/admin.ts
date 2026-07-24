@@ -2,6 +2,7 @@ import { Router, Response } from 'express';
 import { PrismaClient, InterestStatus } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { authenticate, requireRole, AuthRequest } from '../middleware/auth';
+import { isR2Configured, generateObjectKey, getUploadUrl, objectExists, MAX_FILE_SIZE_BYTES, ALLOWED_FILE_TYPES } from '../lib/r2';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -549,6 +550,69 @@ router.get('/documents', authenticate, requireRole('ADMIN'), async (_req: AuthRe
   }
 });
 
+// POST /api/admin/documents/upload-url
+// ADMIN only. Validates the file the client is about to upload, generates
+// a server-controlled object key (random UUID — never the raw filename),
+// and returns a short-lived presigned PUT URL for the browser to upload
+// directly to R2. Nothing is written to CourseDocument here — the admin
+// still calls the existing POST/PUT /documents route afterwards with the
+// returned objectKey, same as any other field.
+router.post('/documents/upload-url', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    if (!isR2Configured()) {
+      res.status(503).json({ error: 'Document storage is not configured yet. Contact an administrator.' });
+      return;
+    }
+
+    const { filename, contentType, sizeBytes, courseId } = req.body;
+
+    if (!filename || typeof filename !== 'string') {
+      res.status(400).json({ error: 'A filename is required.' });
+      return;
+    }
+    if (!contentType || typeof contentType !== 'string') {
+      res.status(400).json({ error: 'A content type is required.' });
+      return;
+    }
+    if (typeof sizeBytes !== 'number' || !Number.isFinite(sizeBytes) || sizeBytes <= 0) {
+      res.status(400).json({ error: 'A valid file size is required.' });
+      return;
+    }
+    if (sizeBytes > MAX_FILE_SIZE_BYTES) {
+      res.status(400).json({ error: `File is too large. Maximum size is ${Math.round(MAX_FILE_SIZE_BYTES / (1024 * 1024))}MB.` });
+      return;
+    }
+
+    const extMatch = filename.toLowerCase().match(/\.[a-z0-9]+$/);
+    const extension = extMatch ? extMatch[0] : '';
+    const expectedMimeType = ALLOWED_FILE_TYPES[extension];
+    if (!expectedMimeType) {
+      res.status(400).json({ error: `Unsupported file type. Allowed: ${Object.keys(ALLOWED_FILE_TYPES).join(', ')}` });
+      return;
+    }
+    if (contentType !== expectedMimeType) {
+      res.status(400).json({ error: 'The file content type does not match its extension.' });
+      return;
+    }
+
+    if (courseId) {
+      const course = await prisma.course.findUnique({ where: { id: courseId }, select: { id: true } });
+      if (!course) {
+        res.status(400).json({ error: 'Course not found.' });
+        return;
+      }
+    }
+
+    const objectKey = generateObjectKey(courseId || null, extension);
+    const uploadUrl = await getUploadUrl(objectKey, expectedMimeType);
+
+    res.json({ uploadUrl, objectKey });
+  } catch (err) {
+    console.error('[admin/documents/upload-url]', err instanceof Error ? err.message : err);
+    res.status(500).json({ error: 'Failed to prepare upload.' });
+  }
+});
+
 // POST /api/admin/documents
 router.post('/documents', authenticate, requireRole('ADMIN'), async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -564,6 +628,21 @@ router.post('/documents', authenticate, requireRole('ADMIN'), async (req: AuthRe
     if (resolvedStatus === 'AVAILABLE' && (!fileUrl || !fileUrl.trim())) {
       res.status(400).json({ error: 'A file URL is required when status is AVAILABLE.' });
       return;
+    }
+
+    // fileUrl is now an R2 object key, not a public URL — confirm the
+    // object genuinely exists in the bucket before this document is
+    // treated as ready, rather than saving a dangling reference.
+    if (fileUrl && fileUrl.trim()) {
+      if (!isR2Configured()) {
+        res.status(503).json({ error: 'Document storage is not configured yet. Contact an administrator.' });
+        return;
+      }
+      const exists = await objectExists(fileUrl.trim());
+      if (!exists) {
+        res.status(400).json({ error: 'The uploaded file could not be verified in storage. Please try uploading again.' });
+        return;
+      }
     }
 
     const maxSort = await prisma.courseDocument.aggregate({ _max: { sortOrder: true } });
@@ -599,6 +678,21 @@ router.put('/documents/:id', authenticate, requireRole('ADMIN'), async (req: Aut
     if (status === 'AVAILABLE' && fileUrl !== undefined && (!fileUrl || !fileUrl.trim())) {
       res.status(400).json({ error: 'A file URL is required when status is AVAILABLE.' });
       return;
+    }
+
+    // Same existence check as create — only when fileUrl is actually being
+    // set to a new, non-empty value (an unrelated field-only edit that
+    // leaves fileUrl untouched must never be blocked by this).
+    if (fileUrl !== undefined && fileUrl && fileUrl.trim()) {
+      if (!isR2Configured()) {
+        res.status(503).json({ error: 'Document storage is not configured yet. Contact an administrator.' });
+        return;
+      }
+      const exists = await objectExists(fileUrl.trim());
+      if (!exists) {
+        res.status(400).json({ error: 'The uploaded file could not be verified in storage. Please try uploading again.' });
+        return;
+      }
     }
 
     const data: Record<string, unknown> = {};
