@@ -124,6 +124,20 @@ router.get('/:assessmentId', authenticate, async (req: AuthRequest, res: Respons
       return;
     }
 
+    // Same enrolment rule as GET /course/:courseId and POST /:assessmentId/submit
+    // below — ADMIN bypasses, a course-linked assessment requires enrolment,
+    // a platform-wide assessment (courseId null) has no course to be enrolled in.
+    const isAdmin = req.userRole === 'ADMIN';
+    if (!isAdmin && assessment.courseId) {
+      const enrolment = await prisma.enrolment.findUnique({
+        where: { userId_courseId: { userId, courseId: assessment.courseId } },
+      });
+      if (!enrolment) {
+        res.status(403).json({ error: 'You are not enrolled in this course.' });
+        return;
+      }
+    }
+
     res.json(assessment);
   } catch (err) {
     console.error(err);

@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import rateLimit from 'express-rate-limit';
+import { sendRegisterInterestNotification, sendRegisterInterestConfirmation } from '../services/emailService';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -41,7 +42,7 @@ router.post('/', registerInterestLimiter, async (req: Request, res: Response): P
       return;
     }
 
-    await prisma.registerInterest.create({
+    const record = await prisma.registerInterest.create({
       data: {
         firstName: firstName?.trim() || '',
         lastName: lastName?.trim() || '',
@@ -54,6 +55,41 @@ router.post('/', registerInterestLimiter, async (req: Request, res: Response): P
         status: 'NEW',
       },
     });
+
+    // The lead is already safely saved above — nothing below this point
+    // can lose it. Both emails are best-effort and tracked separately,
+    // since one succeeding and the other failing is a normal outcome
+    // (e.g. the submitter's address bounces but the owner notification
+    // still lands fine). Failures here are never surfaced to the
+    // submitter — the response stays the same either way.
+    const [ownerResult, submitterResult] = await Promise.all([
+      sendRegisterInterestNotification({
+        firstName: record.firstName, lastName: record.lastName, email: record.email,
+        phone: record.phone, courseInterest: record.courseInterest,
+        locationInterest: record.locationInterest, message: record.message, sourcePage: record.sourcePage,
+      }),
+      sendRegisterInterestConfirmation({
+        firstName: record.firstName, lastName: record.lastName, email: record.email,
+        phone: record.phone, courseInterest: record.courseInterest,
+        locationInterest: record.locationInterest, message: record.message, sourcePage: record.sourcePage,
+      }),
+    ]);
+
+    try {
+      await prisma.registerInterest.update({
+        where: { id: record.id },
+        data: {
+          ownerNotifiedAt: ownerResult.success ? new Date() : null,
+          ownerNotificationErrorCode: ownerResult.success ? null : ownerResult.errorCode,
+          submitterConfirmationSentAt: submitterResult.success ? new Date() : null,
+          submitterConfirmationErrorCode: submitterResult.success ? null : submitterResult.errorCode,
+        },
+      });
+    } catch (trackingErr) {
+      // Even if recording the delivery outcome fails, the lead itself
+      // is already safely saved — this is observability only.
+      console.error('[register-interest] Failed to record delivery tracking:', trackingErr instanceof Error ? trackingErr.message : trackingErr);
+    }
 
     res.status(201).json({ message: 'Your interest has been registered. We will be in touch soon.' });
   } catch (err) {

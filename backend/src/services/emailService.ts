@@ -1,84 +1,106 @@
 /**
- * Email Service
+ * Email Service — Resend
  *
- * In development (NODE_ENV !== 'production'):
- *   - Does not send real email
- *   - Returns the reset link so the caller can surface it to the developer
- *
- * In production:
- *   - Sends via SMTP using environment variables
- *   - Requires: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, EMAIL_FROM
- *   - Falls back to logging an error if SMTP is not configured
+ * Sends via the official Resend Node SDK. In development/test
+ * (NODE_ENV !== 'production') this never sends a real email — it logs
+ * to console and, for password reset specifically, returns the link so
+ * a developer can use it directly. This must never pretend an email
+ * was delivered when it wasn't.
  *
  * Required environment variables (production):
- *   SMTP_HOST=smtp.example.com
- *   SMTP_PORT=587
- *   SMTP_USER=noreply@educate-strong.com
- *   SMTP_PASS=your-smtp-password
- *   EMAIL_FROM="EducateStrong Academy <noreply@educate-strong.com>"
- *   FRONTEND_URL=https://educate-strong.vercel.app
+ *   RESEND_API_KEY      — a sending-only Resend API key
+ *   EMAIL_FROM          — must be an address on a domain verified with Resend
+ *   NOTIFICATIONS_EMAIL — recipient for Register Interest owner notifications
+ *   FRONTEND_URL        — used to build verification/reset links
+ *
+ * Missing configuration in production does not crash the server or any
+ * unrelated route — only the specific send attempt fails. Every
+ * failure is logged server-side with a short, sanitised error code
+ * ('NOT_CONFIGURED' | 'SEND_FAILED') for debugging. Full provider
+ * responses, stack traces, request data, and API keys are never stored
+ * or returned to a caller.
  */
 
-interface SendResetEmailOptions {
-  toEmail: string;
-  toName: string;
-  resetToken: string;
+import { Resend } from 'resend';
+
+export type EmailErrorCode = 'NOT_CONFIGURED' | 'SEND_FAILED';
+
+interface SendResult {
+  success: boolean;
+  errorCode?: EmailErrorCode;
 }
 
-interface SendResetEmailResult {
-  sent: boolean;
-  /** Only populated in development — never in production */
-  _devResetLink?: string;
+let resendClient: Resend | null = null;
+
+function getResendClient(): Resend | null {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return null;
+  if (!resendClient) resendClient = new Resend(apiKey);
+  return resendClient;
 }
 
-export async function sendPasswordResetEmail(opts: SendResetEmailOptions): Promise<SendResetEmailResult> {
-  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5174';
-  const resetLink = `${frontendUrl}/reset-password/${opts.resetToken}`;
+function isProduction(): boolean {
+  return process.env.NODE_ENV === 'production';
+}
 
-  if (process.env.NODE_ENV !== 'production') {
-    // Development: log to console, return link for dev UI
-    console.log(`[DEV] Password reset link for ${opts.toEmail}: ${resetLink}`);
-    return { sent: false, _devResetLink: resetLink };
+function fromAddress(): string {
+  return process.env.EMAIL_FROM || 'EducateStrong Academy <onboarding@resend.dev>';
+}
+
+function frontendUrl(): string {
+  return process.env.FRONTEND_URL || 'http://localhost:5174';
+}
+
+// Shared low-level send — never throws, never leaks provider details to
+// its caller. Outside production this always suppresses the real send
+// (logged instead) so local development never dispatches real email.
+async function sendEmail(opts: { to: string; subject: string; html: string; text: string }): Promise<SendResult> {
+  if (!isProduction()) {
+    console.log(`[DEV] Email suppressed — would send "${opts.subject}" to ${opts.to}`);
+    return { success: false, errorCode: 'NOT_CONFIGURED' };
   }
 
-  // Production: send via SMTP
-  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, EMAIL_FROM } = process.env;
-
-  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
-    console.error('[emailService] SMTP not configured. Password reset email not sent.');
-    // Return sent:true so the API still returns a neutral response to the user
-    // (we don't want to expose that email sending is broken)
-    return { sent: true };
+  const client = getResendClient();
+  if (!client) {
+    console.error(`[emailService] RESEND_API_KEY is not configured. Email not sent: "${opts.subject}" to ${opts.to}`);
+    return { success: false, errorCode: 'NOT_CONFIGURED' };
   }
 
   try {
-    // Dynamic import avoids bundling nodemailer unless in production
-    const nodemailer = await import('nodemailer');
-    const transporter = nodemailer.default.createTransport({
-      host: SMTP_HOST,
-      port: parseInt(SMTP_PORT || '587'),
-      secure: parseInt(SMTP_PORT || '587') === 465,
-      auth: { user: SMTP_USER, pass: SMTP_PASS },
+    const { error } = await client.emails.send({
+      from: fromAddress(),
+      to: opts.to,
+      subject: opts.subject,
+      html: opts.html,
+      text: opts.text,
     });
-
-    await transporter.sendMail({
-      from: EMAIL_FROM || `EducateStrong Academy <${SMTP_USER}>`,
-      to: opts.toEmail,
-      subject: 'Reset your EducateStrong Academy password',
-      html: buildResetEmailHtml(opts.toName, resetLink),
-      text: buildResetEmailText(opts.toName, resetLink),
-    });
-
-    return { sent: true };
+    if (error) {
+      console.error(`[emailService] Resend reported an error sending "${opts.subject}":`, error.message);
+      return { success: false, errorCode: 'SEND_FAILED' };
+    }
+    return { success: true };
   } catch (err) {
-    console.error('[emailService] Failed to send reset email:', err);
-    return { sent: true }; // neutral — don't expose failure to user
+    console.error(`[emailService] Failed to send "${opts.subject}":`, err instanceof Error ? err.message : err);
+    return { success: false, errorCode: 'SEND_FAILED' };
   }
 }
 
-function buildResetEmailHtml(name: string, link: string): string {
-  return `
-<!DOCTYPE html>
+// ── Shared email chrome ─────────────────────────────────────────────────────
+
+// Escapes a plain-text value for safe interpolation into an HTML email
+// body. Only ever apply this to submitter-supplied values, never to
+// trusted static template markup/text written in this file.
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function wrapHtml(bodyHtml: string): string {
+  return `<!DOCTYPE html>
 <html>
 <body style="margin:0;padding:0;background:#0D0D0D;font-family:sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#0D0D0D;padding:40px 16px;">
@@ -88,21 +110,7 @@ function buildResetEmailHtml(name: string, link: string): string {
           <p style="color:#fff;font-size:20px;font-weight:800;margin:0;">EducateStrong Academy</p>
         </td></tr>
         <tr><td style="padding:32px;">
-          <p style="color:#fff;font-size:16px;margin:0 0 12px;">Hi ${name},</p>
-          <p style="color:rgba(255,255,255,0.7);font-size:14px;line-height:1.6;margin:0 0 24px;">
-            We received a request to reset your password. Click the button below to choose a new one.
-            This link expires in 60 minutes.
-          </p>
-          <a href="${link}" style="display:inline-block;background:#A41C64;color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:700;font-size:14px;">
-            Reset Password
-          </a>
-          <p style="color:rgba(255,255,255,0.4);font-size:12px;margin:24px 0 0;">
-            If you did not request this, you can safely ignore this email.<br>
-            Your password will not change.
-          </p>
-          <p style="color:rgba(255,255,255,0.2);font-size:11px;margin:12px 0 0;word-break:break-all;">
-            Or copy this link: ${link}
-          </p>
+          ${bodyHtml}
         </td></tr>
       </table>
     </td></tr>
@@ -111,6 +119,179 @@ function buildResetEmailHtml(name: string, link: string): string {
 </html>`;
 }
 
-function buildResetEmailText(name: string, link: string): string {
-  return `Hi ${name},\n\nWe received a request to reset your EducateStrong Academy password.\n\nReset your password here:\n${link}\n\nThis link expires in 60 minutes.\n\nIf you did not request this, you can safely ignore this email.`;
+// ── Password reset ───────────────────────────────────────────────────────────
+
+interface SendResetEmailOptions {
+  toEmail: string;
+  toName: string;
+  resetToken: string;
+}
+
+interface SendResetEmailResult {
+  sent: boolean;
+  /** Only populated outside production — never in production */
+  _devResetLink?: string;
+}
+
+// External contract deliberately unchanged from before: always resolves
+// with sent:true in production regardless of actual delivery success,
+// so the calling route's response stays the same neutral message either
+// way — this is required to preserve the existing anti-enumeration
+// behaviour on /auth/forgot-password. Actual delivery failures are
+// still logged server-side by sendEmail() above.
+export async function sendPasswordResetEmail(opts: SendResetEmailOptions): Promise<SendResetEmailResult> {
+  const resetLink = `${frontendUrl()}/reset-password/${opts.resetToken}`;
+
+  if (!isProduction()) {
+    console.log(`[DEV] Password reset link for ${opts.toEmail}: ${resetLink}`);
+    return { sent: false, _devResetLink: resetLink };
+  }
+
+  await sendEmail({
+    to: opts.toEmail,
+    subject: 'Reset your EducateStrong Academy password',
+    html: wrapHtml(`
+      <p style="color:#fff;font-size:16px;margin:0 0 12px;">Hi ${opts.toName},</p>
+      <p style="color:rgba(255,255,255,0.7);font-size:14px;line-height:1.6;margin:0 0 24px;">
+        We received a request to reset your password. Click the button below to choose a new one.
+        This link expires in 60 minutes.
+      </p>
+      <a href="${resetLink}" style="display:inline-block;background:#A41C64;color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:700;font-size:14px;">
+        Reset Password
+      </a>
+      <p style="color:rgba(255,255,255,0.4);font-size:12px;margin:24px 0 0;">
+        If you did not request this, you can safely ignore this email.<br>
+        Your password will not change.
+      </p>
+      <p style="color:rgba(255,255,255,0.2);font-size:11px;margin:12px 0 0;word-break:break-all;">
+        Or copy this link: ${resetLink}
+      </p>
+    `),
+    text: `Hi ${opts.toName},\n\nWe received a request to reset your EducateStrong Academy password.\n\nReset your password here:\n${resetLink}\n\nThis link expires in 60 minutes.\n\nIf you did not request this, you can safely ignore this email.`,
+  });
+
+  // Always sent:true — see comment above.
+  return { sent: true };
+}
+
+// ── Email verification ───────────────────────────────────────────────────────
+
+interface SendVerificationEmailOptions {
+  toEmail: string;
+  toName: string;
+  verificationToken: string;
+}
+
+interface SendVerificationEmailResult {
+  success: boolean;
+  errorCode?: EmailErrorCode;
+  /** Only populated outside production — never in production */
+  _devVerificationLink?: string;
+}
+
+// Unlike password reset, this doesn't need the artificial "always
+// succeeds" neutral contract — a verification email is sent only right
+// after this exact account was just created by this exact request, so
+// there is no account-enumeration surface to protect here. Registration
+// itself never depends on this succeeding (soft verification).
+export async function sendVerificationEmail(opts: SendVerificationEmailOptions): Promise<SendVerificationEmailResult> {
+  const verificationLink = `${frontendUrl()}/verify-email/${opts.verificationToken}`;
+
+  if (!isProduction()) {
+    console.log(`[DEV] Email verification link for ${opts.toEmail}: ${verificationLink}`);
+    return { success: false, errorCode: 'NOT_CONFIGURED', _devVerificationLink: verificationLink };
+  }
+
+  const result = await sendEmail({
+    to: opts.toEmail,
+    subject: 'Verify your email — EducateStrong Academy',
+    html: wrapHtml(`
+      <p style="color:#fff;font-size:16px;margin:0 0 12px;">Hi ${opts.toName},</p>
+      <p style="color:rgba(255,255,255,0.7);font-size:14px;line-height:1.6;margin:0 0 24px;">
+        Thanks for creating an EducateStrong Academy account. Please confirm this is your email
+        address by clicking the button below. This link expires in 24 hours.
+      </p>
+      <a href="${verificationLink}" style="display:inline-block;background:#A41C64;color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:700;font-size:14px;">
+        Verify Email Address
+      </a>
+      <p style="color:rgba(255,255,255,0.4);font-size:12px;margin:24px 0 0;">
+        You can already sign in and use your dashboard without verifying — this is just to
+        confirm we can reach you.
+      </p>
+      <p style="color:rgba(255,255,255,0.2);font-size:11px;margin:12px 0 0;word-break:break-all;">
+        Or copy this link: ${verificationLink}
+      </p>
+    `),
+    text: `Hi ${opts.toName},\n\nThanks for creating an EducateStrong Academy account. Confirm your email address here:\n${verificationLink}\n\nThis link expires in 24 hours.\n\nYou can already sign in and use your dashboard without verifying — this is just to confirm we can reach you.`,
+  });
+
+  return result;
+}
+
+// ── Register Interest ────────────────────────────────────────────────────────
+
+interface RegisterInterestDetails {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string | null;
+  courseInterest?: string | null;
+  locationInterest?: string | null;
+  message?: string | null;
+  sourcePage?: string | null;
+}
+
+// Notifies Educate Strong's own inbox of a new lead. Best-effort — the
+// caller (interest.ts) never rolls back the already-saved database
+// record because this fails; it only records the outcome.
+export async function sendRegisterInterestNotification(details: RegisterInterestDetails): Promise<SendResult> {
+  const notificationsEmail = process.env.NOTIFICATIONS_EMAIL;
+  if (!notificationsEmail) {
+    console.error('[emailService] NOTIFICATIONS_EMAIL is not configured. Register Interest notification not sent.');
+    return { success: false, errorCode: 'NOT_CONFIGURED' };
+  }
+
+  const rows = [
+    ['Name', `${details.firstName} ${details.lastName}`],
+    ['Email', details.email],
+    ['Phone', details.phone || '—'],
+    ['Course interest', details.courseInterest || '—'],
+    ['Location interest', details.locationInterest || '—'],
+    ['Source page', details.sourcePage || '—'],
+    ['Message', details.message || '—'],
+  ];
+
+  return sendEmail({
+    to: notificationsEmail,
+    subject: `New Register Interest submission — ${details.firstName} ${details.lastName}`,
+    html: wrapHtml(`
+      <p style="color:#fff;font-size:16px;margin:0 0 16px;">New Register Interest submission</p>
+      <table style="width:100%;border-collapse:collapse;">
+        ${rows.map(([label, value]) => `
+          <tr>
+            <td style="color:rgba(255,255,255,0.4);font-size:12px;padding:6px 12px 6px 0;vertical-align:top;white-space:nowrap;">${label}</td>
+            <td style="color:#fff;font-size:14px;padding:6px 0;">${escapeHtml(value)}</td>
+          </tr>
+        `).join('')}
+      </table>
+    `),
+    text: rows.map(([label, value]) => `${label}: ${value}`).join('\n'),
+  });
+}
+
+// Confirms receipt to the person who submitted the form. Best-effort,
+// same as above — never blocks or reverses the saved record.
+export async function sendRegisterInterestConfirmation(details: RegisterInterestDetails): Promise<SendResult> {
+  return sendEmail({
+    to: details.email,
+    subject: "We've received your interest — EducateStrong Academy",
+    html: wrapHtml(`
+      <p style="color:#fff;font-size:16px;margin:0 0 12px;">Hi ${escapeHtml(details.firstName)},</p>
+      <p style="color:rgba(255,255,255,0.7);font-size:14px;line-height:1.6;margin:0;">
+        Thanks for registering your interest with EducateStrong Academy. We've received your
+        details and someone from the team will be in touch soon.
+      </p>
+    `),
+    text: `Hi ${details.firstName},\n\nThanks for registering your interest with EducateStrong Academy. We've received your details and someone from the team will be in touch soon.`,
+  });
 }
