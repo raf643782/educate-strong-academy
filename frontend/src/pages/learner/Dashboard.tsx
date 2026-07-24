@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
+import EmailVerificationBanner from '../../components/layout/EmailVerificationBanner';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../lib/api';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
@@ -52,6 +53,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="pt-navbar" style={{ background: 'radial-gradient(ellipse 100% 80% at 50% -20%, rgba(164,28,100,0.18) 0%, transparent 52%), #050506', borderBottom: '1px solid rgba(194,24,106,0.08)' }}>
         <div className="es-container py-8">
+          <EmailVerificationBanner />
           <p className="es-label mb-1">Dashboard</p>
           <h1 className="text-2xl font-black text-white">Welcome back, {user?.firstName}</h1>
           <p className="text-es-muted text-sm mt-1">Continue your professional development.</p>

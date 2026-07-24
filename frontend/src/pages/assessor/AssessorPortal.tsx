@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
+import EmailVerificationBanner from '../../components/layout/EmailVerificationBanner';
 import api from '../../lib/api';
 
 type Status = 'PENDING' | 'IN_REVIEW' | 'PASSED' | 'FAILED' | 'REFERRED' | 'NEEDS_CHANGES';
@@ -175,6 +176,7 @@ export default function AssessorPortal() {
       <Navbar />
       <div className="pt-navbar" style={{ background: 'radial-gradient(ellipse 100% 70% at 50% -20%, rgba(164,28,100,0.16) 0%, transparent 52%), #050506', borderBottom: '1px solid rgba(194,24,106,0.08)' }}>
         <div className="es-container py-8">
+          <EmailVerificationBanner />
           <p className="es-label mb-2">Staff Area</p>
           <h1 className="text-3xl font-black text-white">Assessor Portal</h1>
           <p className="text-es-muted mt-1">Review and grade learner submissions.</p>
