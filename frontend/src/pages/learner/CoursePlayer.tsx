@@ -54,7 +54,7 @@ interface CourseDoc {
   description: string | null;
   type: string;
   status: string;
-  fileUrl: string | null;
+  hasFile: boolean;
   fileType: string;
 }
 
@@ -426,7 +426,7 @@ export default function CoursePlayer() {
                     <div className="space-y-3">
                       {courseDocs.map(doc => {
                         const isLocked = doc.status === 'LOCKED';
-                        const isComingSoon = doc.status === 'COMING_SOON' || !doc.fileUrl;
+                        const isComingSoon = doc.status === 'COMING_SOON' || !doc.hasFile;
                         return (
                           <div key={doc.id} className="flex items-center justify-between p-4 rounded-lg" style={{ background: '#151519', border: '1px solid rgba(255,255,255,0.07)' }}>
                             <div className="flex items-center gap-3 min-w-0">
@@ -442,7 +442,7 @@ export default function CoursePlayer() {
                             </div>
                             <div className="flex items-center gap-2 flex-shrink-0 ml-3">
                               <span className="text-xs px-2 py-0.5 rounded" style={{ color: '#75757D', background: '#1B1B20', border: '1px solid rgba(255,255,255,0.07)' }}>{doc.fileType}</span>
-                              {!isLocked && !isComingSoon && doc.fileUrl && (
+                              {!isLocked && !isComingSoon && doc.hasFile && (
                                 <button
                                   type="button"
                                   onClick={() => handleDocDownload(doc)}

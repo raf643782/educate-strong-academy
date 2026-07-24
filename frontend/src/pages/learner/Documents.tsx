@@ -12,7 +12,7 @@ interface CourseDocument {
   description?: string;
   type: string;
   status: string;
-  fileUrl?: string;
+  hasFile?: boolean;
   fileType: string;
   fileSizeMb?: number;
   sortOrder: number;
@@ -61,7 +61,7 @@ export default function Documents() {
       setTimeout(() => setDownloadMsg(null), 5000);
       return;
     }
-    if (doc.status === 'COMING_SOON' || !doc.fileUrl) {
+    if (doc.status === 'COMING_SOON' || !doc.hasFile) {
       setDownloadMsgLink(null);
       setDownloadMsg(
         `"${doc.title}" — File hosting not yet configured. ` +
@@ -153,7 +153,7 @@ export default function Documents() {
           <div className="grid sm:grid-cols-2 gap-4">
             {filtered.map(doc => {
               const isLocked = doc.status === 'LOCKED';
-              const isComingSoon = doc.status === 'COMING_SOON' || !doc.fileUrl;
+              const isComingSoon = doc.status === 'COMING_SOON' || !doc.hasFile;
               return (
                 <div key={doc.id} className={`es-card p-5 flex items-start gap-4 ${isLocked ? 'opacity-60' : ''}`}>
                   {/* Icon */}

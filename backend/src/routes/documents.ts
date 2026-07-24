@@ -40,8 +40,11 @@ function effectiveStatus(
 // ─────────────────────────────────────────────────────────────────────────────
 // GET /api/documents
 // Returns documents for all courses the learner is enrolled in,
-// plus any platform-wide documents (courseId = null). fileUrl is only
-// ever included for documents the requester can actually access.
+// plus any platform-wide documents (courseId = null). The raw R2 object
+// key (fileUrl) is never included in this list response — callers only
+// learn whether a file is attached and accessible via hasFile; the
+// actual key is only ever resolved to a short-lived signed URL inside
+// the dedicated /:documentId/download route below.
 // ─────────────────────────────────────────────────────────────────────────────
 router.get('/', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -80,7 +83,8 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response): Promise<v
     const result = documents.map(doc => {
       const status = effectiveStatus(doc, doc.courseId ? completedAtByCourse.get(doc.courseId) : null);
       const unlocked = isAdmin || status === 'AVAILABLE';
-      return { ...doc, status, fileUrl: unlocked ? doc.fileUrl : null };
+      const { fileUrl, ...rest } = doc;
+      return { ...rest, status, hasFile: unlocked && Boolean(fileUrl) };
     });
 
     res.json(result);
@@ -93,7 +97,8 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response): Promise<v
 // ─────────────────────────────────────────────────────────────────────────────
 // GET /api/documents/course/:courseId
 // Documents for a specific course only. Requires enrolment in that
-// course, or ADMIN. fileUrl is only included for unlocked documents.
+// course, or ADMIN. Same hasFile-only response shape as GET / above —
+// the raw object key is never returned here either.
 // ─────────────────────────────────────────────────────────────────────────────
 router.get('/course/:courseId', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -120,7 +125,8 @@ router.get('/course/:courseId', authenticate, async (req: AuthRequest, res: Resp
     res.json(documents.map(doc => {
       const status = effectiveStatus(doc, enrolment?.completedAt ?? null);
       const unlocked = isAdmin || status === 'AVAILABLE';
-      return { ...doc, status, fileUrl: unlocked ? doc.fileUrl : null };
+      const { fileUrl, ...rest } = doc;
+      return { ...rest, status, hasFile: unlocked && Boolean(fileUrl) };
     }));
   } catch (err) {
     console.error(err);
