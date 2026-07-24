@@ -23,6 +23,7 @@ export default function KnowledgeArticleSanityPreviewPage() {
   useDocumentHead({
     title: article ? `${article.seoTitle || article.title} — Preview` : 'Knowledge Hub Preview',
     description: article?.metaDescription,
+    noindex: true,
   });
 
   useEffect(() => {

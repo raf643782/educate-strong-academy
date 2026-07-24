@@ -31,8 +31,9 @@ export const sanityClient: SanityClient | null = isSanityConfigured
 
 // ── Types ────────────────────────────────────────────────────────────────
 // Mirrors the public fields of the `knowledgeArticle` schema (see
-// /sanity/schemas/knowledgeArticle.ts). `sourceNotes` is deliberately absent
-// here — it must never be requested by the frontend.
+// /sanity/schemas/knowledgeArticle.ts). No internal-only editorial field
+// exists on this type — see docs/KNOWLEDGE_HUB_SOURCE_NOTES_POLICY.md for
+// why `sourceNotes` was removed from the schema entirely (Stage 5A).
 
 export interface SanityFaqItem {
   question: string;

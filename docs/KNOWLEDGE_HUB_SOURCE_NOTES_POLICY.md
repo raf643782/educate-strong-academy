@@ -1,8 +1,8 @@
 # Knowledge Hub — Source Notes Policy
 
-Internal implementation note on why `sourceNotes` must never be populated on a `knowledgeArticle` document while the Sanity dataset is public.
+Internal implementation note on why `sourceNotes` must never be stored on a `knowledgeArticle` document while the Sanity dataset is public.
 
-**Last updated:** Sanity Stage 2 privacy cleanup — 2026-07-24.
+**Last updated:** Priority 5, Stage 5A — 2026-07-24. The `sourceNotes` field has been **removed from the schema entirely** (see "Current state" below); this document is kept as the permanent record of why, so the reasoning isn't lost and isn't reintroduced by a future schema change without someone reading this first.
 
 ---
 
@@ -18,10 +18,14 @@ Some entries in the source notes referenced things not intended for public expos
 
 ### What to do instead
 
-- Do not populate `sourceNotes` on any `knowledgeArticle` document for as long as the dataset remains public.
-- If source/claim auditing needs to continue, keep it in a private internal document (e.g. a private doc in this `docs/` folder, or an internal spreadsheet/wiki) outside of Sanity.
-- If it becomes a genuine requirement to store this inside Sanity itself, that requires either a private dataset (not the current public `production` dataset) or a document type gated by dataset-level access rules — not a schema field on a document type that's otherwise meant to be public.
+- **`sourceNotes` must not exist as a field on any public Sanity document type, full stop** — not populated-but-hidden, not schema-present-but-empty. A schema field is a standing invitation for someone to populate it later without re-reading this policy.
+- If source/claim auditing needs to continue, keep it in a private internal document (e.g. a private doc in this `docs/` folder, or an internal spreadsheet/wiki) outside of Sanity entirely.
+- If it ever becomes a genuine requirement to store this inside Sanity itself, that requires either a private dataset (not the current public `production` dataset) or a document type gated by dataset-level access rules — not a schema field on a document type that's otherwise meant to be public. No private dataset has been created; this remains a future decision, not something in place today.
 
-### Current state
+### Current state (Stage 5A — schema field removed)
 
-As of the Stage 2 privacy cleanup, `sourceNotes` has been unset on all 10 published `knowledgeArticle` documents. The schema field itself still exists (for internal editorial workflow), but its description now carries this warning directly in the Studio UI. Nothing else on these documents — body, FAQ, CTA, SEO fields, pathway references, or internal links — was changed.
+Before making any schema change, a live read-only query against the real project (`ut2wo29d`, dataset `production`) confirmed: **10 `knowledgeArticle` documents total, 10 published, 0 with `sourceNotes` still defined.** Only counts were queried — no document content was fetched or displayed as part of this check.
+
+With that confirmed, the `sourceNotes` field (and its `sourceNote` object type) has been removed from `sanity/schemas/knowledgeArticle.ts` entirely — it is no longer possible to populate it through Sanity Studio, because the field no longer exists in the schema. This is a schema-only change; no document content was touched (body, FAQ, CTA, SEO fields, pathway references, and internal links are all unaffected).
+
+`sanity/scripts/remove-source-notes.mjs` (the one-off cleanup script referenced above) is retained as a **historical record only** — it has already run successfully against all 10 documents and has no further purpose now that the field doesn't exist in the schema at all. It is not deleted, in case its approach is useful reference for a similar future cleanup, but it should not be re-run against this schema.

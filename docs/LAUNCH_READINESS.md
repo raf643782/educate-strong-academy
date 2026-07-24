@@ -486,6 +486,25 @@ You confirmed the root cause (Vercel project Root Directory = `frontend`) and as
 
 ---
 
+## Priority 5 — Sanity CMS (read-only audit, then Stage 5A safety/hygiene)
+
+**Audit (2026-07-24):** a full read-only audit of the existing Sanity work (schemas, frontend client, preview pages, commit `fba755c`, and the further-ahead `sanity-stage2` branch) plus a survey of every public content area (Course Catalogue, Exercise Library, Event Library, Coach Profiles, homepage sections, About/Coaching Pathway/StrongKidz, EatStrong) confirmed: a real Sanity project (`ut2wo29d`, dataset `production`) already exists with 10 real published `knowledgeArticle` documents; zero production impact (verified live — `/knowledge-hub-preview` returns a genuine 404 on production); no credentials anywhere; a dead/unused `KnowledgeArticle` Prisma model + `backend/src/routes/knowledge.ts` (superseded by the hardcoded `frontend/src/data/knowledgeArticles.ts`, the real live source); 3 duplicated copies of tutor bios; and one real risk (`sourceNotes` still present as a schema field on a public dataset, though unpopulated).
+
+### Stage 5A — Safety, sourceNotes closure, and hygiene (2026-07-24)
+
+**Implemented on `feature-sanity-stage5a-safety` (branched from the newly-backed-up `sanity-stage2`, commit `8697de3`). Not merged. `main`, PR #5, and PR #6 untouched.**
+
+1. **Existing Sanity work backed up.** `sanity-stage2` had never been pushed to `origin` — confirmed via `git ls-remote`, then pushed as-is (no content change), then verified byte-identical remotely before any further work began.
+2. **`sourceNotes` risk closed.** A live read-only count query against the real project confirmed 10 documents total, 10 published, **0 with `sourceNotes` populated** — before any schema change. The field (and its `sourceNote` object type) was then removed from `sanity/schemas/knowledgeArticle.ts` entirely, so it can no longer be populated at all. `docs/KNOWLEDGE_HUB_SOURCE_NOTES_POLICY.md` updated to record this. The one-off cleanup script (`sanity/scripts/remove-source-notes.mjs`) is retained, clearly marked historical/inactive in its own header — not deleted, not re-runnable against the current schema.
+3. **`noindex` added** to both `KnowledgeHubSanityPreview.tsx` and `KnowledgeArticleSanityPreviewPage.tsx` via the existing `useDocumentHead({ noindex: true })` capability — verified live in a running dev server that both pages now emit `<meta name="robots" content="noindex, nofollow">`.
+4. **`frontend/.env.example` created** — first one this repo has ever had — documenting every `VITE_*` variable actually referenced in the frontend source (`VITE_API_URL`, `VITE_SITE_URL`, `VITE_SANITY_PROJECT_ID`/`DATASET`/`API_VERSION`/`USE_CDN`, `VITE_ENABLE_QA_DEMO_LOGIN`), placeholders only, with the Sanity project id/dataset explicitly marked non-secret.
+5. **Sanity access plan and content boundary documented** in new `docs/SANITY_ACCESS_AND_CONTENT_BOUNDARY.md` — recommended Administrator/Editor/Viewer roles, who may publish, who may edit schemas, why Sanity roles are entirely separate from the Postgres `Role` enum, the exact owner dashboard steps for later, and the full content boundary list (nothing touching accounts, roles, enrolments, progress, assessments, certificates, payments, private learner data, safeguarding/medical records, `CourseDocument` storage permissions, coach verification, or EatStrong access levels may ever move into Sanity). No Sanity dashboard changes were made — documentation only.
+6. **Validation:** Sanity schema validation (0 errors/warnings), Sanity Studio build (succeeds), frontend `tsc --noEmit` (clean), full frontend production build including SSR/prerender/sitemap (succeeds — sitemap confirmed to still exclude both preview routes, 116 URLs, unchanged from before this stage), live confirmation that `/knowledge`'s real pages still import from the hardcoded data file (untouched), repository diff review (exactly 6 modified + 2 new files, nothing else), and a secret scan of the complete diff (clean — the only mention of the real project id is in documentation prose, matching the existing convention that the project id/dataset are non-secret; no token, credential, or private dataset value anywhere).
+
+**Not done in this stage (by design):** no Knowledge Hub cutover, no private Sanity dataset created, no Sanity dashboard members added, no schema/query changes beyond removing `sourceNotes`, nothing merged into `main`, `feature/libraryPages`, PR #5, or PR #6 touched.
+
+---
+
 ## Launch blocker table
 
 | Item | Label |

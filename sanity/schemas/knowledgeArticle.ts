@@ -1,11 +1,15 @@
 /**
  * Sanity schema — `knowledgeArticle`.
  *
- * IMPORTANT: `sourceNotes` is internal editorial content only. It must never
- * be exposed to the public frontend. This is enforced at the query layer in
- * frontend/src/lib/sanity.ts (explicit field projections, no `sourceNotes`),
- * but the field is also marked clearly here so nobody adds it to a public
- * query later without noticing the warning.
+ * Stage 5A: the `sourceNotes` field (internal editorial source/claim
+ * auditing) has been removed from this schema. It was never safe on this
+ * public dataset — a frontend query projection excluding a field does not
+ * make that field private, since anyone with the project id can query any
+ * field on any document directly via Sanity's own API. Confirmed via a
+ * live read-only query before this change that zero documents had the
+ * field populated (10/10 knowledgeArticle documents, all published).
+ * Source/claim auditing now belongs in a private internal document
+ * outside Sanity — see docs/KNOWLEDGE_HUB_SOURCE_NOTES_POLICY.md.
  */
 
 import { defineType, defineField, defineArrayMember } from 'sanity';
@@ -143,34 +147,6 @@ export default defineType({
     defineField({ name: 'author', title: 'Author', type: 'string' }),
     defineField({ name: 'reviewedBy', title: 'Reviewed By', type: 'string' }),
     defineField({ name: 'lastReviewedDate', title: 'Last Reviewed Date', type: 'date' }),
-
-    // --- Internal editorial record — NOT public ---
-    defineField({
-      name: 'sourceNotes',
-      title: '⚠ Source Notes (internal only — never public)',
-      type: 'array',
-      description:
-        'Internal editorial record only. This field must NOT be populated in a public dataset: this Sanity dataset is public, so any field on a published document — including one a frontend GROQ projection excludes — can be queried directly by anyone. Excluding it from frontend/src/lib/sanity.ts does not make it private. Use a private editorial system or a private internal document for source notes instead. See docs/KNOWLEDGE_HUB_SOURCE_NOTES_POLICY.md.',
-      of: [
-        defineArrayMember({
-          type: 'object',
-          name: 'sourceNote',
-          fields: [
-            { name: 'claim', title: 'Claim', type: 'string' },
-            { name: 'source', title: 'Source', type: 'string' },
-            {
-              name: 'sourceType',
-              title: 'Source Type',
-              type: 'string',
-              options: {
-                list: ['peer-reviewed', 'official-federation', 'official-organisation', 'recognised-body', 'orientation-only'],
-              },
-            },
-            { name: 'confidence', title: 'Confidence', type: 'string' },
-          ],
-        }),
-      ],
-    }),
 
     // --- Taxonomy ---
     defineField({ name: 'pathway', title: 'Pathway', type: 'reference', to: [{ type: 'pathway' }] }),

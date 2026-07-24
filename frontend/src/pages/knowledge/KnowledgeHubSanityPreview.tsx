@@ -21,6 +21,7 @@ export default function KnowledgeHubSanityPreview() {
   useDocumentHead({
     title: 'Knowledge Hub Preview (Sanity)',
     description: 'Internal Stage 1 preview of Sanity-powered Knowledge Hub content. Not linked in navigation.',
+    noindex: true,
   });
 
   const [articles, setArticles] = useState<SanityKnowledgeArticle[]>([]);
