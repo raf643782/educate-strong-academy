@@ -4,6 +4,7 @@ import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import api from '../../lib/api';
 import { CONTACT_EMAIL } from '../../lib/contact';
+import { downloadCourseDocument } from '../../lib/documentDownload';
 
 interface CourseDocument {
   id: string;
@@ -11,7 +12,7 @@ interface CourseDocument {
   description?: string;
   type: string;
   status: string;
-  fileUrl?: string;
+  hasFile?: boolean;
   fileType: string;
   fileSizeMb?: number;
   sortOrder: number;
@@ -38,6 +39,8 @@ export default function Documents() {
   const [fetchErr, setFetchErr] = useState('');
   const [tab, setTab] = useState<Tab>('All');
   const [downloadMsg, setDownloadMsg] = useState<string | null>(null);
+  const [downloadMsgLink, setDownloadMsgLink] = useState<string | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   useEffect(() => {
     api.get('/documents')
@@ -50,6 +53,7 @@ export default function Documents() {
 
   const handleDownload = async (doc: CourseDocument) => {
     if (doc.status === 'LOCKED') {
+      setDownloadMsgLink(null);
       setDownloadMsg(
         `"${doc.title}" is locked until you complete all course requirements. ` +
         'These templates and documents are included inside the full learner pathway.'
@@ -57,7 +61,8 @@ export default function Documents() {
       setTimeout(() => setDownloadMsg(null), 5000);
       return;
     }
-    if (doc.status === 'COMING_SOON' || !doc.fileUrl) {
+    if (doc.status === 'COMING_SOON' || !doc.hasFile) {
+      setDownloadMsgLink(null);
       setDownloadMsg(
         `"${doc.title}" — File hosting not yet configured. ` +
         `Request this document by emailing ${CONTACT_EMAIL}. ` +
@@ -66,8 +71,20 @@ export default function Documents() {
       setTimeout(() => setDownloadMsg(null), 8000);
       return;
     }
-    // If fileUrl exists, open it
-    window.open(`${import.meta.env.VITE_API_URL || 'http://localhost:3002/api'}/documents/${doc.id}/download`, '_blank');
+
+    setDownloadingId(doc.id);
+    setDownloadMsg(null);
+    setDownloadMsgLink(null);
+    const result = await downloadCourseDocument(doc.id);
+    setDownloadingId(null);
+
+    if (result.status === 'error') {
+      setDownloadMsg(result.message);
+      setTimeout(() => setDownloadMsg(null), 8000);
+    } else if (result.status === 'popup-blocked') {
+      setDownloadMsg(`Your browser blocked the download popup for "${doc.title}". Click below to open it:`);
+      setDownloadMsgLink(result.url);
+    }
   };
 
   return (
@@ -85,6 +102,11 @@ export default function Documents() {
         {downloadMsg && (
           <div className="rounded-lg p-4 mb-6" style={{ background: 'rgba(225,154,71,0.1)', border: '1px solid rgba(225,154,71,0.3)' }}>
             <p className="text-sm" style={{ color: '#E19A47' }}>{downloadMsg}</p>
+            {downloadMsgLink && (
+              <a href={downloadMsgLink} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold underline mt-1 inline-block" style={{ color: '#E19A47' }}>
+                Open document
+              </a>
+            )}
           </div>
         )}
 
@@ -131,7 +153,7 @@ export default function Documents() {
           <div className="grid sm:grid-cols-2 gap-4">
             {filtered.map(doc => {
               const isLocked = doc.status === 'LOCKED';
-              const isComingSoon = doc.status === 'COMING_SOON' || !doc.fileUrl;
+              const isComingSoon = doc.status === 'COMING_SOON' || !doc.hasFile;
               return (
                 <div key={doc.id} className={`es-card p-5 flex items-start gap-4 ${isLocked ? 'opacity-60' : ''}`}>
                   {/* Icon */}
@@ -158,9 +180,10 @@ export default function Documents() {
                     {doc.description && <p className="text-xs text-es-subtle leading-relaxed mb-3">{doc.description}</p>}
                     <button
                       onClick={() => handleDownload(doc)}
+                      disabled={downloadingId === doc.id}
                       className={`text-xs font-semibold flex items-center gap-1.5 transition-colors ${
                         isLocked ? 'text-es-subtle cursor-not-allowed' : 'hover:text-white'
-                      }`}
+                      } disabled:opacity-60`}
                       style={isLocked ? {} : { color: '#A41C64' }}
                     >
                       {isLocked ? (
@@ -172,6 +195,8 @@ export default function Documents() {
                         </>
                       ) : isComingSoon ? (
                         <>Request document</>
+                      ) : downloadingId === doc.id ? (
+                        <>Preparing download…</>
                       ) : (
                         <>
                           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

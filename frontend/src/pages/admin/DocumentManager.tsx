@@ -26,6 +26,21 @@ const DOC_TYPES = ['HANDBOOK', 'ASSESSMENT_FORM', 'CHECKLIST', 'RESOURCE', 'CERT
 const DOC_STATUSES = ['COMING_SOON', 'AVAILABLE', 'LOCKED'];
 const FILE_TYPES = ['PDF', 'Excel', 'Word', 'ZIP', 'Image', 'Other'];
 
+// Client-side mirror of the backend allowlist (backend/src/lib/r2.ts) —
+// this only gives the admin an early, friendly error; the backend
+// re-validates extension, MIME type, and size independently and is the
+// real authority. Keep both lists in sync if either changes.
+const ALLOWED_EXTENSIONS: Record<string, string> = {
+  '.pdf': 'application/pdf',
+  '.doc': 'application/msword',
+  '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  '.xls': 'application/vnd.ms-excel',
+  '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  '.ppt': 'application/vnd.ms-powerpoint',
+  '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+};
+const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25MB — must match backend/src/lib/r2.ts
+
 const statusPill: Record<string, React.CSSProperties> = {
   AVAILABLE: { background: 'rgba(74,222,128,0.1)', color: '#4ADE80' },
   COMING_SOON: { background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)' },
@@ -153,7 +168,74 @@ function DocModal({
   const [form, setForm] = useState<DocForm>(initial);
   const set = (k: keyof DocForm, v: string | boolean) => setForm(f => ({ ...f, [k]: v }));
 
+  // The file itself, chosen but not yet uploaded. fileUrl in `form` always
+  // holds the resolved object key of whatever is currently attached
+  // (existing key when editing, empty until a new upload succeeds).
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [uploadState, setUploadState] = useState<'idle' | 'uploading'>('idle');
+
   const needsFileUrl = form.status === 'AVAILABLE';
+
+  const handleFileSelect = (file: File | null) => {
+    setFileError(null);
+    if (!file) { setSelectedFile(null); return; }
+
+    const extMatch = file.name.toLowerCase().match(/\.[a-z0-9]+$/);
+    const extension = extMatch ? extMatch[0] : '';
+    const expectedMimeType = ALLOWED_EXTENSIONS[extension];
+    if (!expectedMimeType) {
+      setFileError(`Unsupported file type. Allowed: ${Object.keys(ALLOWED_EXTENSIONS).join(', ')}`);
+      setSelectedFile(null);
+      return;
+    }
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      setFileError(`File is too large. Maximum size is ${Math.round(MAX_FILE_SIZE_BYTES / (1024 * 1024))}MB.`);
+      setSelectedFile(null);
+      return;
+    }
+    setSelectedFile(file);
+    set('fileSizeMb', (file.size / (1024 * 1024)).toFixed(2));
+  };
+
+  // Uploads the selected file (if any) before delegating to the parent's
+  // save handler, so the parent only ever sees a resolved object key —
+  // never a raw File. The backend re-validates everything independently;
+  // this is a convenience, not the security boundary.
+  const handleSaveClick = async () => {
+    if (!selectedFile) {
+      onSave(form);
+      return;
+    }
+    setFileError(null);
+    setUploadState('uploading');
+    try {
+      const { data } = await api.post<{ uploadUrl: string; objectKey: string }>('/admin/documents/upload-url', {
+        filename: selectedFile.name,
+        contentType: selectedFile.type,
+        sizeBytes: selectedFile.size,
+        courseId: form.courseId || null,
+      });
+
+      const putRes = await fetch(data.uploadUrl, {
+        method: 'PUT',
+        body: selectedFile,
+        headers: { 'Content-Type': selectedFile.type },
+      });
+      if (!putRes.ok) {
+        throw new Error('Upload to storage failed. Please try again.');
+      }
+
+      setSelectedFile(null);
+      onSave({ ...form, fileUrl: data.objectKey });
+    } catch (err: any) {
+      setFileError(err?.response?.data?.error || err?.message || 'Failed to upload file. Please try again.');
+    } finally {
+      setUploadState('idle');
+    }
+  };
+
+  const busy = saving || uploadState === 'uploading';
 
   return (
     <div
@@ -205,14 +287,30 @@ function DocModal({
             </select>
           </Field>
 
-          <Field label={`File URL${needsFileUrl ? ' *' : ' (optional)'}`}>
+          <Field label={`File${needsFileUrl ? ' *' : ' (optional)'}`}>
             <input
-              style={{ ...S.input, borderColor: needsFileUrl && !form.fileUrl ? 'rgba(239,68,68,0.4)' : undefined }}
-              value={form.fileUrl}
-              onChange={e => set('fileUrl', e.target.value)}
-              placeholder="https://..."
+              type="file"
+              accept={Object.keys(ALLOWED_EXTENSIONS).join(',')}
+              onChange={e => handleFileSelect(e.target.files?.[0] ?? null)}
+              style={{ ...S.input, padding: '8px 10px' }}
             />
-            {needsFileUrl && <p style={{ fontSize: '11px', color: 'rgba(239,68,68,0.6)', marginTop: '4px' }}>Required when status is AVAILABLE</p>}
+            {selectedFile && (
+              <p style={{ fontSize: '11px', color: 'rgba(74,222,128,0.8)', marginTop: '4px' }}>
+                Ready to upload: {selectedFile.name} ({(selectedFile.size / (1024 * 1024)).toFixed(2)} MB)
+              </p>
+            )}
+            {!selectedFile && form.fileUrl && (
+              <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', marginTop: '4px' }}>
+                A file is already attached. Choose a new file above to replace it.
+              </p>
+            )}
+            {fileError && <p style={{ fontSize: '11px', color: 'rgba(239,68,68,0.7)', marginTop: '4px' }}>{fileError}</p>}
+            {needsFileUrl && !selectedFile && !form.fileUrl && (
+              <p style={{ fontSize: '11px', color: 'rgba(239,68,68,0.6)', marginTop: '4px' }}>Required when status is AVAILABLE</p>
+            )}
+            <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.25)', marginTop: '4px' }}>
+              PDF, Word, Excel, or PowerPoint. Max {Math.round(MAX_FILE_SIZE_BYTES / (1024 * 1024))}MB.
+            </p>
           </Field>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
@@ -222,7 +320,7 @@ function DocModal({
               </select>
             </Field>
             <Field label="Size (MB)">
-              <input style={S.input} type="number" min="0" step="0.1" value={form.fileSizeMb} onChange={e => set('fileSizeMb', e.target.value)} placeholder="e.g. 1.2" />
+              <input style={S.input} type="number" min="0" step="0.1" value={form.fileSizeMb} onChange={e => set('fileSizeMb', e.target.value)} placeholder="e.g. 1.2" disabled={!!selectedFile} />
             </Field>
             <Field label="Sort order">
               <input style={S.input} type="number" value={form.sortOrder} onChange={e => set('sortOrder', e.target.value)} placeholder="auto" />
@@ -255,9 +353,9 @@ function DocModal({
           </div>
 
           <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-            <button style={S.btnGhost} onClick={onClose} disabled={saving}>Cancel</button>
-            <button style={{ ...S.btnPrimary, opacity: saving ? 0.6 : 1 }} onClick={() => onSave(form)} disabled={saving}>
-              {saving ? 'Saving…' : 'Save Document'}
+            <button style={S.btnGhost} onClick={onClose} disabled={busy}>Cancel</button>
+            <button style={{ ...S.btnPrimary, opacity: busy ? 0.6 : 1 }} onClick={handleSaveClick} disabled={busy}>
+              {uploadState === 'uploading' ? 'Uploading file…' : saving ? 'Saving…' : 'Save Document'}
             </button>
           </div>
         </div>
@@ -456,7 +554,7 @@ export default function DocumentManager() {
                     <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.2)', fontStyle: 'italic' }}>Platform-wide</p>
                   )}
                   {doc.fileUrl && (
-                    <p style={{ fontSize: '11px', color: 'rgba(164,28,100,0.7)', marginTop: '4px', wordBreak: 'break-all' }}>{doc.fileUrl}</p>
+                    <p style={{ fontSize: '11px', color: 'rgba(164,28,100,0.7)', marginTop: '4px' }}>✓ File uploaded to storage</p>
                   )}
                 </div>
 

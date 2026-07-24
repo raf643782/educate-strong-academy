@@ -563,7 +563,11 @@ model CourseDocument {
   description String?
   type        DocumentType   @default(RESOURCE)
   status      DocumentStatus @default(AVAILABLE)
-  fileUrl     String? // null until file hosting is set up
+  fileUrl     String?        // Stage 4C: private Cloudflare R2 object key, NOT a
+                              // public URL — the column name is unchanged to avoid
+                              // a migration, but the value is a key resolved to a
+                              // short-lived signed GET URL on download. Null until
+                              // a file has been uploaded through the admin flow.
   fileType    String         @default("PDF")
   fileSizeMb  Float?
   sortOrder   Int            @default(0)

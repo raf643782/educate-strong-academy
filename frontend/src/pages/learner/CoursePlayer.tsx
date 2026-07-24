@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import InlineRecommendation from '../../components/recommendations/InlineRecommendation';
 import api from '../../lib/api';
+import { downloadCourseDocument } from '../../lib/documentDownload';
 
 interface Recommendation {
   id: string;
@@ -53,7 +54,7 @@ interface CourseDoc {
   description: string | null;
   type: string;
   status: string;
-  fileUrl: string | null;
+  hasFile: boolean;
   fileType: string;
 }
 
@@ -92,6 +93,23 @@ export default function CoursePlayer() {
   const [assessmentsLoading, setAssessmentsLoading] = useState(false);
   const [lessonError, setLessonError] = useState(false);
   const [completeError, setCompleteError] = useState(false);
+  const [downloadingDocId, setDownloadingDocId] = useState<string | null>(null);
+  const [docDownloadMsg, setDocDownloadMsg] = useState<string | null>(null);
+  const [docDownloadLink, setDocDownloadLink] = useState<string | null>(null);
+
+  const handleDocDownload = async (doc: CourseDoc) => {
+    setDownloadingDocId(doc.id);
+    setDocDownloadMsg(null);
+    setDocDownloadLink(null);
+    const result = await downloadCourseDocument(doc.id);
+    setDownloadingDocId(null);
+    if (result.status === 'error') {
+      setDocDownloadMsg(result.message);
+    } else if (result.status === 'popup-blocked') {
+      setDocDownloadMsg(`Your browser blocked the download popup for "${doc.title}".`);
+      setDocDownloadLink(result.url);
+    }
+  };
 
   const fetchLesson = useCallback(async () => {
     if (!lessonId) return;
@@ -380,6 +398,16 @@ export default function CoursePlayer() {
             {activeTab === 'resources' && (
               <div className="mb-10">
                 <h2 className="text-lg font-bold text-white mb-4">Course Resources</h2>
+                {docDownloadMsg && (
+                  <div className="rounded-lg p-3 mb-4" style={{ background: 'rgba(225,154,71,0.1)', border: '1px solid rgba(225,154,71,0.3)' }}>
+                    <p className="text-sm" style={{ color: '#E19A47' }}>{docDownloadMsg}</p>
+                    {docDownloadLink && (
+                      <a href={docDownloadLink} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold underline mt-1 inline-block" style={{ color: '#E19A47' }}>
+                        Open document
+                      </a>
+                    )}
+                  </div>
+                )}
                 {docsLoading ? (
                   <div className="space-y-3">
                     {[1, 2].map(i => <div key={i} className="h-14 rounded-lg animate-pulse" style={{ background: '#151519' }} />)}
@@ -398,7 +426,7 @@ export default function CoursePlayer() {
                     <div className="space-y-3">
                       {courseDocs.map(doc => {
                         const isLocked = doc.status === 'LOCKED';
-                        const isComingSoon = doc.status === 'COMING_SOON' || !doc.fileUrl;
+                        const isComingSoon = doc.status === 'COMING_SOON' || !doc.hasFile;
                         return (
                           <div key={doc.id} className="flex items-center justify-between p-4 rounded-lg" style={{ background: '#151519', border: '1px solid rgba(255,255,255,0.07)' }}>
                             <div className="flex items-center gap-3 min-w-0">
@@ -414,16 +442,16 @@ export default function CoursePlayer() {
                             </div>
                             <div className="flex items-center gap-2 flex-shrink-0 ml-3">
                               <span className="text-xs px-2 py-0.5 rounded" style={{ color: '#75757D', background: '#1B1B20', border: '1px solid rgba(255,255,255,0.07)' }}>{doc.fileType}</span>
-                              {!isLocked && !isComingSoon && doc.fileUrl && (
-                                <a
-                                  href={doc.fileUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-xs font-semibold"
-                                  style={{ color: '#C2186A' }}
+                              {!isLocked && !isComingSoon && doc.hasFile && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleDocDownload(doc)}
+                                  disabled={downloadingDocId === doc.id}
+                                  className="text-xs font-semibold disabled:opacity-60"
+                                  style={{ color: '#C2186A', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                                 >
-                                  Download
-                                </a>
+                                  {downloadingDocId === doc.id ? 'Preparing…' : 'Download'}
+                                </button>
                               )}
                             </div>
                           </div>
