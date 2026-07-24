@@ -23,6 +23,7 @@ function makeAuthLimiter() {
 const loginLimiter = makeAuthLimiter();
 const registerLimiter = makeAuthLimiter();
 const forgotPasswordLimiter = makeAuthLimiter();
+const resetPasswordLimiter = makeAuthLimiter();
 const verifyEmailLimiter = makeAuthLimiter();
 const resendVerificationLimiter = makeAuthLimiter();
 
@@ -201,7 +202,7 @@ router.post('/forgot-password', forgotPasswordLimiter, async (req: Request, res:
 });
 
 // POST /auth/reset-password
-router.post('/reset-password', async (req: Request, res: Response): Promise<void> => {
+router.post('/reset-password', resetPasswordLimiter, async (req: Request, res: Response): Promise<void> => {
   try {
     const { token, password } = req.body;
     if (!token || typeof token !== 'string' || !password || typeof password !== 'string') {
