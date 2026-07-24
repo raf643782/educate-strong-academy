@@ -149,7 +149,8 @@ export default defineType({
       name: 'sourceNotes',
       title: '⚠ Source Notes (internal only — never public)',
       type: 'array',
-      description: 'Internal editorial record only. Must never be added to a public-facing GROQ query/projection. See frontend/src/lib/sanity.ts.',
+      description:
+        'Internal editorial record only. This field must NOT be populated in a public dataset: this Sanity dataset is public, so any field on a published document — including one a frontend GROQ projection excludes — can be queried directly by anyone. Excluding it from frontend/src/lib/sanity.ts does not make it private. Use a private editorial system or a private internal document for source notes instead. See docs/KNOWLEDGE_HUB_SOURCE_NOTES_POLICY.md.',
       of: [
         defineArrayMember({
           type: 'object',
