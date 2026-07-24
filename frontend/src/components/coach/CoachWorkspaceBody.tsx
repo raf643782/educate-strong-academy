@@ -1,4 +1,5 @@
 import Navbar from '../layout/Navbar';
+import EmailVerificationBanner from '../layout/EmailVerificationBanner';
 import { WorkspaceSectionCard, WorkspaceActionCard } from '../workspace/WorkspaceSectionCard';
 import { UsersIcon, ChartIcon, FolderIcon, AlertIcon, ResourcesIcon, NotesIcon, ProfileIcon } from '../workspace/icons';
 
@@ -7,13 +8,16 @@ import { UsersIcon, ChartIcon, FolderIcon, AlertIcon, ResourcesIcon, NotesIcon, 
  * /portal-preview/coach. `basePath` controls where the Coach Profile
  * action links to ("/coach" for real, "/portal-preview/coach" for
  * preview), so the preview never sends a visitor into a real protected
- * route.
+ * route. `showVerificationBanner` defaults to false and must be passed
+ * explicitly by the real page only — the preview must never reflect a
+ * real logged-in user's verification state (it shows no real account
+ * data by design), so it simply never passes this prop.
  *
  * These are honest empty states, not fake data. When EducateStrong has
  * real coaches with real assigned learners, only the copy inside each
  * card changes — this shell stays the same.
  */
-export default function CoachWorkspaceBody({ basePath }: { basePath: string }) {
+export default function CoachWorkspaceBody({ basePath, showVerificationBanner }: { basePath: string; showVerificationBanner?: boolean }) {
   return (
     <div style={{ minHeight: '100vh', background: '#050506', color: '#fff' }}>
       <Navbar />
@@ -26,6 +30,7 @@ export default function CoachWorkspaceBody({ basePath }: { basePath: string }) {
         paddingBottom: '24px',
       }}>
         <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '0 24px' }}>
+          {showVerificationBanner && <EmailVerificationBanner />}
           <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', marginBottom: '6px', letterSpacing: '0.05em', textTransform: 'uppercase', fontWeight: 600 }}>
             Coach Workspace
           </p>

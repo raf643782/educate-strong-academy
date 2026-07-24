@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
+import EmailVerificationBanner from '../../components/layout/EmailVerificationBanner';
 import api from '../../lib/api';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
 
@@ -54,6 +55,7 @@ export default function AdminDashboard() {
 
       <div className="pt-navbar" style={{ background: 'radial-gradient(ellipse 100% 70% at 50% -20%, rgba(164,28,100,0.16) 0%, transparent 52%), #050506', borderBottom: '1px solid rgba(194,24,106,0.08)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <EmailVerificationBanner />
           <p className="es-label mb-2">Admin Area</p>
           <h1 className="text-3xl font-black text-white">Platform Overview</h1>
         </div>

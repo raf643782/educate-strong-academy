@@ -102,13 +102,14 @@ enum Difficulty {
 }
 
 model User {
-  id                  String    @id @default(uuid())
-  email               String    @unique
+  id                  String   @id @default(uuid())
+  email               String   @unique
   password            String
   firstName           String
   lastName            String
-  role                Role      @default(LEARNER)
-  isActive            Boolean   @default(true)
+  role                Role     @default(LEARNER)
+  isActive            Boolean  @default(true)
+  emailVerified       Boolean  @default(false)
   avatarUrl           String?
   bio                 String?
   location            String?
@@ -116,17 +117,18 @@ model User {
   sourcePlatform      String?
   integrationProvider String?
   apiToken            String?
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
-  enrolments            Enrolment[]
-  lessonProgress        LessonProgress[]
-  assessmentSubmissions AssessmentSubmission[]
-  certificates          Certificate[]
-  cpdLogs               CPDLog[]
-  integrationLogs       IntegrationLog[]
-  passwordResetTokens   PasswordResetToken[]
-  coachProfile          CoachProfile?
+  enrolments              Enrolment[]
+  lessonProgress          LessonProgress[]
+  assessmentSubmissions   AssessmentSubmission[]
+  certificates            Certificate[]
+  cpdLogs                 CPDLog[]
+  integrationLogs         IntegrationLog[]
+  passwordResetTokens     PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
+  coachProfile            CoachProfile?
 }
 
 model CoachProfile {
@@ -163,21 +165,36 @@ model PasswordResetToken {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+// Same secure pattern as PasswordResetToken: a 32-byte random token is
+// never stored — only its SHA-256 hash. Single-use via usedAt. Soft
+// verification only — this table's state never grants enrolment,
+// unlocks paid content, changes a role, or changes an access level.
+model EmailVerificationToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 model Course {
-  id            String    @id @default(uuid())
+  id            String   @id @default(uuid())
   title         String
-  slug          String    @unique
+  slug          String   @unique
   description   String
   summary       String?
   pathway       Pathway
-  level         Int       @default(1)
+  level         Int      @default(1)
   imageUrl      String?
   durationHours Float?
   prerequisites String?
-  isPublished   Boolean   @default(false)
-  sortOrder     Int       @default(0)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  isPublished   Boolean  @default(false)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   modules      Module[]
   enrolments   Enrolment[]
@@ -215,7 +232,7 @@ model Lesson {
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
 
-  module          Module               @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  module          Module                 @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   progress        LessonProgress[]
   recommendations RecommendationPrompt[]
 }
@@ -258,7 +275,7 @@ model Assessment {
   isActive    Boolean        @default(true)
   createdAt   DateTime       @default(now())
 
-  course      Course?               @relation(fields: [courseId], references: [id])
+  course      Course?                @relation(fields: [courseId], references: [id])
   submissions AssessmentSubmission[]
 }
 
@@ -326,104 +343,104 @@ model KnowledgeArticle {
 }
 
 model Exercise {
-  id               String     @id @default(uuid())
-  name             String
-  slug             String     @unique
-  category         String
-  difficulty       Difficulty @default(INTERMEDIATE)
-  description      String?
-  techniqueNotes   String?
-  coachingCues     String?
-  commonMistakes   String?
-  progressions     String?
-  regressions      String?
-  programmingNotes String?
-  videoUrl         String?
-  equipmentNeeded  String?
-  musclesWorked    String?
-  safetyNotes      String?
-  isCompetitionEvent Boolean  @default(false)
-  isPublished      Boolean    @default(false)
-  isLaunchPriority Boolean    @default(false)
+  id                    String     @id @default(uuid())
+  name                  String
+  slug                  String     @unique
+  category              String
+  difficulty            Difficulty @default(INTERMEDIATE)
+  description           String?
+  techniqueNotes        String?
+  coachingCues          String?
+  commonMistakes        String?
+  progressions          String?
+  regressions           String?
+  programmingNotes      String?
+  videoUrl              String?
+  equipmentNeeded       String?
+  musclesWorked         String?
+  safetyNotes           String?
+  isCompetitionEvent    Boolean    @default(false)
+  isPublished           Boolean    @default(false)
+  isLaunchPriority      Boolean    @default(false)
   // Stage 6 media infrastructure — all nullable, additive. Left empty
   // until real assets exist; the frontend never fabricates a thumbnail
   // or video from an empty field.
-  imageUrl           String?
-  imageAlt           String?
-  videoProvider      String?
-  videoThumbnailUrl  String?
-  videoTitle         String?
-  videoDescription   String?
-  videoUploadDate    DateTime?
-  videoDuration      String?
-  videoTranscript    String?
-  captionsUrl        String?
+  imageUrl              String?
+  imageAlt              String?
+  videoProvider         String?
+  videoThumbnailUrl     String?
+  videoTitle            String?
+  videoDescription      String?
+  videoUploadDate       DateTime?
+  videoDuration         String?
+  videoTranscript       String?
+  captionsUrl           String?
   // Stage 7 editorial attribution, sources and related content — all
   // nullable/empty-array, additive. Left empty until a real author,
   // reviewer, source, or curated relationship is confirmed; the
   // frontend never invents or auto-assigns a name here.
-  authorName             String?
-  authorRole             String?
-  reviewerName           String?
-  reviewerQualification  String?
-  publishedDate          DateTime?
-  lastReviewedDate       DateTime?
-  sources                String?
-  relatedExerciseSlugs   String[]  @default([])
-  relatedEventSlugs      String[]  @default([])
-  relatedArticleSlugs    String[]  @default([])
-  relevantCourseSlugs    String[]  @default([])
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
+  authorName            String?
+  authorRole            String?
+  reviewerName          String?
+  reviewerQualification String?
+  publishedDate         DateTime?
+  lastReviewedDate      DateTime?
+  sources               String?
+  relatedExerciseSlugs  String[]   @default([])
+  relatedEventSlugs     String[]   @default([])
+  relatedArticleSlugs   String[]   @default([])
+  relevantCourseSlugs   String[]   @default([])
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
 }
 
 model Event {
-  id               String   @id @default(uuid())
-  name             String
-  slug             String   @unique
-  category         String
-  description      String?
-  technicalNotes   String?
-  coachingNotes    String?
-  judgingCriteria  String?
-  programmingNotes String?
-  commonErrors     String?
-  videoUrl         String?
-  isPublished      Boolean  @default(false)
-  isLaunchPriority Boolean  @default(false)
+  id                    String    @id @default(uuid())
+  name                  String
+  slug                  String    @unique
+  category              String
+  description           String?
+  technicalNotes        String?
+  coachingNotes         String?
+  judgingCriteria       String?
+  programmingNotes      String?
+  commonErrors          String?
+  videoUrl              String?
+  isPublished           Boolean   @default(false)
+  isLaunchPriority      Boolean   @default(false)
   // Stage 6 media infrastructure — all nullable, additive. Left empty
   // until real assets exist; the frontend never fabricates a thumbnail
   // or video from an empty field.
-  imageUrl           String?
-  imageAlt           String?
-  videoProvider      String?
-  videoThumbnailUrl  String?
-  videoTitle         String?
-  videoDescription   String?
-  videoUploadDate    DateTime?
-  videoDuration      String?
-  videoTranscript    String?
-  captionsUrl        String?
+  imageUrl              String?
+  imageAlt              String?
+  videoProvider         String?
+  videoThumbnailUrl     String?
+  videoTitle            String?
+  videoDescription      String?
+  videoUploadDate       DateTime?
+  videoDuration         String?
+  videoTranscript       String?
+  captionsUrl           String?
   // Stage 7 editorial attribution, sources and related content — all
   // nullable/empty-array, additive. Left empty until a real author,
   // reviewer, source, or curated relationship is confirmed; the
   // frontend never invents or auto-assigns a name here. ruleReviewDate
   // is Event-only — the date a promoter/federation rule summary was
   // last confirmed as current, distinct from general editorial review.
-  authorName             String?
-  authorRole             String?
-  reviewerName           String?
-  reviewerQualification  String?
-  publishedDate          DateTime?
-  lastReviewedDate       DateTime?
-  ruleReviewDate         DateTime?
-  sources                String?
-  relatedExerciseSlugs   String[]  @default([])
-  relatedEventSlugs      String[]  @default([])
-  relatedArticleSlugs    String[]  @default([])
-  relevantCourseSlugs    String[]  @default([])
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  authorName            String?
+  authorRole            String?
+  reviewerName          String?
+  reviewerQualification String?
+  publishedDate         DateTime?
+  lastReviewedDate      DateTime?
+  ruleReviewDate        DateTime?
+  sources               String?
+  relatedExerciseSlugs  String[]  @default([])
+  relatedEventSlugs     String[]  @default([])
+  relatedArticleSlugs   String[]  @default([])
+  relevantCourseSlugs   String[]  @default([])
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 }
 
 model ContentRelationship {
@@ -484,18 +501,18 @@ model BeStrongArticle {
   // Authorship — nutrition content must be attributed to a qualified reviewer
   authorName            String?
   reviewerName          String?
-  reviewerQualification String?          // e.g. "Registered Dietitian", "SENr Practitioner"
+  reviewerQualification String? // e.g. "Registered Dietitian", "SENr Practitioner"
   lastReviewedAt        DateTime?
   // Scope of practice disclaimer shown at article top
   scopeOfPracticeNote   String?
   // Access control
   accessLevel           AccessLevel      @default(FREE)
-  isPremium             Boolean          @default(false)  // reserved for future paid tier
+  isPremium             Boolean          @default(false) // reserved for future paid tier
   isPublished           Boolean          @default(false)
   isFeatured            Boolean          @default(false)
   readMinutes           Int?
   imageUrl              String?
-  tags                  String?          // comma-separated
+  tags                  String? // comma-separated
   // Related content (stored as JSON arrays of IDs)
   relatedArticleSlugs   String?
   relatedCourseSlugs    String?
@@ -505,20 +522,20 @@ model BeStrongArticle {
 }
 
 model BeStrongDownload {
-  id           String           @id @default(uuid())
-  title        String
-  slug         String           @unique
-  description  String?
-  category     BeStrongCategory
-  fileType     String           @default("PDF")  // PDF, Excel, Word
-  fileUrl      String?
-  thumbnailUrl String?
-  accessLevel  AccessLevel      @default(ENROLLED)
-  isPublished  Boolean          @default(false)
-  downloadCount Int             @default(0)
-  sortOrder    Int              @default(0)
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
+  id            String           @id @default(uuid())
+  title         String
+  slug          String           @unique
+  description   String?
+  category      BeStrongCategory
+  fileType      String           @default("PDF") // PDF, Excel, Word
+  fileUrl       String?
+  thumbnailUrl  String?
+  accessLevel   AccessLevel      @default(ENROLLED)
+  isPublished   Boolean          @default(false)
+  downloadCount Int              @default(0)
+  sortOrder     Int              @default(0)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
 }
 
 // ─── Course Documents ─────────────────────────────────────────────────────────
@@ -534,19 +551,19 @@ enum DocumentType {
 }
 
 enum DocumentStatus {
-  AVAILABLE    // learner can access
-  LOCKED       // only unlocked on completion
-  COMING_SOON  // placeholder — file not yet uploaded
+  AVAILABLE // learner can access
+  LOCKED // only unlocked on completion
+  COMING_SOON // placeholder — file not yet uploaded
 }
 
 model CourseDocument {
   id          String         @id @default(uuid())
-  courseId    String?        // null = platform-wide resource
+  courseId    String? // null = platform-wide resource
   title       String
   description String?
   type        DocumentType   @default(RESOURCE)
   status      DocumentStatus @default(AVAILABLE)
-  fileUrl     String?        // null until file hosting is set up
+  fileUrl     String? // null until file hosting is set up
   fileType    String         @default("PDF")
   fileSizeMb  Float?
   sortOrder   Int            @default(0)
@@ -627,4 +644,16 @@ model RegisterInterest {
   sourcePage       String?
   status           InterestStatus @default(NEW)
   createdAt        DateTime       @default(now())
+
+  // Separately auditable delivery tracking for the two independent
+  // emails this record can trigger. Deliberately two pairs of fields,
+  // not one shared pair — the owner notification and the submitter
+  // confirmation can succeed or fail independently, and conflating
+  // them would hide a real delivery failure behind an unrelated
+  // success. Only short, sanitised error codes are stored here — never
+  // full provider responses, stack traces, or the email body.
+  ownerNotifiedAt                DateTime?
+  ownerNotificationErrorCode     String?
+  submitterConfirmationSentAt    DateTime?
+  submitterConfirmationErrorCode String?
 }
