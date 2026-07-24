@@ -2,7 +2,7 @@
 
 Living document. Updated at the end of every programme section. No credentials, connection strings, or secret values are ever recorded in this file — only status, ownership and evidence references.
 
-**Last updated:** Priority 4, Stage 4B — IMPLEMENTED, NOT MERGED (Master Continuation Programme — Real Account Journey, Email Delivery and Secure Downloads) — 2026-07-24. Email verification and Resend-based delivery implemented on `feature/libraryPages` (commit `ef29623`), validated as far as possible without a live database, and pushed. Not merged into `main`. Stage 4A (below) remains merged, deployed, and verified — unchanged by this update. See the Stage 4B section for full detail. Priority 3 (Knowledge Hub and EatStrong Editorial Completion) closed 2026-07-23 — see its own findings section further down, unchanged.
+**Last updated:** Priority 4, Stage 4C — IMPLEMENTED, NOT MERGED (Master Continuation Programme — Real Account Journey, Email Delivery and Secure Downloads) — 2026-07-24. Cloudflare R2 secure storage for `CourseDocument` implemented on a scoped `production-stage4c-secure-course-files` branch cut from `main` (commit `4f45e1c`), validated as far as possible without a live Cloudflare bucket, PR #6 opened, not merged. `BeStrongDownload` explicitly deferred. Stage 4B (email verification, commit `ef29623` on `feature/libraryPages`, PR #5) and Stage 4A (merged, deployed, and verified) are unchanged by this update. See the Stage 4C section for full detail. Priority 3 (Knowledge Hub and EatStrong Editorial Completion) closed 2026-07-23 — see its own findings section further down, unchanged.
 
 ## Priority 3 audit status (2026-07-23)
 
@@ -425,8 +425,7 @@ You confirmed the root cause (Vercel project Root Directory = `frontend`) and as
 
 **Files touched by the merge itself:** none beyond what Stage 4A already listed above — the merge/reconciliation commits only moved the same 9 files into `main` and back into `feature/libraryPages`, plus picking up the already-separately-merged EatStrong disclaimer migration from PR #3 during reconciliation.
 
-**Remaining Priority 4 stages after 4B (not started):**
-- **Stage 4C (Cloudflare R2 secure downloads)** — presigned URLs, admin upload flow, `Documents.tsx`/`CoursePlayer.tsx` download-flow fixes.
+**Remaining Priority 4 stages after 4C:** none — Priority 4 as scoped (email verification, Register Interest delivery, and Cloudflare R2 secure course document storage) is now implemented across Stages 4A–4C. See the Stage 4C section below for full detail. `BeStrongDownload` was explicitly descoped from 4C and remains a deferred follow-up (see that section).
 
 ---
 
@@ -482,7 +481,55 @@ You confirmed the root cause (Vercel project Root Directory = `frontend`) and as
 
 **10. Workspace protection:** a separate, unrelated uncommitted Sanity CMS work-in-progress was found in the working directory at the start of this stage and was stashed (`git stash push -u`) before any Stage 4B edit, so the two diffs never touched the same uncommitted state. No Sanity file was staged, edited, or committed as part of Stage 4B. See the note directly below on restoring it — this needs your input rather than a decision made silently on your behalf.
 
-**11. Sanity stash restoration — flagging for your decision, not resolved automatically:** while this stage was in progress, a separate commit (`fba755c`, "Stage 1B: add Sanity studio scaffold", authored directly by you at 12:30) was pushed to `feature/libraryPages` — already safely on `origin`. This means the Sanity work I originally stashed has since been properly committed by you through a different route. Attempting `git stash pop` failed cleanly ("already exists, no checkout") because the stashed files' pre-commit content now conflicts with the already-committed, newer version on disk — for example, `sanity/sanity.config.ts`'s comment wording genuinely differs between the two. **Nothing has been lost**: the stash is still fully intact (`stash@{0}`), your commit is safely on `origin`, and I have not chosen a version or dropped anything. Since your commit already safely contains this work, the stash is very likely now redundant and safe to drop — but I'm leaving that decision to you rather than doing it myself.
+**11. Sanity stash restoration — resolved 2026-07-24:** while this stage was in progress, a separate commit (`fba755c`, "Stage 1B: add Sanity studio scaffold", authored directly by you at 12:30) was pushed to `feature/libraryPages` — already safely on `origin`. A file-by-file comparison of `stash@{0}` against `fba755c` and the working tree confirmed every functional file was byte-identical (schemas, client code, package manifests); the only differences anywhere were four comment/wording variants, and where content genuinely differed (`README.md`), the committed version had *more* content than the stash, not less. Nothing unique existed in the stash. You confirmed this, and `stash@{0}` was dropped — `git stash list` is now empty and the working tree is clean.
+
+---
+
+### Stage 4C — Cloudflare R2 Secure Storage for CourseDocument (2026-07-24)
+
+**Implemented on `production-stage4c-secure-course-files` (cut from `main`), commit `4f45e1c`. Pushed. PR #6 opened into `main`, not merged. `feature/libraryPages` and PR #5 (Stage 4B) were not touched by this stage.**
+
+**Scope decision:** `CourseDocument` only. `BeStrongDownload` is explicitly **deferred**, not included: it has no admin CRUD flow today, uses a separate access-tier model (`accessLevel`, not enrolment), and EatStrong content ownership/handover is still in progress — bundling it now would broaden this stage's scope unnecessarily.
+
+**1. Storage architecture:** one private Cloudflare R2 bucket (no public access, no "Public Development URL"), accessed via the standard AWS S3 SDK (`@aws-sdk/client-s3` + `@aws-sdk/s3-request-presigner` — R2 is fully S3-API-compatible). New `backend/src/lib/r2.ts` is the only module that talks to R2: it never connects or throws at import time, and every other route only ever checks `isR2Configured()` first — so the rest of the site keeps working even before R2 is set up.
+
+**2. Upload flow (ADMIN only):** `POST /api/admin/documents/upload-url` validates the ADMIN role, the file's extension and declared MIME type against an allowlist, the file size, and that the target course exists — then returns a presigned PUT URL (~5 minute expiry) and a server-generated object key. The frontend uploads directly from the browser to R2 (never proxied through the Node server). The object key is never client-chosen: `course-documents/{courseId|platform}/{random-uuid}{extension}` — a random UUID, never the raw filename, so a key can never be guessed from a document's title. Once the browser's PUT succeeds, the existing `POST`/`PUT /api/admin/documents` routes accept the returned key like any other field, and now also call `HeadObject` to confirm the file genuinely exists in the bucket before the document is treated as ready.
+
+**3. Allowed file types and size limit:** PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX (extension **and** declared MIME type must both match — neither is trusted alone). Maximum size: **25MB**.
+
+**4. Download flow:** `GET /api/documents/:documentId/download` keeps every existing check completely unchanged — authentication, enrolment, lock state, ADMIN override — Stage 4C only replaces what happens *after* authorisation succeeds. Instead of `res.redirect(doc.fileUrl)` (a raw stored value), it now generates a fresh presigned GET URL (~2 minute expiry) and returns it as JSON; the frontend opens that URL itself. The object key itself is never returned to an unauthorised caller, and a signed URL is never persisted or logged anywhere.
+
+**5. Database:** `CourseDocument.fileUrl` now holds a private R2 object key, not a public URL — **comment-only schema change, no migration**. Confirmed via `prisma migrate diff` against `main`'s actual committed schema: the diff is empty. No `fileUrl` was populated in any checked-out schema/seed data, so this is a green-field wire-up, not a backfill.
+
+**6. Frontend fixes:** `Documents.tsx` and `CoursePlayer.tsx` both now call the authenticated download endpoint through a new shared `frontend/src/lib/documentDownload.ts` helper. Two real, pre-existing gaps were closed as part of this: `CoursePlayer.tsx` previously linked directly to the raw `fileUrl` (`<a href={doc.fileUrl}>`), bypassing every server-side enrolment/lock check entirely; `Documents.tsx` previously called the download endpoint via `window.open()`, which cannot attach the required `Authorization` header, so it could never actually have authenticated against a real deployment. Both now: request the signed URL via the authenticated `api` client, open it, and handle loading, 401, 403, 404, 503 (storage not configured), and popup-blocked states with inline feedback — no blocking modals, no change to the Stage 4A 401-redirect behaviour.
+
+**7. Admin upload widget:** `DocumentManager.tsx`'s free-text `fileUrl` input is replaced with a real file picker (client-side allowlist/size validation mirrors the backend, exact same values), wired to the presigned-upload flow above. The admin document list no longer displays the raw object key as text — just a simple "✓ File uploaded to storage" indicator.
+
+**8. Validation performed:**
+- Backend + frontend `tsc --noEmit`: clean.
+- `prisma validate`: clean; `prisma migrate diff` vs `main`'s real schema confirmed empty.
+- Full frontend production build: succeeded.
+- Repository diff review: exactly 11 files changed, confirmed no Sanity files, no Knowledge Hub changes, no `BeStrongDownload` changes, no unrelated migration.
+- **`r2.ts` tested directly** (21 checks) — genuine local SigV4 signing, no live bucket required: object key format/uniqueness/unguessability confirmed, upload URL expiry is exactly 300s, download URL expiry is exactly 120s, no generated URL ever contains the raw secret access key, `isR2Configured()` correctly toggles on missing config, allowlist constants correct, `objectExists()` never throws even against an unreachable bucket.
+- **Route-level authorization tested directly against the real route code** (17 scenarios, not a hand-copied replica) — Prisma mocked via Node's experimental module-mocking (`node:test`'s `mock.module`), real HTTP requests made to the actual Express routers: ADMIN-only upload-url access confirmed, non-ADMIN rejected (403), enrolled learner can download an AVAILABLE document, non-enrolled learner rejected (403, no object key leaked), a locked (incomplete-course) CERTIFICATE-type document rejected for the enrolled-but-incomplete learner, ADMIN override confirmed for a locked document, unauthenticated request rejected (401), disallowed extension/oversized-file/mismatched-MIME-vs-extension all rejected (400) on the upload-url route, and missing R2 configuration fails safely (503, no secret in the response) on both the upload and download routes.
+- **Desktop (1280px) and mobile (375px) visual verification**, against a throwaway local mock backend (no live database, no real R2 bucket, no production contact): `DocumentManager`'s new-document modal correctly shows the file picker with the allowlist/size helper text; a simulated file selection and full save (request upload URL → PUT to mock storage → save with returned key) completed end-to-end and the new document appeared in the list; the edit modal for an existing document correctly shows "A file is already attached..."; `Documents.tsx`'s Download button correctly made the authenticated JSON call and opened the signed URL; `CoursePlayer.tsx`'s Course Resources tab correctly shows a real "Download" button (not a raw link) and completed the same authenticated flow. No regressions observed in existing layout at either width.
+
+**9. Not yet verified (deferred, requires real Cloudflare setup):** actual upload and download against a live R2 bucket. No live Cloudflare delivery is claimed anywhere in this stage.
+
+**10. Cloudflare owner setup checklist (dashboard only — code does not require this to be complete):**
+1. Create or access a Cloudflare account.
+2. R2 → Create bucket (private — do **not** enable a "Public Development URL").
+3. R2 → Manage API tokens → create a token scoped to Object Read & Write, restricted to only this bucket.
+4. Note the Account ID (shown in the R2 dashboard).
+5. Add a CORS policy to the bucket allowing the Educate Strong frontend origin(s) to `PUT`.
+6. Add `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME` as Render environment variables — never shared over chat.
+7. Confirm no public/dev URL is enabled on the bucket before considering it production-ready.
+
+**Status split:** Code complete. Cloudflare setup pending. Live upload/download delivery not yet verified.
+
+**11. Files changed:** `backend/.env.example`, `backend/package.json`/`package-lock.json` (added `@aws-sdk/client-s3`, `@aws-sdk/s3-request-presigner`), `backend/prisma/schema.prisma` (comment only), new `backend/src/lib/r2.ts`, `backend/src/routes/admin.ts`, `backend/src/routes/documents.ts`, new `frontend/src/lib/documentDownload.ts`, `frontend/src/pages/admin/DocumentManager.tsx`, `frontend/src/pages/learner/CoursePlayer.tsx`, `frontend/src/pages/learner/Documents.tsx`.
+
+**12. Deferred follow-up:** `BeStrongDownload` secure storage — needs its own admin CRUD flow built first (none exists today), a decision on whether to reuse the same R2 bucket or a separate one, and clarity on EatStrong content ownership before scoping.
 
 ---
 
