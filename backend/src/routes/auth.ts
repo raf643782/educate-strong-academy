@@ -6,6 +6,7 @@ import rateLimit from 'express-rate-limit';
 import { PrismaClient } from '@prisma/client';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { sendPasswordResetEmail } from '../services/emailService';
+import { JWT_SECRET } from '../config/jwtSecret';
 
 function makeAuthLimiter() {
   return rateLimit({
@@ -58,7 +59,7 @@ router.post('/register', registerLimiter, async (req: Request, res: Response): P
       data: { email, password: hashed, firstName, lastName },
     });
 
-    const secret = process.env.JWT_SECRET || 'fallback-secret';
+    const secret = JWT_SECRET;
     const token = jwt.sign({ userId: user.id, role: user.role }, secret, { expiresIn: '7d' });
 
     res.status(201).json({
@@ -96,7 +97,7 @@ router.post('/login', loginLimiter, async (req: Request, res: Response): Promise
       return;
     }
 
-    const secret = process.env.JWT_SECRET || 'fallback-secret';
+    const secret = JWT_SECRET;
     const token = jwt.sign({ userId: user.id, role: user.role }, secret, { expiresIn: '7d' });
 
     res.json({

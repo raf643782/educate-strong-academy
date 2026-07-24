@@ -408,14 +408,6 @@ export default function Login() {
             {' '}— no account needed.
           </p>
 
-          {/* Internal preview link — subtle, not boxed */}
-          <p style={{ textAlign: 'center', fontSize: '12px', color: 'rgba(255,255,255,0.2)', marginTop: '10px', lineHeight: 1.6 }}>
-            <Link to="/portal-preview" style={{ color: 'rgba(255,255,255,0.32)', fontWeight: 600, textDecoration: 'underline' }}>
-              Preview the portals
-            </Link>
-            {' '}— for internal review only. These previews do not show real account data.
-          </p>
-
         </div>
       </div>
     </div>

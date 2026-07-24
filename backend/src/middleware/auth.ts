@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
+import { JWT_SECRET } from '../config/jwtSecret';
 
 const prisma = new PrismaClient();
 
@@ -18,7 +19,7 @@ export async function authenticate(req: AuthRequest, res: Response, next: NextFu
 
   const token = authHeader.split(' ')[1];
   try {
-    const secret = process.env.JWT_SECRET || 'fallback-secret';
+    const secret = JWT_SECRET;
     const decoded = jwt.verify(token, secret) as { userId: string; role: string };
 
     // Re-checked on every request (not just at login) so a disabled account
@@ -64,7 +65,7 @@ export async function optionalAuthenticate(req: AuthRequest, _res: Response, nex
 
   const token = authHeader.split(' ')[1];
   try {
-    const secret = process.env.JWT_SECRET || 'fallback-secret';
+    const secret = JWT_SECRET;
     const decoded = jwt.verify(token, secret) as { userId: string; role: string };
     const user = await prisma.user.findUnique({ where: { id: decoded.userId }, select: { isActive: true } });
     if (user && user.isActive) {
