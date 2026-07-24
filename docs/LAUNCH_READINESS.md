@@ -2,7 +2,7 @@
 
 Living document. Updated at the end of every programme section. No credentials, connection strings, or secret values are ever recorded in this file — only status, ownership and evidence references.
 
-**Last updated:** Priority 4, Stage 4A — MERGED AND DEPLOYED (Master Continuation Programme — Real Account Journey, Email Delivery and Secure Downloads) — 2026-07-24. PR #4 merged into `main` following the owner's Render environment confirmation (`JWT_SECRET` present, `NODE_ENV=production`, QA demo login disabled); Render and Vercel have both deployed the change; immediate post-deployment read-only verification against production is complete. See the post-deployment findings below. **Stage 4A only — Priority 4 is not complete.** Priority 3 (Knowledge Hub and EatStrong Editorial Completion) closed 2026-07-23 — see its own findings section further down, unchanged by this update.
+**Last updated:** Priority 4, Stage 4B — IMPLEMENTED, NOT MERGED (Master Continuation Programme — Real Account Journey, Email Delivery and Secure Downloads) — 2026-07-24. Email verification and Resend-based delivery implemented on `feature/libraryPages` (commit `ef29623`), validated as far as possible without a live database, and pushed. Not merged into `main`. Stage 4A (below) remains merged, deployed, and verified — unchanged by this update. See the Stage 4B section for full detail. Priority 3 (Knowledge Hub and EatStrong Editorial Completion) closed 2026-07-23 — see its own findings section further down, unchanged.
 
 ## Priority 3 audit status (2026-07-23)
 
@@ -425,10 +425,64 @@ You confirmed the root cause (Vercel project Root Directory = `frontend`) and as
 
 **Files touched by the merge itself:** none beyond what Stage 4A already listed above — the merge/reconciliation commits only moved the same 9 files into `main` and back into `feature/libraryPages`, plus picking up the already-separately-merged EatStrong disclaimer migration from PR #3 during reconciliation.
 
-**Remaining Priority 4 stages (not started):**
-- **Stage 4B** — email verification (soft approach): schema migration (`User.emailVerified`, new `EmailVerificationToken` model), new auth routes, `VerifyEmail.tsx`, dashboard banner.
-- **Stage 4C** — Register Interest reliability: Resend-based owner notification + submitter confirmation emails.
-- **Stage 4D** — secure downloads: Cloudflare R2 integration, presigned URLs, admin upload flow, `Documents.tsx`/`CoursePlayer.tsx` download-flow fixes.
+**Remaining Priority 4 stages after 4B (not started):**
+- **Stage 4C (Cloudflare R2 secure downloads)** — presigned URLs, admin upload flow, `Documents.tsx`/`CoursePlayer.tsx` download-flow fixes.
+
+---
+
+### Stage 4B — Email Verification and Reliable Delivery via Resend (2026-07-24)
+
+**Implemented on `feature/libraryPages`, commit `ef29623`. Pushed. Not merged into `main` — no production database changes made.**
+
+**1. Email verification, soft throughout:**
+- `User.emailVerified Boolean @default(false)` and a new `EmailVerificationToken` model, exact same secure pattern as `PasswordResetToken`: 32-byte random token, SHA-256 hashed at rest (raw value never stored), 24-hour expiry, single-use via `usedAt`, existing unused tokens deleted before a new one is issued.
+- `POST /api/auth/verify-email` (public — the token itself is the credential, same reasoning as reset-password) and `POST /api/auth/resend-verification` (authenticated, so spamming someone else's inbox would require already knowing their password), both rate-limited (10/15min per IP, matching every other auth route).
+- `VerifyEmail.tsx` requires an **explicit button click** to consume the token — deliberately not an auto-verify-on-load — so email-client link-scanners can't silently burn the single-use token before the real recipient opens the message.
+- Confirmed soft in every direction: registration succeeds and auto-logs in regardless of whether the verification email sends; `emailVerified` never gates login, dashboard access, enrolment, paid content, role, or access level — it is purely informational.
+- **Admin-created accounts also start `emailVerified: false`** — confirmed by reading `POST /api/admin/users` directly: it never sets the field, so it relies on the same schema default as self-registration. An admin typing an email address doesn't prove the recipient controls that inbox, so COACH/TUTOR/ASSESSOR/ADMIN accounts are not auto-verified.
+
+**2. Verification banner:** new `EmailVerificationBanner.tsx` — clear reminder text, a resend button with sending/sent/error states, no modal, no dashboard interruption. Wired into all 5 authenticated dashboard entry points (Learner `Dashboard.tsx`, `AssessorPortal.tsx`, `AdminDashboard.tsx` directly; `CoachWorkspace.tsx`/`TutorWorkspace.tsx` via an explicit `showVerificationBanner` prop on their shared `*Body` components, since those bodies are also reused by `/portal-preview/coach` and `/portal-preview/tutor` — the preview pages never pass the prop, so the banner never reflects a real logged-in admin's verification state there, preserving "no real account data" in the preview tooling).
+
+**3. Resend integration (`emailService.ts` rewritten on the official `resend` SDK):**
+- Password reset (`sendPasswordResetEmail`) keeps its exact external contract unchanged — always resolves `{sent: true}` in production regardless of actual delivery outcome, preserving the anti-enumeration behaviour on `/auth/forgot-password`. Actual failures are logged server-side only.
+- Dev/test mode never sends a real email and never pretends one was sent — confirmed directly: returns `{success: false, errorCode: 'NOT_CONFIGURED', _devVerificationLink: ...}` and logs the link to console instead.
+- Missing `RESEND_API_KEY` in production: confirmed directly — logs a clear server-side error, returns a sanitised `NOT_CONFIGURED` code, does not crash the process or affect any unrelated route.
+- Invalid/wrong `RESEND_API_KEY` in production: confirmed directly against Resend's real API (a genuine network call) — Resend's own "API key is invalid" error is caught, logged (message only, no key, no stack trace), returns `SEND_FAILED`, no crash.
+- No secret is ever logged, returned to a caller, or reachable from the frontend.
+
+**4. Register Interest delivery:** after the lead record is saved (unchanged), an owner-notification email and a submitter-confirmation email are sent, each independently tracked via four separate fields — `ownerNotifiedAt`/`ownerNotificationErrorCode`, `submitterConfirmationSentAt`/`submitterConfirmationErrorCode` — so one succeeding never hides the other failing. The saved lead is never rolled back regardless of either email's outcome, and no delivery error is ever surfaced to the submitter. Only short sanitised codes (`NOT_CONFIGURED`, `SEND_FAILED`) are stored — never full provider responses, email bodies, API keys, stack traces, or other request data.
+
+**5. Database migration** (`20260724100000_add_email_verification_and_delivery_tracking`) — additive only, confirmed via `prisma migrate diff` against the prior schema:
+  - `ALTER TABLE "User" ADD COLUMN "emailVerified" BOOLEAN NOT NULL DEFAULT false` — **existing users automatically become `emailVerified = false`** via Postgres applying the column's own default to every existing row; no separate backfill statement was written or is needed.
+  - `ALTER TABLE "RegisterInterest" ADD COLUMN` ×4 (all nullable, no default required).
+  - `CREATE TABLE "EmailVerificationToken"` (new table, foreign key to `User` with `ON DELETE CASCADE`, matching `PasswordResetToken`'s exact shape).
+  - No column dropped or renamed, no `Role`/`Enrolment`/`AccessLevel` logic touched, no existing password or reset token affected.
+  - **Not applied to production.** Per the established pattern (Viking Press, EatStrong disclaimer), this will go through its own scoped branch cut from `main` → PR → owner approval → Render's existing `prisma migrate deploy` step, once Stage 4B itself is approved for production.
+
+**6. Validation performed:**
+  - Backend + frontend `tsc --noEmit`: clean.
+  - Full production build: succeeded (55 pages prerendered, sitemap 116 URLs — unaffected).
+  - `prisma validate`: clean. Migration file confirmed byte-for-byte identical (aside from an explanatory comment) to what `prisma migrate diff` generates from the schema change.
+  - Token generation/hashing: verified directly (32-byte/64-hex-char tokens, deterministic SHA-256, correctly distinct per token).
+  - `emailService.ts`: all three configuration scenarios (dev suppression, missing key, invalid key) verified directly, including one genuine live network call to Resend's real API to confirm the SDK wiring itself works.
+  - Portal Preview / dashboard banner placement, the `VerifyEmail` success and invalid-token-error states, and the resend button's sending/success feedback were all verified live via a throwaway local mock auth server (no real accounts, no production contact) at both desktop (1280px) and mobile (375px) widths.
+  - **Not verifiable without a live database or a verified Resend domain** (consistent with every prior disclosed limitation in this programme): the full token round-trip against real `EmailVerificationToken` rows (expired/used/invalid rejection, already-verified short-circuit), and real email delivery to an external inbox. `onboarding@resend.dev` can only prove account-level API connectivity, not that mail reaches arbitrary recipients — genuine delivery testing is correctly deferred until the owner has verified a sending domain with Resend.
+
+**7. Deferred UAT for Stage 4B** (to be confirmed once the owner has completed Resend setup and a database is available): full email-verification round trip with a real inbox; real Register Interest owner-notification and submitter-confirmation delivery; expired/used/invalid `EmailVerificationToken` rejection against real rows; already-verified-account short-circuit against a real user.
+
+**8. Owner setup still required before live delivery (code does not require this to be complete — env vars are read as placeholders and every missing-config path fails safely):**
+  - Create/access a Resend account.
+  - Verify the Educate Strong sending domain in Resend.
+  - Generate a sending-only Resend API key.
+  - Add `RESEND_API_KEY`, `EMAIL_FROM`, `NOTIFICATIONS_EMAIL` to Render's environment variables.
+
+  **Status split:** Code complete. Provider setup pending. Live delivery not yet verified.
+
+**9. Files modified:** `backend/prisma/schema.prisma`, new migration folder, `backend/src/routes/auth.ts`, `backend/src/routes/interest.ts`, `backend/src/services/emailService.ts` (rewritten), `backend/.env.example`, `backend/package.json`/`package-lock.json` (added `resend`); `frontend/src/App.tsx` (new route), new `frontend/src/pages/auth/VerifyEmail.tsx`, new `frontend/src/components/layout/EmailVerificationBanner.tsx`, `frontend/src/context/AuthContext.tsx` (added `emailVerified` + `refreshUser`), `frontend/src/pages/learner/Dashboard.tsx`, `frontend/src/pages/assessor/AssessorPortal.tsx`, `frontend/src/pages/admin/AdminDashboard.tsx`, `frontend/src/components/coach/CoachWorkspaceBody.tsx` + `frontend/src/pages/coach/CoachWorkspace.tsx`, `frontend/src/components/tutor/TutorWorkspaceBody.tsx` + `frontend/src/pages/tutor/TutorWorkspace.tsx`.
+
+**10. Workspace protection:** a separate, unrelated uncommitted Sanity CMS work-in-progress was found in the working directory at the start of this stage and was stashed (`git stash push -u`) before any Stage 4B edit, so the two diffs never touched the same uncommitted state. No Sanity file was staged, edited, or committed as part of Stage 4B. See the note directly below on restoring it — this needs your input rather than a decision made silently on your behalf.
+
+**11. Sanity stash restoration — flagging for your decision, not resolved automatically:** while this stage was in progress, a separate commit (`fba755c`, "Stage 1B: add Sanity studio scaffold", authored directly by you at 12:30) was pushed to `feature/libraryPages` — already safely on `origin`. This means the Sanity work I originally stashed has since been properly committed by you through a different route. Attempting `git stash pop` failed cleanly ("already exists, no checkout") because the stashed files' pre-commit content now conflicts with the already-committed, newer version on disk — for example, `sanity/sanity.config.ts`'s comment wording genuinely differs between the two. **Nothing has been lost**: the stash is still fully intact (`stash@{0}`), your commit is safely on `origin`, and I have not chosen a version or dropped anything. Since your commit already safely contains this work, the stash is very likely now redundant and safe to drop — but I'm leaving that decision to you rather than doing it myself.
 
 ---
 
