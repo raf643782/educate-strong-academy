@@ -87,6 +87,18 @@ async function sendEmail(opts: { to: string; subject: string; html: string; text
 
 // ── Shared email chrome ─────────────────────────────────────────────────────
 
+// Escapes a plain-text value for safe interpolation into an HTML email
+// body. Only ever apply this to submitter-supplied values, never to
+// trusted static template markup/text written in this file.
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function wrapHtml(bodyHtml: string): string {
   return `<!DOCTYPE html>
 <html>
@@ -258,7 +270,7 @@ export async function sendRegisterInterestNotification(details: RegisterInterest
         ${rows.map(([label, value]) => `
           <tr>
             <td style="color:rgba(255,255,255,0.4);font-size:12px;padding:6px 12px 6px 0;vertical-align:top;white-space:nowrap;">${label}</td>
-            <td style="color:#fff;font-size:14px;padding:6px 0;">${value}</td>
+            <td style="color:#fff;font-size:14px;padding:6px 0;">${escapeHtml(value)}</td>
           </tr>
         `).join('')}
       </table>
@@ -274,7 +286,7 @@ export async function sendRegisterInterestConfirmation(details: RegisterInterest
     to: details.email,
     subject: "We've received your interest — EducateStrong Academy",
     html: wrapHtml(`
-      <p style="color:#fff;font-size:16px;margin:0 0 12px;">Hi ${details.firstName},</p>
+      <p style="color:#fff;font-size:16px;margin:0 0 12px;">Hi ${escapeHtml(details.firstName)},</p>
       <p style="color:rgba(255,255,255,0.7);font-size:14px;line-height:1.6;margin:0;">
         Thanks for registering your interest with EducateStrong Academy. We've received your
         details and someone from the team will be in touch soon.
