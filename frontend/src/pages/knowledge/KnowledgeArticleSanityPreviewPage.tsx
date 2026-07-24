@@ -1,0 +1,146 @@
+/**
+ * Stage 1 Sanity proof-of-concept — NOT linked in any navigation.
+ *
+ * Renders a single Knowledge Hub article from Sanity by slug, in parallel
+ * with (and without touching) the live /knowledge/:slug page.
+ */
+
+import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import Navbar from '../../components/layout/Navbar';
+import Footer from '../../components/layout/Footer';
+import { useDocumentHead } from '../../hooks/useDocumentHead';
+import { getKnowledgeArticleBySlug, isSanityConfigured, type SanityKnowledgeArticle } from '../../lib/sanity';
+import PortableTextRenderer from '../../components/knowledge/PortableTextRenderer';
+import FaqAccordion from '../../components/knowledge/FaqAccordion';
+
+export default function KnowledgeArticleSanityPreviewPage() {
+  const { slug } = useParams<{ slug: string }>();
+  const [article, setArticle] = useState<SanityKnowledgeArticle | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useDocumentHead({
+    title: article ? `${article.seoTitle || article.title} — Preview` : 'Knowledge Hub Preview',
+    description: article?.metaDescription,
+  });
+
+  useEffect(() => {
+    if (!slug) return;
+    if (!isSanityConfigured) {
+      setError('Sanity is not configured yet. Add VITE_SANITY_PROJECT_ID (and related env vars) to enable this preview — see frontend/.env.local.');
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    getKnowledgeArticleBySlug(slug)
+      .then(setArticle)
+      .catch(err => setError(err instanceof Error ? err.message : 'Failed to load this article from Sanity.'))
+      .finally(() => setLoading(false));
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-es-muted">Loading…</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error || !article) {
+    return (
+      <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center max-w-md px-4">
+            <h2 className="text-2xl font-black text-white mb-2">
+              {error ? 'Not available yet' : 'Article not found'}
+            </h2>
+            <p className="text-es-muted text-sm mb-4">
+              {error || 'No published article was found for this slug in Sanity.'}
+            </p>
+            <Link to="/knowledge-hub-preview" className="text-sm font-medium" style={{ color: '#A41C64' }}>
+              Back to Knowledge Hub Preview
+            </Link>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
+      <Navbar />
+
+      <main className="flex-1">
+        <div className="pt-navbar" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C' }}>
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <nav className="flex items-center gap-2 text-xs mb-5" style={{ color: '#A41C64' }}>
+              <Link to="/knowledge-hub-preview" className="hover:text-white transition-colors" style={{ color: '#A41C64' }}>
+                Knowledge Hub Preview
+              </Link>
+              {article.pathway && (
+                <>
+                  <span className="text-es-subtle">/</span>
+                  <span style={{ color: '#A41C64' }}>{article.pathway.title}</span>
+                </>
+              )}
+            </nav>
+
+            <h1 className="text-3xl md:text-4xl font-black text-white leading-tight mb-4" style={{ letterSpacing: '-0.03em' }}>
+              {article.h1 || article.title}
+            </h1>
+            {article.metaDescription && (
+              <p className="text-es-muted text-lg leading-relaxed max-w-2xl">{article.metaDescription}</p>
+            )}
+          </div>
+        </div>
+
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <PortableTextRenderer value={article.body} />
+
+          {article.faq && article.faq.length > 0 && (
+            <div className="mt-12 pt-8" style={{ borderTop: '1px solid #2C2C2C' }}>
+              <h3 className="font-bold text-white mb-4 text-lg">Frequently Asked Questions</h3>
+              <FaqAccordion items={article.faq} />
+            </div>
+          )}
+
+          {article.cta?.ctaText && (
+            <div
+              className="mt-10 rounded-xl p-6"
+              style={{ background: 'rgba(164,28,100,0.06)', border: '1px solid rgba(164,28,100,0.2)' }}
+            >
+              <p className="text-es-muted text-sm leading-relaxed">{article.cta.ctaText}</p>
+              {article.cta.destinationUrl && (
+                <Link to={article.cta.destinationUrl} className="text-sm font-semibold" style={{ color: '#A41C64' }}>
+                  Learn more →
+                </Link>
+              )}
+            </div>
+          )}
+
+          <div className="mt-10">
+            <Link
+              to="/knowledge-hub-preview"
+              className="font-medium flex items-center gap-1 text-sm"
+              style={{ color: '#A41C64' }}
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Knowledge Hub Preview
+            </Link>
+          </div>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
