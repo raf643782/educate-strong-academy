@@ -58,6 +58,15 @@ import SkillTree from './pages/learner/SkillTree';
 // Library pages — all public
 import KnowledgeHub from './pages/knowledge/KnowledgeHub';
 import KnowledgeArticlePage from './pages/knowledge/KnowledgeArticlePage';
+
+// Knowledge Hub / Sanity Stage 1 proof-of-concept — not linked in any nav.
+// Renders content from Sanity in parallel with the live, hardcoded /knowledge
+// pages above. See frontend/src/lib/sanity.ts and /sanity/README.md.
+// Named "...Sanity..." to avoid clashing with the unrelated homepage
+// section component at components/sections/KnowledgeHubPreview.tsx.
+import KnowledgeHubSanityPreview from './pages/knowledge/KnowledgeHubSanityPreview';
+import KnowledgeArticleSanityPreviewPage from './pages/knowledge/KnowledgeArticleSanityPreviewPage';
+
 import ExerciseLibrary from './pages/exercises/ExerciseLibrary';
 import EventLibrary from './pages/events/EventLibrary';
 
@@ -156,6 +165,10 @@ export default function App() {
           <Route path="/refund-policy" element={<RefundPolicy />} />
           <Route path="/knowledge" element={<KnowledgeHub />} />
           <Route path="/knowledge/:slug" element={<KnowledgeArticlePage />} />
+          {/* Sanity Stage 1 proof-of-concept — never linked in nav. Does not
+              affect /knowledge above. See /sanity/README.md for Stage 2 plan. */}
+          <Route path="/knowledge-hub-preview" element={<KnowledgeHubSanityPreview />} />
+          <Route path="/knowledge-hub-preview/:slug" element={<KnowledgeArticleSanityPreviewPage />} />
           <Route path="/exercises" element={<ExerciseLibrary />} />
           <Route path="/events" element={<EventLibrary />} />
 
