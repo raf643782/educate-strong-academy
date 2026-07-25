@@ -23,6 +23,16 @@
 
 import { createClient } from '@sanity/client';
 
+import whatIsStrongman from '../content/approved-knowledge-articles/what-is-strongman.mjs';
+import strongmanForBeginners from '../content/approved-knowledge-articles/strongman-for-beginners.mjs';
+import strongmanEventsExplained from '../content/approved-knowledge-articles/strongman-events-explained.mjs';
+import howToBecomeAStrongmanCoach from '../content/approved-knowledge-articles/how-to-become-a-strongman-coach.mjs';
+import atlasStonesTechniqueGuide from '../content/approved-knowledge-articles/atlas-stones-technique-guide.mjs';
+import whatDoesAStrongmanRefereeDo from '../content/approved-knowledge-articles/what-does-a-strongman-referee-do.mjs';
+import firstStrongmanCompetitionTraining from '../content/approved-knowledge-articles/first-strongman-competition-training.mjs';
+import strongmanVsPowerlifting from '../content/approved-knowledge-articles/strongman-vs-powerlifting.mjs';
+import strongmanCompetitionRulesExplained from '../content/approved-knowledge-articles/strongman-competition-rules-explained.mjs';
+
 const PROJECT_ID = process.env.SANITY_STUDIO_PROJECT_ID || 'ut2wo29d';
 const DATASET = process.env.SANITY_STUDIO_DATASET || 'production';
 
@@ -45,105 +55,32 @@ const WRITE_MODE_ENABLED = false;
 const EXCLUDED_SLUG = 'is-strongman-safe-for-children';
 
 /**
- * The 9 approved public articles. `bodyStatus` records whether this
- * script actually has the exact final approved body text available to
- * write, per the Stage 4 requirement not to reconstruct, paraphrase, or
- * invent content. Metadata (title/seoTitle/metaDescription) mirrors
- * frontend/src/lib/approvedKnowledgeArticles.ts, which IS the durable,
- * approved source for those fields.
+ * All 9 approved public articles now have a durable source file under
+ * sanity/content/approved-knowledge-articles/ (Stage 4B). `source` holds
+ * the full object (title/h1/seoTitle/metaDescription/body/faq/cta/
+ * publicReferences/pathway/clusterOrder) for use once Stage 5 is approved.
+ * `bodyStatus`/`bodyNote` are retained for reporting continuity with
+ * Stage 4's dry run.
  */
 const TARGET_ARTICLES = [
-  {
-    slug: 'what-is-strongman',
-    title: 'What Is Strongman? A Clear Guide to the Sport, Events, and Competition Format',
-    seoTitle: 'What Is Strongman? A Clear Guide to the Sport & Events | Educate Strong Academy',
-    metaDescription:
-      'A clear, accurate guide to Strongman as a sport — how competitions work, common event types, who competes, and how it differs from powerlifting, CrossFit, and bodybuilding.',
-    bodyStatus: 'MISSING_APPROVED_TEXT',
-    bodyNote:
-      'Approved corrections (IFSA paragraph removed, unverified athlete count removed, Novice guidance restored and attributed, scoring/tie claims softened, Wikipedia removed from references, children\'s-safety links removed) exist only in editorial review conversation — not yet saved to any file in this repository. Do not write body changes until the approved text is persisted to a durable source and re-verified.',
-  },
-  {
-    slug: 'strongman-for-beginners',
-    title: 'Strongman for Beginners: How to Start Training Safely and Realistically',
-    seoTitle: 'Strongman for Beginners: How to Start Safely | Educate Strong Academy',
-    metaDescription:
-      'A realistic, evidence-led guide to starting Strongman — who it suits, how to build a foundation, common mistakes, and how to find your first novice competition.',
-    bodyStatus: 'MISSING_APPROVED_TEXT',
-    bodyNote:
-      'Approved corrections (Tinnion to Hindle, ACSM source upgraded to the 2026 position stand, children\'s-safety links removed, frequency wording reframed as a reasonable beginner structure rather than a Strongman rule) exist only in editorial review conversation — not yet saved to any file in this repository.',
-  },
-  {
-    slug: 'strongman-events-explained',
-    title: "Strongman Events Explained: A Beginner's Guide to the Main Event Types",
-    seoTitle: 'Strongman Events Explained: Main Event Types | Educate Strong Academy',
-    metaDescription:
-      'A clear, evidence-led guide to the main types of Strongman events, from carries and presses to loading and grip events, and why rules vary by competition.',
-    bodyStatus: 'MISSING_APPROVED_TEXT',
-    bodyNote:
-      'Approved corrections (Tinnion to Hindle, Log Press overstatement simplified, Vehicle Pull separated from Arm-Over-Arm wording, Sled Drag attachment variation clarified, Hercules Hold time-limit scoped to WSM, broken FAQ markup fixed, Atlas Stones link updated) exist only in editorial review conversation — not yet saved to any file in this repository.',
-  },
-  {
-    slug: 'how-to-become-a-strongman-coach',
-    title: 'How to Become a Strongman Coach: Skills, Knowledge, and Education Pathways',
-    seoTitle: 'How to Become a Strongman Coach: Skills & Education | Educate Strong Academy',
-    metaDescription:
-      'A careful, evidence-led guide to what Strongman coaching involves, the knowledge it requires, and how to think about education and qualification pathways.',
-    bodyStatus: 'MISSING_APPROVED_TEXT',
-    bodyNote:
-      'Approved corrections (Tinnion to Hindle, Winwood injury claim tightened to the 1.9x figure, children\'s-safety link removed, disclaimers consolidated, Educate Strong Academy pathway section added) exist only in editorial review conversation — not yet saved to any file in this repository.',
-  },
-  {
-    slug: 'atlas-stones-technique-guide',
-    title: 'Atlas Stones Technique Guide',
-    seoTitle: 'Atlas Stones Technique Guide: How the Lift Works | Educate Strong Academy',
-    metaDescription:
-      'An evidence-led technique guide to the Atlas Stones lift — the phases, grip considerations, common mistakes, and how it connects to foundational strength movements.',
-    bodyStatus: 'MISSING_APPROVED_TEXT',
-    bodyNote:
-      'Approved corrections (stone count/format variation clarified, tacky wording softened, one-motion technique reframed as advanced, phase structure clarified, "final event" claim scoped to WSM, foundational movements split into research vs. coaching judgement) exist only in editorial review conversation — not yet saved to any file in this repository.',
-  },
-  {
-    slug: 'strongman-competition-rules-explained',
-    title: 'Strongman Competition Rules Explained',
-    seoTitle: 'Strongman Competition Rules Explained (Plain English) | Educate Strong Academy',
-    metaDescription:
-      'A plain English guide to how Strongman competitions are scored and judged, and why exact rules always depend on the specific federation or organiser.',
-    bodyStatus: 'MISSING_APPROVED_TEXT',
-    bodyNote:
-      'Approved corrections (time-limit/scoring corrected using real WSM examples, equipment section corrected using Strongman Corporation rules, commands-vary clarification, tie-handling added, empty CTA replaced) exist only in editorial review conversation — not yet saved to any file in this repository.',
-  },
-  {
-    slug: 'what-does-a-strongman-referee-do',
-    title: 'What Does a Strongman Referee Do?',
-    seoTitle: 'What Does a Strongman Referee Do? | Educate Strong Academy',
-    metaDescription:
-      'A clear explanation of the Strongman referee\'s role, from judging standards to safety oversight, and how officiating pathways currently work.',
-    bodyStatus: 'MISSING_APPROVED_TEXT',
-    bodyNote:
-      'Approved corrections (opening reframed around the officiating team, referee responsibilities separated, safety authority scoped to organiser rules, Douglas Edmunds date range softened, Wikipedia removed, Giants Live used as the reference, Educate Strong Academy referee paragraph narrowed) exist only in editorial review conversation — not yet saved to any file in this repository.',
-  },
-  {
-    slug: 'first-strongman-competition-training',
-    title: 'How to Train for Your First Strongman Competition',
-    seoTitle: 'How to Train for Your First Strongman Competition | Educate Strong Academy',
-    metaDescription:
-      'A practical, evidence-led guide to preparing for your first Strongman competition, from choosing the right event to competition-day logistics.',
-    bodyStatus: 'OK_UNCHANGED',
-    bodyNote:
-      'Formal review found no body corrections required — the current live Sanity document body already IS the approved text. Only metadata/reference fields and preview-link conversion apply here.',
-  },
-  {
-    slug: 'strongman-vs-powerlifting',
-    title: 'Strongman vs Powerlifting: How the Two Sports Actually Differ',
-    seoTitle: 'Strongman vs Powerlifting: The Real Differences | Educate Strong Academy',
-    metaDescription:
-      'A clear, evidence-based comparison of Strongman and powerlifting: format, scoring, training demands, and which might suit you.',
-    bodyStatus: 'OK_UNCHANGED',
-    bodyNote:
-      'Formal review found no body corrections required — the current live Sanity document body already IS the approved text. Only public references (IPF Technical Rules Book 2026; Yang et al. 2026) need adding, plus preview-link conversion.',
-  },
-];
+  whatIsStrongman,
+  strongmanForBeginners,
+  strongmanEventsExplained,
+  howToBecomeAStrongmanCoach,
+  atlasStonesTechniqueGuide,
+  whatDoesAStrongmanRefereeDo,
+  firstStrongmanCompetitionTraining,
+  strongmanVsPowerlifting,
+  strongmanCompetitionRulesExplained,
+].map((source) => ({
+  slug: source.slug,
+  title: source.title,
+  seoTitle: source.seoTitle,
+  metaDescription: source.metaDescription,
+  source,
+  bodyStatus: 'OK_APPROVED_TEXT_AVAILABLE',
+  bodyNote: 'Approved source text captured in sanity/content/approved-knowledge-articles/ (Stage 4B). Not yet written to Sanity — Stage 5 remains blocked pending separate approval.',
+}));
 
 const APPROVED_SLUGS = new Set(TARGET_ARTICLES.map((a) => a.slug));
 
@@ -160,6 +97,18 @@ function extractLinkHrefs(body) {
     for (const markDef of block.markDefs || []) {
       if (markDef.href) hrefs.push(markDef.href);
     }
+  }
+  return hrefs;
+}
+
+/** Finds every `{{label|href}}` inline link href in a source file's simplified body array. */
+function extractSourceLinkHrefs(source) {
+  if (!source || !Array.isArray(source.body)) return [];
+  const hrefs = [];
+  const regex = /\{\{[^|{}]+\|([^{}]+)\}\}/g;
+  for (const entry of source.body) {
+    let match;
+    while ((match = regex.exec(entry.text || ''))) hrefs.push(match[1]);
   }
   return hrefs;
 }
@@ -234,6 +183,20 @@ async function run() {
     console.log(`  note: ${target.bodyNote}`);
     console.log(`  missing required fields: ${existing ? 'none at metadata level' : 'entire document (would create)'}`);
     console.log(`  conflicts: none`);
+
+    if (target.source) {
+      const sourceHrefs = extractSourceLinkHrefs(target.source);
+      const sourceLinksToExcluded = sourceHrefs.filter((h) => h.includes(EXCLUDED_SLUG));
+      const sourceLinksStillPreview = sourceHrefs.filter((h) => h.startsWith('/knowledge-hub-preview/'));
+      console.log(`  approved source file: sanity/content/approved-knowledge-articles/${target.slug}.mjs`);
+      console.log(`  approved source internal links: ${sourceHrefs.length ? sourceHrefs.join(', ') : 'none'}`);
+      console.log(`  approved source links to excluded article: ${sourceLinksToExcluded.length ? `⚠ ${sourceLinksToExcluded.join(', ')}` : 'none'}`);
+      console.log(`  approved source links still using /knowledge-hub-preview/: ${sourceLinksStillPreview.length ? `⚠ ${sourceLinksStillPreview.join(', ')}` : 'none (already converted to /knowledge/)'}`);
+      console.log(`  approved source FAQ count: ${target.source.faq?.length ?? 0}`);
+      console.log(`  approved source publicReferences count: ${target.source.publicReferences?.length ?? 0}`);
+    } else {
+      console.log(`  approved source file: none`);
+    }
   }
 
   // ── 3. Article 5 (excluded) ──
