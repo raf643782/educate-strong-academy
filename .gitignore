@@ -22,6 +22,9 @@ backend/dist/
 # Vite
 frontend/.vite/
 
+# Sanity Studio dev/build runtime cache
+sanity/.sanity/
+
 # OS
 .DS_Store
 Thumbs.db
