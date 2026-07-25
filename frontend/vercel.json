@@ -1,11 +1,4 @@
 {
-  "redirects": [
-    {
-      "source": "/knowledge/start-strongman-safely",
-      "destination": "/knowledge/strongman-for-beginners",
-      "permanent": true
-    }
-  ],
   "rewrites": [
     {
       "source": "/knowledge/is-strongman-safe-for-children",
