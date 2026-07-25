@@ -15,6 +15,12 @@
  *      certificates, cpd, coursework, documents, login, register,
  *      forgot-password, reset-password, qa-demo, portal-preview,
  *      homepagepreview, dev).
+ *   4a. No known redirect source URL appears in the sitemap — read
+ *       directly from vercel.json's own `redirects` array, so this
+ *       check can never drift out of sync with what's actually
+ *       configured to redirect. A sitemap should only ever list
+ *       canonical live destinations, not a URL that just forwards
+ *       elsewhere.
  *   5. Every sitemap URL corresponds to a real route: Exercise/Event
  *      URLs must have a real prerendered dist/ file; every other
  *      sitemap URL must match a real path pattern in the frontend's
@@ -47,6 +53,26 @@ const PROTECTED_PATTERNS = [
 ];
 
 const problems = [];
+
+/**
+ * Reads vercel.json's own `redirects` array and returns the set of
+ * `source` paths. Deliberately duplicated (not imported) from the
+ * equivalent helper in prerender.mjs — that file unconditionally runs
+ * its own build process at the bottom, so importing it here would
+ * re-run the entire prerender. Keep both copies in sync if this logic
+ * ever changes.
+ */
+async function getRedirectSourcePaths() {
+  const raw = await readFile(path.join(FRONTEND_ROOT, 'vercel.json'), 'utf-8');
+  const config = JSON.parse(raw);
+  const sources = new Set();
+  for (const redirect of config.redirects ?? []) {
+    if (typeof redirect.source === 'string' && !redirect.source.includes(':') && !redirect.source.includes('*')) {
+      sources.add(redirect.source);
+    }
+  }
+  return sources;
+}
 
 async function main() {
   console.log('Stage 8 sitemap/prerender validation\n');
@@ -89,6 +115,14 @@ async function main() {
       if (p === pattern || p.startsWith(pattern + '/')) {
         problems.push(`Sitemap contains a protected route: ${p} (matches pattern "${pattern}")`);
       }
+    }
+  }
+
+  // 4a. No known redirect source URL appears in the sitemap.
+  const redirectSources = await getRedirectSourcePaths();
+  for (const p of sitemapPaths) {
+    if (redirectSources.has(p)) {
+      problems.push(`Sitemap contains a known redirect source URL (should list the destination instead): ${p}`);
     }
   }
 

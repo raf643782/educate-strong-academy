@@ -156,6 +156,27 @@ function escapeHtml(str) {
 }
 
 /**
+ * Reads vercel.json's own `redirects` array and returns the set of
+ * `source` paths (e.g. "/knowledge/start-strongman-safely"). This is
+ * the single source of truth for "known redirect source URLs" — used
+ * here to keep them out of the sitemap, and by validate-sitemap.mjs to
+ * fail the build if one ever slips back in. A source containing a
+ * dynamic segment (":" or "*") is skipped — this is only for exact,
+ * static redirect paths, which is all vercel.json currently defines.
+ */
+async function getRedirectSourcePaths() {
+  const raw = await readFile(path.join(FRONTEND_ROOT, 'vercel.json'), 'utf-8');
+  const config = JSON.parse(raw);
+  const sources = new Set();
+  for (const redirect of config.redirects ?? []) {
+    if (typeof redirect.source === 'string' && !redirect.source.includes(':') && !redirect.source.includes('*')) {
+      sources.add(redirect.source);
+    }
+  }
+  return sources;
+}
+
+/**
  * Stage 8 — generates a genuine sitemap.xml and robots.txt at build
  * time, from the same allExercises/allEvents this build just
  * prerendered (not a second independent fetch, so the two can never
@@ -173,10 +194,20 @@ function escapeHtml(str) {
  */
 async function generateSitemapAndRobots({ allExercises, allEvents, apiToPublicSlug, knowledgeArticles }) {
   const urls = new Set(STATIC_PUBLIC_ROUTES);
+  const redirectSources = await getRedirectSourcePaths();
 
   for (const ex of allExercises) urls.add(`/exercises/${apiToPublicSlug(ex.slug)}`);
   for (const ev of allEvents) urls.add(`/events/${ev.slug}`);
-  for (const a of knowledgeArticles) urls.add(`/knowledge/${a.slug}`);
+  // A sitemap should only ever list canonical live destinations, never a
+  // known redirect source — a URL that permanently redirects elsewhere
+  // is not itself the "real" page a crawler should be told to index.
+  // redirectSources is read directly from vercel.json's own `redirects`
+  // array (see getRedirectSourcePaths), so this can never drift out of
+  // sync with whatever redirects actually exist there.
+  for (const a of knowledgeArticles) {
+    const url = `/knowledge/${a.slug}`;
+    if (!redirectSources.has(url)) urls.add(url);
+  }
 
   try {
     const beStrongArticles = await fetchJsonWithRetry(`${API_BASE}/be-strong/articles`, { retries: 1 });
