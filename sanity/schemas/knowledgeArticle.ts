@@ -143,6 +143,46 @@ export default defineType({
       ],
     }),
 
+    // --- Public references ---
+    // Visible citations/sources shown publicly at the end of an article
+    // (e.g. "Hindle et al., 2019"). This is explicitly NOT a replacement for
+    // sourceNotes (removed in Stage 5A, must not be recreated) — it must
+    // only ever contain what a reader could reasonably see in a normal
+    // citation list. Never put private research notes, internal reasoning,
+    // or anything unsafe/embarrassing if queried directly from the public
+    // dataset in this field. See docs/KNOWLEDGE_HUB_SOURCE_NOTES_POLICY.md.
+    defineField({
+      name: 'publicReferences',
+      title: 'Public References',
+      type: 'array',
+      description:
+        'Publicly visible citations only — never private editorial notes, internal reasoning, or anything unsafe to publish. This dataset is public.',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'publicReference',
+          fields: [
+            { name: 'authorsOrOrganisation', title: 'Author(s) or Organisation', type: 'string' },
+            { name: 'title', title: 'Title', type: 'string' },
+            { name: 'publicationOrSource', title: 'Publication or Source', type: 'string' },
+            { name: 'year', title: 'Year', type: 'string', description: 'Plain text, so values like "2009/2010" (an online-first vs. print year) can be recorded accurately.' },
+            { name: 'doi', title: 'DOI (if applicable)', type: 'string' },
+            { name: 'url', title: 'URL', type: 'url' },
+            { name: 'accessDate', title: 'Access Date', type: 'date' },
+            {
+              name: 'notesForDisplay',
+              title: 'Notes for Display (public-safe only)',
+              type: 'string',
+              description: 'Optional short public-facing note (e.g. what this source specifically supports). Must be safe to publish as-is — not an editorial/private note.',
+            },
+          ],
+          preview: {
+            select: { title: 'title', subtitle: 'authorsOrOrganisation' },
+          },
+        }),
+      ],
+    }),
+
     // --- Attribution ---
     defineField({ name: 'author', title: 'Author', type: 'string' }),
     defineField({ name: 'reviewedBy', title: 'Reviewed By', type: 'string' }),
@@ -157,8 +197,10 @@ export default defineType({
       name: 'status',
       title: 'Status',
       type: 'string',
-      options: { list: ['draft', 'inReview', 'approved', 'published'] },
+      options: { list: ['draft', 'inReview', 'approved', 'published', 'archived'] },
       initialValue: 'draft',
+      description:
+        'Editorial workflow marker only — this is NOT the public exposure boundary. This dataset is public, so any document (regardless of status) is directly queryable by anyone with the project ID. The frontend decides what is actually publicly visible using its own explicit approved-slug allow-list (frontend/src/lib/approvedKnowledgeArticles.ts), not this field. Content on a sensitive topic (for example, anything involving health, safety, or medical claims about children) must not be treated as ready simply because this is set to "published" — it requires an explicit, separately-confirmed qualified review before the frontend allow-list is updated to include it.',
     }),
     defineField({ name: 'publishedDate', title: 'Published Date', type: 'datetime' }),
 
