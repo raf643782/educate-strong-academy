@@ -17,6 +17,7 @@
  */
 
 import { createClient, type SanityClient } from '@sanity/client';
+import { getApprovedKnowledgeSlugs, isApprovedKnowledgeSlug } from './approvedKnowledgeArticles';
 
 const projectId = import.meta.env.VITE_SANITY_PROJECT_ID as string | undefined;
 const dataset = (import.meta.env.VITE_SANITY_DATASET as string | undefined) || 'production';
@@ -56,6 +57,18 @@ export interface SanityPathwayRef {
   slug: string;
 }
 
+/** Mirrors the `publicReference` object type in the `knowledgeArticle` schema — public-safe citations only, never `sourceNotes` or private editorial notes. */
+export interface SanityPublicReference {
+  authorsOrOrganisation?: string;
+  title?: string;
+  publicationOrSource?: string;
+  year?: string;
+  doi?: string;
+  url?: string;
+  accessDate?: string;
+  notesForDisplay?: string;
+}
+
 export interface SanityKnowledgeArticle {
   _id: string;
   title: string;
@@ -69,6 +82,7 @@ export interface SanityKnowledgeArticle {
   faq?: SanityFaqItem[];
   internalLinks?: SanityInternalLink[];
   cta?: SanityCta;
+  publicReferences?: SanityPublicReference[];
   author?: string;
   reviewedBy?: string;
   lastReviewedDate?: string;
@@ -104,6 +118,7 @@ const PUBLIC_ARTICLE_PROJECTION = `{
   faq,
   internalLinks,
   cta,
+  publicReferences,
   author,
   reviewedBy,
   lastReviewedDate,
@@ -116,17 +131,32 @@ const PUBLIC_ARTICLE_PROJECTION = `{
 
 // ── Query functions ──────────────────────────────────────────────────────
 
-/** All published Knowledge Hub articles, ordered for listing pages. */
+/**
+ * All publicly exposable Knowledge Hub articles, ordered for listing pages.
+ * The approved-slug manifest (approvedKnowledgeArticles.ts) is the hard
+ * public boundary — status is checked too, but is never sufficient on its
+ * own (see that file's header for why).
+ */
 export async function getPublishedKnowledgeArticles(): Promise<SanityKnowledgeArticle[]> {
   if (!sanityClient) return [];
+  const approvedSlugs = getApprovedKnowledgeSlugs();
+  if (approvedSlugs.length === 0) return [];
   return sanityClient.fetch(
-    `*[_type == "knowledgeArticle" && status == "published"] | order(clusterOrder asc) ${PUBLIC_ARTICLE_PROJECTION}`
+    `*[_type == "knowledgeArticle" && status == "published" && slug.current in $approvedSlugs] | order(clusterOrder asc) ${PUBLIC_ARTICLE_PROJECTION}`,
+    { approvedSlugs }
   );
 }
 
-/** A single published Knowledge Hub article by slug, or null if not found/not published. */
+/**
+ * A single publicly exposable Knowledge Hub article by slug, or null if not
+ * found, not published, or not on the approved-slug manifest. The manifest
+ * check happens before any Sanity query runs, so an excluded or unapproved
+ * slug (e.g. is-strongman-safe-for-children, or any old hardcoded slug) is
+ * refused outright rather than depending on Sanity's own status field.
+ */
 export async function getKnowledgeArticleBySlug(slug: string): Promise<SanityKnowledgeArticle | null> {
   if (!sanityClient) return null;
+  if (!isApprovedKnowledgeSlug(slug)) return null;
   const result = await sanityClient.fetch(
     `*[_type == "knowledgeArticle" && status == "published" && slug.current == $slug][0] ${PUBLIC_ARTICLE_PROJECTION}`,
     { slug }

@@ -13,6 +13,7 @@ import { useDocumentHead } from '../../hooks/useDocumentHead';
 import { getKnowledgeArticleBySlug, isSanityConfigured, type SanityKnowledgeArticle } from '../../lib/sanity';
 import PortableTextRenderer from '../../components/knowledge/PortableTextRenderer';
 import FaqAccordion from '../../components/knowledge/FaqAccordion';
+import PublicReferencesList from '../../components/knowledge/PublicReferencesList';
 
 export default function KnowledgeArticleSanityPreviewPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -111,6 +112,8 @@ export default function KnowledgeArticleSanityPreviewPage() {
               <FaqAccordion items={article.faq} />
             </div>
           )}
+
+          <PublicReferencesList items={article.publicReferences} />
 
           {article.cta?.ctaText && (
             <div
