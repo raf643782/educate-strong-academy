@@ -25,6 +25,9 @@ frontend/.vite/
 # Sanity Studio dev/build runtime cache
 sanity/.sanity/
 
+# Local pre-write content backups — never commit real Sanity content snapshots
+sanity/backups/
+
 # OS
 .DS_Store
 Thumbs.db
