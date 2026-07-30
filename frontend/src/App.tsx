@@ -68,7 +68,9 @@ import KnowledgeHubSanityPreview from './pages/knowledge/KnowledgeHubSanityPrevi
 import KnowledgeArticleSanityPreviewPage from './pages/knowledge/KnowledgeArticleSanityPreviewPage';
 
 import ExerciseLibrary from './pages/exercises/ExerciseLibrary';
+import ExerciseDetail from './pages/exercises/ExerciseDetail';
 import EventLibrary from './pages/events/EventLibrary';
+import EventDetail from './pages/events/EventDetail';
 
 // EatStrong — Nutrition section (all public)
 // Internal file names remain "BeStrong" to avoid a database migration.
@@ -170,7 +172,9 @@ export default function App() {
           <Route path="/knowledge-hub-preview" element={<KnowledgeHubSanityPreview />} />
           <Route path="/knowledge-hub-preview/:slug" element={<KnowledgeArticleSanityPreviewPage />} />
           <Route path="/exercises" element={<ExerciseLibrary />} />
+          <Route path="/exercises/:slug" element={<ExerciseDetail />} />
           <Route path="/events" element={<EventLibrary />} />
+          <Route path="/events/:slug" element={<EventDetail />} />
 
           {/* ── EatStrong — canonical routes ───────────────────────────── */}
           <Route path="/eatstrong" element={<BeStrongHub />} />
