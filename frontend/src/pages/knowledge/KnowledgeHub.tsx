@@ -1,56 +1,39 @@
 import { useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
-import { KNOWLEDGE_ARTICLES, KNOWLEDGE_CATEGORIES } from '../../data/knowledgeArticles';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
+import { getPublishedKnowledgeArticles, isSanityConfigured, type SanityKnowledgeArticle } from '../../lib/sanity';
 
-const CATEGORIES = KNOWLEDGE_CATEGORIES;
-
-const LEVEL_COLOUR: Record<string, string> = {
-  Foundation:  'badge-accent',
-  Coaching:    'badge-accent',
-  Refereeing:  'badge-grey',
-  Advanced:    'badge-amber',
-  Youth:       'badge-amber',
-  Nutrition:   'badge-grey',
-};
+const CANONICAL_URL = 'https://educate-strong-academy.vercel.app/knowledge';
 
 export default function KnowledgeHub() {
   useDocumentHead({
     title: 'Knowledge Hub',
     description: 'Practical articles, coaching guides, and evidence-based resources for Strongman coaches, referees, and athletes.',
+    canonical: CANONICAL_URL,
   });
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const categoryParam = searchParams.get('category') || 'all';
-  const [activeCategory, setActiveCategory] = useState(
-    CATEGORIES.some(c => c.id === categoryParam) ? categoryParam : 'all'
-  );
+  const [articles, setArticles] = useState<SanityKnowledgeArticle[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const next = searchParams.get('category') || 'all';
-    setActiveCategory(CATEGORIES.some(c => c.id === next) ? next : 'all');
-  }, [searchParams]);
-
-  function selectCategory(id: string) {
-    setActiveCategory(id);
-    if (id === 'all') {
-      setSearchParams({});
-    } else {
-      setSearchParams({ category: id });
+    if (!isSanityConfigured) {
+      setError('Knowledge Hub content is not available right now.');
+      setLoading(false);
+      return;
     }
-  }
-
-  const filtered = activeCategory === 'all'
-    ? KNOWLEDGE_ARTICLES
-    : KNOWLEDGE_ARTICLES.filter(a => a.category === activeCategory);
+    getPublishedKnowledgeArticles()
+      .then(setArticles)
+      .catch(() => setError('Failed to load Knowledge Hub articles.'))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
       <Navbar />
 
-      {/* Header */}
       <section className="pt-navbar es-grit" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C', position: 'relative' }}>
         <div className="es-container py-16">
           <p className="es-label mb-3">Knowledge Hub</p>
@@ -63,68 +46,48 @@ export default function KnowledgeHub() {
         </div>
       </section>
 
-      {/* Category filters */}
-      <div style={{ background: '#111111', borderBottom: '1px solid #2C2C2C' }}>
-        <div className="es-container py-4 flex flex-wrap gap-2">
-          {CATEGORIES.map(cat => (
-            <button
-              key={cat.id}
-              onClick={() => selectCategory(cat.id)}
-              className={`px-4 py-3 rounded text-sm font-semibold transition-all ${
-                activeCategory === cat.id
-                  ? 'text-white'
-                  : 'text-es-muted hover:text-white border border-es-grey-dark hover:border-es-accent'
-              }`}
-              style={activeCategory === cat.id ? { background: '#A41C64', border: '1px solid rgba(164,28,100,0.6)' } : {}}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Articles */}
       <div className="es-section flex-1">
         <div className="es-container">
-          <div className="flex items-center justify-between mb-6">
-            <p className="text-sm text-es-muted">
-              {filtered.length} resource{filtered.length !== 1 ? 's' : ''}
-              {activeCategory !== 'all' && ` in ${CATEGORIES.find(c => c.id === activeCategory)?.label}`}
-            </p>
-          </div>
+          {loading && <p className="text-es-muted">Loading…</p>}
 
-          {filtered.length === 0 ? (
+          {!loading && error && (
             <div className="es-card text-center py-16">
-              <p className="text-es-muted mb-2">No articles in this category yet.</p>
+              <p className="text-es-muted mb-2">{error}</p>
+              <p className="text-es-subtle text-sm">Check back soon.</p>
+            </div>
+          )}
+
+          {!loading && !error && articles.length === 0 && (
+            <div className="es-card text-center py-16">
+              <p className="text-es-muted mb-2">No articles available yet.</p>
               <p className="text-es-subtle text-sm">Content is being developed — check back soon.</p>
-              <button onClick={() => selectCategory('all')} className="btn-secondary text-sm mt-4">
-                View all resources
-              </button>
             </div>
-          ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filtered.map(article => (
-                <div key={article.id} className="es-card-hover flex flex-col p-5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className={LEVEL_COLOUR[article.level] || 'badge-grey'}>{article.level}</span>
-                    <span className="text-xs text-es-subtle">{article.readTime}</span>
+          )}
+
+          {!loading && !error && articles.length > 0 && (
+            <>
+              <p className="text-sm text-es-muted mb-6">
+                {articles.length} resource{articles.length !== 1 ? 's' : ''}
+              </p>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {articles.map(article => (
+                  <div key={article._id} className="es-card-hover flex flex-col p-5">
+                    {article.pathway && (
+                      <span className="badge-accent mb-3 self-start">{article.pathway.title}</span>
+                    )}
+                    <h3 className="font-bold text-white text-base leading-snug mb-2 flex-1">{article.title}</h3>
+                    <p className="text-es-muted text-sm leading-relaxed mb-4">{article.metaDescription}</p>
+                    <Link to={`/knowledge/${article.slug}`} className="btn-secondary text-sm text-center">
+                      Read Article
+                    </Link>
                   </div>
-                  <h3 className="font-bold text-white text-base leading-snug mb-2 flex-1">{article.title}</h3>
-                  <p className="text-es-muted text-sm leading-relaxed mb-4">{article.summary}</p>
-                  <Link
-                    to={`/knowledge/${article.slug}`}
-                    className="btn-secondary text-sm text-center"
-                  >
-                    Read Article
-                  </Link>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
       </div>
 
-      {/* CTA */}
       <section style={{ background: '#111111', borderTop: '1px solid #2C2C2C' }}>
         <div className="es-container py-12">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">

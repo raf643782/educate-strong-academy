@@ -1,34 +1,68 @@
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
-import { KNOWLEDGE_ARTICLES, KNOWLEDGE_CATEGORIES } from '../../data/knowledgeArticles';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
+import { getKnowledgeArticleBySlug, isSanityConfigured, type SanityKnowledgeArticle } from '../../lib/sanity';
+import { isApprovedKnowledgeSlug } from '../../lib/approvedKnowledgeArticles';
+import PortableTextRenderer from '../../components/knowledge/PortableTextRenderer';
+import FaqAccordion from '../../components/knowledge/FaqAccordion';
+import PublicReferencesList from '../../components/knowledge/PublicReferencesList';
 
-const LEVEL_COLOUR: Record<string, string> = {
-  Foundation:  'badge-accent',
-  Coaching:    'badge-accent',
-  Refereeing:  'badge-grey',
-  Advanced:    'badge-amber',
-  Youth:       'badge-amber',
-  Nutrition:   'badge-grey',
-};
+const CANONICAL_ORIGIN = 'https://educate-strong-academy.vercel.app';
 
 export default function KnowledgeArticlePage() {
   const { slug } = useParams<{ slug: string }>();
-  const article = KNOWLEDGE_ARTICLES.find(a => a.slug === slug);
+  const approved = Boolean(slug && isApprovedKnowledgeSlug(slug));
+
+  const [article, setArticle] = useState<SanityKnowledgeArticle | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useDocumentHead({
-    title: article ? `${article.title} — Knowledge Hub` : 'Article Not Found',
-    description: article?.summary,
+    title: article ? article.seoTitle || article.title : 'Article Not Found',
+    description: article?.metaDescription,
+    canonical: article ? `${CANONICAL_ORIGIN}/knowledge/${article.slug}` : undefined,
   });
 
-  if (!article) {
+  useEffect(() => {
+    if (!slug) return;
+    if (!approved) {
+      setLoading(false);
+      return;
+    }
+    if (!isSanityConfigured) {
+      setError('Knowledge Hub content is not available right now.');
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    getKnowledgeArticleBySlug(slug)
+      .then(setArticle)
+      .catch(() => setError('Failed to load this article.'))
+      .finally(() => setLoading(false));
+  }, [slug, approved]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-es-muted">Loading…</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!approved || error || !article) {
     return (
       <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <h2 className="text-2xl font-black text-white mb-2">Article not found</h2>
+            {error && <p className="text-es-muted text-sm mb-4">{error}</p>}
             <Link to="/knowledge" className="text-sm font-medium" style={{ color: '#A41C64' }}>
               Back to Knowledge Hub
             </Link>
@@ -39,100 +73,60 @@ export default function KnowledgeArticlePage() {
     );
   }
 
-  const categoryLabel = KNOWLEDGE_CATEGORIES.find(c => c.id === article.category)?.label || article.category;
-
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
       <Navbar />
 
       <main className="flex-1">
-        {/* Article header */}
         <div className="pt-navbar" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C' }}>
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-            {/* Breadcrumb */}
             <nav className="flex items-center gap-2 text-xs mb-5" style={{ color: '#A41C64' }}>
-              <Link to="/knowledge" className="hover:text-white transition-colors" style={{ color: '#A41C64' }}>Knowledge Hub</Link>
-              <span className="text-es-subtle">/</span>
-              <span style={{ color: '#A41C64' }}>{categoryLabel}</span>
+              <Link to="/knowledge" className="hover:text-white transition-colors" style={{ color: '#A41C64' }}>
+                Knowledge Hub
+              </Link>
+              {article.pathway && (
+                <>
+                  <span className="text-es-subtle">/</span>
+                  <span style={{ color: '#A41C64' }}>{article.pathway.title}</span>
+                </>
+              )}
             </nav>
 
-            <div className="flex items-center gap-2 mb-3">
-              <span className={LEVEL_COLOUR[article.level] || 'badge-grey'}>{article.level}</span>
-              <span className="text-xs text-es-subtle">{article.readTime}</span>
-            </div>
-
             <h1 className="text-3xl md:text-4xl font-black text-white leading-tight mb-4" style={{ letterSpacing: '-0.03em' }}>
-              {article.title}
+              {article.h1 || article.title}
             </h1>
-            <p className="text-es-muted text-lg leading-relaxed max-w-2xl">{article.summary}</p>
+            {article.metaDescription && (
+              <p className="text-es-muted text-lg leading-relaxed max-w-2xl">{article.metaDescription}</p>
+            )}
           </div>
         </div>
 
-        {/* Article body */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="space-y-4">
-            {article.body.split('\n\n').map((para, i) => (
-              <p key={i} className="text-es-muted leading-relaxed text-base">{para}</p>
-            ))}
-            <div style={{ borderTop: '1px solid #2C2C2C', marginTop: '24px', paddingTop: '16px' }}>
-              <p className="text-xs text-es-subtle italic">
-                Content reviewed by the Educate.Strong coaching team. This article is for educational reference — it does not replace qualified instruction or professional coaching.
-              </p>
+          <PortableTextRenderer value={article.body} />
+
+          {article.faq && article.faq.length > 0 && (
+            <div className="mt-12 pt-8" style={{ borderTop: '1px solid #2C2C2C' }}>
+              <h3 className="font-bold text-white mb-4 text-lg">Frequently Asked Questions</h3>
+              <FaqAccordion items={article.faq} />
             </div>
-          </div>
+          )}
 
-          {/* Soft paywall CTA — free overview, paid depth */}
-          <div
-            className="mt-10 rounded-xl p-6"
-            style={{ background: 'rgba(164,28,100,0.06)', border: '1px solid rgba(164,28,100,0.2)' }}
-          >
-            <p className="font-bold text-white mb-2">Want the full coaching framework?</p>
-            <p className="text-es-muted text-sm leading-relaxed mb-4">
-              This topic is covered in depth inside the Level 1 Coaching Strongman course.
-            </p>
-            <Link to="/courses/level-1-coaching-strongman" className="text-sm font-semibold" style={{ color: '#A41C64' }}>
-              Explore the Level 1 Coaching course →
-            </Link>
-          </div>
+          <PublicReferencesList items={article.publicReferences} />
 
-          {/* Related content */}
-          <div className="mt-12 pt-8" style={{ borderTop: '1px solid #2C2C2C' }}>
-            <h3 className="font-bold text-es-muted mb-4 text-sm uppercase tracking-wide">
-              Related resources
-            </h3>
-            <div className="grid sm:grid-cols-2 gap-3">
-              <Link
-                to={`/knowledge?category=${article.category}`}
-                className="flex items-center gap-3 es-card p-4 hover:border-es-accent transition-colors"
-              >
-                <div className="w-8 h-8 rounded flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(164,28,100,0.1)', border: '1px solid rgba(164,28,100,0.2)' }}>
-                  <svg className="w-4 h-4" style={{ color: '#A41C64' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-xs text-es-subtle mb-0.5">More in</p>
-                  <p className="text-sm font-semibold text-white">{categoryLabel}</p>
-                </div>
-              </Link>
-              <Link
-                to="/courses"
-                className="flex items-center gap-3 es-card p-4 hover:border-es-accent transition-colors"
-              >
-                <div className="w-8 h-8 rounded flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(225,154,71,0.1)', border: '1px solid rgba(225,154,71,0.2)' }}>
-                  <svg className="w-4 h-4 text-es-amber" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-xs text-es-subtle mb-0.5">Continue your development</p>
-                  <p className="text-sm font-semibold text-white">Coaching Qualifications</p>
-                </div>
-              </Link>
+          {article.cta?.ctaText && (
+            <div
+              className="mt-10 rounded-xl p-6"
+              style={{ background: 'rgba(164,28,100,0.06)', border: '1px solid rgba(164,28,100,0.2)' }}
+            >
+              <p className="text-es-muted text-sm leading-relaxed">{article.cta.ctaText}</p>
+              {article.cta.destinationUrl && (
+                <Link to={article.cta.destinationUrl} className="text-sm font-semibold" style={{ color: '#A41C64' }}>
+                  Learn more →
+                </Link>
+              )}
             </div>
-          </div>
+          )}
 
-          {/* Back navigation */}
           <div className="mt-10">
             <Link
               to="/knowledge"
