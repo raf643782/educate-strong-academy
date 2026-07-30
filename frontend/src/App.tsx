@@ -166,6 +166,7 @@ export default function App() {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/refund-policy" element={<RefundPolicy />} />
           <Route path="/knowledge" element={<KnowledgeHub />} />
+          <Route path="/knowledge/start-strongman-safely" element={<Navigate to="/knowledge/strongman-for-beginners" replace />} />
           <Route path="/knowledge/:slug" element={<KnowledgeArticlePage />} />
           {/* Sanity Stage 1 proof-of-concept — never linked in nav. Does not
               affect /knowledge above. See /sanity/README.md for Stage 2 plan. */}

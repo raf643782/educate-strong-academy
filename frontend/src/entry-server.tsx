@@ -32,11 +32,12 @@ import { pickRelatedExercises, pickEventsForExercise, pickExercisesForEvent, pic
 import { apiToPublicSlug } from './lib/exerciseSlugs';
 
 export { apiToPublicSlug, API_TO_PUBLIC_SLUG, publicToApiSlug } from './lib/exerciseSlugs';
-// Stage 8: re-exported so the build-time sitemap generator can read the
-// exact same Knowledge Hub article list the site actually renders (the
-// hardcoded array, not the separate/different DB-seeded KnowledgeArticle
-// table the frontend does not read from) — one source, no drift.
-export { KNOWLEDGE_ARTICLES } from './data/knowledgeArticles';
+// Re-exported so the build-time sitemap generator can read the exact same
+// Knowledge Hub slugs the site actually renders at /knowledge/:slug. As of
+// the Sanity cutover, that's the approved-manifest slug list — not the old
+// hardcoded knowledgeArticles.ts array, which /knowledge/:slug no longer
+// reads from at all.
+export { getApprovedKnowledgeSlugs } from './lib/approvedKnowledgeArticles';
 
 interface ExerciseRenderInput {
   type: 'exercise';

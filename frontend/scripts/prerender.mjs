@@ -192,7 +192,7 @@ async function getRedirectSourcePaths() {
  * article whose accessLevel is ENROLLED/CERTIFIED rather than FREE
  * (private course content).
  */
-async function generateSitemapAndRobots({ allExercises, allEvents, apiToPublicSlug, knowledgeArticles }) {
+async function generateSitemapAndRobots({ allExercises, allEvents, apiToPublicSlug, knowledgeSlugs }) {
   const urls = new Set(STATIC_PUBLIC_ROUTES);
   const redirectSources = await getRedirectSourcePaths();
 
@@ -203,9 +203,11 @@ async function generateSitemapAndRobots({ allExercises, allEvents, apiToPublicSl
   // is not itself the "real" page a crawler should be told to index.
   // redirectSources is read directly from vercel.json's own `redirects`
   // array (see getRedirectSourcePaths), so this can never drift out of
-  // sync with whatever redirects actually exist there.
-  for (const a of knowledgeArticles) {
-    const url = `/knowledge/${a.slug}`;
+  // sync with whatever redirects actually exist there. knowledgeSlugs is
+  // the approved-manifest slug list — the only slugs /knowledge/:slug
+  // actually serves post-Sanity-cutover.
+  for (const slug of knowledgeSlugs) {
+    const url = `/knowledge/${slug}`;
     if (!redirectSources.has(url)) urls.add(url);
   }
 
@@ -293,7 +295,7 @@ function validateGeneratedPage({ label, html, meta }) {
 }
 
 async function main() {
-  const { render, apiToPublicSlug, KNOWLEDGE_ARTICLES } = await import(path.join(FRONTEND_ROOT, 'dist-server', 'entry-server.js'));
+  const { render, apiToPublicSlug, getApprovedKnowledgeSlugs } = await import(path.join(FRONTEND_ROOT, 'dist-server', 'entry-server.js'));
 
   const template = await readFile(path.join(DIST_DIR, 'index.html'), 'utf-8');
 
@@ -395,7 +397,7 @@ async function main() {
     allExercises,
     allEvents,
     apiToPublicSlug,
-    knowledgeArticles: KNOWLEDGE_ARTICLES,
+    knowledgeSlugs: getApprovedKnowledgeSlugs(),
   });
 }
 
