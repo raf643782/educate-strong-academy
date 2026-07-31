@@ -59,7 +59,7 @@ export default function CourseHero({
             ) : isEnrolled ? (
               <span className="btn-primary text-sm opacity-70">Enrolled in Online Materials</span>
             ) : (
-              <Link to={registerInterestHref} className="btn-primary text-sm">Secure Your Place</Link>
+              <Link to={registerInterestHref} className="btn-primary text-sm">Register Interest</Link>
             )}
             <a href="#course-details" className="text-es-muted hover:text-white text-sm transition-colors">
               View course details
