@@ -26,23 +26,24 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3002;
 
-// Allow multiple origins: local dev + Vercel production
+// Explicit production allowlist. Add to this list if and only if a new
+// first-party origin needs credentialed API access. Never use a wildcard
+// or substring match in production — it would allow any Vercel project
+// or any site that shares a domain suffix to make authenticated requests.
 const allowedOrigins = [
   'http://localhost:5174',
   'http://localhost:3000',
-  'https://educate-strong.vercel.app',
-  process.env.FRONTEND_URL,
+  'https://educate-strong-academy.vercel.app', // Vercel production (current)
+  'https://educatestrong.com',                  // apex — ready for domain cutover
+  'https://www.educatestrong.com',              // www — ready for domain cutover
+  process.env.FRONTEND_URL,                     // override via Render env var if needed
 ].filter(Boolean) as string[];
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (Render health checks, Postman, etc.)
+    // Allow requests with no origin (Render health checks, Postman, curl, etc.)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    // Also allow any *.vercel.app preview deployment
-    if (origin.includes('vercel.app')) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
     callback(new Error(`CORS: origin ${origin} not allowed`));
   },
   credentials: true,
