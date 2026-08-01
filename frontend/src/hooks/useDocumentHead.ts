@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 const SITE_NAME = 'Educate.Strong Academy';
-const DEFAULT_OG_IMAGE = '/assets/atlas-stone-branded.png';
+const DEFAULT_OG_IMAGE = 'https://educate-strong-academy.vercel.app/assets/atlas-stone-branded.png';
 
 interface HeadOptions {
   title: string;
