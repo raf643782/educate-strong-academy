@@ -18,10 +18,10 @@ export default function CourseFinalCTA({ courseTitle, contactEmail, interestType
       <div className="es-container-wide py-16 md:py-20">
         <div className="max-w-2xl">
           <h2 className="text-2xl md:text-3xl font-black text-white mb-3" style={{ letterSpacing: '-0.03em' }}>Ready to Take the Next Step?</h2>
-          <p className="text-es-muted mb-2">Spaces are limited. Contact Educate.Strong to secure your place.</p>
-          <p className="text-es-subtle text-sm mb-8">Deposit: £{pricing.deposit} — Total: £{pricing.totalFee}. Booking details confirmed directly.</p>
+          <p className="text-es-muted mb-2">Spaces are limited. Register your interest and Educate.Strong will be in touch with booking details.</p>
+          <p className="text-es-subtle text-sm mb-8">Deposit: £{pricing.deposit} — Total: £{pricing.totalFee}. Booking details confirmed on reply.</p>
           <div className="flex flex-wrap gap-4">
-            <Link to={registerInterestHref} className="btn-primary">Secure Your Place</Link>
+            <Link to={registerInterestHref} className="btn-primary">Register Interest</Link>
             <a href={contactHref} className="btn-secondary">Contact Educate.Strong</a>
           </div>
         </div>
