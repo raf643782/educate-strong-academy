@@ -211,7 +211,7 @@ export default function Login() {
     <div style={{ minHeight: '100vh', background: '#050506', display: 'flex', flexDirection: 'column' }}>
       <Navbar />
 
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '88px 20px 56px' }}>
+      <main id="main-content" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '88px 20px 56px' }}>
         <div style={{ width: '100%', maxWidth: '480px' }}>
 
           {/* Logo */}
@@ -300,7 +300,7 @@ export default function Login() {
 
             {/* Error banner */}
             {error && (
-              <div style={{
+              <div role="alert" style={{
                 marginBottom: '20px',
                 padding: '12px 16px',
                 background: 'rgba(239,68,68,0.08)',
@@ -316,7 +316,7 @@ export default function Login() {
 
             {/* Redirect notice banner */}
             {notice && (
-              <div style={{
+              <div role="status" style={{
                 marginBottom: '20px',
                 padding: '12px 16px',
                 background: 'rgba(164,28,100,0.1)',
@@ -333,8 +333,9 @@ export default function Login() {
             {/* Form — one single sign-in form for every workspace */}
             <form onSubmit={handleSubmit} noValidate>
               <div style={{ marginBottom: '16px' }}>
-                <label style={labelStyle}>Email address</label>
+                <label htmlFor="login-email" style={labelStyle}>Email address</label>
                 <input
+                  id="login-email"
                   type="email"
                   value={email}
                   onChange={e => { setEmail(e.target.value); if (fieldErrors.email) setFieldErrors(f => ({ ...f, email: undefined })); }}
@@ -342,20 +343,22 @@ export default function Login() {
                   placeholder="you@example.com"
                   style={{ ...inputStyle, borderColor: fieldErrors.email ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.10)' }}
                   autoComplete="email"
+                  aria-describedby={fieldErrors.email ? 'login-email-error' : undefined}
                 />
                 {fieldErrors.email && (
-                  <p style={{ marginTop: '6px', fontSize: '12px', color: 'rgba(239,68,68,0.85)' }}>{fieldErrors.email}</p>
+                  <p id="login-email-error" role="alert" style={{ marginTop: '6px', fontSize: '12px', color: 'rgba(239,68,68,0.85)' }}>{fieldErrors.email}</p>
                 )}
               </div>
 
               <div style={{ marginBottom: '24px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '7px' }}>
-                  <label style={{ ...labelStyle, marginBottom: 0 }}>Password</label>
+                  <label htmlFor="login-password" style={{ ...labelStyle, marginBottom: 0 }}>Password</label>
                   <Link to="/forgot-password" style={{ fontSize: '13px', color: '#C2186A', fontWeight: 600, textDecoration: 'none' }}>
                     Forgot password?
                   </Link>
                 </div>
                 <input
+                  id="login-password"
                   type="password"
                   value={password}
                   onChange={e => { setPassword(e.target.value); if (fieldErrors.password) setFieldErrors(f => ({ ...f, password: undefined })); }}
@@ -363,9 +366,10 @@ export default function Login() {
                   placeholder="••••••••"
                   style={{ ...inputStyle, borderColor: fieldErrors.password ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.10)' }}
                   autoComplete="current-password"
+                  aria-describedby={fieldErrors.password ? 'login-password-error' : undefined}
                 />
                 {fieldErrors.password && (
-                  <p style={{ marginTop: '6px', fontSize: '12px', color: 'rgba(239,68,68,0.85)' }}>{fieldErrors.password}</p>
+                  <p id="login-password-error" role="alert" style={{ marginTop: '6px', fontSize: '12px', color: 'rgba(239,68,68,0.85)' }}>{fieldErrors.password}</p>
                 )}
               </div>
 
@@ -409,7 +413,7 @@ export default function Login() {
           </p>
 
         </div>
-      </div>
+      </main>
     </div>
   );
 }

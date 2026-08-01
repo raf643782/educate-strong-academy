@@ -99,7 +99,7 @@ export default function Register() {
     <div style={{ minHeight: '100vh', background: '#0D0D0D', display: 'flex', flexDirection: 'column' }}>
       <Navbar />
 
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 16px 48px' }}>
+      <main id="main-content" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 16px 48px' }}>
         <div style={{ width: '100%', maxWidth: '400px' }}>
 
           {/* Header */}
@@ -116,7 +116,7 @@ export default function Register() {
           {/* Form card */}
           <div style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '24px' }}>
             {error && (
-              <div style={{ marginBottom: '16px', padding: '10px 14px', background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px', color: 'rgba(239,68,68,0.9)', fontSize: '13px' }}>
+              <div role="alert" style={{ marginBottom: '16px', padding: '10px 14px', background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px', color: 'rgba(239,68,68,0.9)', fontSize: '13px' }}>
                 {error}
               </div>
             )}
@@ -125,62 +125,77 @@ export default function Register() {
               {/* Name row */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
                 <div>
-                  <label style={labelStyle}>First Name</label>
+                  <label htmlFor="reg-first-name" style={labelStyle}>First Name</label>
                   <input
+                    id="reg-first-name"
                     type="text"
                     value={form.firstName}
                     onChange={set('firstName')}
                     required
                     placeholder="Jane"
+                    autoComplete="given-name"
+                    aria-describedby={fieldErrors.firstName ? 'reg-first-name-error' : undefined}
                     style={{ ...inputStyle, borderColor: fieldErrors.firstName ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.1)' }}
                   />
                   {fieldErrors.firstName && (
-                    <p style={{ marginTop: '5px', fontSize: '12px', color: 'rgba(239,68,68,0.8)' }}>{fieldErrors.firstName}</p>
+                    <p id="reg-first-name-error" role="alert" style={{ marginTop: '5px', fontSize: '12px', color: 'rgba(239,68,68,0.8)' }}>{fieldErrors.firstName}</p>
                   )}
                 </div>
                 <div>
-                  <label style={labelStyle}>Last Name</label>
+                  <label htmlFor="reg-last-name" style={labelStyle}>Last Name</label>
                   <input
+                    id="reg-last-name"
                     type="text"
                     value={form.lastName}
                     onChange={set('lastName')}
                     required
                     placeholder="Smith"
+                    autoComplete="family-name"
+                    aria-describedby={fieldErrors.lastName ? 'reg-last-name-error' : undefined}
                     style={{ ...inputStyle, borderColor: fieldErrors.lastName ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.1)' }}
                   />
                   {fieldErrors.lastName && (
-                    <p style={{ marginTop: '5px', fontSize: '12px', color: 'rgba(239,68,68,0.8)' }}>{fieldErrors.lastName}</p>
+                    <p id="reg-last-name-error" role="alert" style={{ marginTop: '5px', fontSize: '12px', color: 'rgba(239,68,68,0.8)' }}>{fieldErrors.lastName}</p>
                   )}
                 </div>
               </div>
 
               {/* Email */}
               <div style={{ marginBottom: '14px' }}>
-                <label style={labelStyle}>Email</label>
+                <label htmlFor="reg-email" style={labelStyle}>Email</label>
                 <input
+                  id="reg-email"
                   type="email"
                   value={form.email}
                   onChange={set('email')}
                   required
                   placeholder="you@example.com"
+                  autoComplete="email"
+                  aria-describedby={fieldErrors.email ? 'reg-email-error' : undefined}
                   style={{ ...inputStyle, borderColor: fieldErrors.email ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.1)' }}
                 />
                 {fieldErrors.email && (
-                  <p style={{ marginTop: '5px', fontSize: '12px', color: 'rgba(239,68,68,0.8)' }}>{fieldErrors.email}</p>
+                  <p id="reg-email-error" role="alert" style={{ marginTop: '5px', fontSize: '12px', color: 'rgba(239,68,68,0.8)' }}>{fieldErrors.email}</p>
                 )}
               </div>
 
               {/* Password */}
               <div style={{ marginBottom: '8px' }}>
-                <label style={labelStyle}>Password</label>
+                <label htmlFor="reg-password" style={labelStyle}>Password</label>
                 <input
+                  id="reg-password"
                   type="password"
                   value={form.password}
                   onChange={set('password')}
                   required
                   placeholder="••••••••"
+                  autoComplete="new-password"
+                  aria-describedby={fieldErrors.password ? 'reg-password-error' : undefined}
                   style={{ ...inputStyle, borderColor: fieldErrors.password ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.1)' }}
                 />
+                {fieldErrors.password && (
+                  <p id="reg-password-error" role="alert" style={{ marginTop: '5px', fontSize: '12px', color: 'rgba(239,68,68,0.8)' }}>{fieldErrors.password}</p>
+                )}
               </div>
 
               {/* Strength rules */}
@@ -210,13 +225,16 @@ export default function Register() {
 
               {/* Confirm password */}
               <div style={{ marginBottom: '20px' }}>
-                <label style={labelStyle}>Confirm Password</label>
+                <label htmlFor="reg-confirm" style={labelStyle}>Confirm Password</label>
                 <input
+                  id="reg-confirm"
                   type="password"
                   value={form.confirm}
                   onChange={set('confirm')}
                   required
                   placeholder="••••••••"
+                  autoComplete="new-password"
+                  aria-describedby={form.confirm.length > 0 && form.confirm !== form.password ? 'reg-confirm-error' : undefined}
                   style={{
                     ...inputStyle,
                     borderColor: form.confirm.length > 0 && form.confirm !== form.password
@@ -225,7 +243,7 @@ export default function Register() {
                   }}
                 />
                 {form.confirm.length > 0 && form.confirm !== form.password && (
-                  <p style={{ marginTop: '5px', fontSize: '12px', color: 'rgba(239,68,68,0.8)' }}>Passwords do not match.</p>
+                  <p id="reg-confirm-error" role="alert" style={{ marginTop: '5px', fontSize: '12px', color: 'rgba(239,68,68,0.8)' }}>Passwords do not match.</p>
                 )}
               </div>
 
@@ -267,7 +285,7 @@ export default function Register() {
           </p>
 
         </div>
-      </div>
+      </main>
     </div>
   );
 }

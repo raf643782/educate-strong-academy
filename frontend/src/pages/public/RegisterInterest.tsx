@@ -68,7 +68,7 @@ export default function RegisterInterest() {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
       <Navbar />
-      <div className="pt-navbar flex-1 flex items-center justify-center px-4 py-16">
+      <main id="main-content" className="pt-navbar flex-1 flex items-center justify-center px-4 py-16">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <p className="es-label mb-3">Register Interest</p>
@@ -90,53 +90,64 @@ export default function RegisterInterest() {
             ) : (
               <form onSubmit={handleSubmit} noValidate className="space-y-4">
                 {status === 'error' && (
-                  <div className="mb-2 p-3 rounded text-sm text-red-400 border border-red-900/40" style={{ background: 'rgba(239,68,68,0.06)' }}>
+                  <div role="alert" className="mb-2 p-3 rounded text-sm text-red-400 border border-red-900/40" style={{ background: 'rgba(239,68,68,0.06)' }}>
                     {errorMsg}
                   </div>
                 )}
                 <div>
-                  <label className="block text-xs font-semibold text-es-muted mb-1.5 uppercase tracking-wide">Name</label>
+                  <label htmlFor="ri-name" className="block text-xs font-semibold text-es-muted mb-1.5 uppercase tracking-wide">Name</label>
                   <input
+                    id="ri-name"
                     type="text"
                     value={name}
                     onChange={e => { setName(e.target.value); if (fieldErrors.name) setFieldErrors(f => ({ ...f, name: undefined })); }}
                     maxLength={150}
+                    autoComplete="name"
+                    aria-required="true"
+                    aria-describedby={fieldErrors.name ? 'ri-name-error' : undefined}
                     className="w-full px-4 py-3 rounded-es text-sm text-white placeholder-es-subtle border border-es-grey-dark focus:border-es-accent focus:outline-none transition-colors"
                     style={{ background: '#1C1C1C', borderColor: fieldErrors.name ? 'rgba(239,68,68,0.5)' : undefined }}
                   />
                   {fieldErrors.name && (
-                    <p className="text-xs mt-1.5" style={{ color: 'rgba(239,68,68,0.85)' }}>{fieldErrors.name}</p>
+                    <p id="ri-name-error" role="alert" className="text-xs mt-1.5" style={{ color: 'rgba(239,68,68,0.85)' }}>{fieldErrors.name}</p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-es-muted mb-1.5 uppercase tracking-wide">Email address</label>
+                  <label htmlFor="ri-email" className="block text-xs font-semibold text-es-muted mb-1.5 uppercase tracking-wide">Email address</label>
                   <input
+                    id="ri-email"
                     type="email"
                     value={email}
                     onChange={e => { setEmail(e.target.value); if (fieldErrors.email) setFieldErrors(f => ({ ...f, email: undefined })); }}
                     maxLength={200}
+                    autoComplete="email"
+                    aria-required="true"
+                    aria-describedby={fieldErrors.email ? 'ri-email-error' : undefined}
                     className="w-full px-4 py-3 rounded-es text-sm text-white placeholder-es-subtle border border-es-grey-dark focus:border-es-accent focus:outline-none transition-colors"
                     style={{ background: '#1C1C1C', borderColor: fieldErrors.email ? 'rgba(239,68,68,0.5)' : undefined }}
                     placeholder="you@example.com"
                   />
                   {fieldErrors.email && (
-                    <p className="text-xs mt-1.5" style={{ color: 'rgba(239,68,68,0.85)' }}>{fieldErrors.email}</p>
+                    <p id="ri-email-error" role="alert" className="text-xs mt-1.5" style={{ color: 'rgba(239,68,68,0.85)' }}>{fieldErrors.email}</p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-es-muted mb-1.5 uppercase tracking-wide">Postcode (optional)</label>
+                  <label htmlFor="ri-postcode" className="block text-xs font-semibold text-es-muted mb-1.5 uppercase tracking-wide">Postcode (optional)</label>
                   <input
+                    id="ri-postcode"
                     type="text"
                     value={postcode}
                     onChange={e => setPostcode(e.target.value)}
                     maxLength={20}
+                    autoComplete="postal-code"
                     className="w-full px-4 py-3 rounded-es text-sm text-white placeholder-es-subtle border border-es-grey-dark focus:border-es-accent focus:outline-none transition-colors"
                     style={{ background: '#1C1C1C' }}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-es-muted mb-1.5 uppercase tracking-wide">Message (optional)</label>
+                  <label htmlFor="ri-message" className="block text-xs font-semibold text-es-muted mb-1.5 uppercase tracking-wide">Message (optional)</label>
                   <textarea
+                    id="ri-message"
                     value={message}
                     onChange={e => setMessage(e.target.value)}
                     maxLength={2000}
@@ -162,7 +173,7 @@ export default function RegisterInterest() {
             </Link>
           </p>
         </div>
-      </div>
+      </main>
       <Footer />
     </div>
   );
