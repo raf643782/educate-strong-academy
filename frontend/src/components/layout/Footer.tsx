@@ -143,7 +143,7 @@ function NewsletterForm() {
       )}
 
       {status === 'error' && (
-        <p className="text-red-400 text-xs mt-2">{errorMsg}</p>
+        <p role="alert" className="text-red-400 text-xs mt-2">{errorMsg}</p>
       )}
     </div>
   );
@@ -232,11 +232,12 @@ export default function Footer() {
           </div>
 
           {/* Nav columns */}
+          <nav aria-label="Footer navigation" className="contents">
           {NAV_COLS.map(col => (
             <div key={col.heading}>
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/30 mb-4">
+              <h3 className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/30 mb-4">
                 {col.heading}
-              </p>
+              </h3>
               <ul className="space-y-2.5">
                 {col.links.map(link => (
                   <li key={link.to}>
@@ -251,6 +252,7 @@ export default function Footer() {
               </ul>
             </div>
           ))}
+          </nav>
         </div>
       </div>
 

@@ -496,6 +496,7 @@ export default function CourseDetail() {
                             >
                               <div className="flex items-center gap-3">
                                 <svg
+                                  aria-hidden="true"
                                   className="w-4 h-4 text-es-subtle flex-shrink-0"
                                   fill="none"
                                   viewBox="0 0 24 24"

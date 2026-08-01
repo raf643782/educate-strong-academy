@@ -158,6 +158,13 @@ export default function Navbar() {
       role="navigation"
       aria-label="Main navigation"
     >
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-4 focus:z-[200] focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-semibold focus:text-white"
+        style={{ background: '#A41C64' }}
+      >
+        Skip to main content
+      </a>
       <div className="es-container">
         <div className={`flex items-center justify-between ${navH} transition-all duration-300`}>
 
