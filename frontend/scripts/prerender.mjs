@@ -120,9 +120,10 @@ function injectHead(html, meta) {
     /<meta property="og:description" content=".*?" \/>/,
     `<meta property="og:description" content="${escapeHtml(meta.ogDescription)}" />`
   );
+  // og:url should equal the canonical URL per the OpenGraph spec
   out = out.replace(
     '</head>',
-    `    <link rel="canonical" href="${meta.canonical}" />\n  </head>`
+    `    <meta property="og:url" content="${meta.canonical}" />\n    <link rel="canonical" href="${meta.canonical}" />\n  </head>`
   );
   return out;
 }

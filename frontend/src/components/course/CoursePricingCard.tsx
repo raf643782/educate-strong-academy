@@ -69,10 +69,10 @@ export default function CoursePricingCard({ pricing, contactEmail, interestType 
             {/* CTAs */}
             <div className="px-6 py-5" style={{ background: '#1B1B20' }}>
               <Link to={registerInterestHref} className="btn-primary w-full text-center block text-sm mb-3">
-                Secure Your Place
+                Register Interest
               </Link>
               <p className="text-xs text-es-subtle text-center mb-4">
-                Secure your place by contacting Educate.Strong directly. Booking details confirmed on reply.
+                Submit your interest — Educate.Strong will confirm availability and send booking details.
               </p>
               {pricing.armedForcesNote && (
                 <a href={armedForcesHref} className="btn-secondary w-full text-center block text-sm">

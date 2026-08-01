@@ -89,6 +89,8 @@ export default function Home() {
     <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
       <Navbar />
 
+      <main id="main-content">
+
       {/* ─────────────────────────────────────────────────────────── */}
       {/* 1. HERO                                                     */}
       {/* ─────────────────────────────────────────────────────────── */}
@@ -468,6 +470,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      </main>
 
       <Footer />
     </div>

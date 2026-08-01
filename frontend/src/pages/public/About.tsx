@@ -219,7 +219,7 @@ export default function About() {
                   <ul className="space-y-1.5 mb-5">
                     {member.credentials.map(c => (
                       <li key={c} className="flex items-start gap-2.5 text-sm text-es-muted">
-                        <svg className="w-4 h-4 text-es-accent mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" className="w-4 h-4 text-es-accent mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                         {c}
