@@ -300,7 +300,11 @@ function validateGeneratedPage({ label, html, meta }) {
 }
 
 async function main() {
-  const { render, renderKnowledge, renderCourse, apiToPublicSlug, KNOWLEDGE_ARTICLES } = await import(path.join(FRONTEND_ROOT, 'dist-server', 'entry-server.js'));
+  const {
+    render, renderKnowledge, renderCourse,
+    renderAbout, renderCoachingPathway, renderStrongKidz,
+    apiToPublicSlug, KNOWLEDGE_ARTICLES,
+  } = await import(path.join(FRONTEND_ROOT, 'dist-server', 'entry-server.js'));
 
   const template = await readFile(path.join(DIST_DIR, 'index.html'), 'utf-8');
 
@@ -416,7 +420,24 @@ async function main() {
   }
   console.log(`[prerender] wrote ${coursesWritten}/${COURSE_SLUGS.length} course page(s)`);
 
-  const intendedCount = exercisesToRender.length + eventSlugsToRender.length + KNOWLEDGE_ARTICLES.length + coursesWritten;
+  // Static public pages — no API fetch needed, content is pure static JSX
+  const STATIC_PAGES = [
+    { slug: 'about', render: renderAbout },
+    { slug: 'coaching', render: renderCoachingPathway },
+    { slug: 'strongkidz', render: renderStrongKidz },
+  ];
+  for (const p of STATIC_PAGES) {
+    const { html, meta } = p.render();
+    validateGeneratedPage({ label: `/${p.slug}`, html, meta });
+    const outDir = path.join(DIST_DIR, p.slug);
+    await mkdir(outDir, { recursive: true });
+    const page = injectRoot(injectHead(template, meta), html);
+    await writeFile(path.join(outDir, 'index.html'), page);
+    written++;
+  }
+  console.log(`[prerender] wrote ${STATIC_PAGES.length} static page(s) (about, coaching, strongkidz)`);
+
+  const intendedCount = exercisesToRender.length + eventSlugsToRender.length + KNOWLEDGE_ARTICLES.length + coursesWritten + STATIC_PAGES.length;
   if (written !== intendedCount) {
     throw new PrerenderError(`Expected to write ${intendedCount} page(s) but wrote ${written}.`);
   }

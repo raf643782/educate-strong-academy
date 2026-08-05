@@ -30,7 +30,11 @@ import { EventDetailContent, type Event } from './pages/events/EventDetail';
 import { KnowledgeArticleContent } from './pages/knowledge/KnowledgeArticlePage';
 import { CourseDetailContent, type CourseAPI } from './pages/public/CourseDetail';
 import { COURSE_PAGE_DATA } from './data/coursePageData';
+import { AboutContent } from './pages/public/About';
+import { CoachingPathwayContent } from './pages/public/CoachingPathway';
+import { StrongKidzContent } from './pages/public/StrongKidz';
 import { buildExerciseMeta, buildEventMeta, buildKnowledgeArticleMeta, buildCourseMeta, type PageMeta } from './lib/libraryMeta';
+import { SITE_URL } from './lib/siteUrl';
 import { pickRelatedExercises, pickEventsForExercise, pickExercisesForEvent, pickRelatedEvents } from './lib/relatedContent';
 import { apiToPublicSlug } from './lib/exerciseSlugs';
 import type { KnowledgeArticle } from './data/knowledgeArticles';
@@ -158,6 +162,53 @@ export function renderCourse(course: CourseAPI): CourseRenderResult {
   const meta = buildCourseMeta(course, richData);
   const coursePayload = { type: 'course' as const, slug: course.slug, course };
   return { html, meta, coursePayload };
+}
+
+export interface StaticPageResult {
+  html: string;
+  meta: PageMeta;
+}
+
+export function renderAbout(): StaticPageResult {
+  const html = renderShell('/about', <AboutContent />);
+  return {
+    html,
+    meta: {
+      title: 'About',
+      description: 'Meet the team behind Educate.Strong Academy — champions and coaches building the standard for Strongman education.',
+      canonical: `${SITE_URL}/about`,
+      ogTitle: 'About — Educate Strong Academy',
+      ogDescription: 'Meet the team behind Educate.Strong Academy — champions and coaches building the standard for Strongman education.',
+    },
+  };
+}
+
+export function renderCoachingPathway(): StaticPageResult {
+  const html = renderShell('/coaching', <CoachingPathwayContent />, '#050506');
+  return {
+    html,
+    meta: {
+      title: 'Coaching Pathway',
+      description: 'Level 1 through Level 3 Strongman coaching qualifications and ongoing CPD — the full path to becoming an accredited Strongman coach.',
+      canonical: `${SITE_URL}/coaching`,
+      ogTitle: 'Coaching Pathway — Educate Strong Academy',
+      ogDescription: 'Level 1 through Level 3 Strongman coaching qualifications and ongoing CPD.',
+    },
+  };
+}
+
+export function renderStrongKidz(): StaticPageResult {
+  const html = renderShell('/strongkidz', <StrongKidzContent />, '#050506');
+  return {
+    html,
+    meta: {
+      title: 'StrongKidz — Youth Strength Programme in Sheffield',
+      description: "StrongKidz is Educate Strong's youth strength programme in Sheffield — movement, confidence and positive experiences of strength for children.",
+      canonical: `${SITE_URL}/strongkidz`,
+      ogTitle: 'StrongKidz — Youth Strength and Coach Education',
+      ogDescription: "StrongKidz — youth strength programme and coach certification for adults working with children.",
+    },
+  };
 }
 
 function renderShell(url: string, content: React.ReactNode, background = '#0D0D0D'): string {

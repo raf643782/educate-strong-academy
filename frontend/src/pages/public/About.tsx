@@ -98,16 +98,9 @@ const ACCREDITATIONS = [
   },
 ];
 
-export default function About() {
-  useDocumentHead({
-    title: 'About',
-    description: 'Meet the team behind Educate.Strong Academy — champions and coaches building the standard for Strongman education.',
-  });
-
+export function AboutContent() {
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
-      <Navbar />
-
+    <>
       {/* Hero */}
       <section
         className="pt-navbar relative"
@@ -285,6 +278,21 @@ export default function About() {
         </div>
       </section>
 
+    </>
+  );
+}
+
+export default function About() {
+  useDocumentHead({
+    title: 'About',
+    description: 'Meet the team behind Educate.Strong Academy — champions and coaches building the standard for Strongman education.',
+  });
+  return (
+    <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
+      <Navbar />
+      <main className="flex-1">
+        <AboutContent />
+      </main>
       <Footer />
     </div>
   );

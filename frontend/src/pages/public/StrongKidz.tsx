@@ -101,40 +101,10 @@ const COACH_FAQS = [
 
 const SCHEMA_ID = 'strongkidz-faq-schema';
 
-export default function StrongKidz() {
-  const canonicalUrl = `${SITE_URL}/strongkidz`;
-
-  useDocumentHead({
-    title: 'StrongKidz — Youth Strength Programme in Sheffield',
-    description:
-      "StrongKidz is Educate Strong's youth strength programme in Sheffield — movement, confidence and positive experiences of strength for children, coached by safeguarding-trained coaches. Also home to StrongKidz Coach Education for adults.",
-    canonical: canonicalUrl,
-  });
-
+export function StrongKidzContent() {
   const [tab, setTab] = useState<Tab>('parents');
   const parentsTabRef = useRef<HTMLButtonElement>(null);
   const coachesTabRef = useRef<HTMLButtonElement>(null);
-
-  // FAQPage schema — only for the real, visible FAQ content above.
-  useEffect(() => {
-    const allFaqs = [...PARENT_FAQS, ...COACH_FAQS];
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.id = SCHEMA_ID;
-    script.text = JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      mainEntity: allFaqs.map((f) => ({
-        '@type': 'Question',
-        name: f.q,
-        acceptedAnswer: { '@type': 'Answer', text: f.a },
-      })),
-    });
-    document.head.appendChild(script);
-    return () => {
-      document.getElementById(SCHEMA_ID)?.remove();
-    };
-  }, []);
 
   const switchTab = (next: Tab) => {
     setTab(next);
@@ -149,9 +119,7 @@ export default function StrongKidz() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
-      <Navbar />
-
+    <>
       {/* ── HERO ──────────────────────────────────────────────────────── */}
       <section
         className="pt-navbar relative overflow-hidden"
@@ -586,7 +554,47 @@ export default function StrongKidz() {
           <p className="text-xs mt-6" style={{ color: '#55555E' }}>No payment required at this stage.</p>
         </div>
       </section>
+    </>
+  );
+}
 
+export default function StrongKidz() {
+  const canonicalUrl = `${SITE_URL}/strongkidz`;
+
+  useDocumentHead({
+    title: 'StrongKidz — Youth Strength Programme in Sheffield',
+    description:
+      "StrongKidz is Educate Strong's youth strength programme in Sheffield — movement, confidence and positive experiences of strength for children, coached by safeguarding-trained coaches. Also home to StrongKidz Coach Education for adults.",
+    canonical: canonicalUrl,
+  });
+
+  // FAQPage schema — only for the real, visible FAQ content above. Client-side only.
+  useEffect(() => {
+    const allFaqs = [...PARENT_FAQS, ...COACH_FAQS];
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = SCHEMA_ID;
+    script.text = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: allFaqs.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    });
+    document.head.appendChild(script);
+    return () => {
+      document.getElementById(SCHEMA_ID)?.remove();
+    };
+  }, []);
+
+  return (
+    <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
+      <Navbar />
+      <main className="flex-1">
+        <StrongKidzContent />
+      </main>
       <Footer />
     </div>
   );
