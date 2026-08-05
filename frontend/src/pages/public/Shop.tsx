@@ -125,6 +125,7 @@ export default function Shop() {
   useDocumentHead({
     title: 'Shop',
     description: 'Training kit, academy apparel, and Strongman equipment built for the culture we teach.',
+    noindex: true,
   });
 
   return (

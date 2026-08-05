@@ -18,7 +18,7 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 type FieldErrors = { firstName?: string; lastName?: string; email?: string; password?: string; confirm?: string };
 
 export default function Register() {
-  useDocumentHead({ title: 'Create an Account' });
+  useDocumentHead({ title: 'Create an Account', noindex: true });
 
   const { login } = useAuth();
   const navigate = useNavigate();

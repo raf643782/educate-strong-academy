@@ -5,7 +5,7 @@ import api from '../../lib/api';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 export default function ResetPassword() {
-  useDocumentHead({ title: 'Set a New Password' });
+  useDocumentHead({ title: 'Set a New Password', noindex: true });
 
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
