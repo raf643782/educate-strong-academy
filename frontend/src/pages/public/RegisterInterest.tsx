@@ -4,6 +4,7 @@ import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import api from '../../lib/api';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
+import { trackEvent } from '../../lib/analytics';
 import { interestTypeLabel } from '../../data/registerInterestTypes';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -57,6 +58,7 @@ export default function RegisterInterest() {
         sourcePage: window.location.pathname + window.location.search,
       });
       setStatus('sent');
+      trackEvent('register_interest', { interest_type: type, course_interest: item || undefined });
     } catch (err: any) {
       setErrorMsg(err?.response?.data?.error || 'Something went wrong. Please try again.');
       setStatus('error');
