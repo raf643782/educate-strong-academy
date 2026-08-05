@@ -40,7 +40,7 @@ function CoachCard({ coach }: { coach: Coach }) {
           style={{ background: coach.photoUrl ? undefined : 'rgba(164,28,100,0.15)', border: '1px solid rgba(164,28,100,0.25)', color: '#C0246E' }}
         >
           {coach.photoUrl ? (
-            <img src={coach.photoUrl} alt={coach.displayName} className="w-full h-full object-cover" />
+            <img src={coach.photoUrl} alt={coach.displayName} className="w-full h-full object-cover" loading="lazy" />
           ) : (
             coach.displayName.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()
           )}

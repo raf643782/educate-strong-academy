@@ -258,7 +258,7 @@ export default function About() {
           </div>
           {/* British Army logo */}
           <div className="mt-8 flex items-center gap-4">
-            <img src="/assets/partner-british-army.webp" alt="British Army" className="h-10 w-auto opacity-60" onError={(e) => { (e.target as HTMLImageElement).src = '/assets/british-army-logo.webp'; }} />
+            <img src="/assets/partner-british-army.webp" alt="British Army" className="h-10 w-auto opacity-60" loading="lazy" onError={(e) => { (e.target as HTMLImageElement).src = '/assets/british-army-logo.webp'; }} />
             <p className="text-sm text-es-subtle">Armed Forces Strongman partner — educational support for serving and veteran personnel.</p>
           </div>
         </div>

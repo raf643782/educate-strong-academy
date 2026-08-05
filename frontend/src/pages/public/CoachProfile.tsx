@@ -144,7 +144,7 @@ export default function CoachProfile() {
             }}
           >
             {coach.photoUrl
-              ? <img src={coach.photoUrl} alt={coach.displayName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+              ? <img src={coach.photoUrl} alt={coach.displayName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
               : coach.displayName.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()}
           </div>
           <div>

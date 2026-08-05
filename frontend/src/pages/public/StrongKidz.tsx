@@ -408,7 +408,7 @@ export default function StrongKidz() {
               ].map(coach => (
                 <div key={coach.name} className="rounded-2xl overflow-hidden" style={{ background: '#151519', border: '1px solid rgba(255,255,255,0.07)' }}>
                   <div className="h-48" style={{ background: '#1B1B20' }}>
-                    <img src={coach.img} alt={coach.name} className="w-full h-full object-cover object-top" />
+                    <img src={coach.img} alt={coach.name} className="w-full h-full object-cover object-top" loading="lazy" />
                   </div>
                   <div className="p-5">
                     <p className="font-bold text-white mb-0.5">{coach.name}</p>
