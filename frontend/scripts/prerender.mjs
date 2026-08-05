@@ -117,8 +117,17 @@ function injectHead(html, meta) {
     /<meta property="og:description" content=".*?" \/>/,
     `<meta property="og:description" content="${escapeHtml(meta.ogDescription)}" />`
   );
-  // og:url must equal the canonical URL per the OpenGraph spec; og:image
-  // overrides the template default when this specific page has its own image.
+  // og:url must equal the canonical URL per the OpenGraph spec.
+  // og:image: use the page-specific image when provided; otherwise update
+  // the template default to use the env-aware SITE_URL so domain migration
+  // (setting VITE_SITE_URL in Vercel) propagates to all prerendered pages.
+  const defaultOgImage = `${SITE_URL}/assets/atlas-stone-branded.png`;
+  if (!meta.ogImage) {
+    out = out.replace(
+      /<meta property="og:image" content=".*?" \/>/,
+      `<meta property="og:image" content="${defaultOgImage}" />`
+    );
+  }
   const extraTags = [
     `    <meta property="og:url" content="${meta.canonical}" />`,
     `    <link rel="canonical" href="${meta.canonical}" />`,
