@@ -15,6 +15,7 @@ import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
 import { SITE_URL } from '../../lib/siteUrl';
+import BreadcrumbSchema from '../../components/content/BreadcrumbSchema';
 
 /* ── Pathway Steps ──────────────────────────────────────────────── */
 const STEPS = [
@@ -253,6 +254,7 @@ function EventCard({ event }: { event: typeof EVENTS[number] }) {
 export function CoachingPathwayContent() {
   return (
     <>
+      <BreadcrumbSchema items={[{ name: 'Home', path: '/' }, { name: 'Coaching Pathway', path: '/coaching' }]} />
       {/* ── 1. HERO ──────────────────────────────────────────────── */}
       <section
         className="relative overflow-hidden"

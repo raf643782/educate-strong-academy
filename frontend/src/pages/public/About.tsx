@@ -4,6 +4,7 @@ import Footer from '../../components/layout/Footer';
 import { CONTACT_EMAIL } from '../../lib/contact';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
 import { SITE_URL } from '../../lib/siteUrl';
+import BreadcrumbSchema from '../../components/content/BreadcrumbSchema';
 
 const TEAM = [
   {
@@ -102,6 +103,7 @@ const ACCREDITATIONS = [
 export function AboutContent() {
   return (
     <>
+      <BreadcrumbSchema items={[{ name: 'Home', path: '/' }, { name: 'About', path: '/about' }]} />
       {/* Hero */}
       <section
         className="pt-navbar relative"

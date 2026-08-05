@@ -5,6 +5,7 @@ import Footer from '../../components/layout/Footer';
 import { CONTACT_EMAIL } from '../../lib/contact';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
 import { SITE_URL } from '../../lib/siteUrl';
+import BreadcrumbSchema from '../../components/content/BreadcrumbSchema';
 
 type Tab = 'parents' | 'coaches';
 
@@ -120,6 +121,7 @@ export function StrongKidzContent() {
 
   return (
     <>
+      <BreadcrumbSchema items={[{ name: 'Home', path: '/' }, { name: 'StrongKidz', path: '/strongkidz' }]} />
       {/* ── HERO ──────────────────────────────────────────────────────── */}
       <section
         className="pt-navbar relative overflow-hidden"

@@ -5,6 +5,7 @@ import Footer from '../../components/layout/Footer';
 import { KNOWLEDGE_ARTICLES, KNOWLEDGE_CATEGORIES } from '../../data/knowledgeArticles';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
 import { SITE_URL } from '../../lib/siteUrl';
+import BreadcrumbSchema from '../../components/content/BreadcrumbSchema';
 
 const CATEGORIES = KNOWLEDGE_CATEGORIES;
 
@@ -44,6 +45,7 @@ export function KnowledgeHubContent() {
 
   return (
     <>
+      <BreadcrumbSchema items={[{ name: 'Home', path: '/' }, { name: 'Knowledge Hub', path: '/knowledge' }]} />
       {/* Header */}
       <section className="pt-navbar es-grit" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C', position: 'relative' }}>
         <div className="es-container py-16">
