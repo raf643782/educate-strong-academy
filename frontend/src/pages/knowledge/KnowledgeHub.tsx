@@ -4,6 +4,7 @@ import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import { KNOWLEDGE_ARTICLES, KNOWLEDGE_CATEGORIES } from '../../data/knowledgeArticles';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
+import { SITE_URL } from '../../lib/siteUrl';
 
 const CATEGORIES = KNOWLEDGE_CATEGORIES;
 
@@ -138,6 +139,7 @@ export default function KnowledgeHub() {
   useDocumentHead({
     title: 'Knowledge Hub',
     description: 'Practical articles, coaching guides, and evidence-based resources for Strongman coaches, referees, and athletes.',
+    canonical: `${SITE_URL}/knowledge`,
   });
 
   return (

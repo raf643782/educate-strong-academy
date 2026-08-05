@@ -14,6 +14,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
+import { SITE_URL } from '../../lib/siteUrl';
 
 /* ── Pathway Steps ──────────────────────────────────────────────── */
 const STEPS = [
@@ -500,6 +501,7 @@ export default function CoachingPathway() {
   useDocumentHead({
     title: 'Coaching Pathway',
     description: 'Level 1 through Level 3 Strongman coaching qualifications and ongoing CPD.',
+    canonical: `${SITE_URL}/coaching`,
   });
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>

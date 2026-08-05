@@ -3,6 +3,7 @@ import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import { CONTACT_EMAIL } from '../../lib/contact';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
+import { SITE_URL } from '../../lib/siteUrl';
 
 const TEAM = [
   {
@@ -286,6 +287,7 @@ export default function About() {
   useDocumentHead({
     title: 'About',
     description: 'Meet the team behind Educate.Strong Academy — champions and coaches building the standard for Strongman education.',
+    canonical: `${SITE_URL}/about`,
   });
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>

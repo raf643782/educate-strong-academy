@@ -53,6 +53,7 @@ export default function Home() {
     title: 'Educate.Strong Academy: Strongman Coaching, Refereeing and Strength Education',
     description:
       'Learn how strength is built through Strongman. Coaching, refereeing, StrongKidz and EatStrong, plus a full Knowledge Hub, Exercise Library and Event Library. Built and taught by people who compete.',
+    canonical: SITE_URL,
   });
 
   // Fire-and-forget: warms the Render free-tier API while the visitor
