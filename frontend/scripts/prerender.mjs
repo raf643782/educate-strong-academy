@@ -302,7 +302,7 @@ function validateGeneratedPage({ label, html, meta }) {
 async function main() {
   const {
     render, renderKnowledge, renderCourse,
-    renderAbout, renderCoachingPathway, renderStrongKidz,
+    renderAbout, renderCoachingPathway, renderStrongKidz, renderKnowledgeHub,
     apiToPublicSlug, KNOWLEDGE_ARTICLES,
   } = await import(path.join(FRONTEND_ROOT, 'dist-server', 'entry-server.js'));
 
@@ -425,6 +425,7 @@ async function main() {
     { slug: 'about', render: renderAbout },
     { slug: 'coaching', render: renderCoachingPathway },
     { slug: 'strongkidz', render: renderStrongKidz },
+    { slug: 'knowledge', render: renderKnowledgeHub },
   ];
   for (const p of STATIC_PAGES) {
     const { html, meta } = p.render();
@@ -435,7 +436,7 @@ async function main() {
     await writeFile(path.join(outDir, 'index.html'), page);
     written++;
   }
-  console.log(`[prerender] wrote ${STATIC_PAGES.length} static page(s) (about, coaching, strongkidz)`);
+  console.log(`[prerender] wrote ${STATIC_PAGES.length} static page(s) (about, coaching, strongkidz, knowledge)`);
 
   const intendedCount = exercisesToRender.length + eventSlugsToRender.length + KNOWLEDGE_ARTICLES.length + coursesWritten + STATIC_PAGES.length;
   if (written !== intendedCount) {

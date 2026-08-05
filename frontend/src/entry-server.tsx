@@ -33,6 +33,7 @@ import { COURSE_PAGE_DATA } from './data/coursePageData';
 import { AboutContent } from './pages/public/About';
 import { CoachingPathwayContent } from './pages/public/CoachingPathway';
 import { StrongKidzContent } from './pages/public/StrongKidz';
+import { KnowledgeHubContent } from './pages/knowledge/KnowledgeHub';
 import { buildExerciseMeta, buildEventMeta, buildKnowledgeArticleMeta, buildCourseMeta, type PageMeta } from './lib/libraryMeta';
 import { SITE_URL } from './lib/siteUrl';
 import { pickRelatedExercises, pickEventsForExercise, pickExercisesForEvent, pickRelatedEvents } from './lib/relatedContent';
@@ -207,6 +208,20 @@ export function renderStrongKidz(): StaticPageResult {
       canonical: `${SITE_URL}/strongkidz`,
       ogTitle: 'StrongKidz — Youth Strength and Coach Education',
       ogDescription: "StrongKidz — youth strength programme and coach certification for adults working with children.",
+    },
+  };
+}
+
+export function renderKnowledgeHub(): StaticPageResult {
+  const html = renderShell('/knowledge', <KnowledgeHubContent />);
+  return {
+    html,
+    meta: {
+      title: 'Knowledge Hub — Coaching Intelligence',
+      description: 'Practical articles, coaching guides, and evidence-based resources for Strongman coaches, referees, and athletes.',
+      canonical: `${SITE_URL}/knowledge`,
+      ogTitle: 'Knowledge Hub — Educate Strong Academy',
+      ogDescription: 'Practical articles, coaching guides, and evidence-based resources for Strongman coaches, referees, and athletes.',
     },
   };
 }

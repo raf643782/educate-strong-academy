@@ -16,12 +16,7 @@ const LEVEL_COLOUR: Record<string, string> = {
   Nutrition:   'badge-grey',
 };
 
-export default function KnowledgeHub() {
-  useDocumentHead({
-    title: 'Knowledge Hub',
-    description: 'Practical articles, coaching guides, and evidence-based resources for Strongman coaches, referees, and athletes.',
-  });
-
+export function KnowledgeHubContent() {
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryParam = searchParams.get('category') || 'all';
   const [activeCategory, setActiveCategory] = useState(
@@ -47,9 +42,7 @@ export default function KnowledgeHub() {
     : KNOWLEDGE_ARTICLES.filter(a => a.category === activeCategory);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
-      <Navbar />
-
+    <>
       {/* Header */}
       <section className="pt-navbar es-grit" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C', position: 'relative' }}>
         <div className="es-container py-16">
@@ -137,6 +130,22 @@ export default function KnowledgeHub() {
         </div>
       </section>
 
+    </>
+  );
+}
+
+export default function KnowledgeHub() {
+  useDocumentHead({
+    title: 'Knowledge Hub',
+    description: 'Practical articles, coaching guides, and evidence-based resources for Strongman coaches, referees, and athletes.',
+  });
+
+  return (
+    <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
+      <Navbar />
+      <main className="flex-1">
+        <KnowledgeHubContent />
+      </main>
       <Footer />
     </div>
   );
