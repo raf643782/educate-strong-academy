@@ -62,3 +62,19 @@ export function buildEventMeta(event: EventLike): PageMeta {
     ...(event.imageUrl ? { ogImage: event.imageUrl } : {}),
   };
 }
+
+export interface KnowledgeArticleLike {
+  slug: string;
+  title: string;
+  summary: string;
+}
+
+export function buildKnowledgeArticleMeta(article: KnowledgeArticleLike): PageMeta {
+  return {
+    title: `${article.title} — Knowledge Hub`,
+    description: article.summary,
+    canonical: `${SITE_URL}/knowledge/${article.slug}`,
+    ogTitle: `${article.title} — Educate Strong Knowledge Hub`,
+    ogDescription: article.summary,
+  };
+}

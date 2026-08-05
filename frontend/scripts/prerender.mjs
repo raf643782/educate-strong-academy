@@ -294,7 +294,7 @@ function validateGeneratedPage({ label, html, meta }) {
 }
 
 async function main() {
-  const { render, apiToPublicSlug, KNOWLEDGE_ARTICLES } = await import(path.join(FRONTEND_ROOT, 'dist-server', 'entry-server.js'));
+  const { render, renderKnowledge, apiToPublicSlug, KNOWLEDGE_ARTICLES } = await import(path.join(FRONTEND_ROOT, 'dist-server', 'entry-server.js'));
 
   const template = await readFile(path.join(DIST_DIR, 'index.html'), 'utf-8');
 
@@ -375,7 +375,19 @@ async function main() {
   }
   console.log(`[prerender] wrote ${eventSlugsToRender.length} event page(s)`);
 
-  const intendedCount = exercisesToRender.length + eventSlugsToRender.length;
+  // Knowledge Hub articles — static data, no API fetch needed
+  for (const article of KNOWLEDGE_ARTICLES) {
+    const { html, meta } = renderKnowledge(article);
+    validateGeneratedPage({ label: `/knowledge/${article.slug}`, html, meta });
+    const outDir = path.join(DIST_DIR, 'knowledge', article.slug);
+    await mkdir(outDir, { recursive: true });
+    const page = injectRoot(injectHead(template, meta), html);
+    await writeFile(path.join(outDir, 'index.html'), page);
+    written++;
+  }
+  console.log(`[prerender] wrote ${KNOWLEDGE_ARTICLES.length} knowledge article page(s)`);
+
+  const intendedCount = exercisesToRender.length + eventSlugsToRender.length + KNOWLEDGE_ARTICLES.length;
   if (written !== intendedCount) {
     throw new PrerenderError(`Expected to write ${intendedCount} page(s) but wrote ${written}.`);
   }
@@ -390,7 +402,7 @@ async function main() {
     );
   }
 
-  console.log(`[prerender] done — ${written} page(s) prerendered (of ${allExercises.length + allEvents.length} total published records)`);
+  console.log(`[prerender] done — ${written} page(s) prerendered (${allExercises.length} exercises, ${allEvents.length} events, ${KNOWLEDGE_ARTICLES.length} knowledge articles)`);
 
   await generateSitemapAndRobots({
     allExercises,

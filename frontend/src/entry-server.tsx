@@ -27,9 +27,11 @@ import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import { ExerciseDetailContent, type Exercise } from './pages/exercises/ExerciseDetail';
 import { EventDetailContent, type Event } from './pages/events/EventDetail';
-import { buildExerciseMeta, buildEventMeta, type PageMeta } from './lib/libraryMeta';
+import { KnowledgeArticleContent } from './pages/knowledge/KnowledgeArticlePage';
+import { buildExerciseMeta, buildEventMeta, buildKnowledgeArticleMeta, type PageMeta } from './lib/libraryMeta';
 import { pickRelatedExercises, pickEventsForExercise, pickExercisesForEvent, pickRelatedEvents } from './lib/relatedContent';
 import { apiToPublicSlug } from './lib/exerciseSlugs';
+import type { KnowledgeArticle } from './data/knowledgeArticles';
 
 export { apiToPublicSlug, API_TO_PUBLIC_SLUG, publicToApiSlug } from './lib/exerciseSlugs';
 // Stage 8: re-exported so the build-time sitemap generator can read the
@@ -110,6 +112,18 @@ export function render(input: ExerciseRenderInput | EventRenderInput): RenderRes
       relatedEvents: relatedEvents.map(e => ({ slug: e.slug, name: e.name, category: e.category })),
     },
   };
+}
+
+export interface KnowledgeRenderResult {
+  html: string;
+  meta: PageMeta;
+}
+
+export function renderKnowledge(article: KnowledgeArticle): KnowledgeRenderResult {
+  const content = <KnowledgeArticleContent article={article} />;
+  const html = renderShell(`/knowledge/${article.slug}`, content);
+  const meta = buildKnowledgeArticleMeta(article);
+  return { html, meta };
 }
 
 function renderShell(url: string, content: React.ReactNode): string {
