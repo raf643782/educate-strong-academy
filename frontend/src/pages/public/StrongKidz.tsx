@@ -467,8 +467,8 @@ export default function StrongKidz() {
                 <p className="text-sm" style={{ color: '#75757D' }}>
                   Coaching a wider age range or sport? Browse the full{' '}
                   <Link to="/courses" className="es-inline-link font-semibold" style={{ color: '#C2186A' }}>Course Catalogue</Link>, or read{' '}
-                  <Link to="/knowledge/strongman-safety-screening" className="es-inline-link font-semibold" style={{ color: '#C2186A' }}>
-                    Strongman Safety: Screening and Risk Management for Coaches
+                  <Link to="/knowledge/risk-assessment-strongman-environments" className="es-inline-link font-semibold" style={{ color: '#C2186A' }}>
+                    Risk Assessment for Strongman Training Environments
                   </Link>{' '}
                   on the Knowledge Hub.
                 </p>

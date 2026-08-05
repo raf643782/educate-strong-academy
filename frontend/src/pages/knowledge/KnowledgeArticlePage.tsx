@@ -3,6 +3,7 @@ import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import { KNOWLEDGE_ARTICLES, KNOWLEDGE_CATEGORIES, type KnowledgeArticle } from '../../data/knowledgeArticles';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
+import BreadcrumbSchema from '../../components/content/BreadcrumbSchema';
 
 const LEVEL_COLOUR: Record<string, string> = {
   Foundation:  'badge-accent',
@@ -23,6 +24,13 @@ export function KnowledgeArticleContent({ article }: { article: KnowledgeArticle
 
   return (
     <>
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', path: '/' },
+          { name: 'Knowledge Hub', path: '/knowledge' },
+          { name: article.title, path: `/knowledge/${article.slug}` },
+        ]}
+      />
       {/* Article header */}
       <div className="pt-navbar" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C' }}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">

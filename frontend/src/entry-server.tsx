@@ -73,20 +73,28 @@ export function render(input: ExerciseRenderInput | EventRenderInput): RenderRes
     const relatedExercises = pickRelatedExercises(input.allExercises, input.exercise);
     const relatedEvents = pickEventsForExercise(input.allEvents, input.exercise);
 
+    // Convert to public slug here so BreadcrumbSchema and ArticleSchema in
+    // ExerciseDetailContent produce correct absolute URLs — matching the
+    // record the client reads from __ES_LIBRARY_DATA__ (which also uses
+    // the public slug). Without this, all 29 exercise BreadcrumbLists
+    // have the spurious `exercise-` API prefix in position-3's item URL.
+    const exercise = { ...input.exercise, slug: apiToPublicSlug(input.exercise.slug) };
+    const relatedExercisesPublic = relatedExercises.map(e => ({ ...e, slug: apiToPublicSlug(e.slug) }));
+
     const content = (
-      <ExerciseDetailContent exercise={input.exercise} relatedExercises={relatedExercises} relatedEvents={relatedEvents} />
+      <ExerciseDetailContent exercise={exercise} relatedExercises={relatedExercisesPublic} relatedEvents={relatedEvents} />
     );
     const html = renderShell(input.url, content);
-    const meta = buildExerciseMeta(input.exercise);
+    const meta = buildExerciseMeta(exercise);
 
     return {
       html,
       meta,
       initialData: {
         type: 'exercise',
-        slug: apiToPublicSlug(input.exercise.slug),
-        record: { ...input.exercise, slug: apiToPublicSlug(input.exercise.slug) },
-        relatedExercises: relatedExercises.map(e => ({ ...e, slug: apiToPublicSlug(e.slug) })),
+        slug: exercise.slug,
+        record: exercise,
+        relatedExercises: relatedExercisesPublic.map(e => ({ slug: e.slug, name: e.name, category: e.category })),
         relatedEvents: relatedEvents.map(e => ({ slug: e.slug, name: e.name, category: e.category })),
       },
     };
