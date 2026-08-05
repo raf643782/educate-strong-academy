@@ -148,6 +148,12 @@ function injectInitialData(html, initialData) {
   return html.replace('</body>', `${tag}  </body>`);
 }
 
+function injectCourseData(html, coursePayload) {
+  const json = serializeForScriptTag(coursePayload);
+  const tag = `    <script type="application/json" id="__ES_COURSE_DATA__">${json}</script>\n`;
+  return html.replace('</body>', `${tag}  </body>`);
+}
+
 function escapeHtml(str) {
   return String(str)
     .replace(/&/g, '&amp;')
@@ -294,7 +300,7 @@ function validateGeneratedPage({ label, html, meta }) {
 }
 
 async function main() {
-  const { render, renderKnowledge, apiToPublicSlug, KNOWLEDGE_ARTICLES } = await import(path.join(FRONTEND_ROOT, 'dist-server', 'entry-server.js'));
+  const { render, renderKnowledge, renderCourse, apiToPublicSlug, KNOWLEDGE_ARTICLES } = await import(path.join(FRONTEND_ROOT, 'dist-server', 'entry-server.js'));
 
   const template = await readFile(path.join(DIST_DIR, 'index.html'), 'utf-8');
 
@@ -387,7 +393,30 @@ async function main() {
   }
   console.log(`[prerender] wrote ${KNOWLEDGE_ARTICLES.length} knowledge article page(s)`);
 
-  const intendedCount = exercisesToRender.length + eventSlugsToRender.length + KNOWLEDGE_ARTICLES.length;
+  // Course detail pages — fetch from API, render with static rich data
+  // Only courses that have COURSE_PAGE_DATA entries are prerendered here;
+  // courses without rich data still work via the SPA fallback.
+  const COURSE_SLUGS = ['level-1-coaching-strongman', 'level-1-strongman-refereeing'];
+  let coursesWritten = 0;
+  for (const slug of COURSE_SLUGS) {
+    try {
+      const courseData = await fetchJsonWithRetry(`${API_BASE}/courses/${slug}`);
+      const { html, meta, coursePayload } = renderCourse(courseData);
+      validateGeneratedPage({ label: `/courses/${slug}`, html, meta });
+      const outDir = path.join(DIST_DIR, 'courses', slug);
+      await mkdir(outDir, { recursive: true });
+      const page = injectCourseData(injectRoot(injectHead(template, meta), html), coursePayload);
+      await writeFile(path.join(outDir, 'index.html'), page);
+      written++;
+      coursesWritten++;
+    } catch (err) {
+      console.warn(`[prerender] WARNING: could not prerender /courses/${slug}: ${err.message}`);
+      console.warn(`[prerender] Course page will fall back to SPA rendering.`);
+    }
+  }
+  console.log(`[prerender] wrote ${coursesWritten}/${COURSE_SLUGS.length} course page(s)`);
+
+  const intendedCount = exercisesToRender.length + eventSlugsToRender.length + KNOWLEDGE_ARTICLES.length + coursesWritten;
   if (written !== intendedCount) {
     throw new PrerenderError(`Expected to write ${intendedCount} page(s) but wrote ${written}.`);
   }

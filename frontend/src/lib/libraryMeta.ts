@@ -78,3 +78,27 @@ export function buildKnowledgeArticleMeta(article: KnowledgeArticleLike): PageMe
     ogDescription: article.summary,
   };
 }
+
+export interface CourseLike {
+  slug: string;
+  title: string;
+  description: string;
+  summary?: string;
+}
+
+export interface CourseRichData {
+  metaTitle?: string;
+  subHeadline: string;
+}
+
+export function buildCourseMeta(course: CourseLike, richData?: CourseRichData): PageMeta {
+  const title = richData?.metaTitle || `${course.title} — Educate Strong Academy`;
+  const description = richData?.subHeadline || course.summary || course.description;
+  return {
+    title,
+    description,
+    canonical: `${SITE_URL}/courses/${course.slug}`,
+    ogTitle: title,
+    ogDescription: description,
+  };
+}

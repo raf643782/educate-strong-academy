@@ -28,7 +28,9 @@ import Footer from './components/layout/Footer';
 import { ExerciseDetailContent, type Exercise } from './pages/exercises/ExerciseDetail';
 import { EventDetailContent, type Event } from './pages/events/EventDetail';
 import { KnowledgeArticleContent } from './pages/knowledge/KnowledgeArticlePage';
-import { buildExerciseMeta, buildEventMeta, buildKnowledgeArticleMeta, type PageMeta } from './lib/libraryMeta';
+import { CourseDetailContent, type CourseAPI } from './pages/public/CourseDetail';
+import { COURSE_PAGE_DATA } from './data/coursePageData';
+import { buildExerciseMeta, buildEventMeta, buildKnowledgeArticleMeta, buildCourseMeta, type PageMeta } from './lib/libraryMeta';
 import { pickRelatedExercises, pickEventsForExercise, pickExercisesForEvent, pickRelatedEvents } from './lib/relatedContent';
 import { apiToPublicSlug } from './lib/exerciseSlugs';
 import type { KnowledgeArticle } from './data/knowledgeArticles';
@@ -134,7 +136,31 @@ export function renderKnowledge(article: KnowledgeArticle): KnowledgeRenderResul
   return { html, meta };
 }
 
-function renderShell(url: string, content: React.ReactNode): string {
+export interface CourseRenderResult {
+  html: string;
+  meta: PageMeta;
+  coursePayload: { type: 'course'; slug: string; course: CourseAPI };
+}
+
+export function renderCourse(course: CourseAPI): CourseRenderResult {
+  const richData = COURSE_PAGE_DATA[course.slug];
+  const content = (
+    <CourseDetailContent
+      course={course}
+      richData={richData}
+      isEnrolled={false}
+      openModules={new Set()}
+    />
+  );
+  // Course pages use #050506 background — passed so renderShell matches
+  // what CourseDetail's client-side default export renders.
+  const html = renderShell(`/courses/${course.slug}`, content, '#050506');
+  const meta = buildCourseMeta(course, richData);
+  const coursePayload = { type: 'course' as const, slug: course.slug, course };
+  return { html, meta, coursePayload };
+}
+
+function renderShell(url: string, content: React.ReactNode, background = '#0D0D0D'): string {
   // renderToString (not renderToStaticMarkup) — this output is hydrated
   // by hydrateRoot on the client (main.tsx). renderToStaticMarkup omits
   // the internal markers React needs to match up server and client
@@ -143,7 +169,7 @@ function renderShell(url: string, content: React.ReactNode): string {
   return renderToString(
     <StaticRouter location={url}>
       <AuthProvider>
-        <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
+        <div className="min-h-screen flex flex-col" style={{ background }}>
           <Navbar />
           <main className="flex-1">{content}</main>
           <Footer />
