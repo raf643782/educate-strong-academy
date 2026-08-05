@@ -43,6 +43,7 @@ import KnowledgeHubPreview from '../../components/sections/KnowledgeHubPreview';
 import UpcomingCohortSpotlight from '../../components/sections/UpcomingCohortSpotlight';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
 import api from '../../lib/api';
+import { SITE_URL } from '../../lib/siteUrl';
 
 const ORG_SCHEMA_ID = 'homepage-org-schema';
 
@@ -72,8 +73,8 @@ export default function Home() {
       '@type': 'Organization',
       name: 'Educate Strong Academy',
       alternateName: 'Educate.Strong',
-      url: 'https://educate-strong-academy.vercel.app/',
-      logo: 'https://educate-strong-academy.vercel.app/assets/es-logo.png',
+      url: `${SITE_URL}/`,
+      logo: `${SITE_URL}/assets/es-logo.png`,
       description:
         'Strongman education platform covering coaching, refereeing, StrongKidz youth sessions and EatStrong performance nutrition, alongside a Knowledge Hub, Exercise Library and Event Library.',
       sameAs: ['https://www.instagram.com/educate.strong/'],

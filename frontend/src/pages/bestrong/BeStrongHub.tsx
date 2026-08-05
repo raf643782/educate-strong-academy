@@ -16,6 +16,7 @@ import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import api from '../../lib/api';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
+import { SITE_URL } from '../../lib/siteUrl';
 
 interface Category {
   key: string;
@@ -100,7 +101,7 @@ const FAQS = [
 const SCHEMA_ID = 'eatstrong-faq-schema';
 
 export default function EatStrongHub() {
-  const canonicalUrl = 'https://educate-strong-academy.vercel.app/eatstrong';
+  const canonicalUrl = `${SITE_URL}/eatstrong`;
 
   useDocumentHead({
     title: 'EatStrong — Free Strongman Nutrition Education',

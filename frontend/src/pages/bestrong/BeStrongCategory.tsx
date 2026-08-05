@@ -5,6 +5,7 @@ import Footer from '../../components/layout/Footer';
 import api from '../../lib/api';
 import { CONTACT_EMAIL } from '../../lib/contact';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
+import { SITE_URL } from '../../lib/siteUrl';
 
 interface Article {
   id: string;
@@ -83,7 +84,7 @@ export default function EatStrongCategory() {
   useDocumentHead({
     title: `${categoryLabel} — EatStrong`,
     description: categoryMeta?.description,
-    canonical: categorySlug ? `https://educate-strong-academy.vercel.app/eatstrong/category/${categorySlug}` : undefined,
+    canonical: categorySlug ? `${SITE_URL}/eatstrong/category/${categorySlug}` : undefined,
   });
 
   return (

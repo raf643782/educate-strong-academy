@@ -4,6 +4,7 @@ import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import api from '../../lib/api';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
+import { SITE_URL } from '../../lib/siteUrl';
 
 interface Article {
   id: string;
@@ -57,7 +58,7 @@ export default function EatStrongArticlePage() {
   useDocumentHead({
     title: article?.title || 'Article Not Found',
     description: article?.summary,
-    canonical: slug ? `https://educate-strong-academy.vercel.app/eatstrong/articles/${slug}` : undefined,
+    canonical: slug ? `${SITE_URL}/eatstrong/articles/${slug}` : undefined,
   });
 
   useEffect(() => {
@@ -78,7 +79,7 @@ export default function EatStrongArticlePage() {
   useEffect(() => {
     if (!article || !slug) return;
     const scriptId = 'eatstrong-article-schema';
-    const url = `https://educate-strong-academy.vercel.app/eatstrong/articles/${slug}`;
+    const url = `${SITE_URL}/eatstrong/articles/${slug}`;
     const script = document.createElement('script');
     script.type = 'application/ld+json';
     script.id = scriptId;
@@ -93,7 +94,7 @@ export default function EatStrongArticlePage() {
       publisher: {
         '@type': 'Organization',
         name: 'Educate Strong Academy',
-        sameAs: 'https://educate-strong-academy.vercel.app/',
+        sameAs: `${SITE_URL}/`,
       },
     });
     document.head.appendChild(script);

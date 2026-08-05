@@ -21,6 +21,7 @@ import { CONTACT_EMAIL } from '../../lib/contact';
 import { UNLAUNCHED_COURSE_SLUGS } from '../../data/courseLaunchStatus';
 import { COURSE_SLUG_TO_INTEREST_TYPE } from '../../data/registerInterestTypes';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
+import { SITE_URL } from '../../lib/siteUrl';
 
 // Rich course page components
 import CourseHero from '../../components/course/CourseHero';
@@ -93,7 +94,7 @@ export default function CourseDetail() {
   useDocumentHead({
     title: richData?.metaTitle || course?.title || richData?.headline || 'Course',
     description: richData?.subHeadline || course?.summary || course?.description,
-    canonical: slug ? `https://educate-strong-academy.vercel.app/courses/${slug}` : undefined,
+    canonical: slug ? `${SITE_URL}/courses/${slug}` : undefined,
   });
 
   const loadCourse = () => {
@@ -137,7 +138,7 @@ export default function CourseDetail() {
   useEffect(() => {
     if (!richData || !course) return;
     const scriptId = 'course-schema';
-    const url = `https://educate-strong-academy.vercel.app/courses/${richData.slug}`;
+    const url = `${SITE_URL}/courses/${richData.slug}`;
     const script = document.createElement('script');
     script.type = 'application/ld+json';
     script.id = scriptId;
@@ -151,7 +152,7 @@ export default function CourseDetail() {
           provider: {
             '@type': 'Organization',
             name: 'Educate Strong Academy',
-            sameAs: 'https://educate-strong-academy.vercel.app/',
+            sameAs: `${SITE_URL}/`,
           },
           url,
           offers: {
@@ -173,7 +174,7 @@ export default function CourseDetail() {
         {
           '@type': 'BreadcrumbList',
           itemListElement: [
-            { '@type': 'ListItem', position: 1, name: 'Courses', item: 'https://educate-strong-academy.vercel.app/courses' },
+            { '@type': 'ListItem', position: 1, name: 'Courses', item: `${SITE_URL}/courses` },
             { '@type': 'ListItem', position: 2, name: course.title, item: url },
           ],
         },

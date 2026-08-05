@@ -4,6 +4,7 @@ import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import { CONTACT_EMAIL } from '../../lib/contact';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
+import { SITE_URL } from '../../lib/siteUrl';
 
 type Tab = 'parents' | 'coaches';
 
@@ -101,7 +102,7 @@ const COACH_FAQS = [
 const SCHEMA_ID = 'strongkidz-faq-schema';
 
 export default function StrongKidz() {
-  const canonicalUrl = 'https://educate-strong-academy.vercel.app/strongkidz';
+  const canonicalUrl = `${SITE_URL}/strongkidz`;
 
   useDocumentHead({
     title: 'StrongKidz — Youth Strength Programme in Sheffield',

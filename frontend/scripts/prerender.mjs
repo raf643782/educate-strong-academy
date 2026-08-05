@@ -120,11 +120,14 @@ function injectHead(html, meta) {
     /<meta property="og:description" content=".*?" \/>/,
     `<meta property="og:description" content="${escapeHtml(meta.ogDescription)}" />`
   );
-  // og:url should equal the canonical URL per the OpenGraph spec
-  out = out.replace(
-    '</head>',
-    `    <meta property="og:url" content="${meta.canonical}" />\n    <link rel="canonical" href="${meta.canonical}" />\n  </head>`
-  );
+  // og:url must equal the canonical URL per the OpenGraph spec; og:image
+  // overrides the template default when this specific page has its own image.
+  const extraTags = [
+    `    <meta property="og:url" content="${meta.canonical}" />`,
+    `    <link rel="canonical" href="${meta.canonical}" />`,
+    ...(meta.ogImage ? [`    <meta property="og:image" content="${escapeHtml(meta.ogImage)}" />`] : []),
+  ].join('\n');
+  out = out.replace('</head>', `${extraTags}\n  </head>`);
   return out;
 }
 
