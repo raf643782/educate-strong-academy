@@ -34,6 +34,11 @@ import { AboutContent } from './pages/public/About';
 import { CoachingPathwayContent } from './pages/public/CoachingPathway';
 import { StrongKidzContent } from './pages/public/StrongKidz';
 import { KnowledgeHubContent } from './pages/knowledge/KnowledgeHub';
+import Home from './pages/public/Home';
+import CourseCatalogue from './pages/public/CourseCatalogue';
+import ExerciseLibrary from './pages/exercises/ExerciseLibrary';
+import EventLibrary from './pages/events/EventLibrary';
+import EatStrongHub from './pages/bestrong/BeStrongHub';
 import { buildExerciseMeta, buildEventMeta, buildKnowledgeArticleMeta, buildCourseMeta, type PageMeta } from './lib/libraryMeta';
 import { SITE_URL } from './lib/siteUrl';
 import { pickRelatedExercises, pickEventsForExercise, pickExercisesForEvent, pickRelatedEvents } from './lib/relatedContent';
@@ -222,6 +227,106 @@ export function renderKnowledgeHub(): StaticPageResult {
       canonical: `${SITE_URL}/knowledge`,
       ogTitle: 'Knowledge Hub — Educate Strong Academy',
       ogDescription: 'Practical articles, coaching guides, and evidence-based resources for Strongman coaches, referees, and athletes.',
+    },
+  };
+}
+
+export function renderHome(): StaticPageResult {
+  const html = renderToString(
+    <StaticRouter location="/">
+      <AuthProvider>
+        <Home />
+      </AuthProvider>
+    </StaticRouter>
+  );
+  return {
+    html,
+    meta: {
+      title: 'Strongman Coaching, Refereeing and Strength Education',
+      description: 'Learn how strength is built through Strongman. Coaching, refereeing, StrongKidz and EatStrong — plus a full Knowledge Hub, Exercise Library and Event Library. Built and taught by people who compete.',
+      canonical: SITE_URL,
+      ogTitle: 'Educate.Strong Academy: Strongman Coaching, Refereeing and Strength Education',
+      ogDescription: 'Learn how strength is built through Strongman. Coaching, refereeing, StrongKidz and EatStrong — plus a full Knowledge Hub, Exercise Library and Event Library. Built and taught by people who compete.',
+    },
+  };
+}
+
+export function renderCourseCatalogue(): StaticPageResult {
+  const html = renderToString(
+    <StaticRouter location="/courses">
+      <AuthProvider>
+        <CourseCatalogue />
+      </AuthProvider>
+    </StaticRouter>
+  );
+  return {
+    html,
+    meta: {
+      title: 'All Courses',
+      description: 'Browse all Strongman coaching, refereeing and youth development qualifications from Educate.Strong Academy.',
+      canonical: `${SITE_URL}/courses`,
+      ogTitle: 'All Courses — Educate.Strong Academy',
+      ogDescription: 'Browse all Strongman coaching, refereeing and youth development qualifications from Educate.Strong Academy.',
+    },
+  };
+}
+
+export function renderExerciseLibrary(): StaticPageResult {
+  const html = renderToString(
+    <StaticRouter location="/exercises">
+      <AuthProvider>
+        <ExerciseLibrary />
+      </AuthProvider>
+    </StaticRouter>
+  );
+  return {
+    html,
+    meta: {
+      title: 'Strongman Exercise Library | Technique and Training Guides',
+      description: 'Technique guides, video breakdowns and coaching cues for every major Strongman movement — free and open access.',
+      canonical: `${SITE_URL}/exercises`,
+      ogTitle: 'Strongman Exercise Library — Educate.Strong Academy',
+      ogDescription: 'Technique guides, video breakdowns and coaching cues for every major Strongman movement — free and open access.',
+    },
+  };
+}
+
+export function renderEventLibrary(): StaticPageResult {
+  const html = renderToString(
+    <StaticRouter location="/events">
+      <AuthProvider>
+        <EventLibrary />
+      </AuthProvider>
+    </StaticRouter>
+  );
+  return {
+    html,
+    meta: {
+      title: 'Strongman Event Library | Rules, Judging and Training',
+      description: 'Rules, judging standards and event-specific training guides for every Strongman discipline — written by certified referees and coaches.',
+      canonical: `${SITE_URL}/events`,
+      ogTitle: 'Strongman Event Library — Educate.Strong Academy',
+      ogDescription: 'Rules, judging standards and event-specific training guides for every Strongman discipline — written by certified referees and coaches.',
+    },
+  };
+}
+
+export function renderEatStrong(): StaticPageResult {
+  const html = renderToString(
+    <StaticRouter location="/eatstrong">
+      <AuthProvider>
+        <EatStrongHub />
+      </AuthProvider>
+    </StaticRouter>
+  );
+  return {
+    html,
+    meta: {
+      title: 'EatStrong | Nutrition for Strongman',
+      description: 'Practical nutrition guidance for Strongman athletes — from competition-day fuelling to long-term strength nutrition, written for the sport.',
+      canonical: `${SITE_URL}/eatstrong`,
+      ogTitle: 'EatStrong — Nutrition for Strongman | Educate.Strong Academy',
+      ogDescription: 'Practical nutrition guidance for Strongman athletes — from competition-day fuelling to long-term strength nutrition, written for the sport.',
     },
   };
 }

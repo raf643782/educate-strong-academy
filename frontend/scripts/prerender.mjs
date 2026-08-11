@@ -312,10 +312,17 @@ async function main() {
   const {
     render, renderKnowledge, renderCourse,
     renderAbout, renderCoachingPathway, renderStrongKidz, renderKnowledgeHub,
+    renderHome, renderCourseCatalogue, renderExerciseLibrary, renderEventLibrary, renderEatStrong,
     apiToPublicSlug, KNOWLEDGE_ARTICLES,
   } = await import(path.join(FRONTEND_ROOT, 'dist-server', 'entry-server.js'));
 
   const template = await readFile(path.join(DIST_DIR, 'index.html'), 'utf-8');
+
+  // Save the raw SPA shell before any page overwrites dist/index.html.
+  // spa-fallback-or-404.mjs serves /shell.html for non-prerendered SPA
+  // routes so those routes never accidentally receive homepage HTML.
+  await writeFile(path.join(DIST_DIR, 'shell.html'), template);
+  console.log('[prerender] wrote shell.html (SPA fallback template)');
 
   console.log(`[prerender] API base: ${API_BASE}`);
   const [allExercises, allEvents] = await Promise.all([
@@ -429,12 +436,29 @@ async function main() {
   }
   console.log(`[prerender] wrote ${coursesWritten}/${COURSE_SLUGS.length} course page(s)`);
 
+  // Homepage — overwrites dist/index.html with prerendered content.
+  // shell.html (written above) is now the SPA fallback template so
+  // spa-fallback-or-404.mjs does not serve homepage HTML for /dashboard,
+  // /login, etc. injectHead updates og:image to use SITE_URL automatically.
+  {
+    const { html, meta } = renderHome();
+    validateGeneratedPage({ label: '/', html, meta });
+    const page = injectRoot(injectHead(template, meta), html);
+    await writeFile(path.join(DIST_DIR, 'index.html'), page);
+    written++;
+  }
+  console.log('[prerender] wrote homepage (dist/index.html)');
+
   // Static public pages — no API fetch needed, content is pure static JSX
   const STATIC_PAGES = [
     { slug: 'about', render: renderAbout },
     { slug: 'coaching', render: renderCoachingPathway },
     { slug: 'strongkidz', render: renderStrongKidz },
     { slug: 'knowledge', render: renderKnowledgeHub },
+    { slug: 'courses', render: renderCourseCatalogue },
+    { slug: 'exercises', render: renderExerciseLibrary },
+    { slug: 'events', render: renderEventLibrary },
+    { slug: 'eatstrong', render: renderEatStrong },
   ];
   for (const p of STATIC_PAGES) {
     const { html, meta } = p.render();
@@ -445,9 +469,9 @@ async function main() {
     await writeFile(path.join(outDir, 'index.html'), page);
     written++;
   }
-  console.log(`[prerender] wrote ${STATIC_PAGES.length} static page(s) (about, coaching, strongkidz, knowledge)`);
+  console.log(`[prerender] wrote ${STATIC_PAGES.length} static page(s) (about, coaching, strongkidz, knowledge, courses, exercises, events, eatstrong)`);
 
-  const intendedCount = exercisesToRender.length + eventSlugsToRender.length + KNOWLEDGE_ARTICLES.length + coursesWritten + STATIC_PAGES.length;
+  const intendedCount = exercisesToRender.length + eventSlugsToRender.length + KNOWLEDGE_ARTICLES.length + coursesWritten + STATIC_PAGES.length + 1; // +1 for homepage
   if (written !== intendedCount) {
     throw new PrerenderError(`Expected to write ${intendedCount} page(s) but wrote ${written}.`);
   }
