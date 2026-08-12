@@ -16,6 +16,7 @@ import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import api from '../../lib/api';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
+import { SITE_URL } from '../../lib/siteUrl';
 
 interface Category {
   key: string;
@@ -97,10 +98,8 @@ const FAQS = [
   },
 ];
 
-const SCHEMA_ID = 'eatstrong-faq-schema';
-
 export default function EatStrongHub() {
-  const canonicalUrl = 'https://educate-strong-academy.vercel.app/eatstrong';
+  const canonicalUrl = `${SITE_URL}/eatstrong`;
 
   useDocumentHead({
     title: 'EatStrong — Free Strongman Nutrition Education',
@@ -127,33 +126,25 @@ export default function EatStrongHub() {
       .finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.id = SCHEMA_ID;
-    script.text = JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      mainEntity: FAQS.map((f) => ({
-        '@type': 'Question',
-        name: f.q,
-        acceptedAnswer: { '@type': 'Answer', text: f.a },
-      })),
-    });
-    document.head.appendChild(script);
-    return () => {
-      document.getElementById(SCHEMA_ID)?.remove();
-    };
-  }, []);
-
   const visibleCategories = useMemo(() => {
     if (filter === 'All Topics') return categories;
     const keys = AUDIENCE_GROUPS[filter] || [];
     return categories.filter((c) => keys.includes(c.key));
   }, [categories, filter]);
 
+  const faqJsonLd = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FAQS.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  }).replace(/</g, '\\u003c');
+
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: faqJsonLd }} />
       <Navbar />
 
       {/* Hero */}

@@ -11,7 +11,7 @@ import { useDocumentHead } from '../../hooks/useDocumentHead';
 // them for phishing/malware, which would otherwise burn this single-use
 // token before the real recipient ever opens the message.
 export default function VerifyEmail() {
-  useDocumentHead({ title: 'Verify Your Email' });
+  useDocumentHead({ title: 'Verify Your Email', noindex: true });
 
   const { token } = useParams<{ token: string }>();
   const { refreshUser } = useAuth();

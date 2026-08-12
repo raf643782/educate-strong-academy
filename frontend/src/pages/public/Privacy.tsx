@@ -3,7 +3,7 @@ import { CONTACT_EMAIL } from '../../lib/contact';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 export default function Privacy() {
-  useDocumentHead({ title: 'Privacy Policy' });
+  useDocumentHead({ title: 'Privacy Policy', noindex: true });
 
   return (
     <LegalPageLayout title="Privacy Policy">

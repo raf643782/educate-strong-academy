@@ -72,7 +72,7 @@ export default async function handler(req, res) {
     // shell exactly as the previous catch-all rewrite always did.
     try {
       const proto = req.headers['x-forwarded-proto'] || 'https';
-      const shellRes = await fetch(`${proto}://${req.headers.host}/index.html`);
+      const shellRes = await fetch(`${proto}://${req.headers.host}/shell.html`);
       const shellHtml = await shellRes.text();
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
       res.status(200).send(shellHtml);

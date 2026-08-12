@@ -62,3 +62,43 @@ export function buildEventMeta(event: EventLike): PageMeta {
     ...(event.imageUrl ? { ogImage: event.imageUrl } : {}),
   };
 }
+
+export interface KnowledgeArticleLike {
+  slug: string;
+  title: string;
+  summary: string;
+}
+
+export function buildKnowledgeArticleMeta(article: KnowledgeArticleLike): PageMeta {
+  return {
+    title: `${article.title} — Knowledge Hub`,
+    description: article.summary,
+    canonical: `${SITE_URL}/knowledge/${article.slug}`,
+    ogTitle: `${article.title} — Educate Strong Knowledge Hub`,
+    ogDescription: article.summary,
+  };
+}
+
+export interface CourseLike {
+  slug: string;
+  title: string;
+  description: string;
+  summary?: string;
+}
+
+export interface CourseRichData {
+  metaTitle?: string;
+  subHeadline: string;
+}
+
+export function buildCourseMeta(course: CourseLike, richData?: CourseRichData): PageMeta {
+  const title = richData?.metaTitle || `${course.title} — Educate Strong Academy`;
+  const description = richData?.subHeadline || course.summary || course.description;
+  return {
+    title,
+    description,
+    canonical: `${SITE_URL}/courses/${course.slug}`,
+    ogTitle: title,
+    ogDescription: description,
+  };
+}

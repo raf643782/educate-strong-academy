@@ -5,7 +5,7 @@ import api from '../../lib/api';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 export default function ForgotPassword() {
-  useDocumentHead({ title: 'Reset Password' });
+  useDocumentHead({ title: 'Reset Password', noindex: true });
 
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'sent' | 'error'>('idle');

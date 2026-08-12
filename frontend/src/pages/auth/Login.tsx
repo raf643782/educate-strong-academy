@@ -148,7 +148,7 @@ function WorkspaceCTA({ ws }: { ws: WorkspaceKey }) {
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function Login() {
-  useDocumentHead({ title: 'Sign In' });
+  useDocumentHead({ title: 'Sign In', noindex: true });
 
   const { login } = useAuth();
   const navigate = useNavigate();

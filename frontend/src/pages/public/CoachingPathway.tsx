@@ -14,6 +14,8 @@ import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
+import { SITE_URL } from '../../lib/siteUrl';
+import BreadcrumbSchema from '../../components/content/BreadcrumbSchema';
 
 /* ── Pathway Steps ──────────────────────────────────────────────── */
 const STEPS = [
@@ -249,16 +251,10 @@ function EventCard({ event }: { event: typeof EVENTS[number] }) {
 }
 
 /* ── Page ───────────────────────────────────────────────────────── */
-export default function CoachingPathway() {
-  useDocumentHead({
-    title: 'Coaching Pathway',
-    description: 'Level 1 through Level 3 Strongman coaching qualifications and ongoing CPD.',
-  });
-
+export function CoachingPathwayContent() {
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
-      <Navbar />
-
+    <>
+      <BreadcrumbSchema items={[{ name: 'Home', path: '/' }, { name: 'Coaching Pathway', path: '/coaching' }]} />
       {/* ── 1. HERO ──────────────────────────────────────────────── */}
       <section
         className="relative overflow-hidden"
@@ -499,6 +495,22 @@ export default function CoachingPathway() {
         </div>
       </section>
 
+    </>
+  );
+}
+
+export default function CoachingPathway() {
+  useDocumentHead({
+    title: 'Coaching Pathway',
+    description: 'Level 1 through Level 3 Strongman coaching qualifications and ongoing CPD.',
+    canonical: `${SITE_URL}/coaching`,
+  });
+  return (
+    <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
+      <Navbar />
+      <main className="flex-1">
+        <CoachingPathwayContent />
+      </main>
       <Footer />
     </div>
   );

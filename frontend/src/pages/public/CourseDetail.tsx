@@ -9,6 +9,9 @@
  *
  * LMS enrolment (online pre/post-course materials) is maintained
  * as a secondary action alongside the primary in-person booking flow.
+ *
+ * CourseDetailContent is exported for build-time prerendering (same
+ * pattern as ExerciseDetailContent / KnowledgeArticleContent).
  */
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
@@ -21,6 +24,7 @@ import { CONTACT_EMAIL } from '../../lib/contact';
 import { UNLAUNCHED_COURSE_SLUGS } from '../../data/courseLaunchStatus';
 import { COURSE_SLUG_TO_INTEREST_TYPE } from '../../data/registerInterestTypes';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
+import { SITE_URL } from '../../lib/siteUrl';
 
 // Rich course page components
 import CourseHero from '../../components/course/CourseHero';
@@ -39,7 +43,7 @@ import CourseFinalCTA from '../../components/course/CourseFinalCTA';
 import CourseAccessOverview from '../../components/course/CourseAccessOverview';
 
 // Static marketing data
-import { COURSE_PAGE_DATA } from '../../data/coursePageData';
+import { COURSE_PAGE_DATA, type CoursePageData } from '../../data/coursePageData';
 
 // ─── API types ────────────────────────────────────────────────────────────────
 
@@ -58,7 +62,7 @@ interface Module {
   lessons: Lesson[];
 }
 
-interface CourseAPI {
+export interface CourseAPI {
   id: string;
   title: string;
   slug: string;
@@ -71,190 +75,105 @@ interface CourseAPI {
   modules: Module[];
 }
 
+// ─── Embedded data for prerendered pages ─────────────────────────────────────
+
+function readEmbeddedCourseData(slug: string | undefined): { course: CourseAPI } | null {
+  if (typeof document === 'undefined' || !slug) return null;
+  const el = document.getElementById('__ES_COURSE_DATA__');
+  if (!el || !el.textContent) return null;
+  try {
+    const parsed = JSON.parse(el.textContent);
+    if (parsed?.type === 'course' && parsed?.slug === slug) return { course: parsed.course };
+  } catch {
+    // malformed — fall back to normal API fetch
+  }
+  return null;
+}
+
+// ─── Inline structured data ───────────────────────────────────────────────────
+
+function CourseSchema({ course, richData }: { course: CourseAPI; richData: CoursePageData }) {
+  const url = `${SITE_URL}/courses/${richData.slug}`;
+  const schema = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Course',
+        name: course.title,
+        description: richData.subHeadline,
+        provider: {
+          '@type': 'Organization',
+          name: 'Educate Strong Academy',
+          sameAs: `${SITE_URL}/`,
+        },
+        url,
+        offers: {
+          '@type': 'Offer',
+          price: richData.pricing.totalFee,
+          priceCurrency: 'GBP',
+          url,
+          availability: 'https://schema.org/InStock',
+        },
+      },
+      {
+        '@type': 'FAQPage',
+        mainEntity: richData.faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.question,
+          acceptedAnswer: { '@type': 'Answer', text: f.answer },
+        })),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Courses', item: `${SITE_URL}/courses` },
+          { '@type': 'ListItem', position: 2, name: course.title, item: url },
+        ],
+      },
+    ],
+  };
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, '\\u003c') }}
+    />
+  );
+}
+
 const pathwayLabel = (p: string) =>
   p === 'COACHING' ? 'Coaching' : p === 'REFEREEING' ? 'Refereeing' : 'StrongKidz';
 
-// ─── Main component ───────────────────────────────────────────────────────────
+// ─── CourseDetailContent — pure content, exported for SSR prerendering ────────
+// Follows the same pattern as ExerciseDetailContent and KnowledgeArticleContent:
+// no Navbar/Footer/outer div — the caller (CourseDetail or renderShell) provides
+// those. Accepts all data as props so renderToString produces meaningful HTML.
 
-export default function CourseDetail() {
-  const { slug } = useParams<{ slug: string }>();
-  const { isAuthenticated } = useAuth();
-
-  const [course, setCourse] = useState<CourseAPI | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState(false);
-  const [slowLoad, setSlowLoad] = useState(false);
-  const [enrolled, setEnrolled] = useState(false);
-  const [openModules, setOpenModules] = useState<Set<string>>(new Set());
-
-  // Look up rich static data — determines which view to render
-  const richData = slug ? COURSE_PAGE_DATA[slug] : undefined;
-
-  useDocumentHead({
-    title: richData?.metaTitle || course?.title || richData?.headline || 'Course',
-    description: richData?.subHeadline || course?.summary || course?.description,
-    canonical: slug ? `https://educate-strong-academy.vercel.app/courses/${slug}` : undefined,
-  });
-
-  const loadCourse = () => {
-    if (!slug) return;
-    setLoading(true);
-    setLoadError(false);
-    setSlowLoad(false);
-    api
-      .get(`/courses/${slug}`)
-      .then((res) => setCourse(res.data))
-      .catch((err) => {
-        if (err?.response?.status === 404) setCourse(null);
-        else setLoadError(true);
-      })
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => { loadCourse(); }, [slug]);
-
-  useEffect(() => {
-    if (!loading) return;
-    const timer = setTimeout(() => setSlowLoad(true), 4000);
-    return () => clearTimeout(timer);
-  }, [loading]);
-
-  // Course access is granted by an admin (see Enrolment Manager), not
-  // self-service — this checks real enrolment status so a learner who
-  // has been admin-enrolled sees "Continue Learning" correctly.
-  useEffect(() => {
-    if (!isAuthenticated || !slug) return;
-    api
-      .get<{ enrolled: boolean }>(`/courses/${slug}/enrolled`)
-      .then(res => setEnrolled(res.data.enrolled))
-      .catch(() => {});
-  }, [isAuthenticated, slug]);
-
-  // Course + FAQPage + BreadcrumbList structured data — only for the rich
-  // marketing pages, only built from data that's actually visible on the
-  // page (real price, real published FAQs, the real breadcrumb above the
-  // hero). Scoped and removed on unmount/navigation so it never leaks.
-  useEffect(() => {
-    if (!richData || !course) return;
-    const scriptId = 'course-schema';
-    const url = `https://educate-strong-academy.vercel.app/courses/${richData.slug}`;
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.id = scriptId;
-    script.text = JSON.stringify({
-      '@context': 'https://schema.org',
-      '@graph': [
-        {
-          '@type': 'Course',
-          name: course.title,
-          description: richData.subHeadline,
-          provider: {
-            '@type': 'Organization',
-            name: 'Educate Strong Academy',
-            sameAs: 'https://educate-strong-academy.vercel.app/',
-          },
-          url,
-          offers: {
-            '@type': 'Offer',
-            price: richData.pricing.totalFee,
-            priceCurrency: 'GBP',
-            url,
-            availability: 'https://schema.org/InStock',
-          },
-        },
-        {
-          '@type': 'FAQPage',
-          mainEntity: richData.faqs.map((f) => ({
-            '@type': 'Question',
-            name: f.question,
-            acceptedAnswer: { '@type': 'Answer', text: f.answer },
-          })),
-        },
-        {
-          '@type': 'BreadcrumbList',
-          itemListElement: [
-            { '@type': 'ListItem', position: 1, name: 'Courses', item: 'https://educate-strong-academy.vercel.app/courses' },
-            { '@type': 'ListItem', position: 2, name: course.title, item: url },
-          ],
-        },
-      ],
-    });
-    document.head.appendChild(script);
-    return () => {
-      document.getElementById(scriptId)?.remove();
-    };
-  }, [richData, course]);
-
-  const toggleModule = (moduleId: string) => {
-    setOpenModules((prev) => {
-      const next = new Set(prev);
-      if (next.has(moduleId)) next.delete(moduleId);
-      else next.add(moduleId);
-      return next;
-    });
-  };
-
-  // Loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <div className="flex-1 flex flex-col items-center justify-center text-sm gap-2" style={{ color: '#75757D', background: '#050506' }}>
-          <div className="animate-pulse" style={{ width: '220px', height: '16px', background: '#151519', borderRadius: '8px' }} />
-          <p>{slowLoad ? 'Waking the server, this can take a few seconds on first load.' : 'Loading course...'}</p>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
-  // Load error (distinct from not-found)
-  if (loadError) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center" style={{ background: '#050506', padding: '80px 0' }}>
-            <h2 className="text-2xl font-bold text-white mb-2">Couldn't load this course</h2>
-            <p className="text-sm mb-4" style={{ color: '#75757D' }}>Something went wrong. Please try again.</p>
-            <button onClick={loadCourse} className="btn-primary">Retry</button>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
-  // Not found
-  if (!course) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center" style={{ background: '#050506', padding: '80px 0' }}>
-            <h2 className="text-2xl font-bold text-white mb-2">Course not found</h2>
-            <Link to="/courses" className="text-sm hover:opacity-80 transition-opacity" style={{ color: '#C2186A' }}>
-              Back to catalogue
-            </Link>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
+export function CourseDetailContent({
+  course,
+  richData,
+  isEnrolled = false,
+  openModules = new Set<string>(),
+  onToggleModule,
+}: {
+  course: CourseAPI;
+  richData: CoursePageData | undefined;
+  isEnrolled?: boolean;
+  openModules?: Set<string>;
+  onToggleModule?: (id: string) => void;
+}) {
+  const interestType = COURSE_SLUG_TO_INTEREST_TYPE[course.slug] || 'general';
+  const comingSoon = UNLAUNCHED_COURSE_SLUGS.has(course.slug);
   const firstLessonId = course.modules[0]?.lessons[0]?.id;
   const firstLessonUrl = firstLessonId
     ? `/learn/${course.slug}/lessons/${firstLessonId}`
     : undefined;
-  const comingSoon = UNLAUNCHED_COURSE_SLUGS.has(course.slug);
-  const interestType = COURSE_SLUG_TO_INTEREST_TYPE[course.slug] || 'general';
 
-  // ── RICH MARKETING PAGE (courses with static data) ────────────────────────
+  // ── RICH MARKETING PAGE ────────────────────────────────────────────────────
   if (richData) {
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
-        <Navbar />
+      <>
+        {/* Inline structured data — included in prerendered HTML, not deferred to useEffect */}
+        <CourseSchema course={course} richData={richData} />
 
         {/* Breadcrumb — also the internal link back to the course catalogue */}
         <nav aria-label="Breadcrumb" className="pt-navbar" style={{ background: '#050506' }}>
@@ -276,7 +195,7 @@ export default function CourseDetail() {
           keyFacts={richData.keyFacts}
           contactEmail={richData.contactEmail}
           interestType={interestType}
-          isEnrolled={enrolled}
+          isEnrolled={isEnrolled}
           firstLessonUrl={firstLessonUrl}
         />
 
@@ -341,7 +260,7 @@ export default function CourseDetail() {
         )}
 
         {/* 9.5: How access works — public preview vs. learner pathway */}
-        {!enrolled && <CourseAccessOverview interestType={interestType} />}
+        {!isEnrolled && <CourseAccessOverview interestType={interestType} />}
 
         {/* 10: Pricing card */}
         <CoursePricingCard
@@ -362,7 +281,7 @@ export default function CourseDetail() {
         />
 
         {/* 12: Learning journey */}
-        <CourseLearningJourney steps={richData.journeySteps} isEnrolled={enrolled} />
+        <CourseLearningJourney steps={richData.journeySteps} isEnrolled={isEnrolled} />
 
         {/* 13: FAQ */}
         <CourseFAQ faqs={richData.faqs} />
@@ -432,7 +351,7 @@ export default function CourseDetail() {
                     <h2 className="text-xl font-black text-white mb-1">Online Learning Materials</h2>
                     <p className="text-es-muted text-sm">Pre-course preparation and reference content.</p>
                   </div>
-                  {!enrolled && (
+                  {!isEnrolled && (
                     <Link
                       to={`/register-interest?type=${encodeURIComponent(interestType)}`}
                       className="btn-secondary text-xs py-2 px-4 flex-shrink-0"
@@ -440,7 +359,7 @@ export default function CourseDetail() {
                       Register Interest
                     </Link>
                   )}
-                  {enrolled && firstLessonUrl && (
+                  {isEnrolled && firstLessonUrl && (
                     <Link to={firstLessonUrl} className="btn-primary text-xs py-2 px-4 flex-shrink-0">
                       Start Learning
                     </Link>
@@ -454,7 +373,7 @@ export default function CourseDetail() {
                       className="es-card overflow-hidden"
                     >
                       <button
-                        onClick={() => toggleModule(mod.id)}
+                        onClick={() => onToggleModule?.(mod.id)}
                         aria-expanded={openModules.has(mod.id)}
                         aria-controls={`module-panel-${mod.id}`}
                         className="w-full flex items-center justify-between p-4 text-left hover:bg-es-card transition-colors"
@@ -526,16 +445,14 @@ export default function CourseDetail() {
           </section>
         )}
 
-        <Footer />
-      </div>
+      </>
     );
   }
 
   // ── FALLBACK: Simple API-driven view for courses without rich data ─────────
   // (Level 2, Level 3, StrongKidz etc. until static data is added)
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
-      <Navbar />
+    <>
 
       {/* Simple hero */}
       <div
@@ -570,7 +487,7 @@ export default function CourseDetail() {
             >
               Coming Soon — Not Yet Open for Enrolment
             </span>
-          ) : enrolled ? (
+          ) : isEnrolled ? (
             <div className="flex gap-3 flex-wrap">
               <span
                 className="font-semibold px-6 py-3 rounded-full text-sm text-white"
@@ -624,7 +541,7 @@ export default function CourseDetail() {
             {course.modules.map((mod, idx) => (
               <div key={mod.id} className="es-card overflow-hidden">
                 <button
-                  onClick={() => toggleModule(mod.id)}
+                  onClick={() => onToggleModule?.(mod.id)}
                   aria-expanded={openModules.has(mod.id)}
                   aria-controls={`module-panel-fallback-${mod.id}`}
                   className="w-full flex items-center justify-between p-4 text-left hover:bg-es-card transition-colors"
@@ -670,8 +587,141 @@ export default function CourseDetail() {
         </div>
       </div>
 
-      {!enrolled && <CourseAccessOverview interestType={interestType} />}
+      {!isEnrolled && <CourseAccessOverview interestType={interestType} />}
+    </>
+  );
+}
 
+// ─── Main route component ─────────────────────────────────────────────────────
+
+export default function CourseDetail() {
+  const { slug } = useParams<{ slug: string }>();
+  const { isAuthenticated } = useAuth();
+
+  // Look up rich static data — determines which view to render
+  const richData = slug ? COURSE_PAGE_DATA[slug] : undefined;
+
+  // Read embedded data if this page was prerendered — avoids loading flash
+  // and ensures hydrateRoot sees the same output as renderToString did.
+  const [embedded] = useState(() => readEmbeddedCourseData(slug));
+
+  const [course, setCourse] = useState<CourseAPI | null>(embedded?.course ?? null);
+  const [loading, setLoading] = useState(!embedded);
+  const [loadError, setLoadError] = useState(false);
+  const [slowLoad, setSlowLoad] = useState(false);
+  const [enrolled, setEnrolled] = useState(false);
+  const [openModules, setOpenModules] = useState<Set<string>>(new Set());
+
+  useDocumentHead({
+    title: richData?.metaTitle || course?.title || richData?.headline || 'Course',
+    description: richData?.subHeadline || course?.summary || course?.description,
+    canonical: slug ? `${SITE_URL}/courses/${slug}` : undefined,
+  });
+
+  const loadCourse = () => {
+    if (!slug) return;
+    setLoading(true);
+    setLoadError(false);
+    setSlowLoad(false);
+    api
+      .get(`/courses/${slug}`)
+      .then((res) => setCourse(res.data))
+      .catch((err) => {
+        if (err?.response?.status === 404) setCourse(null);
+        else setLoadError(true);
+      })
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    if (embedded) return; // already have data from prerendered page
+    loadCourse();
+  }, [slug]);
+
+  useEffect(() => {
+    if (!loading) return;
+    const timer = setTimeout(() => setSlowLoad(true), 4000);
+    return () => clearTimeout(timer);
+  }, [loading]);
+
+  // Course access is granted by an admin (see Enrolment Manager), not
+  // self-service — this checks real enrolment status so a learner who
+  // has been admin-enrolled sees "Continue Learning" correctly.
+  useEffect(() => {
+    if (!isAuthenticated || !slug) return;
+    api
+      .get<{ enrolled: boolean }>(`/courses/${slug}/enrolled`)
+      .then(res => setEnrolled(res.data.enrolled))
+      .catch(() => {});
+  }, [isAuthenticated, slug]);
+
+  const toggleModule = (moduleId: string) => {
+    setOpenModules((prev) => {
+      const next = new Set(prev);
+      if (next.has(moduleId)) next.delete(moduleId);
+      else next.add(moduleId);
+      return next;
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex flex-col items-center justify-center text-sm gap-2" style={{ color: '#75757D', background: '#050506' }}>
+          <div className="animate-pulse" style={{ width: '220px', height: '16px', background: '#151519', borderRadius: '8px' }} />
+          <p>{slowLoad ? 'Waking the server, this can take a few seconds on first load.' : 'Loading course...'}</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center" style={{ background: '#050506', padding: '80px 0' }}>
+            <h2 className="text-2xl font-bold text-white mb-2">Couldn't load this course</h2>
+            <p className="text-sm mb-4" style={{ color: '#75757D' }}>Something went wrong. Please try again.</p>
+            <button onClick={loadCourse} className="btn-primary">Retry</button>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!course) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center" style={{ background: '#050506', padding: '80px 0' }}>
+            <h2 className="text-2xl font-bold text-white mb-2">Course not found</h2>
+            <Link to="/courses" className="text-sm hover:opacity-80 transition-opacity" style={{ color: '#C2186A' }}>
+              Back to catalogue
+            </Link>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
+      <Navbar />
+      <main className="flex-1">
+        <CourseDetailContent
+          course={course}
+          richData={richData}
+          isEnrolled={enrolled}
+          openModules={openModules}
+          onToggleModule={toggleModule}
+        />
+      </main>
       <Footer />
     </div>
   );

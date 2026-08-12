@@ -3,6 +3,8 @@ import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import { CONTACT_EMAIL } from '../../lib/contact';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
+import { SITE_URL } from '../../lib/siteUrl';
+import BreadcrumbSchema from '../../components/content/BreadcrumbSchema';
 
 const TEAM = [
   {
@@ -98,16 +100,10 @@ const ACCREDITATIONS = [
   },
 ];
 
-export default function About() {
-  useDocumentHead({
-    title: 'About',
-    description: 'Meet the team behind Educate.Strong Academy — champions and coaches building the standard for Strongman education.',
-  });
-
+export function AboutContent() {
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
-      <Navbar />
-
+    <>
+      <BreadcrumbSchema items={[{ name: 'Home', path: '/' }, { name: 'About', path: '/about' }]} />
       {/* Hero */}
       <section
         className="pt-navbar relative"
@@ -258,7 +254,7 @@ export default function About() {
           </div>
           {/* British Army logo */}
           <div className="mt-8 flex items-center gap-4">
-            <img src="/assets/partner-british-army.webp" alt="British Army" className="h-10 w-auto opacity-60" onError={(e) => { (e.target as HTMLImageElement).src = '/assets/british-army-logo.webp'; }} />
+            <img src="/assets/partner-british-army.webp" alt="British Army" className="h-10 w-auto opacity-60" loading="lazy" onError={(e) => { (e.target as HTMLImageElement).src = '/assets/british-army-logo.webp'; }} />
             <p className="text-sm text-es-subtle">Armed Forces Strongman partner — educational support for serving and veteran personnel.</p>
           </div>
         </div>
@@ -285,6 +281,22 @@ export default function About() {
         </div>
       </section>
 
+    </>
+  );
+}
+
+export default function About() {
+  useDocumentHead({
+    title: 'About',
+    description: 'Meet the team behind Educate.Strong Academy — champions and coaches building the standard for Strongman education.',
+    canonical: `${SITE_URL}/about`,
+  });
+  return (
+    <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
+      <Navbar />
+      <main className="flex-1">
+        <AboutContent />
+      </main>
       <Footer />
     </div>
   );

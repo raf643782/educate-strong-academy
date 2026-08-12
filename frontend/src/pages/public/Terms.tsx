@@ -3,7 +3,7 @@ import { CONTACT_EMAIL } from '../../lib/contact';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 export default function Terms() {
-  useDocumentHead({ title: 'Terms of Service' });
+  useDocumentHead({ title: 'Terms of Service', noindex: true });
 
   return (
     <LegalPageLayout title="Terms of Service">

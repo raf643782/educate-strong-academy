@@ -47,6 +47,8 @@ const MAX_RETRIES = 2;
 // Static, always-public routes — every admin/tutor/coach/learner-
 // dashboard/auth/reset/preview/demo route is excluded by construction,
 // since this list only ever names routes that are genuinely public.
+// /terms, /privacy, /refund-policy intentionally absent — noindex pages
+// must not appear in the sitemap.
 const STATIC_PUBLIC_ROUTES = [
   '/',
   '/courses',
@@ -56,12 +58,6 @@ const STATIC_PUBLIC_ROUTES = [
   '/strongkidz',
   '/coaching',
   '/coaches',
-  '/shop',
-  '/register-interest',
-  '/verify',
-  '/terms',
-  '/privacy',
-  '/refund-policy',
   '/knowledge',
   '/exercises',
   '/events',
@@ -75,6 +71,19 @@ const STATIC_PUBLIC_ROUTES = [
   '/eatstrong/category/coaches_guide',
   '/eatstrong/category/youth_nutrition',
   '/eatstrong/category/downloads',
+];
+
+// Category slug → backend enum key, matching CATEGORY_KEY_MAP in BeStrongCategory.tsx.
+const EATSTRONG_CATEGORY_SLUGS = [
+  { slug: 'basics',          key: 'BASICS' },
+  { slug: 'competition',     key: 'COMPETITION' },
+  { slug: 'recovery',        key: 'RECOVERY' },
+  { slug: 'making_weight',   key: 'MAKING_WEIGHT' },
+  { slug: 'hydration',       key: 'HYDRATION' },
+  { slug: 'supplements',     key: 'SUPPLEMENTS' },
+  { slug: 'coaches_guide',   key: 'COACHES_GUIDE' },
+  { slug: 'youth_nutrition', key: 'YOUTH_NUTRITION' },
+  { slug: 'downloads',       key: 'DOWNLOADS' },
 ];
 
 class PrerenderError extends Error {}
@@ -120,11 +129,23 @@ function injectHead(html, meta) {
     /<meta property="og:description" content=".*?" \/>/,
     `<meta property="og:description" content="${escapeHtml(meta.ogDescription)}" />`
   );
-  // og:url should equal the canonical URL per the OpenGraph spec
-  out = out.replace(
-    '</head>',
-    `    <meta property="og:url" content="${meta.canonical}" />\n    <link rel="canonical" href="${meta.canonical}" />\n  </head>`
-  );
+  // og:url must equal the canonical URL per the OpenGraph spec.
+  // og:image: use the page-specific image when provided; otherwise update
+  // the template default to use the env-aware SITE_URL so domain migration
+  // (setting VITE_SITE_URL in Vercel) propagates to all prerendered pages.
+  const defaultOgImage = `${SITE_URL}/assets/atlas-stone-branded.png`;
+  if (!meta.ogImage) {
+    out = out.replace(
+      /<meta property="og:image" content=".*?" \/>/,
+      `<meta property="og:image" content="${defaultOgImage}" />`
+    );
+  }
+  const extraTags = [
+    `    <meta property="og:url" content="${meta.canonical}" />`,
+    `    <link rel="canonical" href="${meta.canonical}" />`,
+    ...(meta.ogImage ? [`    <meta property="og:image" content="${escapeHtml(meta.ogImage)}" />`] : []),
+  ].join('\n');
+  out = out.replace('</head>', `${extraTags}\n  </head>`);
   return out;
 }
 
@@ -146,6 +167,28 @@ function injectInitialData(html, initialData) {
   const json = serializeForScriptTag(initialData);
   const tag = `    <script type="application/json" id="__ES_LIBRARY_DATA__">${json}</script>\n`;
   return html.replace('</body>', `${tag}  </body>`);
+}
+
+function injectCourseData(html, coursePayload) {
+  const json = serializeForScriptTag(coursePayload);
+  const tag = `    <script type="application/json" id="__ES_COURSE_DATA__">${json}</script>\n`;
+  return html.replace('</body>', `${tag}  </body>`);
+}
+
+function injectEatStrongArticleData(html, data) {
+  const json = serializeForScriptTag(data);
+  const tag = `    <script type="application/json" id="__ES_EATSTRONG_ARTICLE__">${json}</script>\n`;
+  return html.replace('</body>', `${tag}  </body>`);
+}
+
+function injectEatStrongCategoryData(html, data) {
+  const json = serializeForScriptTag(data);
+  const tag = `    <script type="application/json" id="__ES_EATSTRONG_CATEGORY__">${json}</script>\n`;
+  return html.replace('</body>', `${tag}  </body>`);
+}
+
+function injectNoindex(html) {
+  return html.replace('</head>', '    <meta name="robots" content="noindex, nofollow" />\n  </head>');
 }
 
 function escapeHtml(str) {
@@ -294,9 +337,23 @@ function validateGeneratedPage({ label, html, meta }) {
 }
 
 async function main() {
-  const { render, apiToPublicSlug, KNOWLEDGE_ARTICLES } = await import(path.join(FRONTEND_ROOT, 'dist-server', 'entry-server.js'));
+  const {
+    render, renderKnowledge, renderCourse,
+    renderAbout, renderCoachingPathway, renderStrongKidz, renderKnowledgeHub,
+    renderHome, renderCourseCatalogue, renderExerciseLibrary, renderEventLibrary, renderEatStrong,
+    renderCoachDirectory,
+    renderEatStrongArticle, renderEatStrongCategory,
+    renderTerms, renderPrivacy, renderRefundPolicy,
+    apiToPublicSlug, KNOWLEDGE_ARTICLES,
+  } = await import(path.join(FRONTEND_ROOT, 'dist-server', 'entry-server.js'));
 
   const template = await readFile(path.join(DIST_DIR, 'index.html'), 'utf-8');
+
+  // Save the raw SPA shell before any page overwrites dist/index.html.
+  // spa-fallback-or-404.mjs serves /shell.html for non-prerendered SPA
+  // routes so those routes never accidentally receive homepage HTML.
+  await writeFile(path.join(DIST_DIR, 'shell.html'), template);
+  console.log('[prerender] wrote shell.html (SPA fallback template)');
 
   console.log(`[prerender] API base: ${API_BASE}`);
   const [allExercises, allEvents] = await Promise.all([
@@ -375,7 +432,153 @@ async function main() {
   }
   console.log(`[prerender] wrote ${eventSlugsToRender.length} event page(s)`);
 
-  const intendedCount = exercisesToRender.length + eventSlugsToRender.length;
+  // Knowledge Hub articles — static data, no API fetch needed
+  for (const article of KNOWLEDGE_ARTICLES) {
+    const { html, meta } = renderKnowledge(article);
+    validateGeneratedPage({ label: `/knowledge/${article.slug}`, html, meta });
+    const outDir = path.join(DIST_DIR, 'knowledge', article.slug);
+    await mkdir(outDir, { recursive: true });
+    const page = injectRoot(injectHead(template, meta), html);
+    await writeFile(path.join(outDir, 'index.html'), page);
+    written++;
+  }
+  console.log(`[prerender] wrote ${KNOWLEDGE_ARTICLES.length} knowledge article page(s)`);
+
+  // Course detail pages — fetch from API, render with static rich data
+  // Only courses that have COURSE_PAGE_DATA entries are prerendered here;
+  // courses without rich data still work via the SPA fallback.
+  const COURSE_SLUGS = ['level-1-coaching-strongman', 'level-1-strongman-refereeing'];
+  let coursesWritten = 0;
+  for (const slug of COURSE_SLUGS) {
+    try {
+      const courseData = await fetchJsonWithRetry(`${API_BASE}/courses/${slug}`);
+      const { html, meta, coursePayload } = renderCourse(courseData);
+      validateGeneratedPage({ label: `/courses/${slug}`, html, meta });
+      const outDir = path.join(DIST_DIR, 'courses', slug);
+      await mkdir(outDir, { recursive: true });
+      const page = injectCourseData(injectRoot(injectHead(template, meta), html), coursePayload);
+      await writeFile(path.join(outDir, 'index.html'), page);
+      written++;
+      coursesWritten++;
+    } catch (err) {
+      console.warn(`[prerender] WARNING: could not prerender /courses/${slug}: ${err.message}`);
+      console.warn(`[prerender] Course page will fall back to SPA rendering.`);
+    }
+  }
+  console.log(`[prerender] wrote ${coursesWritten}/${COURSE_SLUGS.length} course page(s)`);
+
+  // Homepage — overwrites dist/index.html with prerendered content.
+  // shell.html (written above) is now the SPA fallback template so
+  // spa-fallback-or-404.mjs does not serve homepage HTML for /dashboard,
+  // /login, etc. injectHead updates og:image to use SITE_URL automatically.
+  {
+    const { html, meta } = renderHome();
+    validateGeneratedPage({ label: '/', html, meta });
+    const page = injectRoot(injectHead(template, meta), html);
+    await writeFile(path.join(DIST_DIR, 'index.html'), page);
+    written++;
+  }
+  console.log('[prerender] wrote homepage (dist/index.html)');
+
+  // Static public pages — no API fetch needed, content is pure static JSX
+  const STATIC_PAGES = [
+    { slug: 'about', render: renderAbout },
+    { slug: 'coaching', render: renderCoachingPathway },
+    { slug: 'strongkidz', render: renderStrongKidz },
+    { slug: 'knowledge', render: renderKnowledgeHub },
+    { slug: 'courses', render: renderCourseCatalogue },
+    { slug: 'exercises', render: renderExerciseLibrary },
+    { slug: 'events', render: renderEventLibrary },
+    { slug: 'eatstrong', render: renderEatStrong },
+    { slug: 'coaches', render: renderCoachDirectory },
+  ];
+  for (const p of STATIC_PAGES) {
+    const { html, meta } = p.render();
+    validateGeneratedPage({ label: `/${p.slug}`, html, meta });
+    const outDir = path.join(DIST_DIR, p.slug);
+    await mkdir(outDir, { recursive: true });
+    const page = injectRoot(injectHead(template, meta), html);
+    await writeFile(path.join(outDir, 'index.html'), page);
+    written++;
+  }
+  console.log(`[prerender] wrote ${STATIC_PAGES.length} static page(s) (about, coaching, strongkidz, knowledge, courses, exercises, events, eatstrong, coaches)`);
+
+  // Legal pages — prerendered with noindex; NOT in sitemap.
+  const LEGAL_PAGES = [
+    { slug: 'terms', render: renderTerms },
+    { slug: 'privacy', render: renderPrivacy },
+    { slug: 'refund-policy', render: renderRefundPolicy },
+  ];
+  for (const p of LEGAL_PAGES) {
+    const { html, meta } = p.render();
+    validateGeneratedPage({ label: `/${p.slug}`, html, meta });
+    const outDir = path.join(DIST_DIR, p.slug);
+    await mkdir(outDir, { recursive: true });
+    const page = injectNoindex(injectRoot(injectHead(template, meta), html));
+    await writeFile(path.join(outDir, 'index.html'), page);
+    written++;
+  }
+  console.log(`[prerender] wrote ${LEGAL_PAGES.length} legal page(s) (terms, privacy, refund-policy) with noindex`);
+
+  // EatStrong category pages — one per category, articles fetched per category.
+  const categoriesMeta = await fetchJsonWithRetry(`${API_BASE}/be-strong/categories`);
+  let categoriesWritten = 0;
+  for (const { slug: catSlug, key: catKey } of EATSTRONG_CATEGORY_SLUGS) {
+    const catArticles = await fetchJsonWithRetry(`${API_BASE}/be-strong/articles?category=${catKey}`);
+    const categoryMeta = Array.isArray(categoriesMeta) ? categoriesMeta.find(c => c.key === catKey) || null : null;
+    const articles = Array.isArray(catArticles) ? catArticles : [];
+    const { html, meta } = renderEatStrongCategory(catSlug, catKey, articles, categoryMeta);
+    validateGeneratedPage({ label: `/eatstrong/category/${catSlug}`, html, meta });
+    const categoryData = { categorySlug: catSlug, articles, categoryMeta };
+    const outDir = path.join(DIST_DIR, 'eatstrong', 'category', catSlug);
+    await mkdir(outDir, { recursive: true });
+    const page = injectEatStrongCategoryData(injectRoot(injectHead(template, meta), html), categoryData);
+    await writeFile(path.join(outDir, 'index.html'), page);
+    written++;
+    categoriesWritten++;
+  }
+  console.log(`[prerender] wrote ${categoriesWritten} EatStrong category page(s)`);
+
+  // EatStrong article pages — fetch list first, then each FREE article individually
+  // (the list endpoint returns contentLen:0; full content requires the individual endpoint).
+  let eatStrongArticlesWritten = 0;
+  try {
+    const articleList = await fetchJsonWithRetry(`${API_BASE}/be-strong/articles`, { retries: 1 });
+    if (Array.isArray(articleList)) {
+      const freeArticleSlugs = articleList.filter(a => a.accessLevel === 'FREE' && a.slug).map(a => a.slug);
+      for (const slug of freeArticleSlugs) {
+        try {
+          const article = await fetchJsonWithRetry(`${API_BASE}/be-strong/articles/${slug}`);
+          const { html, meta } = renderEatStrongArticle(article);
+          validateGeneratedPage({ label: `/eatstrong/articles/${slug}`, html, meta });
+          const articleData = { slug: article.slug, article };
+          const outDir = path.join(DIST_DIR, 'eatstrong', 'articles', slug);
+          await mkdir(outDir, { recursive: true });
+          const page = injectEatStrongArticleData(injectRoot(injectHead(template, meta), html), articleData);
+          await writeFile(path.join(outDir, 'index.html'), page);
+          written++;
+          eatStrongArticlesWritten++;
+        } catch (err) {
+          console.warn(`[prerender] WARNING: could not prerender /eatstrong/articles/${slug}: ${err.message}`);
+        }
+      }
+    }
+  } catch (err) {
+    console.warn(`[prerender] WARNING: could not fetch EatStrong article list, article pages will serve SPA shell: ${err.message}`);
+  }
+  console.log(`[prerender] wrote ${eatStrongArticlesWritten} EatStrong article page(s)`);
+
+  const intendedCount =
+    exercisesToRender.length +
+    eventSlugsToRender.length +
+    KNOWLEDGE_ARTICLES.length +
+    coursesWritten +
+    STATIC_PAGES.length +
+    1 + // homepage
+    LEGAL_PAGES.length +
+    categoriesWritten +
+    eatStrongArticlesWritten;
+
   if (written !== intendedCount) {
     throw new PrerenderError(`Expected to write ${intendedCount} page(s) but wrote ${written}.`);
   }
@@ -390,7 +593,13 @@ async function main() {
     );
   }
 
-  console.log(`[prerender] done — ${written} page(s) prerendered (of ${allExercises.length + allEvents.length} total published records)`);
+  console.log(
+    `[prerender] done — ${written} page(s) prerendered ` +
+    `(${allExercises.length} exercises, ${allEvents.length} events, ` +
+    `${KNOWLEDGE_ARTICLES.length} knowledge articles, ${coursesWritten} courses, ` +
+    `${STATIC_PAGES.length} static, ${LEGAL_PAGES.length} legal, ` +
+    `${categoriesWritten} eatstrong categories, ${eatStrongArticlesWritten} eatstrong articles)`
+  );
 
   await generateSitemapAndRobots({
     allExercises,

@@ -4,6 +4,8 @@ import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import { CONTACT_EMAIL } from '../../lib/contact';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
+import { SITE_URL } from '../../lib/siteUrl';
+import BreadcrumbSchema from '../../components/content/BreadcrumbSchema';
 
 type Tab = 'parents' | 'coaches';
 
@@ -100,40 +102,10 @@ const COACH_FAQS = [
 
 const SCHEMA_ID = 'strongkidz-faq-schema';
 
-export default function StrongKidz() {
-  const canonicalUrl = 'https://educate-strong-academy.vercel.app/strongkidz';
-
-  useDocumentHead({
-    title: 'StrongKidz — Youth Strength Programme in Sheffield',
-    description:
-      "StrongKidz is Educate Strong's youth strength programme in Sheffield — movement, confidence and positive experiences of strength for children, coached by safeguarding-trained coaches. Also home to StrongKidz Coach Education for adults.",
-    canonical: canonicalUrl,
-  });
-
+export function StrongKidzContent() {
   const [tab, setTab] = useState<Tab>('parents');
   const parentsTabRef = useRef<HTMLButtonElement>(null);
   const coachesTabRef = useRef<HTMLButtonElement>(null);
-
-  // FAQPage schema — only for the real, visible FAQ content above.
-  useEffect(() => {
-    const allFaqs = [...PARENT_FAQS, ...COACH_FAQS];
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.id = SCHEMA_ID;
-    script.text = JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      mainEntity: allFaqs.map((f) => ({
-        '@type': 'Question',
-        name: f.q,
-        acceptedAnswer: { '@type': 'Answer', text: f.a },
-      })),
-    });
-    document.head.appendChild(script);
-    return () => {
-      document.getElementById(SCHEMA_ID)?.remove();
-    };
-  }, []);
 
   const switchTab = (next: Tab) => {
     setTab(next);
@@ -148,9 +120,8 @@ export default function StrongKidz() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
-      <Navbar />
-
+    <>
+      <BreadcrumbSchema items={[{ name: 'Home', path: '/' }, { name: 'StrongKidz', path: '/strongkidz' }]} />
       {/* ── HERO ──────────────────────────────────────────────────────── */}
       <section
         className="pt-navbar relative overflow-hidden"
@@ -407,7 +378,7 @@ export default function StrongKidz() {
               ].map(coach => (
                 <div key={coach.name} className="rounded-2xl overflow-hidden" style={{ background: '#151519', border: '1px solid rgba(255,255,255,0.07)' }}>
                   <div className="h-48" style={{ background: '#1B1B20' }}>
-                    <img src={coach.img} alt={coach.name} className="w-full h-full object-cover object-top" />
+                    <img src={coach.img} alt={coach.name} className="w-full h-full object-cover object-top" loading="lazy" />
                   </div>
                   <div className="p-5">
                     <p className="font-bold text-white mb-0.5">{coach.name}</p>
@@ -466,8 +437,8 @@ export default function StrongKidz() {
                 <p className="text-sm" style={{ color: '#75757D' }}>
                   Coaching a wider age range or sport? Browse the full{' '}
                   <Link to="/courses" className="es-inline-link font-semibold" style={{ color: '#C2186A' }}>Course Catalogue</Link>, or read{' '}
-                  <Link to="/knowledge/strongman-safety-screening" className="es-inline-link font-semibold" style={{ color: '#C2186A' }}>
-                    Strongman Safety: Screening and Risk Management for Coaches
+                  <Link to="/knowledge/risk-assessment-strongman-environments" className="es-inline-link font-semibold" style={{ color: '#C2186A' }}>
+                    Risk Assessment for Strongman Training Environments
                   </Link>{' '}
                   on the Knowledge Hub.
                 </p>
@@ -585,7 +556,47 @@ export default function StrongKidz() {
           <p className="text-xs mt-6" style={{ color: '#55555E' }}>No payment required at this stage.</p>
         </div>
       </section>
+    </>
+  );
+}
 
+export default function StrongKidz() {
+  const canonicalUrl = `${SITE_URL}/strongkidz`;
+
+  useDocumentHead({
+    title: 'StrongKidz — Youth Strength Programme in Sheffield',
+    description:
+      "StrongKidz is Educate Strong's youth strength programme in Sheffield — movement, confidence and positive experiences of strength for children, coached by safeguarding-trained coaches. Also home to StrongKidz Coach Education for adults.",
+    canonical: canonicalUrl,
+  });
+
+  // FAQPage schema — only for the real, visible FAQ content above. Client-side only.
+  useEffect(() => {
+    const allFaqs = [...PARENT_FAQS, ...COACH_FAQS];
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = SCHEMA_ID;
+    script.text = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: allFaqs.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    });
+    document.head.appendChild(script);
+    return () => {
+      document.getElementById(SCHEMA_ID)?.remove();
+    };
+  }, []);
+
+  return (
+    <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
+      <Navbar />
+      <main className="flex-1">
+        <StrongKidzContent />
+      </main>
       <Footer />
     </div>
   );

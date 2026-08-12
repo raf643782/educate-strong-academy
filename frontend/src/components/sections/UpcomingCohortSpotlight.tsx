@@ -31,6 +31,7 @@ import { Link } from 'react-router-dom';
 import api from '../../lib/api';
 import { COURSE_PAGE_DATA } from '../../data/coursePageData';
 import { hasValidCoords as hasValidCoordsPair, VenueMap } from '../../lib/cohortMap';
+import { SITE_URL } from '../../lib/siteUrl';
 
 interface CohortCourse {
   id: string;
@@ -148,7 +149,7 @@ export default function UpcomingCohortSpotlight() {
       offers: c.price
         ? { '@type': 'Offer', price: c.price, priceCurrency: 'GBP', availability: 'https://schema.org/InStock', url: c.bookingUrl || undefined }
         : undefined,
-      url: c.course ? `/courses/${c.course.slug}` : undefined,
+      url: c.course ? `${SITE_URL}/courses/${c.course.slug}` : undefined,
     });
     document.head.appendChild(script);
     return () => {
