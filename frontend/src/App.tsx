@@ -163,9 +163,9 @@ export default function App() {
             <Route path="/refund-policy" element={<RefundPolicy />} />
             <Route path="/knowledge" element={<KnowledgeHub />} />
             <Route path="/knowledge/:slug" element={<KnowledgeArticlePage />} />
-            {/* Internal Sanity preview — noindex, not linked in nav. See docs/handover/cms-guide.md */}
-            <Route path="/knowledge-hub-preview" element={<KnowledgeHubSanityPreview />} />
-            <Route path="/knowledge-hub-preview/:slug" element={<KnowledgeArticleSanityPreviewPage />} />
+            {/* Internal Sanity preview — ADMIN only, noindex, not linked in nav. See docs/handover/cms-guide.md */}
+            <Route path="/knowledge-hub-preview" element={<ProtectedRoute roles={['ADMIN']}><KnowledgeHubSanityPreview /></ProtectedRoute>} />
+            <Route path="/knowledge-hub-preview/:slug" element={<ProtectedRoute roles={['ADMIN']}><KnowledgeArticleSanityPreviewPage /></ProtectedRoute>} />
             <Route path="/exercises" element={<ExerciseLibrary />} />
             <Route path="/exercises/:slug" element={<ExerciseDetail />} />
             <Route path="/events" element={<EventLibrary />} />

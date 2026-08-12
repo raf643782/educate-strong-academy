@@ -155,6 +155,6 @@ export async function getPathwaysWithArticles(): Promise<SanityPathwayWithArticl
   `);
   return pathways.map(p => ({
     ...p,
-    orderedArticles: p.orderedArticles.filter(a => a.status === 'published'),
+    orderedArticles: p.orderedArticles.filter(a => a.status === 'published' && isApprovedKnowledgeSlug(a.slug)),
   }));
 }
