@@ -19,12 +19,14 @@ Resend is the transactional email provider. It handles all automated emails sent
 
 **Not yet live.** The Resend integration is fully implemented in the backend code, but requires:
 
-1. A Resend account with `educatestrong.com` as a verified sending domain
+1. A Resend account with `send.educatestrong.com` as a verified sending subdomain
 2. `RESEND_API_KEY` set on Render
-3. `EMAIL_FROM` set on Render to `EducateStrong Academy <no-reply@educatestrong.com>` (or similar)
+3. `EMAIL_FROM` set on Render to `EducateStrong Academy <no-reply@send.educatestrong.com>`
 4. `NOTIFICATIONS_EMAIL` set on Render to the team inbox
 
 Until these are done, the backend falls back to `onboarding@resend.dev` (Resend's shared test sender), which means emails may land in spam and show the wrong "from" address.
+
+**Architecture note**: The intended sending domain is the subdomain `send.educatestrong.com` — not the root `educatestrong.com`. This cleanly separates transactional email from Google Workspace staff mailboxes (`kris@educatestrong.com` etc.) and avoids SPF/DKIM conflicts at the root domain.
 
 ---
 
@@ -37,13 +39,15 @@ Go to https://resend.com and create an account. The free plan covers 3,000 email
 ### Step 2 — Verify the sending domain
 
 1. In Resend dashboard → Domains → Add Domain
-2. Enter `educatestrong.com`
+2. Enter `send.educatestrong.com` (the subdomain — not the root `educatestrong.com`)
 3. Resend will provide DNS records to add:
-   - An SPF TXT record
-   - DKIM CNAME records (usually 2–3 records)
-   - A DMARC TXT record (Resend may provide this or you can add it yourself)
-4. Add these records in the Cloudflare DNS panel for `educatestrong.com`
+   - An SPF TXT record at `send.educatestrong.com`
+   - DKIM CNAME records (usually 2–3 records, at subdomains of `send.educatestrong.com`)
+   - A DMARC TXT record at `_dmarc.send.educatestrong.com`
+4. Add these records in the DNS panel for `educatestrong.com`
 5. Back in Resend dashboard, click "Verify" — green checks confirm the records are in place
+
+**DNS provider note**: These are TXT and CNAME records at the subdomain level. If DNS is currently managed through Wix and Wix does not support creating TXT or CNAME records at subdomain levels, DNS management must be moved to Cloudflare first. See `platform-cloudflare.md`. Adding Resend DNS records does **not** affect Google Workspace MX records or staff email.
 
 ### Step 3 — Create an API key
 
@@ -58,15 +62,15 @@ Go to https://resend.com and create an account. The free plan covers 3,000 email
 | Variable | Value |
 |---|---|
 | `RESEND_API_KEY` | The API key from Step 3 |
-| `EMAIL_FROM` | `EducateStrong Academy <no-reply@educatestrong.com>` |
+| `EMAIL_FROM` | `EducateStrong Academy <no-reply@send.educatestrong.com>` |
 | `NOTIFICATIONS_EMAIL` | e.g. `kris@educatestrong.com` or a team inbox |
-| `FRONTEND_URL` | `https://www.educatestrong.com` (controls link domain in emails) |
+| `FRONTEND_URL` | The canonical production URL — e.g. `https://www.educatestrong.com` or `https://educatestrong.com` (owner decision required; controls link domain in emails) |
 
 ### Step 5 — Test
 
 1. Trigger a registration on the staging/preview environment
 2. Confirm the verification email arrives with:
-   - Correct "from" address (e.g. `no-reply@educatestrong.com`)
+   - Correct "from" address (e.g. `no-reply@send.educatestrong.com`)
    - Correct link domain (e.g. `https://www.educatestrong.com/verify-email/...`)
    - Delivered to inbox (not spam)
 

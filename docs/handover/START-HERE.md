@@ -137,3 +137,5 @@ Short version:
 | `platform-neon.md` | Neon (database) operator guide |
 | `platform-cloudflare.md` | Cloudflare DNS and R2 operator guide |
 | `platform-resend.md` | Resend email setup and operator guide |
+| `knowledge-sanity-migration-map.md` | Migration decisions for all 21 Knowledge Hub URLs before Sanity cutover |
+| `wix-content-continuity.md` | Wix course/content comparison — confirms nothing is lost in the migration |

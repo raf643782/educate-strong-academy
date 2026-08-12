@@ -40,7 +40,7 @@ Everything public, plus:
 - `/cpd` — their own CPD record
 - `/coursework` — their own coursework submissions
 - `/documents` — download documents for courses they are enrolled in (presigned R2 URLs, 2-minute expiry)
-- `/skill-tree` — skill tree view
+- `/dashboard/pathway` — skill tree / learning pathway view
 - API: `GET /api/documents`, `GET /api/documents/course/:courseId`, `GET /api/documents/:id/download` — authenticated, but no role restriction beyond being logged in; `/:id/download` checks the requester is enrolled in the relevant course
 
 ### COACH
@@ -64,14 +64,14 @@ All of the above, plus:
 - `/admin` — admin dashboard
 - `/admin/users` — view, search, edit, enable/disable all users
 - `/admin/courses` — create, edit, delete courses
-- `/admin/courses/:id/edit` — course editor
+- `/admin/courses/:id` — course editor
 - `/admin/cohorts` — manage cohorts
 - `/admin/enrolments` — enrol/remove learners
 - `/admin/assessments` — view and manage all assessments
 - `/admin/documents` — upload, attach, delete course documents
-- `/admin/coach-profiles` — manage coach profiles
+- `/admin/coaches` — manage coach profiles
 - `/admin/register-interest` — view all Register Interest submissions
-- `/admin/bestrong` — manage EatStrong/BeStrong content
+- `/admin/eatstrong` — manage EatStrong/BeStrong content (`/admin/be-strong` redirects here)
 - `/admin/certificates` — issue and revoke certificates
 - All `/api/admin/*` endpoints
 - All `/api/assessor/*` endpoints

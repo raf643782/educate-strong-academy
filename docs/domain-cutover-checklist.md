@@ -31,16 +31,14 @@ domain, and verifying everything is working before standing down.
 
 ### 1.2 Email DNS pre-cutover
 
-Resend uses DNS records separate from A/CNAME. If email sending on the
-new domain is not already configured, complete these **before** DNS switch:
+Resend uses the sending subdomain `send.educatestrong.com` (not the root domain). DNS records are TXT and CNAME only — no MX records. These are separate from A/CNAME changes and do not affect Google Workspace email. Complete these **before** DNS switch:
 
-- [ ] Verify SPF record exists for the sending domain (check Resend dashboard
-      → Domains → your domain's verification status)
-- [ ] Verify DKIM CNAME records exist and are passing in the Resend dashboard
-- [ ] Verify DMARC TXT record (`_dmarc.your-domain.com`) is in place
-      (at minimum: `v=DMARC1; p=none; rua=mailto:...`)
-- [ ] Send a test transactional email (e.g. password reset on staging) and
-      confirm delivery + correct "from" domain before go-live
+- [ ] Resend sending subdomain `send.educatestrong.com` verified in Resend dashboard
+- [ ] SPF TXT record for `send.educatestrong.com` present and passing in Resend
+- [ ] DKIM CNAME records for `send.educatestrong.com` present and passing
+- [ ] DMARC TXT record (`_dmarc.send.educatestrong.com`) in place
+- [ ] If DNS is currently on Wix: confirm Wix supports TXT/CNAME at subdomain level; if not, move DNS to Cloudflare first
+- [ ] Send a test transactional email (e.g. password reset on staging) and confirm delivery + correct "from" address (`no-reply@send.educatestrong.com`) before go-live
 
 ### 1.4 SEO baseline (record before cutover)
 

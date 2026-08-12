@@ -6,6 +6,8 @@ This document explains the current state of the Knowledge Hub, what Sanity CMS i
 
 ## Current state
 
+**SANITY FRONTEND INTEGRATION STAGED / LIVE SANITY CUTOVER NOT PERFORMED / 21 HARDCODED ARTICLES REMAIN PUBLIC SOURCE**
+
 The Knowledge Hub at `/knowledge` currently serves **21 hardcoded articles** stored in the frontend codebase at `frontend/src/data/knowledgeArticles.ts`. To add, edit, or remove one of these articles, a developer must edit that file, commit, and redeploy the frontend.
 
 This system works but is not owner-editable without developer involvement.
@@ -67,10 +69,20 @@ Once the variables are deployed, go to `https://www.educatestrong.com/knowledge-
 
 ### Step 4 — Load content into Sanity Studio
 
-The Sanity Studio (the editorial CMS interface) can be deployed separately or accessed via the Sanity dashboard. A developer will need to:
+**Sanity Studio finding**: A Sanity Studio project with full schema exists in the `sanity/` directory of the `feature-sanity-stage5a-safety` branch. The schema defines `knowledgeArticle` and `pathway` document types with all required fields (`body`, `faq`, `publicReferences`, SEO fields). The project ID `ut2wo29d` is referenced in `docs/SANITY_ACCESS_AND_CONTENT_BOUNDARY.md` on that branch.
 
-- Deploy or run the Sanity Studio project (in `sanity/` directory if present, otherwise create it from the schema)
+**To use the existing Studio**: port the `sanity/` directory from `feature-sanity-stage5a-safety` into this branch, then set `SANITY_STUDIO_PROJECT_ID=ut2wo29d` and `SANITY_STUDIO_DATASET=production` in a `sanity/.env.local` file (never commit these). Run the Studio locally with `cd sanity && npx sanity dev`.
+
+**SANITY EDITORIAL STUDIO HANDOVER STILL REQUIRES DEVELOPER SETUP** — the Studio files exist in a feature branch and have not been ported to `main`. A developer must complete this step before the owner can create content.
+
+**Owner action**: Go to `manage.sanity.io/projects/ut2wo29d` to verify access to this Sanity project. If you cannot access it, create a new project and provide the new Project ID to the developer.
+
+A developer will:
+
+- Port the Studio from the feature branch (or create a new one from the schema)
 - Create and publish articles using the 9 approved slugs defined in `frontend/src/lib/approvedKnowledgeArticles.ts`
+
+**Hard requirement**: Before the live Sanity cutover, every one of the 21 existing hardcoded Knowledge Hub URLs must have a documented migration decision. See `docs/handover/knowledge-sanity-migration-map.md`. The cutover must not happen until all 21 decisions are resolved — otherwise existing prerendered pages will 404 after the switch.
 
 ### Step 5 — Cutover the live Knowledge Hub (developer task)
 

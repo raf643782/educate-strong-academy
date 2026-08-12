@@ -25,7 +25,7 @@ Complete each section before going live at `educatestrong.com`. Tick items as th
 - [ ] `DATABASE_URL` — Neon PostgreSQL connection string — set and verified
 - [ ] `JWT_SECRET` — long random string — set and verified
 - [ ] `NODE_ENV` — set to `production`
-- [ ] `FRONTEND_URL` — set to `https://www.educatestrong.com`
+- [ ] `FRONTEND_URL` — set to the canonical production URL (owner decision: `https://educatestrong.com` or `https://www.educatestrong.com`)
 - [ ] `RESEND_API_KEY` — Resend API key — set and verified
 - [ ] `EMAIL_FROM` — set to `EducateStrong Academy <no-reply@educatestrong.com>` (or approved sender)
 - [ ] `NOTIFICATIONS_EMAIL` — set to team inbox that receives Register Interest notifications
@@ -39,7 +39,7 @@ Complete each section before going live at `educatestrong.com`. Tick items as th
 
 ## Section 3 — Frontend environment variables (Vercel)
 
-- [ ] `VITE_SITE_URL` — set to `https://www.educatestrong.com`
+- [ ] `VITE_SITE_URL` — set to the canonical production URL (must match `FRONTEND_URL`; owner decision required)
 - [ ] `VITE_API_URL` — set to `https://educate-strong-api.onrender.com/api`
 - [ ] `VITE_GA_MEASUREMENT_ID` — set to real GA4 property ID (format: `G-XXXXXXXXXX`)
 - [ ] `VITE_ENABLE_QA_DEMO_LOGIN` — must be absent or `false` in production
@@ -49,11 +49,15 @@ Complete each section before going live at `educatestrong.com`. Tick items as th
 
 ## Section 4 — Email DNS (Resend)
 
-- [ ] Resend domain `educatestrong.com` verified in Resend dashboard
-- [ ] SPF record present and passing in Resend dashboard
-- [ ] DKIM CNAME records present and passing
-- [ ] DMARC TXT record present (`_dmarc.educatestrong.com`)
-- [ ] Test email sent and received with correct "from" address
+Sending subdomain is `send.educatestrong.com` — not the root domain. See `platform-resend.md`.
+
+- [ ] Resend sending subdomain `send.educatestrong.com` verified in Resend dashboard
+- [ ] SPF TXT record for `send.educatestrong.com` present and passing
+- [ ] DKIM CNAME records for `send.educatestrong.com` present and passing
+- [ ] DMARC TXT record present (`_dmarc.send.educatestrong.com`)
+- [ ] `EMAIL_FROM` on Render set to `EducateStrong Academy <no-reply@send.educatestrong.com>`
+- [ ] Test email sent and received with correct "from" address (`no-reply@send.educatestrong.com`)
+- [ ] If DNS is on Wix: confirm Wix supports TXT/CNAME at subdomain level — otherwise move DNS to Cloudflare first
 
 ---
 
