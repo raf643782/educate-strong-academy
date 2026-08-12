@@ -36,7 +36,7 @@ export default function CoursePractical({
           {/* Media */}
           {mediaUrl ? (
             <div className="rounded-xl aspect-[4/3] overflow-hidden" style={{ background: '#151519' }}>
-              <img src={mediaUrl} alt={mediaAlt || ''} className="w-full h-full object-cover" loading="lazy" />
+              <img src={mediaUrl} alt={mediaAlt || ''} aria-hidden={!mediaAlt || undefined} className="w-full h-full object-cover" loading="lazy" />
             </div>
           ) : (
             <div className="rounded-xl aspect-[4/3] flex flex-col items-center justify-center"
