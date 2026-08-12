@@ -39,6 +39,12 @@ import CourseCatalogue from './pages/public/CourseCatalogue';
 import ExerciseLibrary from './pages/exercises/ExerciseLibrary';
 import EventLibrary from './pages/events/EventLibrary';
 import EatStrongHub from './pages/bestrong/BeStrongHub';
+import CoachDirectory from './pages/public/CoachDirectory';
+import Terms from './pages/public/Terms';
+import Privacy from './pages/public/Privacy';
+import RefundPolicy from './pages/public/RefundPolicy';
+import { EatStrongArticleContent, type Article as EatStrongArticle, CATEGORY_LABELS, CATEGORY_SLUG } from './pages/bestrong/BeStrongArticlePage';
+import { EatStrongCategoryContent, type Article as EatStrongCategoryArticle, type CategoryMeta, CATEGORY_KEY_MAP } from './pages/bestrong/BeStrongCategory';
 import { buildExerciseMeta, buildEventMeta, buildKnowledgeArticleMeta, buildCourseMeta, type PageMeta } from './lib/libraryMeta';
 import { SITE_URL } from './lib/siteUrl';
 import { pickRelatedExercises, pickEventsForExercise, pickExercisesForEvent, pickRelatedEvents } from './lib/relatedContent';
@@ -327,6 +333,153 @@ export function renderEatStrong(): StaticPageResult {
       canonical: `${SITE_URL}/eatstrong`,
       ogTitle: 'EatStrong — Nutrition for Strongman | Educate.Strong Academy',
       ogDescription: 'Practical nutrition guidance for Strongman athletes — from competition-day fuelling to long-term strength nutrition, written for the sport.',
+    },
+  };
+}
+
+export { CATEGORY_KEY_MAP };
+
+export function renderCoachDirectory(): StaticPageResult {
+  const html = renderToString(
+    <StaticRouter location="/coaches">
+      <AuthProvider>
+        <CoachDirectory />
+      </AuthProvider>
+    </StaticRouter>
+  );
+  return {
+    html,
+    meta: {
+      title: 'Find a Certified Strongman Coach',
+      description: 'Directory of certified Strongman coaches and referees from Educate.Strong Academy — find a coach near you.',
+      canonical: `${SITE_URL}/coaches`,
+      ogTitle: 'Coach Directory — Educate.Strong Academy',
+      ogDescription: 'Directory of certified Strongman coaches and referees from Educate.Strong Academy — find a coach near you.',
+    },
+  };
+}
+
+export function renderEatStrongArticle(article: EatStrongArticle): StaticPageResult {
+  const categorySlug = CATEGORY_SLUG[article.category] || article.category.toLowerCase();
+  const categoryLabel = CATEGORY_LABELS[article.category] || article.category;
+  const html = renderToString(
+    <StaticRouter location={`/eatstrong/articles/${article.slug}`}>
+      <AuthProvider>
+        <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
+          <Navbar />
+          <EatStrongArticleContent
+            article={article}
+            categorySlug={categorySlug}
+            categoryLabel={categoryLabel}
+          />
+          <Footer />
+        </div>
+      </AuthProvider>
+    </StaticRouter>
+  );
+  return {
+    html,
+    meta: {
+      title: article.title,
+      description: article.summary || `${categoryLabel} — EatStrong nutrition guidance for Strongman athletes.`,
+      canonical: `${SITE_URL}/eatstrong/articles/${article.slug}`,
+      ogTitle: `${article.title} — EatStrong`,
+      ogDescription: article.summary || `${categoryLabel} — EatStrong nutrition guidance for Strongman athletes.`,
+    },
+  };
+}
+
+export function renderEatStrongCategory(
+  categorySlug: string,
+  categoryKey: string,
+  articles: EatStrongCategoryArticle[],
+  categoryMeta: CategoryMeta | null,
+): StaticPageResult {
+  const categoryLabel = categoryMeta?.label || categoryKey.replace(/_/g, ' ');
+  const html = renderToString(
+    <StaticRouter location={`/eatstrong/category/${categorySlug}`}>
+      <AuthProvider>
+        <div className="min-h-screen flex flex-col" style={{ background: '#0D0D0D' }}>
+          <Navbar />
+          <EatStrongCategoryContent
+            articles={articles}
+            categoryMeta={categoryMeta}
+            categorySlug={categorySlug}
+            categoryKey={categoryKey}
+          />
+          <Footer />
+        </div>
+      </AuthProvider>
+    </StaticRouter>
+  );
+  return {
+    html,
+    meta: {
+      title: `${categoryLabel} — EatStrong`,
+      description: categoryMeta?.description || `${categoryLabel} nutrition resources for Strongman athletes.`,
+      canonical: `${SITE_URL}/eatstrong/category/${categorySlug}`,
+      ogTitle: `${categoryLabel} — EatStrong | Educate.Strong Academy`,
+      ogDescription: categoryMeta?.description || `${categoryLabel} nutrition resources for Strongman athletes.`,
+    },
+  };
+}
+
+export function renderTerms(): StaticPageResult {
+  const html = renderToString(
+    <StaticRouter location="/terms">
+      <AuthProvider>
+        <Terms />
+      </AuthProvider>
+    </StaticRouter>
+  );
+  return {
+    html,
+    meta: {
+      title: 'Terms of Service',
+      description: 'Terms of Service for Educate.Strong Academy — covering course bookings, accounts, and acceptable use.',
+      canonical: `${SITE_URL}/terms`,
+      ogTitle: 'Terms of Service — Educate.Strong Academy',
+      ogDescription: 'Terms of Service for Educate.Strong Academy — covering course bookings, accounts, and acceptable use.',
+    },
+  };
+}
+
+export function renderPrivacy(): StaticPageResult {
+  const html = renderToString(
+    <StaticRouter location="/privacy">
+      <AuthProvider>
+        <Privacy />
+      </AuthProvider>
+    </StaticRouter>
+  );
+  return {
+    html,
+    meta: {
+      title: 'Privacy Policy',
+      description: 'Privacy Policy for Educate.Strong Academy — explaining what personal data we collect and how we use it.',
+      canonical: `${SITE_URL}/privacy`,
+      ogTitle: 'Privacy Policy — Educate.Strong Academy',
+      ogDescription: 'Privacy Policy for Educate.Strong Academy — explaining what personal data we collect and how we use it.',
+    },
+  };
+}
+
+export function renderRefundPolicy(): StaticPageResult {
+  const html = renderToString(
+    <StaticRouter location="/refund-policy">
+      <AuthProvider>
+        <RefundPolicy />
+      </AuthProvider>
+    </StaticRouter>
+  );
+  return {
+    html,
+    meta: {
+      title: 'Refund & Cancellation Policy',
+      description: 'Refund and cancellation policy for Educate.Strong Academy courses and bookings.',
+      canonical: `${SITE_URL}/refund-policy`,
+      ogTitle: 'Refund & Cancellation Policy — Educate.Strong Academy',
+      ogDescription: 'Refund and cancellation policy for Educate.Strong Academy courses and bookings.',
     },
   };
 }

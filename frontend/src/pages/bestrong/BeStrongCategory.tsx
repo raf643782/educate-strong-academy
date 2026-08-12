@@ -7,7 +7,7 @@ import { CONTACT_EMAIL } from '../../lib/contact';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
 import { SITE_URL } from '../../lib/siteUrl';
 
-interface Article {
+export interface Article {
   id: string;
   title: string;
   slug: string;
@@ -32,7 +32,7 @@ interface Download {
   locked?: boolean;
 }
 
-interface CategoryMeta {
+export interface CategoryMeta {
   key: string;
   label: string;
   description: string;
@@ -41,7 +41,7 @@ interface CategoryMeta {
   downloadCount: number;
 }
 
-const CATEGORY_KEY_MAP: Record<string, string> = {
+export const CATEGORY_KEY_MAP: Record<string, string> = {
   basics:          'BASICS',
   competition:     'COMPETITION',
   recovery:        'RECOVERY',
@@ -53,17 +53,161 @@ const CATEGORY_KEY_MAP: Record<string, string> = {
   downloads:       'DOWNLOADS',
 };
 
+function readEmbeddedEatStrongCategory(
+  slug: string | undefined,
+): { articles: Article[]; categoryMeta: CategoryMeta | null } | null {
+  if (typeof document === 'undefined' || !slug) return null;
+  const el = document.getElementById('__ES_EATSTRONG_CATEGORY__');
+  if (!el) return null;
+  try {
+    const data = JSON.parse(el.textContent || '');
+    if (data && data.categorySlug === slug) {
+      return { articles: data.articles as Article[], categoryMeta: data.categoryMeta as CategoryMeta | null };
+    }
+  } catch {}
+  return null;
+}
+
+/** Content-only render — used by the SSR prerender script via renderShell. */
+export function EatStrongCategoryContent({
+  articles,
+  categoryMeta,
+  categorySlug,
+  categoryKey,
+}: {
+  articles: Article[];
+  categoryMeta: CategoryMeta | null;
+  categorySlug: string;
+  categoryKey: string;
+}) {
+  const categoryLabel = categoryMeta?.label || categoryKey.replace(/_/g, ' ');
+  return (
+    <>
+      <section className="pt-navbar" style={{ background: '#141414', borderBottom: '1px solid #2C2C2C' }}>
+        <div className="es-container py-12">
+          <nav className="flex items-center gap-2 text-xs mb-4" style={{ color: '#A41C64' }}>
+            <Link to="/eatstrong" className="hover:text-white transition-colors" style={{ color: '#A41C64' }}>EatStrong</Link>
+            <span className="text-es-subtle">/</span>
+            <span className="text-white">{categoryLabel}</span>
+          </nav>
+          <h1 className="text-3xl md:text-4xl font-black text-white mb-3" style={{ letterSpacing: '-0.03em' }}>{categoryLabel}</h1>
+          {categoryMeta?.description && (
+            <p className="text-es-muted max-w-2xl text-base leading-relaxed">
+              {categoryMeta.description}
+            </p>
+          )}
+        </div>
+      </section>
+      <div style={{ background: 'rgba(225,154,71,0.06)', borderBottom: '1px solid rgba(225,154,71,0.2)' }}>
+        <div className="es-container py-2.5">
+          <p className="text-xs leading-relaxed" style={{ color: '#E19A47', opacity: 0.85 }}>
+            EatStrong content is for educational awareness only. For individualised dietary
+            advice, refer athletes to a registered dietitian or registered nutritionist.
+          </p>
+        </div>
+      </div>
+      <main className="flex-1" style={{ background: '#0D0D0D' }}>
+        <div className="es-container py-10">
+          {articles.length > 0 ? (
+            <section className="mb-10">
+              <h2 className="text-lg font-black text-white mb-4">
+                Articles
+                <span className="ml-2 text-sm font-normal text-es-subtle">{articles.length}</span>
+              </h2>
+              <div className="space-y-3">
+                {articles.map(article => (
+                  <Link
+                    key={article.id}
+                    to={`/eatstrong/articles/${article.slug}`}
+                    className="group block es-card-hover p-5"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          {article.accessLevel === 'FREE' && (
+                            <span className="badge-grey text-xs">Free</span>
+                          )}
+                          {article.accessLevel !== 'FREE' && article.locked && (
+                            <span className="badge-accent text-xs">Learner pathway</span>
+                          )}
+                          {article.isFeatured && (
+                            <span className="badge-amber text-xs">Featured</span>
+                          )}
+                        </div>
+                        <h3 className="font-bold text-white leading-snug mb-1">{article.title}</h3>
+                        {article.summary && (
+                          <p className="text-es-muted text-sm leading-relaxed line-clamp-2">{article.summary}</p>
+                        )}
+                        {article.reviewerName && (
+                          <p className="text-xs text-es-subtle mt-2">
+                            Reviewed by {article.reviewerName}
+                            {article.reviewerQualification && ` — ${article.reviewerQualification}`}
+                            {article.lastReviewedAt &&
+                              ` · ${new Date(article.lastReviewedAt).toLocaleDateString('en-GB', {
+                                month: 'long',
+                                year: 'numeric',
+                              })}`}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex-shrink-0 text-right">
+                        {article.readMinutes && (
+                          <p className="text-xs text-es-subtle mb-1">{article.readMinutes} min</p>
+                        )}
+                        <span className="text-xs font-semibold" style={{ color: '#A41C64' }}>Read</span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ) : (
+            <div className="text-center py-20">
+              <h3 className="font-semibold text-es-muted mb-2">Content coming soon</h3>
+              <p className="text-es-subtle text-sm">
+                More EatStrong resources are being developed for this category.
+              </p>
+              <Link to="/eatstrong" className="text-sm font-medium mt-4 inline-block" style={{ color: '#A41C64' }}>
+                Back to EatStrong
+              </Link>
+            </div>
+          )}
+          <div className="mt-8">
+            <Link to="/eatstrong" className="text-sm font-medium flex items-center gap-1" style={{ color: '#A41C64' }}>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to EatStrong
+            </Link>
+          </div>
+        </div>
+      </main>
+    </>
+  );
+}
+
 export default function EatStrongCategory() {
   const { categorySlug } = useParams<{ categorySlug: string }>();
   const categoryKey = CATEGORY_KEY_MAP[categorySlug || ''] || (categorySlug || '').toUpperCase();
 
-  const [articles, setArticles] = useState<Article[]>([]);
+  const [articles, setArticles] = useState<Article[]>(
+    () => readEmbeddedEatStrongCategory(categorySlug)?.articles ?? [],
+  );
   const [downloads, setDownloads] = useState<Download[]>([]);
-  const [categoryMeta, setCategoryMeta] = useState<CategoryMeta | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [categoryMeta, setCategoryMeta] = useState<CategoryMeta | null>(
+    () => readEmbeddedEatStrongCategory(categorySlug)?.categoryMeta ?? null,
+  );
+  const [loading, setLoading] = useState<boolean>(
+    () => readEmbeddedEatStrongCategory(categorySlug) === null,
+  );
   const [downloadMsgId, setDownloadMsgId] = useState<string | null>(null);
 
   useEffect(() => {
+    if (readEmbeddedEatStrongCategory(categorySlug) !== null) {
+      // Articles already hydrated; still fetch downloads (they are not embedded).
+      api.get(`/be-strong/downloads?category=${categoryKey}`).then(res => setDownloads(res.data)).catch(() => {});
+      return;
+    }
     Promise.all([
       api.get(`/be-strong/articles?category=${categoryKey}`),
       api.get(`/be-strong/downloads?category=${categoryKey}`),
@@ -77,7 +221,7 @@ export default function EatStrongCategory() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [categoryKey]);
+  }, [categoryKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const categoryLabel = categoryMeta?.label || categoryKey.replace(/_/g, ' ');
 

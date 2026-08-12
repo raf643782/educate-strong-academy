@@ -3,7 +3,7 @@ import { CONTACT_EMAIL } from '../../lib/contact';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
 
 export default function RefundPolicy() {
-  useDocumentHead({ title: 'Refund & Cancellation Policy' });
+  useDocumentHead({ title: 'Refund & Cancellation Policy', noindex: true });
 
   return (
     <LegalPageLayout title="Refund & Cancellation Policy">

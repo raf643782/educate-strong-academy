@@ -45,7 +45,18 @@ import { useDocumentHead } from '../../hooks/useDocumentHead';
 import api from '../../lib/api';
 import { SITE_URL } from '../../lib/siteUrl';
 
-const ORG_SCHEMA_ID = 'homepage-org-schema';
+const ORG_SCHEMA = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Educate Strong Academy',
+  alternateName: 'Educate.Strong',
+  url: `${SITE_URL}/`,
+  logo: `${SITE_URL}/assets/es-logo.png`,
+  description:
+    'Strongman education platform covering coaching, refereeing, StrongKidz youth sessions and EatStrong performance nutrition, alongside a Knowledge Hub, Exercise Library and Event Library.',
+  sameAs: ['https://www.instagram.com/educate.strong/'],
+  knowsAbout: ['Strongman', 'Strongman coaching', 'Strongman refereeing', 'Strength training', 'Youth strength training', 'Performance nutrition'],
+}).replace(/</g, '\\u003c');
 
 /* ═══════════════════════════════════════════════════════════════════ */
 export default function Home() {
@@ -63,32 +74,10 @@ export default function Home() {
     api.get('/health').catch(() => {});
   }, []);
 
-  // Organization structured data, scoped and cleaned up on unmount so it
-  // never leaks onto another route.
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.id = ORG_SCHEMA_ID;
-    script.text = JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'Organization',
-      name: 'Educate Strong Academy',
-      alternateName: 'Educate.Strong',
-      url: `${SITE_URL}/`,
-      logo: `${SITE_URL}/assets/es-logo.png`,
-      description:
-        'Strongman education platform covering coaching, refereeing, StrongKidz youth sessions and EatStrong performance nutrition, alongside a Knowledge Hub, Exercise Library and Event Library.',
-      sameAs: ['https://www.instagram.com/educate.strong/'],
-      knowsAbout: ['Strongman', 'Strongman coaching', 'Strongman refereeing', 'Strength training', 'Youth strength training', 'Performance nutrition'],
-    });
-    document.head.appendChild(script);
-    return () => {
-      document.getElementById(ORG_SCHEMA_ID)?.remove();
-    };
-  }, []);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#050506' }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ORG_SCHEMA }} />
       <Navbar />
 
       <main id="main-content">

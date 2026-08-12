@@ -47,6 +47,8 @@ const MAX_RETRIES = 2;
 // Static, always-public routes — every admin/tutor/coach/learner-
 // dashboard/auth/reset/preview/demo route is excluded by construction,
 // since this list only ever names routes that are genuinely public.
+// /terms, /privacy, /refund-policy intentionally absent — noindex pages
+// must not appear in the sitemap.
 const STATIC_PUBLIC_ROUTES = [
   '/',
   '/courses',
@@ -56,9 +58,6 @@ const STATIC_PUBLIC_ROUTES = [
   '/strongkidz',
   '/coaching',
   '/coaches',
-  '/terms',
-  '/privacy',
-  '/refund-policy',
   '/knowledge',
   '/exercises',
   '/events',
@@ -72,6 +71,19 @@ const STATIC_PUBLIC_ROUTES = [
   '/eatstrong/category/coaches_guide',
   '/eatstrong/category/youth_nutrition',
   '/eatstrong/category/downloads',
+];
+
+// Category slug → backend enum key, matching CATEGORY_KEY_MAP in BeStrongCategory.tsx.
+const EATSTRONG_CATEGORY_SLUGS = [
+  { slug: 'basics',          key: 'BASICS' },
+  { slug: 'competition',     key: 'COMPETITION' },
+  { slug: 'recovery',        key: 'RECOVERY' },
+  { slug: 'making_weight',   key: 'MAKING_WEIGHT' },
+  { slug: 'hydration',       key: 'HYDRATION' },
+  { slug: 'supplements',     key: 'SUPPLEMENTS' },
+  { slug: 'coaches_guide',   key: 'COACHES_GUIDE' },
+  { slug: 'youth_nutrition', key: 'YOUTH_NUTRITION' },
+  { slug: 'downloads',       key: 'DOWNLOADS' },
 ];
 
 class PrerenderError extends Error {}
@@ -161,6 +173,22 @@ function injectCourseData(html, coursePayload) {
   const json = serializeForScriptTag(coursePayload);
   const tag = `    <script type="application/json" id="__ES_COURSE_DATA__">${json}</script>\n`;
   return html.replace('</body>', `${tag}  </body>`);
+}
+
+function injectEatStrongArticleData(html, data) {
+  const json = serializeForScriptTag(data);
+  const tag = `    <script type="application/json" id="__ES_EATSTRONG_ARTICLE__">${json}</script>\n`;
+  return html.replace('</body>', `${tag}  </body>`);
+}
+
+function injectEatStrongCategoryData(html, data) {
+  const json = serializeForScriptTag(data);
+  const tag = `    <script type="application/json" id="__ES_EATSTRONG_CATEGORY__">${json}</script>\n`;
+  return html.replace('</body>', `${tag}  </body>`);
+}
+
+function injectNoindex(html) {
+  return html.replace('</head>', '    <meta name="robots" content="noindex, nofollow" />\n  </head>');
 }
 
 function escapeHtml(str) {
@@ -313,6 +341,9 @@ async function main() {
     render, renderKnowledge, renderCourse,
     renderAbout, renderCoachingPathway, renderStrongKidz, renderKnowledgeHub,
     renderHome, renderCourseCatalogue, renderExerciseLibrary, renderEventLibrary, renderEatStrong,
+    renderCoachDirectory,
+    renderEatStrongArticle, renderEatStrongCategory,
+    renderTerms, renderPrivacy, renderRefundPolicy,
     apiToPublicSlug, KNOWLEDGE_ARTICLES,
   } = await import(path.join(FRONTEND_ROOT, 'dist-server', 'entry-server.js'));
 
@@ -459,6 +490,7 @@ async function main() {
     { slug: 'exercises', render: renderExerciseLibrary },
     { slug: 'events', render: renderEventLibrary },
     { slug: 'eatstrong', render: renderEatStrong },
+    { slug: 'coaches', render: renderCoachDirectory },
   ];
   for (const p of STATIC_PAGES) {
     const { html, meta } = p.render();
@@ -469,9 +501,84 @@ async function main() {
     await writeFile(path.join(outDir, 'index.html'), page);
     written++;
   }
-  console.log(`[prerender] wrote ${STATIC_PAGES.length} static page(s) (about, coaching, strongkidz, knowledge, courses, exercises, events, eatstrong)`);
+  console.log(`[prerender] wrote ${STATIC_PAGES.length} static page(s) (about, coaching, strongkidz, knowledge, courses, exercises, events, eatstrong, coaches)`);
 
-  const intendedCount = exercisesToRender.length + eventSlugsToRender.length + KNOWLEDGE_ARTICLES.length + coursesWritten + STATIC_PAGES.length + 1; // +1 for homepage
+  // Legal pages — prerendered with noindex; NOT in sitemap.
+  const LEGAL_PAGES = [
+    { slug: 'terms', render: renderTerms },
+    { slug: 'privacy', render: renderPrivacy },
+    { slug: 'refund-policy', render: renderRefundPolicy },
+  ];
+  for (const p of LEGAL_PAGES) {
+    const { html, meta } = p.render();
+    validateGeneratedPage({ label: `/${p.slug}`, html, meta });
+    const outDir = path.join(DIST_DIR, p.slug);
+    await mkdir(outDir, { recursive: true });
+    const page = injectNoindex(injectRoot(injectHead(template, meta), html));
+    await writeFile(path.join(outDir, 'index.html'), page);
+    written++;
+  }
+  console.log(`[prerender] wrote ${LEGAL_PAGES.length} legal page(s) (terms, privacy, refund-policy) with noindex`);
+
+  // EatStrong category pages — one per category, articles fetched per category.
+  const categoriesMeta = await fetchJsonWithRetry(`${API_BASE}/be-strong/categories`);
+  let categoriesWritten = 0;
+  for (const { slug: catSlug, key: catKey } of EATSTRONG_CATEGORY_SLUGS) {
+    const catArticles = await fetchJsonWithRetry(`${API_BASE}/be-strong/articles?category=${catKey}`);
+    const categoryMeta = Array.isArray(categoriesMeta) ? categoriesMeta.find(c => c.key === catKey) || null : null;
+    const articles = Array.isArray(catArticles) ? catArticles : [];
+    const { html, meta } = renderEatStrongCategory(catSlug, catKey, articles, categoryMeta);
+    validateGeneratedPage({ label: `/eatstrong/category/${catSlug}`, html, meta });
+    const categoryData = { categorySlug: catSlug, articles, categoryMeta };
+    const outDir = path.join(DIST_DIR, 'eatstrong', 'category', catSlug);
+    await mkdir(outDir, { recursive: true });
+    const page = injectEatStrongCategoryData(injectRoot(injectHead(template, meta), html), categoryData);
+    await writeFile(path.join(outDir, 'index.html'), page);
+    written++;
+    categoriesWritten++;
+  }
+  console.log(`[prerender] wrote ${categoriesWritten} EatStrong category page(s)`);
+
+  // EatStrong article pages — fetch list first, then each FREE article individually
+  // (the list endpoint returns contentLen:0; full content requires the individual endpoint).
+  let eatStrongArticlesWritten = 0;
+  try {
+    const articleList = await fetchJsonWithRetry(`${API_BASE}/be-strong/articles`, { retries: 1 });
+    if (Array.isArray(articleList)) {
+      const freeArticleSlugs = articleList.filter(a => a.accessLevel === 'FREE' && a.slug).map(a => a.slug);
+      for (const slug of freeArticleSlugs) {
+        try {
+          const article = await fetchJsonWithRetry(`${API_BASE}/be-strong/articles/${slug}`);
+          const { html, meta } = renderEatStrongArticle(article);
+          validateGeneratedPage({ label: `/eatstrong/articles/${slug}`, html, meta });
+          const articleData = { slug: article.slug, article };
+          const outDir = path.join(DIST_DIR, 'eatstrong', 'articles', slug);
+          await mkdir(outDir, { recursive: true });
+          const page = injectEatStrongArticleData(injectRoot(injectHead(template, meta), html), articleData);
+          await writeFile(path.join(outDir, 'index.html'), page);
+          written++;
+          eatStrongArticlesWritten++;
+        } catch (err) {
+          console.warn(`[prerender] WARNING: could not prerender /eatstrong/articles/${slug}: ${err.message}`);
+        }
+      }
+    }
+  } catch (err) {
+    console.warn(`[prerender] WARNING: could not fetch EatStrong article list, article pages will serve SPA shell: ${err.message}`);
+  }
+  console.log(`[prerender] wrote ${eatStrongArticlesWritten} EatStrong article page(s)`);
+
+  const intendedCount =
+    exercisesToRender.length +
+    eventSlugsToRender.length +
+    KNOWLEDGE_ARTICLES.length +
+    coursesWritten +
+    STATIC_PAGES.length +
+    1 + // homepage
+    LEGAL_PAGES.length +
+    categoriesWritten +
+    eatStrongArticlesWritten;
+
   if (written !== intendedCount) {
     throw new PrerenderError(`Expected to write ${intendedCount} page(s) but wrote ${written}.`);
   }
@@ -486,7 +593,13 @@ async function main() {
     );
   }
 
-  console.log(`[prerender] done — ${written} page(s) prerendered (${allExercises.length} exercises, ${allEvents.length} events, ${KNOWLEDGE_ARTICLES.length} knowledge articles)`);
+  console.log(
+    `[prerender] done — ${written} page(s) prerendered ` +
+    `(${allExercises.length} exercises, ${allEvents.length} events, ` +
+    `${KNOWLEDGE_ARTICLES.length} knowledge articles, ${coursesWritten} courses, ` +
+    `${STATIC_PAGES.length} static, ${LEGAL_PAGES.length} legal, ` +
+    `${categoriesWritten} eatstrong categories, ${eatStrongArticlesWritten} eatstrong articles)`
+  );
 
   await generateSitemapAndRobots({
     allExercises,
