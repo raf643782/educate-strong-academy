@@ -301,6 +301,7 @@ Disallow: /reset-password
 Disallow: /qa-demo
 Disallow: /portal-preview
 Disallow: /homepagepreview
+Disallow: /knowledge-hub-preview
 Disallow: /dev
 
 Sitemap: ${SITE_URL}/sitemap.xml

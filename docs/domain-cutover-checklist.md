@@ -12,7 +12,7 @@ domain, and verifying everything is working before standing down.
 
 - [ ] Branch `seo/critical_technical_closure` merged to `main`
 - [ ] `VITE_SITE_URL` set to the real custom domain in Vercel production
-      environment variables (e.g. `https://www.educatestrong.co.uk`)
+      environment variables (e.g. `https://www.educatestrong.com`)
 - [ ] A full production build triggered after setting `VITE_SITE_URL` —
       verify the new domain appears in `dist/sitemap.xml` and in the
       canonical tags of spot-checked prerendered pages
@@ -21,7 +21,7 @@ domain, and verifying everything is working before standing down.
 - [ ] `VITE_GA_MEASUREMENT_ID` set to the real GA4 property ID in Vercel
       production environment variables
 - [ ] Backend `FRONTEND_URL` env var updated on Render to the new custom
-      domain (e.g. `https://www.educatestrong.co.uk`). This controls the
+      domain (e.g. `https://www.educatestrong.com`). This controls the
       domain in password-reset and email-verification link emails. Update
       BEFORE cutover so emails sent after go-live carry the correct URL.
 - [ ] New domain added to the backend CORS allowed-origins list in

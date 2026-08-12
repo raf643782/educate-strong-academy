@@ -87,6 +87,10 @@ const AssessorPreview     = lazy(() => import('./pages/preview/AssessorPreview')
 const AdminPreview        = lazy(() => import('./pages/preview/AdminPreview'));
 const HomepagePreview     = lazy(() => import('./pages/preview/homepage/HomepagePreview'));
 
+// ── Sanity Knowledge Hub preview — noindex, not linked in nav ─────────────────
+const KnowledgeHubSanityPreview = lazy(() => import('./pages/knowledge/KnowledgeHubSanityPreview'));
+const KnowledgeArticleSanityPreviewPage = lazy(() => import('./pages/knowledge/KnowledgeArticleSanityPreviewPage'));
+
 // ── Internal QA tooling — gated by VITE_ENABLE_QA_DEMO_LOGIN ─────────────────
 const QaDemoLogin = lazy(() => import('./pages/qa/QaDemoLogin'));
 
@@ -159,6 +163,9 @@ export default function App() {
             <Route path="/refund-policy" element={<RefundPolicy />} />
             <Route path="/knowledge" element={<KnowledgeHub />} />
             <Route path="/knowledge/:slug" element={<KnowledgeArticlePage />} />
+            {/* Internal Sanity preview — noindex, not linked in nav. See docs/handover/cms-guide.md */}
+            <Route path="/knowledge-hub-preview" element={<KnowledgeHubSanityPreview />} />
+            <Route path="/knowledge-hub-preview/:slug" element={<KnowledgeArticleSanityPreviewPage />} />
             <Route path="/exercises" element={<ExerciseLibrary />} />
             <Route path="/exercises/:slug" element={<ExerciseDetail />} />
             <Route path="/events" element={<EventLibrary />} />
