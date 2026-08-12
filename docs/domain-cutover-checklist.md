@@ -12,7 +12,7 @@ domain, and verifying everything is working before standing down.
 
 - [ ] Branch `seo/critical_technical_closure` merged to `main`
 - [ ] `VITE_SITE_URL` set to the real custom domain in Vercel production
-      environment variables (e.g. `https://www.educatestrong.co.uk`)
+      environment variables (e.g. `https://www.educatestrong.com`)
 - [ ] A full production build triggered after setting `VITE_SITE_URL` —
       verify the new domain appears in `dist/sitemap.xml` and in the
       canonical tags of spot-checked prerendered pages
@@ -21,7 +21,7 @@ domain, and verifying everything is working before standing down.
 - [ ] `VITE_GA_MEASUREMENT_ID` set to the real GA4 property ID in Vercel
       production environment variables
 - [ ] Backend `FRONTEND_URL` env var updated on Render to the new custom
-      domain (e.g. `https://www.educatestrong.co.uk`). This controls the
+      domain (e.g. `https://www.educatestrong.com`). This controls the
       domain in password-reset and email-verification link emails. Update
       BEFORE cutover so emails sent after go-live carry the correct URL.
 - [ ] New domain added to the backend CORS allowed-origins list in
@@ -31,16 +31,14 @@ domain, and verifying everything is working before standing down.
 
 ### 1.2 Email DNS pre-cutover
 
-Resend uses DNS records separate from A/CNAME. If email sending on the
-new domain is not already configured, complete these **before** DNS switch:
+Resend uses the sending subdomain `send.educatestrong.com` (not the root domain). DNS records are TXT and CNAME only — no MX records. These are separate from A/CNAME changes and do not affect Google Workspace email. Complete these **before** DNS switch:
 
-- [ ] Verify SPF record exists for the sending domain (check Resend dashboard
-      → Domains → your domain's verification status)
-- [ ] Verify DKIM CNAME records exist and are passing in the Resend dashboard
-- [ ] Verify DMARC TXT record (`_dmarc.your-domain.com`) is in place
-      (at minimum: `v=DMARC1; p=none; rua=mailto:...`)
-- [ ] Send a test transactional email (e.g. password reset on staging) and
-      confirm delivery + correct "from" domain before go-live
+- [ ] Resend sending subdomain `send.educatestrong.com` verified in Resend dashboard
+- [ ] SPF TXT record for `send.educatestrong.com` present and passing in Resend
+- [ ] DKIM CNAME records for `send.educatestrong.com` present and passing
+- [ ] DMARC TXT record (`_dmarc.send.educatestrong.com`) in place
+- [ ] If DNS is currently on Wix: the existing Wix DNS setup may not support the subdomain MX configuration required by the chosen Resend setup — Cloudflare DNS management may be required first
+- [ ] Send a test transactional email (e.g. password reset on staging) and confirm delivery + correct "from" address (`no-reply@send.educatestrong.com`) before go-live
 
 ### 1.4 SEO baseline (record before cutover)
 
