@@ -120,12 +120,20 @@ Short version:
 | File | What it covers |
 |---|---|
 | `START-HERE.md` | This file |
-| `environment-inventory.md` | All environment variables, what they do |
-| `access-required.md` | Which platform accounts Educate Strong should own |
+| `pre-launch-status.md` | Current status of all systems — canonical domain, Resend, Sanity, GA4, Shopify, R2 |
+| `final-handover-checklist.md` | Complete launch checklist (14 sections) |
+| `environment-inventory.md` | All environment variables, what they do, what breaks if missing |
+| `access-required.md` | Which platform accounts Educate Strong should own, MFA checklist |
+| `auth-roles.md` | Role/permission matrix — what each role can access |
 | `admin-guide.md` | How to use the admin panel |
-| `cms-guide.md` | Knowledge Hub CMS situation |
-| `content-ownership.md` | Where each type of content lives |
+| `cms-guide.md` | Knowledge Hub CMS — Sanity activation guide |
+| `content-ownership.md` | Where each type of content lives, who edits it |
 | `known-limitations.md` | Known issues and post-launch work |
-| `final-handover-checklist.md` | Complete launch checklist |
 | `uat-test-script.md` | Manual test script for Kris/team |
-| `incident-guide.md` | When something breaks |
+| `incident-guide.md` | When something breaks — first-response guide |
+| `security-status.md` | Security headers, dependency vulnerabilities, risk assessment |
+| `platform-vercel.md` | Vercel operator guide |
+| `platform-render.md` | Render operator guide |
+| `platform-neon.md` | Neon (database) operator guide |
+| `platform-cloudflare.md` | Cloudflare DNS and R2 operator guide |
+| `platform-resend.md` | Resend email setup and operator guide |
