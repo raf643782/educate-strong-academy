@@ -32,6 +32,7 @@ import api from '../../lib/api';
 import { COURSE_PAGE_DATA } from '../../data/coursePageData';
 import { hasValidCoords as hasValidCoordsPair, VenueMap } from '../../lib/cohortMap';
 import { SITE_URL } from '../../lib/siteUrl';
+import { trackEvent } from '../../lib/analytics';
 
 interface CohortCourse {
   id: string;
@@ -248,7 +249,13 @@ export default function UpcomingCohortSpotlight() {
 
               <div className="flex flex-wrap gap-3">
                 {cohort.bookingUrl ? (
-                  <a href={cohort.bookingUrl} target="_blank" rel="noopener noreferrer" className="btn-primary">Book Now</a>
+                  <a
+                    href={cohort.bookingUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-primary"
+                    onClick={() => trackEvent('book_now_click', { cohort_id: cohort.id, course_slug: cohort.course?.slug })}
+                  >Book Now</a>
                 ) : (
                   <Link to={registerUrl} className="btn-primary">Register Interest</Link>
                 )}

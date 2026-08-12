@@ -93,6 +93,7 @@ export default function CoachDirectory() {
   return (
     <div style={{ background: '#0D0D0D', minHeight: '100vh', color: '#fff' }}>
       <Navbar />
+      <main id="main-content">
 
       {/* ── Hero ────────────────────────────────────────────────────── */}
       <section
@@ -336,6 +337,7 @@ export default function CoachDirectory() {
         </div>
       </section>
 
+      </main>
       <Footer />
     </div>
   );

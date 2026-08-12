@@ -26,6 +26,7 @@ function CoachNotFound() {
   return (
     <div style={{ background: '#0D0D0D', minHeight: '100vh', color: '#fff' }}>
       <Navbar />
+      <main id="main-content">
       <div
         style={{
           maxWidth: '520px',
@@ -84,6 +85,7 @@ function CoachNotFound() {
           </div>
         </div>
       </div>
+      </main>
       <Footer />
     </div>
   );
@@ -112,9 +114,11 @@ export default function CoachProfile() {
     return (
       <div style={{ background: '#0D0D0D', minHeight: '100vh', color: '#fff' }}>
         <Navbar />
+        <main id="main-content">
         <div style={{ padding: 'calc(var(--navbar-height, 72px) + 80px) 24px 80px', textAlign: 'center', color: 'rgba(255,255,255,0.3)' }}>
           Loading…
         </div>
+        </main>
         <Footer />
       </div>
     );
@@ -127,7 +131,7 @@ export default function CoachProfile() {
   return (
     <div style={{ background: '#0D0D0D', minHeight: '100vh', color: '#fff' }}>
       <Navbar />
-
+      <main id="main-content">
       <div className="pt-navbar" style={{ maxWidth: '760px', margin: '0 auto', padding: 'calc(var(--navbar-height, 72px) + 56px) 24px 80px' }}>
         <Link to="/coaches" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', textDecoration: 'none', display: 'inline-block', marginBottom: '28px' }}>
           ← Back to Coach Directory
@@ -187,7 +191,7 @@ export default function CoachProfile() {
           </div>
         )}
       </div>
-
+      </main>
       <Footer />
     </div>
   );

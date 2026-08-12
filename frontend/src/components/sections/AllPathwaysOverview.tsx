@@ -87,7 +87,7 @@ function PathwayImage({ pathway }: { pathway: Pathway }) {
   if (pathway.image) {
     return (
       <div className="rounded-xl mb-5 overflow-hidden" style={{ height: '120px' }}>
-        <img src={pathway.image} alt={pathway.imageAlt || ''} className="w-full h-full object-cover" loading="lazy" />
+        <img src={pathway.image} alt={pathway.imageAlt || ''} aria-hidden={!pathway.imageAlt || undefined} className="w-full h-full object-cover" loading="lazy" />
       </div>
     );
   }

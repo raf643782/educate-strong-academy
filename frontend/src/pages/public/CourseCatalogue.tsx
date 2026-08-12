@@ -48,14 +48,18 @@ function CourseCard({ course }: { course: Course }) {
           <span className="badge-grey">Level {course.level}</span>
           {comingSoon && <span className="badge-amber">Coming Soon</span>}
         </div>
-        <h3 className="font-bold text-white text-base mb-2 leading-snug flex-1">{course.title}</h3>
+        <h2 className="font-bold text-white text-base mb-2 leading-snug flex-1">{course.title}</h2>
         <p className="text-es-muted text-sm leading-relaxed mb-5">
           {(course.summary || course.description).slice(0, 110)}...
         </p>
         {course.durationHours && (
           <p className="text-xs text-es-subtle mb-4">{course.durationHours}h content</p>
         )}
-        <Link to={`/courses/${course.slug}`} className="btn-secondary text-sm text-center">
+        <Link
+          to={`/courses/${course.slug}`}
+          className="btn-secondary text-sm text-center"
+          aria-label={comingSoon ? `Learn more about ${course.title}` : `View ${course.title} course`}
+        >
           {comingSoon ? 'Learn More' : 'View Course'}
         </Link>
       </div>
@@ -101,6 +105,7 @@ export default function CourseCatalogue() {
       style={{ background: '#050506' }}
     >
       <Navbar />
+      <main id="main-content" className="flex-1 flex flex-col">
 
       {/* Page header */}
       <section
@@ -201,6 +206,7 @@ export default function CourseCatalogue() {
         </div>
       </div>
 
+      </main>
       <Footer />
     </div>
   );

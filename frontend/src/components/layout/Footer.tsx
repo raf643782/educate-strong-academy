@@ -196,7 +196,7 @@ export default function Footer() {
             <Link to="/" className="inline-block mb-4" aria-label="Educate.Strong">
               <img
                 src="/assets/logo_owl.svg"
-                alt="Educate.Strong"
+                alt=""
                 className="h-10 w-auto"
                 style={{ filter: 'brightness(0) saturate(100%) invert(14%) sepia(91%) saturate(2500%) hue-rotate(310deg) brightness(85%) contrast(105%)' }}
                 onError={(e) => { (e.target as HTMLImageElement).src = '/assets/es-logo.png'; (e.target as HTMLImageElement).style.filter = 'none'; }}

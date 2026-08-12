@@ -20,21 +20,42 @@ domain, and verifying everything is working before standing down.
       tested in a preview deployment (see `wix-redirect-map.md`)
 - [ ] `VITE_GA_MEASUREMENT_ID` set to the real GA4 property ID in Vercel
       production environment variables
+- [ ] Backend `FRONTEND_URL` env var updated on Render to the new custom
+      domain (e.g. `https://www.educatestrong.co.uk`). This controls the
+      domain in password-reset and email-verification link emails. Update
+      BEFORE cutover so emails sent after go-live carry the correct URL.
+- [ ] New domain added to the backend CORS allowed-origins list in
+      `backend/src/middleware/cors.ts` (or wherever the allowlist lives),
+      the change deployed to production on Render, and smoke-tested from
+      a Vercel preview deployment before DNS switch.
 
-### 1.2 SEO baseline (record before cutover)
+### 1.2 Email DNS pre-cutover
+
+Resend uses DNS records separate from A/CNAME. If email sending on the
+new domain is not already configured, complete these **before** DNS switch:
+
+- [ ] Verify SPF record exists for the sending domain (check Resend dashboard
+      → Domains → your domain's verification status)
+- [ ] Verify DKIM CNAME records exist and are passing in the Resend dashboard
+- [ ] Verify DMARC TXT record (`_dmarc.your-domain.com`) is in place
+      (at minimum: `v=DMARC1; p=none; rua=mailto:...`)
+- [ ] Send a test transactional email (e.g. password reset on staging) and
+      confirm delivery + correct "from" domain before go-live
+
+### 1.4 SEO baseline (record before cutover)
 
 - [ ] Screenshot / export Google Search Console index coverage report
 - [ ] Export any existing Bing Webmaster Tools report
 - [ ] Record current organic traffic baseline from analytics or GSC
 
-### 1.3 Vercel custom domain
+### 1.5 Vercel custom domain
 
 - [ ] Custom domain added in Vercel project settings
       (Settings → Domains → Add)
 - [ ] Vercel confirms domain is valid (shows the CNAME/A target to add)
 - [ ] Do NOT change DNS yet — just confirm Vercel has the domain ready
 
-### 1.4 Staging verification
+### 1.6 Staging verification
 
 - [ ] Open every URL in the Wix redirect map against the Vercel preview
       deployment and confirm all return 308

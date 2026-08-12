@@ -242,7 +242,7 @@ function EventCard({ event }: { event: typeof EVENTS[number] }) {
       <div className="p-4 flex flex-col gap-1.5 flex-1">
         <div className="flex items-center gap-2">
           <span className="text-base">{event.icon}</span>
-          <h4 className="font-bold text-white text-sm">{event.name}</h4>
+          <h3 className="font-bold text-white text-sm">{event.name}</h3>
         </div>
         <p className="text-xs leading-relaxed" style={{ color: '#75757D' }}>{event.description}</p>
       </div>
