@@ -37,7 +37,7 @@ Resend uses the sending subdomain `send.educatestrong.com` (not the root domain)
 - [ ] SPF TXT record for `send.educatestrong.com` present and passing in Resend
 - [ ] DKIM CNAME records for `send.educatestrong.com` present and passing
 - [ ] DMARC TXT record (`_dmarc.send.educatestrong.com`) in place
-- [ ] If DNS is currently on Wix: confirm Wix supports TXT/CNAME at subdomain level; if not, move DNS to Cloudflare first
+- [ ] If DNS is currently on Wix: the existing Wix DNS setup may not support the subdomain MX configuration required by the chosen Resend setup — Cloudflare DNS management may be required first
 - [ ] Send a test transactional email (e.g. password reset on staging) and confirm delivery + correct "from" address (`no-reply@send.educatestrong.com`) before go-live
 
 ### 1.4 SEO baseline (record before cutover)

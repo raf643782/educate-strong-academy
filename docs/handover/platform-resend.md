@@ -47,7 +47,7 @@ Go to https://resend.com and create an account. The free plan covers 3,000 email
 4. Add these records in the DNS panel for `educatestrong.com`
 5. Back in Resend dashboard, click "Verify" — green checks confirm the records are in place
 
-**DNS provider note**: These are TXT and CNAME records at the subdomain level. If DNS is currently managed through Wix and Wix does not support creating TXT or CNAME records at subdomain levels, DNS management must be moved to Cloudflare first. See `platform-cloudflare.md`. Adding Resend DNS records does **not** affect Google Workspace MX records or staff email.
+**DNS provider note**: If DNS is currently managed through Wix, the existing Wix DNS setup may not support the subdomain MX configuration required by the chosen Resend setup. Cloudflare DNS management may therefore be required before completing this step. See `platform-cloudflare.md`. Adding Resend DNS records does **not** affect Google Workspace MX records or staff email — Resend DNS records are added separately and the Google Workspace configuration is preserved.
 
 ### Step 3 — Create an API key
 

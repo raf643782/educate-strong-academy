@@ -42,30 +42,35 @@ There is also **1 article permanently excluded** from public access (`is-strongm
 
 ## What is needed to activate Sanity
 
-### Step 1 — Create a Sanity project
+### Step 1 — Verify access to the existing Sanity project
 
-1. Go to https://sanity.io and create an account (or log in)
-2. Create a new project — name it "Educate Strong Academy" or similar
-3. Note the **Project ID** (a short alphanumeric string like `abc123de`)
-4. The default dataset name is `production` — keep this unless you have a specific reason to change it
+An existing Sanity project has been identified: **Project ID `ut2wo29d`**.
+
+1. Go to https://manage.sanity.io/projects/ut2wo29d and log in with the Educate Strong Sanity account
+2. If you have access: use this project — note the Project ID (`ut2wo29d`) and the dataset name (default: `production`)
+3. If access cannot be recovered or ownership cannot be transferred to the company account: only then create a replacement project — go to https://sanity.io, create a new project, note the new Project ID, and provide it to the developer so the configuration is updated
+
+**Do not create a second Sanity project if the existing `ut2wo29d` project is accessible.** Using a replacement project requires the developer to verify all Studio schemas and approved slug manifest references are updated before any content is loaded.
 
 ### Step 2 — Set the environment variables in Vercel
 
 In the Vercel dashboard for the `educate-strong-academy` project:
 
 1. Go to Settings → Environment Variables
-2. Add `VITE_SANITY_PROJECT_ID` = your Project ID from Step 1
+2. Add `VITE_SANITY_PROJECT_ID` = the Project ID from Step 1 (e.g. `ut2wo29d`)
 3. Add `VITE_SANITY_DATASET` = `production`
 4. Add `VITE_SANITY_API_VERSION` = `2024-01-01`
 5. Trigger a new deployment
 
 ### Step 3 — Test the preview
 
-Once the variables are deployed, go to `https://www.educatestrong.com/knowledge-hub-preview` (or the current domain) and confirm that:
+Once the variables are deployed, log in to the website with an **ADMIN account**, then go to `/knowledge-hub-preview` and confirm that:
 - The page loads without a "not configured" error
 - If articles exist in Sanity, they appear here
 
-**This preview page is not linked anywhere in the navigation and is marked noindex**, so it will not appear in Google search results.
+**Access control**: `/knowledge-hub-preview` and `/knowledge-hub-preview/:slug` are protected by role-based access — only users with the ADMIN role can view them. Log in at `/login` with an ADMIN account before visiting the preview URL.
+
+**Search engine protection**: The preview routes are also marked `noindex` and listed in `robots.txt` as `Disallow`, so they will not appear in Google search results even if a search engine bot encounters the URL.
 
 ### Step 4 — Load content into Sanity Studio
 
@@ -101,11 +106,12 @@ When you are satisfied with how articles look in the preview, a developer can co
 
 | # | Action | Who | Notes |
 |---|---|---|---|
-| 1 | Create Sanity account and project | Educate Strong | Required before any Sanity content can be created |
-| 2 | Set 3 Sanity env vars in Vercel | Developer or Educate Strong | See Step 2 above |
-| 3 | Load and publish articles in Sanity Studio | Educate Strong (content team) | Developer may assist with Studio setup |
-| 4 | Review articles at `/knowledge-hub-preview` | Educate Strong | Confirm content looks right before going live |
-| 5 | Authorise cutover | Educate Strong | Cutover replaces the hardcoded article system |
+| 1 | Verify access to Sanity project `ut2wo29d` at `manage.sanity.io/projects/ut2wo29d` | Educate Strong | Use existing project if accessible; only create a replacement if access cannot be recovered |
+| 2 | Set 3 Sanity env vars in Vercel (`VITE_SANITY_PROJECT_ID`, `VITE_SANITY_DATASET`, `VITE_SANITY_API_VERSION`) | Developer or Educate Strong | See Step 2 above |
+| 3 | Port Sanity Studio from `feature-sanity-stage5a-safety` branch (developer task) and load articles | Developer + Educate Strong content team | See Step 4 above |
+| 4 | Review articles at `/knowledge-hub-preview` — **must log in with ADMIN account first** | Educate Strong | Confirm content looks right before going live |
+| 5 | Resolve all 21 URL migration decisions in `knowledge-sanity-migration-map.md` | Educate Strong + Developer | Must be completed before cutover |
+| 6 | Authorise cutover | Educate Strong | Cutover must preserve KEEP/KEEP—DIFFERENT SCOPE articles |
 
 ---
 

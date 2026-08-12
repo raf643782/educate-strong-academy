@@ -27,7 +27,7 @@ Complete each section before going live at `educatestrong.com`. Tick items as th
 - [ ] `NODE_ENV` — set to `production`
 - [ ] `FRONTEND_URL` — set to the canonical production URL (owner decision: `https://educatestrong.com` or `https://www.educatestrong.com`)
 - [ ] `RESEND_API_KEY` — Resend API key — set and verified
-- [ ] `EMAIL_FROM` — set to `EducateStrong Academy <no-reply@educatestrong.com>` (or approved sender)
+- [ ] `EMAIL_FROM` — set to `EducateStrong Academy <noreply@send.educatestrong.com>`
 - [ ] `NOTIFICATIONS_EMAIL` — set to team inbox that receives Register Interest notifications
 - [ ] `R2_ACCOUNT_ID` — Cloudflare R2 account ID — set and verified
 - [ ] `R2_ACCESS_KEY_ID` — R2 access key — set and verified
@@ -57,7 +57,7 @@ Sending subdomain is `send.educatestrong.com` — not the root domain. See `plat
 - [ ] DMARC TXT record present (`_dmarc.send.educatestrong.com`)
 - [ ] `EMAIL_FROM` on Render set to `EducateStrong Academy <no-reply@send.educatestrong.com>`
 - [ ] Test email sent and received with correct "from" address (`no-reply@send.educatestrong.com`)
-- [ ] If DNS is on Wix: confirm Wix supports TXT/CNAME at subdomain level — otherwise move DNS to Cloudflare first
+- [ ] If DNS is on Wix: the existing Wix DNS setup may not support the subdomain MX configuration required by the chosen Resend setup — Cloudflare DNS management may be required first
 
 ---
 

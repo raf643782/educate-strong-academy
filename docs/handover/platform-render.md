@@ -34,7 +34,7 @@ After changing a variable, Render auto-redeploys the service (or you can trigger
 | `NODE_ENV` | YES | No | Set to `production` |
 | `FRONTEND_URL` | YES | No | `https://www.educatestrong.com` — used in email links |
 | `RESEND_API_KEY` | Before emails | YES | From Resend dashboard |
-| `EMAIL_FROM` | Before emails | No | `EducateStrong Academy <no-reply@educatestrong.com>` |
+| `EMAIL_FROM` | Before emails | No | `EducateStrong Academy <noreply@send.educatestrong.com>` |
 | `NOTIFICATIONS_EMAIL` | Before emails | No | Team inbox for Register Interest notifications |
 | `R2_ACCOUNT_ID` | Before R2 uploads | YES | Cloudflare account ID |
 | `R2_ACCESS_KEY_ID` | Before R2 uploads | YES | R2 access key |

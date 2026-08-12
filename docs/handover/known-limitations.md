@@ -34,9 +34,11 @@ This document records things that are known to be incomplete, not yet activated,
 
 ## 3. Knowledge Hub articles require a code change to edit
 
-**Status**: The 21 Knowledge Hub articles are stored as hardcoded data in the frontend codebase (`frontend/src/lib/knowledgeArticles.ts`). Adding, editing, or removing an article requires editing this file, committing, and redeploying.
+**Status**: SANITY FRONTEND INTEGRATION STAGED IN PR #11 / LIVE SANITY CUTOVER NOT PERFORMED / 21 HARDCODED ARTICLES REMAIN THE PUBLIC KNOWLEDGE HUB SOURCE
 
-**Post-launch option**: A Sanity CMS integration was developed but not yet merged. Activating it would allow Knowledge Hub articles to be managed through a web-based CMS without code changes. See `docs/handover/cms-guide.md`.
+The 21 Knowledge Hub articles are stored as hardcoded data in the frontend codebase (`frontend/src/data/knowledgeArticles.ts`). Adding, editing, or removing an article requires editing this file, committing, and redeploying.
+
+**Post-launch option**: A Sanity CMS integration is staged and ready to activate. Activating it would allow Knowledge Hub articles to be managed through a web-based CMS without code changes. The existing Sanity project is `ut2wo29d`. See `docs/handover/cms-guide.md` and `docs/handover/knowledge-sanity-migration-map.md`.
 
 **Risk if ignored**: Keeping the Knowledge Hub current requires developer involvement for every content update.
 
@@ -52,11 +54,12 @@ This document records things that are known to be incomplete, not yet activated,
 
 ## 5. Resend transactional email requires domain verification
 
-**Status**: Transactional emails (verification, password reset, Register Interest confirmation) are configured to send via Resend, but the sending domain (`educatestrong.com`) must be verified in the Resend dashboard before emails deliver reliably.
+**Status**: Transactional emails (verification, password reset, Register Interest confirmation) are configured to send via Resend, but the sending subdomain (`send.educatestrong.com`) must be verified in the Resend dashboard before emails deliver reliably. The automated sender will be `noreply@send.educatestrong.com`.
 
 **What is needed**:
-- DNS records added for the sending domain (SPF, DKIM) — done in Resend dashboard → Domains
-- This must happen before or during the domain migration. See `docs/domain-cutover-checklist.md` Phase 1.2.
+- DNS records added for the sending subdomain `send.educatestrong.com` (SPF, DKIM, DMARC) — Resend dashboard → Domains supplies the exact values; enter them in the DNS panel for `educatestrong.com`
+- If DNS is currently on Wix: the existing Wix DNS setup may not support the subdomain MX configuration required by the chosen Resend setup — Cloudflare DNS management may be required first
+- This must happen before or during the domain migration. See `docs/handover/platform-resend.md` and `docs/domain-cutover-checklist.md` Phase 1.2.
 
 **Until then**: Emails may be delivered from Resend's test sender and will likely land in spam.
 
@@ -111,7 +114,7 @@ This document records things that are known to be incomplete, not yet activated,
 
 ## 10. Certificate verification is public but no certificates are yet issued
 
-**Status**: The public certificate verification page (`/verify/:id`) is functional. However, no real certificates have been issued yet — the database is empty until a real learner completes a course and is certified.
+**Status**: The public certificate verification page (`/verify/:code`) is functional. However, no real certificates have been issued yet — the database is empty until a real learner completes a course and is certified.
 
 **No action needed**: This is expected pre-launch. Issue the first certificates through the Certificate Manager in the admin panel once a cohort completes.
 
@@ -127,8 +130,8 @@ This document records things that are known to be incomplete, not yet activated,
 
 ## 12. QA demo login must not be enabled in production
 
-**Status**: There is a QA demo login tool at `/qa-login` used during development. It is gated by `VITE_ENABLE_QA_DEMO_LOGIN` (frontend) and `ENABLE_QA_DEMO_LOGIN` (backend).
+**Status**: There is a QA demo login tool at `/qa-demo` used during development. It is gated by `VITE_ENABLE_QA_DEMO_LOGIN` (frontend) and `ENABLE_QA_DEMO_LOGIN` (backend).
 
-**Constraint**: Both variables must be absent or set to `false` in the production environment. If `VITE_ENABLE_QA_DEMO_LOGIN=true` is set in Vercel for production, the QA login route becomes publicly accessible.
+**Constraint**: Both variables must be absent or set to `false` in the production environment. If `VITE_ENABLE_QA_DEMO_LOGIN=true` is set in Vercel for production, the QA demo route becomes publicly accessible.
 
 **Check**: Verify neither variable is set to `true` in the production Vercel or Render environments before launch.

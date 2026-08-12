@@ -69,7 +69,7 @@ Current state of all systems and services as of handover (August 2026). This is 
 | SPF DNS record | **Not added** — needed at `send.educatestrong.com` |
 | DKIM DNS records | **Not added** — CNAMEs at subdomains of `send.educatestrong.com` |
 | DMARC DNS record | **Not added** — needed at `_dmarc.send.educatestrong.com` |
-| Wix DNS limitation | If DNS is currently on Wix, Wix may not support TXT/CNAME at subdomain level — move to Cloudflare DNS first |
+| Wix DNS limitation | The existing Wix DNS setup may not support the subdomain MX configuration required by the chosen Resend setup — Cloudflare DNS management may be required |
 
 **Impact of current state**: Emails are not sent from the correct domain. If `RESEND_API_KEY` is not set, emails are silently not sent at all (logged server-side). User verification and password reset emails will fail until Resend is configured.
 
